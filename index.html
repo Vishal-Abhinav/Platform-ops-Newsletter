@@ -1,6 +1,1333 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platform Ops · Tech with Vishal Abhinav</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ─── TOKENS ─── */
+:root {
+  --ink:    #08090c;
+  --paper:  #f2f0eb;
+  --smoke:  #e4e0d8;
+  --ash:    #b8b2a7;
+  --coal:   #1c1f26;
+  --cyan:   #00c2d4;
+  --amber:  #f59e0b;
+  --crimson:#e53935;
+  --lime:   #84cc16;
+  --text:   #1c1f26;
+  --muted:  #6b6860;
+  --r: 6px;
+}
+
+/* ─── RESET ─── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ─── CUSTOM CURSOR ─── */
+.cursor {
+  position: fixed;
+  top: 0; left: 0;
+  width: 10px; height: 10px;
+  background: var(--crimson);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transition: transform 0.15s ease, background 0.2s;
+  transform: translate(-50%, -50%);
+}
+.cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  width: 36px; height: 36px;
+  border: 1.5px solid var(--coal);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.35s cubic-bezier(.25,.46,.45,.94), width 0.3s, height 0.3s, border-color 0.2s;
+  transform: translate(-50%, -50%);
+}
+body:hover .cursor-ring { border-color: var(--crimson); }
+
+/* ─── NOISE OVERLAY ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.6;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 48px;
+  background: rgba(242,240,235,0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--coal);
+  display: flex; align-items: center; gap: 10px;
+}
+
+.nav-logo span {
+  display: inline-block;
+  width: 8px; height: 8px;
+  background: var(--crimson);
+  border-radius: 50%;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%,100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.6; }
+}
+
+.nav-links {
+  display: flex; gap: 32px; list-style: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 0; height: 1px;
+  background: var(--crimson);
+  transition: width 0.3s;
+}
+
+.nav-links a:hover { color: var(--coal); }
+.nav-links a:hover::after { width: 100%; }
+
+.nav-cta {
+  background: var(--coal);
+  color: var(--paper) !important;
+  padding: 8px 20px !important;
+  border-radius: 2px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px !important;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s !important;
+}
+.nav-cta:hover { background: var(--crimson) !important; }
+.nav-cta::after { display: none !important; }
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding-top: 80px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-left {
+  padding: 80px 48px 80px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+.hero-eyebrow-line {
+  display: block; width: 40px; height: 1px;
+  background: var(--crimson);
+}
+
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(64px, 7vw, 102px);
+  line-height: 0.92;
+  letter-spacing: -1px;
+  color: var(--coal);
+  margin-bottom: 12px;
+}
+
+.hero-title .accent { color: var(--crimson); }
+
+.hero-subtitle {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--muted);
+  margin-bottom: 36px;
+  line-height: 1.4;
+}
+
+.hero-desc {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 420px;
+  margin-bottom: 48px;
+  line-height: 1.8;
+}
+
+.hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+
+.btn-primary {
+  background: var(--coal);
+  color: var(--paper);
+  padding: 14px 32px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: background 0.2s, transform 0.2s;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.btn-primary:hover { background: var(--crimson); transform: translateY(-2px); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--coal);
+  padding: 13px 32px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 2px;
+  border: 1.5px solid var(--coal);
+  transition: border-color 0.2s, color 0.2s, transform 0.2s;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.btn-ghost:hover { border-color: var(--crimson); color: var(--crimson); transform: translateY(-2px); }
+
+.hero-stats {
+  margin-top: 60px;
+  display: flex; gap: 40px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.stat-item {}
+.stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 42px;
+  line-height: 1;
+  color: var(--coal);
+}
+.stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ─── HERO RIGHT (VISUAL) ─── */
+.hero-right {
+  background: var(--coal);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 40px;
+}
+
+.hero-right::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(0,194,212,0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(229,57,53,0.15) 0%, transparent 50%);
+}
+
+/* Terminal card */
+.terminal {
+  background: #12151c;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  position: relative;
+  z-index: 2;
+  animation: float 5s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.terminal-bar {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 8px;
+}
+.t-dot { width: 10px; height: 10px; border-radius: 50%; }
+.t-dot.r { background: #ff5f57; }
+.t-dot.y { background: #ffbd2e; }
+.t-dot.g { background: #28c840; }
+.t-title {
+  flex: 1;
+  text-align: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1px;
+}
+
+.terminal-body {
+  padding: 20px 24px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  line-height: 2;
+}
+
+.tl { display: block; }
+.tl-prompt { color: var(--cyan); }
+.tl-cmd { color: #e2e8f0; }
+.tl-out { color: rgba(255,255,255,0.35); }
+.tl-ok { color: var(--lime); }
+.tl-err { color: var(--crimson); }
+.tl-k { color: var(--amber); }
+.cursor-blink {
+  display: inline-block;
+  width: 8px; height: 14px;
+  background: var(--cyan);
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+  margin-left: 2px;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Badge strip */
+.badge-strip {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-top: 24px;
+  position: relative; z-index: 2;
+  justify-content: center;
+  max-width: 420px;
+}
+
+.t-badge {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.5);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+.t-badge:hover { background: rgba(0,194,212,0.15); border-color: var(--cyan); color: var(--cyan); }
+
+/* ─── TICKER ─── */
+.ticker-wrap {
+  background: var(--coal);
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 12px 0;
+}
+
+.ticker-track {
+  display: flex;
+  gap: 0;
+  animation: ticker 28s linear infinite;
+  white-space: nowrap;
+}
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 28px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+}
+
+.ticker-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--crimson); }
+
+/* ─── SECTION FRAMEWORK ─── */
+.section {
+  padding: 100px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-tag {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.section-tag::before {
+  content: '';
+  display: block;
+  width: 24px; height: 1px;
+  background: var(--crimson);
+}
+
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.5px;
+  color: var(--coal);
+  margin-bottom: 16px;
+}
+
+.section-lead {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 19px;
+  color: var(--muted);
+  max-width: 600px;
+  margin-bottom: 56px;
+}
+
+/* ─── TOPIC CARDS ─── */
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+}
+
+.topic-card {
+  background: var(--smoke);
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.25s;
+}
+
+.topic-card:hover { background: var(--coal); }
+.topic-card:hover .tc-title,
+.topic-card:hover .tc-count,
+.topic-card:hover .tc-arrow { color: var(--paper); }
+.topic-card:hover .tc-items { border-color: rgba(255,255,255,0.12); }
+.topic-card:hover .tc-item { color: rgba(255,255,255,0.55); }
+.topic-card:hover .tc-item::before { color: var(--cyan); }
+.topic-card:hover .tc-badge { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
+.topic-card:hover .tc-indicator { background: var(--crimson); }
+
+.tc-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 32px 32px 24px;
+}
+
+.tc-icon-wrap {
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  background: rgba(0,0,0,0.06);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.topic-card:hover .tc-icon-wrap { background: rgba(255,255,255,0.08); }
+
+.tc-meta { flex: 1; padding-left: 16px; }
+.tc-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 30px;
+  letter-spacing: 1px;
+  color: var(--coal);
+  line-height: 1;
+  margin-bottom: 4px;
+  transition: color 0.25s;
+}
+
+.tc-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  transition: color 0.25s;
+}
+
+.tc-arrow {
+  font-size: 20px;
+  color: var(--muted);
+  transition: color 0.25s, transform 0.25s;
+}
+.topic-card:hover .tc-arrow { transform: rotate(-45deg); color: var(--crimson) !important; }
+
+.tc-indicator {
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px;
+  height: 100%;
+  background: transparent;
+  transition: background 0.25s;
+}
+
+/* Accordion body */
+.tc-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(.25,.46,.45,.94);
+  padding: 0 32px;
+}
+
+.topic-card.open .tc-body { max-height: 600px; }
+.topic-card.open .tc-arrow { transform: rotate(-90deg); }
+.topic-card.open .tc-indicator { background: var(--crimson); }
+
+.tc-items {
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding: 20px 0 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tc-badge {
+  display: inline-block;
+  background: rgba(0,0,0,0.05);
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  transition: background 0.25s, color 0.25s;
+}
+
+.tc-sub-group {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.tc-sub-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 8px;
+}
+.topic-card:hover .tc-sub-title { color: var(--cyan); }
+
+/* ─── LATEST ISSUES ─── */
+.issues-bg {
+  background: var(--coal);
+  padding: 0;
+}
+
+.issues-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 64px;
+}
+
+.issues-inner .section-title,
+.issues-inner .section-tag { color: var(--paper); }
+.issues-inner .section-tag { color: rgba(255,255,255,0.4); }
+.issues-inner .section-lead { color: rgba(255,255,255,0.45); }
+
+.issues-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+
+.issue-card {
+  background: rgba(255,255,255,0.04);
+  padding: 32px 28px;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.issue-card::before {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--crimson), var(--cyan));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+}
+
+.issue-card:hover { background: rgba(255,255,255,0.07); transform: translateY(-4px); }
+.issue-card:hover::before { transform: scaleX(1); }
+
+.ic-issue {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.25);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.ic-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  line-height: 1;
+  color: rgba(255,255,255,0.08);
+  position: absolute;
+  bottom: 20px; right: 20px;
+}
+
+.ic-title {
+  font-family: 'Manrope', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--paper);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.ic-desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.ic-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.ic-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.ic-tag.c { background: rgba(0,194,212,0.15); color: var(--cyan); }
+.ic-tag.r { background: rgba(229,57,53,0.15); color: #ef5350; }
+.ic-tag.l { background: rgba(132,204,22,0.15); color: var(--lime); }
+.ic-tag.a { background: rgba(245,158,11,0.15); color: var(--amber); }
+
+/* ─── SUBSCRIBE ─── */
+.subscribe-section {
+  background: var(--paper);
+  position: relative;
+  overflow: hidden;
+}
+
+.subscribe-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 120px 64px;
+  text-align: center;
+  position: relative; z-index: 2;
+}
+
+.subscribe-bg-text {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 220px;
+  color: rgba(0,0,0,0.035);
+  white-space: nowrap;
+  letter-spacing: -5px;
+  pointer-events: none;
+  line-height: 1;
+  z-index: 1;
+}
+
+.subscribe-inner .section-title { margin-bottom: 16px; }
+.subscribe-inner .section-lead { max-width: 480px; margin: 0 auto 48px; }
+
+.sub-form {
+  display: flex;
+  gap: 0;
+  max-width: 480px;
+  margin: 0 auto 20px;
+  border: 1.5px solid var(--coal);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sub-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 14px 20px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--coal);
+}
+
+.sub-input::placeholder { color: var(--ash); }
+
+.sub-btn {
+  background: var(--coal);
+  color: var(--paper);
+  border: none;
+  padding: 14px 28px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sub-btn:hover { background: var(--crimson); }
+
+.sub-note {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+
+/* ─── AUTHORS ─── */
+.authors-section {
+  background: var(--smoke);
+  padding: 80px 64px;
+}
+
+.authors-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.author-cards { display: flex; flex-direction: column; gap: 16px; }
+
+.author-card {
+  background: var(--paper);
+  padding: 24px;
+  display: flex; align-items: center; gap: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.author-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.12); transform: translateY(-2px); }
+
+.author-avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.author-avatar.v { background: linear-gradient(135deg, var(--crimson), #ff6b35); color: #fff; }
+.author-avatar.a { background: linear-gradient(135deg, var(--cyan), #0068d9); color: #fff; }
+
+.author-name { font-weight: 700; font-size: 16px; color: var(--coal); }
+.author-role {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--ink);
+  color: rgba(255,255,255,0.3);
+  padding: 48px 64px;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.6);
+}
+
+.footer-links { display: flex; gap: 24px; }
+.footer-links a {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--cyan); }
+
+.footer-note {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* ─── ANIMATIONS ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-right { min-height: 380px; }
+  .hero-left { padding: 60px 32px; }
+  nav { padding: 16px 24px; }
+  .nav-links { display: none; }
+  .section { padding: 64px 32px; }
+  .topics-grid { grid-template-columns: 1fr; }
+  .issues-grid { grid-template-columns: 1fr; }
+  .issues-inner { padding: 64px 32px; }
+  .authors-inner { grid-template-columns: 1fr; gap: 40px; }
+  .authors-section { padding: 64px 32px; }
+  .subscribe-inner { padding: 80px 32px; }
+  footer { padding: 40px 32px; }
+  .footer-inner { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
 <body>
-<h1>Platform Ops Newsletter</h1>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav>
+  <div class="nav-logo">
+    <span></span>
+    PLATFORM OPS
+  </div>
+  <ul class="nav-links">
+    <li><a href="#topics">Topics</a></li>
+    <li><a href="#issues">Issues</a></li>
+    <li><a href="#authors">Authors</a></li>
+    <li><a href="#subscribe" class="nav-cta">Subscribe →</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-line"></span>
+      Monthly Technical Newsletter
+    </div>
+
+    <h1 class="hero-title">
+      PLATFORM<br>
+      <span class="accent">OPS</span>
+    </h1>
+
+    <p class="hero-subtitle">Tech with Vishal Abhinav</p>
+
+    <p class="hero-desc">
+      Engineering knowledge for DevOps engineers, SREs, and Platform builders — 
+      with deep dives into Kubernetes, cloud infrastructure, observability, and modern tooling.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#subscribe" class="btn-primary">
+        Subscribe Free
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#issues" class="btn-ghost">
+        Browse Issues
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">47</div>
+        <div class="stat-label">Issues Published</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">12K</div>
+        <div class="stat-label">Subscribers</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">2</div>
+        <div class="stat-label">Years Running</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <!-- Terminal -->
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="t-dot r"></div>
+        <div class="t-dot y"></div>
+        <div class="t-dot g"></div>
+        <div class="t-title">platform-ops ~ issue #047</div>
+      </div>
+      <div class="terminal-body">
+        <span class="tl"><span class="tl-prompt">❯</span> <span class="tl-cmd">kubectl get pods -A</span></span>
+        <span class="tl tl-out">NAMESPACE   NAME             READY   STATUS</span>
+        <span class="tl"><span class="tl-k">kube-sys</span>    <span class="tl-out">coredns-xyz      </span><span class="tl-ok">1/1     Running</span></span>
+        <span class="tl"><span class="tl-k">platform</span>    <span class="tl-out">api-server-abc   </span><span class="tl-ok">3/3     Running</span></span>
+        <span class="tl"><span class="tl-k">monitor</span>     <span class="tl-out">prometheus-0     </span><span class="tl-ok">1/1     Running</span></span>
+        <span class="tl"><span class="tl-k">ingress</span>     <span class="tl-out">nginx-ctrl-xyz   </span><span class="tl-ok">1/1     Running</span></span>
+        <span class="tl"> </span>
+        <span class="tl"><span class="tl-prompt">❯</span> <span class="tl-cmd">helm upgrade --install newsletter ./chart</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Release "newsletter" deployed</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Issue #047 is LIVE 🚀</span></span>
+        <span class="tl"> </span>
+        <span class="tl"><span class="tl-prompt">❯</span> <span class="cursor-blink"></span></span>
+      </div>
+    </div>
+
+    <div class="badge-strip">
+      <span class="t-badge">Kubernetes</span>
+      <span class="t-badge">Helm</span>
+      <span class="t-badge">Cilium</span>
+      <span class="t-badge">ArgoCD</span>
+      <span class="t-badge">Prometheus</span>
+      <span class="t-badge">GitOps</span>
+      <span class="t-badge">eBPF</span>
+      <span class="t-badge">Terraform</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ TICKER ═══════════ -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <!-- doubled for seamless loop -->
+    <span class="ticker-item"><span class="ticker-dot"></span> Kubernetes Networking</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> GitOps</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Service Mesh</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> eBPF</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Platform Engineering</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Observability</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> SRE Practices</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Cloud Native</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> ArgoCD</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Helm Charts</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Terraform</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Cilium CNI</span>
+    <!-- duplicate -->
+    <span class="ticker-item"><span class="ticker-dot"></span> Kubernetes Networking</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> GitOps</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Service Mesh</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> eBPF</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Platform Engineering</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Observability</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> SRE Practices</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Cloud Native</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> ArgoCD</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Helm Charts</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Terraform</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Cilium CNI</span>
+  </div>
+</div>
+
+<!-- ═══════════ TOPICS ═══════════ -->
+<div id="topics">
+  <div class="section reveal">
+    <div class="section-tag">Knowledge Map</div>
+    <h2 class="section-title">WHAT WE COVER</h2>
+    <p class="section-lead">Deep technical content across the full Platform Engineering stack — click any domain to explore.</p>
+
+    <div class="topics-grid">
+
+      <!-- DEVOPS -->
+      <div class="topic-card open" onclick="toggleTopic(this)">
+        <div class="tc-indicator"></div>
+        <div class="tc-header">
+          <div class="tc-icon-wrap">⚙️</div>
+          <div class="tc-meta">
+            <div class="tc-title">DevOps</div>
+            <div class="tc-count">9 subtopics</div>
+          </div>
+          <span class="tc-arrow">↓</span>
+        </div>
+        <div class="tc-body">
+          <div class="tc-items">
+            <span class="tc-badge">CI/CD</span>
+            <span class="tc-badge">GitOps</span>
+            <span class="tc-badge">Automation</span>
+            <div class="tc-sub-group">
+              <div class="tc-sub-title">Containers</div>
+              <span class="tc-badge">Docker</span>
+              <span class="tc-badge">Kubernetes</span>
+            </div>
+            <div class="tc-sub-group">
+              <div class="tc-sub-title">Toolchain</div>
+              <span class="tc-badge">Git</span>
+              <span class="tc-badge">Jenkins</span>
+              <span class="tc-badge">ArgoCD</span>
+              <span class="tc-badge">Terraform</span>
+              <span class="tc-badge">Ansible</span>
+              <span class="tc-badge">Helm</span>
+              <span class="tc-badge">Prometheus</span>
+              <span class="tc-badge">Grafana</span>
+              <span class="tc-badge">ELK Stack</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SRE -->
+      <div class="topic-card" onclick="toggleTopic(this)">
+        <div class="tc-indicator"></div>
+        <div class="tc-header">
+          <div class="tc-icon-wrap">📡</div>
+          <div class="tc-meta">
+            <div class="tc-title">SRE</div>
+            <div class="tc-count">4 subtopics</div>
+          </div>
+          <span class="tc-arrow">↓</span>
+        </div>
+        <div class="tc-body">
+          <div class="tc-items">
+            <span class="tc-badge">SLIs / SLOs / SLAs</span>
+            <span class="tc-badge">Incident Management</span>
+            <span class="tc-badge">Error Budgets</span>
+            <span class="tc-badge">Reliability Engineering</span>
+            <span class="tc-badge">Postmortems</span>
+            <span class="tc-badge">Chaos Engineering</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INFRASTRUCTURE -->
+      <div class="topic-card" onclick="toggleTopic(this)">
+        <div class="tc-indicator"></div>
+        <div class="tc-header">
+          <div class="tc-icon-wrap">🏗️</div>
+          <div class="tc-meta">
+            <div class="tc-title">Infrastructure</div>
+            <div class="tc-count">8 subtopics</div>
+          </div>
+          <span class="tc-arrow">↓</span>
+        </div>
+        <div class="tc-body">
+          <div class="tc-items">
+            <div class="tc-sub-group">
+              <div class="tc-sub-title">Linux</div>
+              <span class="tc-badge">RHEL</span>
+              <span class="tc-badge">CentOS</span>
+              <span class="tc-badge">Ubuntu</span>
+              <span class="tc-badge">Systemd</span>
+            </div>
+            <span class="tc-badge">Virtualization</span>
+            <div class="tc-sub-group">
+              <div class="tc-sub-title">Cloud Providers</div>
+              <span class="tc-badge">AWS</span>
+              <span class="tc-badge">Azure</span>
+              <span class="tc-badge">GCP</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NETWORKING -->
+      <div class="topic-card" onclick="toggleTopic(this)">
+        <div class="tc-indicator"></div>
+        <div class="tc-header">
+          <div class="tc-icon-wrap">🌐</div>
+          <div class="tc-meta">
+            <div class="tc-title">Networking</div>
+            <div class="tc-count">7 subtopics</div>
+          </div>
+          <span class="tc-arrow">↓</span>
+        </div>
+        <div class="tc-body">
+          <div class="tc-items">
+            <span class="tc-badge">OSI Model</span>
+            <span class="tc-badge">TCP/IP</span>
+            <span class="tc-badge">DNS / CoreDNS</span>
+            <span class="tc-badge">Load Balancing</span>
+            <span class="tc-badge">Ingress</span>
+            <span class="tc-badge">Gateway API</span>
+            <span class="tc-badge">Service Mesh</span>
+            <span class="tc-badge">CNI Plugins</span>
+            <span class="tc-badge">Kubernetes Networking</span>
+            <span class="tc-badge">NetworkPolicy</span>
+            <span class="tc-badge">eBPF</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ LATEST ISSUES ═══════════ -->
+<div class="issues-bg" id="issues">
+  <div class="issues-inner reveal">
+    <div class="section-tag" style="color:rgba(255,255,255,0.35)">Archive</div>
+    <h2 class="section-title" style="color:var(--paper)">LATEST ISSUES</h2>
+    <p class="section-lead">Every issue is a deep-dive with architecture diagrams, code samples, and battle-tested insights.</p>
+
+    <div class="issues-grid">
+
+      <div class="issue-card">
+        <div class="ic-issue">March 2026 · #047</div>
+        <div class="ic-title">Kubernetes Networking Decoded</div>
+        <div class="ic-desc">6 architecture diagrams covering Pod networking, CNI plugins, Ingress, NetworkPolicy, and CoreDNS.</div>
+        <div class="ic-tags">
+          <span class="ic-tag c">Kubernetes</span>
+          <span class="ic-tag c">CNI</span>
+          <span class="ic-tag r">Networking</span>
+        </div>
+        <div class="ic-num">47</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="ic-issue">February 2026 · #046</div>
+        <div class="ic-title">FinOps & Kubernetes Cost Optimization</div>
+        <div class="ic-desc">Right-sizing workloads, VPA vs HPA, Spot instances, and Kubecost dashboards in production.</div>
+        <div class="ic-tags">
+          <span class="ic-tag a">FinOps</span>
+          <span class="ic-tag l">Cloud</span>
+          <span class="ic-tag c">K8s</span>
+        </div>
+        <div class="ic-num">46</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="ic-issue">January 2026 · #045</div>
+        <div class="ic-title">AI/ML Workloads on Kubernetes</div>
+        <div class="ic-desc">GPU node pools, KubeFlow pipelines, model serving with KServe, and GPU resource quotas.</div>
+        <div class="ic-tags">
+          <span class="ic-tag l">ML Ops</span>
+          <span class="ic-tag c">Kubernetes</span>
+          <span class="ic-tag a">GPU</span>
+        </div>
+        <div class="ic-num">45</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="ic-issue">December 2025 · #044</div>
+        <div class="ic-title">Platform Engineering & Backstage</div>
+        <div class="ic-desc">Building Internal Developer Platforms with Backstage, service catalogs, scaffolding templates.</div>
+        <div class="ic-tags">
+          <span class="ic-tag r">Platform Eng</span>
+          <span class="ic-tag c">Backstage</span>
+        </div>
+        <div class="ic-num">44</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="ic-issue">November 2025 · #043</div>
+        <div class="ic-title">GitOps at Scale with ArgoCD & Flux</div>
+        <div class="ic-desc">Multi-cluster deployments, app-of-apps pattern, Flux vs ArgoCD head-to-head comparison.</div>
+        <div class="ic-tags">
+          <span class="ic-tag l">GitOps</span>
+          <span class="ic-tag c">ArgoCD</span>
+          <span class="ic-tag c">Flux</span>
+        </div>
+        <div class="ic-num">43</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="ic-issue">October 2025 · #042</div>
+        <div class="ic-title">Observability Stack: Prometheus + Loki + Tempo</div>
+        <div class="ic-desc">The full PLG stack, trace correlation, SLO alerting, and Grafana 11 dashboards from scratch.</div>
+        <div class="ic-tags">
+          <span class="ic-tag a">Observability</span>
+          <span class="ic-tag l">Grafana</span>
+          <span class="ic-tag r">SRE</span>
+        </div>
+        <div class="ic-num">42</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ AUTHORS ═══════════ -->
+<div class="authors-section" id="authors">
+  <div class="authors-inner reveal">
+    <div>
+      <div class="section-tag">Behind the Newsletter</div>
+      <h2 class="section-title">THE AUTHORS</h2>
+      <p class="section-lead" style="margin-bottom:0">Two practitioners building in the trenches of Platform Engineering, sharing what actually works.</p>
+    </div>
+    <div class="author-cards">
+      <div class="author-card">
+        <div class="author-avatar v">VA</div>
+        <div>
+          <div class="author-name">Vishal</div>
+          <div class="author-role">Kubernetes · Platform Engineering · Cloud Architecture</div>
+        </div>
+      </div>
+      <div class="author-card">
+        <div class="author-avatar a">AB</div>
+        <div>
+          <div class="author-name">Abhinav</div>
+          <div class="author-role">DevOps · SRE · Infrastructure Automation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SUBSCRIBE ═══════════ -->
+<div class="subscribe-section" id="subscribe">
+  <div class="subscribe-bg-text">SUBSCRIBE</div>
+  <div class="subscribe-inner reveal">
+    <div class="section-tag" style="justify-content:center">Free Forever</div>
+    <h2 class="section-title">JOIN 12,000+<br>ENGINEERS</h2>
+    <p class="section-lead">
+      One deep-dive every month. No fluff, no spam — just battle-tested knowledge from the Platform Engineering trenches.
+    </p>
+    <div class="sub-form">
+      <input class="sub-input" type="email" placeholder="your@email.com" />
+      <button class="sub-btn">Subscribe →</button>
+    </div>
+    <div class="sub-note">No spam · Unsubscribe anytime · Published monthly</div>
+  </div>
+</div>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PLATFORM OPS</div>
+    <div class="footer-links">
+      <a href="#topics">Topics</a>
+      <a href="#issues">Archive</a>
+      <a href="https://github.com/Tech_with_vishal_abhinav_Newsletter" target="_blank">GitHub</a>
+      <a href="#subscribe">Subscribe</a>
+    </div>
+    <div class="footer-note">© 2026 Vishal Abhinav · MIT License</div>
+  </div>
+</footer>
+
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<script>
+/* Custom cursor */
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top  = my + 'px';
+});
+
+(function animRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(animRing);
+})();
+
+document.querySelectorAll('a, button, .topic-card, .issue-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    ring.style.width = '56px';
+    ring.style.height = '56px';
+    ring.style.borderColor = 'var(--crimson)';
+    cursor.style.transform = 'translate(-50%,-50%) scale(1.5)';
+  });
+  el.addEventListener('mouseleave', () => {
+    ring.style.width = '36px';
+    ring.style.height = '36px';
+    ring.style.borderColor = '';
+    cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+  });
+});
+
+/* Accordion */
+function toggleTopic(card) {
+  const isOpen = card.classList.contains('open');
+  document.querySelectorAll('.topic-card').forEach(c => c.classList.remove('open'));
+  if (!isOpen) card.classList.add('open');
+}
+
+/* Scroll reveal */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+/* Typewriter in terminal */
+const lines = document.querySelectorAll('.tl');
+lines.forEach((line, i) => {
+  line.style.opacity = '0';
+  line.style.transition = `opacity 0.3s ease ${i * 0.18}s`;
+  setTimeout(() => { line.style.opacity = '1'; }, 800 + i * 180);
+});
+</script>
 </body>
 </html>
