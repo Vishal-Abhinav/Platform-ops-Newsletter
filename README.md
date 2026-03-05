@@ -351,15 +351,9 @@ Week 4  →  Publish to GitHub + newsletter send
   <tr>
     <td align="center">
       <b>Vishal</b><br/>
-      <sub>Kubernetes · Platform Engineering · Cloud Architecture</sub><br/>
-      <a href="https://github.com/vishal">@vishal</a> ·
-      <a href="https://linkedin.com/in/vishal">LinkedIn</a>
-    </td>
-    <td align="center">
-      <b>Abhinav</b><br/>
-      <sub>DevOps · SRE · Infrastructure Automation</sub><br/>
-      <a href="https://github.com/abhinav">@abhinav</a> ·
-      <a href="https://linkedin.com/in/abhinav">LinkedIn</a>
+      <sub>· Platfrom Ops ·Kubernetes · Platform Engineering · Cloud Architecture · DevOps c SRE · Infrastructure Automation</sub><br/>
+      <a href="https://github.com/vishal">@VishalAbhinav</a> ·
+      <a href="https://www.linkedin.com/in/vishal-abhinav/">LinkedIn</a>
     </td>
   </tr>
 </table>
