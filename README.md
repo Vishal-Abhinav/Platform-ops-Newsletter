@@ -350,9 +350,9 @@ Week 4  →  Publish to GitHub + newsletter send
 <table>
   <tr>
     <td align="center">
-      <b>Vishal</b><br/>
+      <b>Vishal Abhinav</b><br/>
       <sub>· Platfrom Ops ·Kubernetes · Platform Engineering · Cloud Architecture · DevOps c SRE · Infrastructure Automation</sub><br/>
-      <a href="https://github.com/vishal">@VishalAbhinav</a> ·
+      <a href="https://github.com/Vishal-Abhinav">@VishalAbhinav</a> ·
       <a href="https://www.linkedin.com/in/vishal-abhinav/">LinkedIn</a>
     </td>
   </tr>
