@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes Architecture — Platform Ops · Tech with Vishal Abhinav</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ─── TOKENS ─── */
+:root {
+  --ink:     #08090c;
+  --paper:   #f2f0eb;
+  --smoke:   #e4e0d8;
+  --ash:     #b8b2a7;
+  --coal:    #1c1f26;
+  --cyan:    #00c2d4;
+  --amber:   #f59e0b;
+  --crimson: #e53935;
+  --lime:    #84cc16;
+  --text:    #1c1f26;
+  --muted:   #6b6860;
+  --r: 6px;
+
+  /* K8 accent colours */
+  --k-blue:   #326CE5;
+  --k-teal:   #00897B;
+  --k-purple: #7B2FBE;
+  --k-orange: #E65100;
+  --k-green:  #2E7D32;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ─── CUSTOM CURSOR ─── */
+.cursor { position:fixed; top:0; left:0; width:10px; height:10px; background:var(--crimson); border-radius:50%; pointer-events:none; z-index:10000; transition:transform 0.15s ease, background 0.2s; transform:translate(-50%,-50%); }
+.cursor-ring { position:fixed; top:0; left:0; width:36px; height:36px; border:1.5px solid var(--coal); border-radius:50%; pointer-events:none; z-index:9999; transition:transform 0.35s cubic-bezier(.25,.46,.45,.94), width 0.3s, height 0.3s, border-color 0.2s; transform:translate(-50%,-50%); }
+body:hover .cursor-ring { border-color:var(--crimson); }
+
+/* ─── NOISE ─── */
+body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:9998; opacity:0.6; }
+
+/* ─── NAV ─── */
+nav { position:fixed; top:0; left:0; right:0; z-index:1000; display:flex; align-items:center; justify-content:space-between; padding:18px 48px; background:rgba(242,240,235,0.88); backdrop-filter:blur(16px); border-bottom:1px solid rgba(0,0,0,0.08); }
+.nav-logo { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:2px; color:var(--coal); display:flex; align-items:center; gap:10px; text-decoration:none; }
+.nav-logo span { display:inline-block; width:8px; height:8px; background:var(--crimson); border-radius:50%; animation:pulse-dot 2s infinite; }
+@keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:0.6;} }
+.nav-links { display:flex; gap:32px; list-style:none; font-family:'DM Mono',monospace; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; }
+.nav-links a { color:var(--muted); text-decoration:none; transition:color 0.2s; position:relative; }
+.nav-links a::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:1px; background:var(--crimson); transition:width 0.3s; }
+.nav-links a:hover { color:var(--coal); }
+.nav-links a:hover::after { width:100%; }
+.nav-cta { background:var(--coal); color:var(--paper)!important; padding:8px 20px!important; border-radius:2px; font-family:'DM Mono',monospace; font-size:11px!important; text-transform:uppercase; letter-spacing:2px; text-decoration:none; transition:background 0.2s!important; }
+.nav-cta:hover { background:var(--crimson)!important; }
+.nav-cta::after { display:none!important; }
+
+/* ─── ARTICLE HERO ─── */
+.article-hero {
+  background: var(--coal);
+  padding: 140px 64px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.article-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 15% 50%, rgba(50,108,229,0.2) 0%, transparent 45%),
+    radial-gradient(circle at 85% 20%, rgba(0,194,212,0.15) 0%, transparent 40%),
+    radial-gradient(circle at 60% 80%, rgba(229,57,53,0.1) 0%, transparent 40%);
+}
+
+.article-hero-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 80px;
+  align-items: center;
+}
+
+.ah-eyebrow {
+  display: flex; align-items: center; gap: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 24px;
+}
+.ah-eyebrow-line { display:block; width:32px; height:1px; background:var(--cyan); }
+
+.ah-issue {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 20px;
+}
+
+.ah-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(52px, 6vw, 86px);
+  line-height: 0.92;
+  color: var(--paper);
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+.ah-title .accent { color: var(--cyan); }
+
+.ah-sub {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 20px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.ah-meta {
+  display: flex; gap: 24px; flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+.ah-meta-item {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  display: flex; align-items: center; gap: 8px;
+}
+.ah-meta-item .dot { width:4px; height:4px; border-radius:50%; background:var(--cyan); }
+
+.ah-tags { display:flex; flex-wrap:wrap; gap:8px; }
+.ah-tag {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.55);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+/* Hero right - TOC card */
+.toc-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 28px;
+}
+
+.toc-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.toc-list { list-style: none; }
+.toc-list li { margin-bottom: 2px; }
+.toc-list a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+  letter-spacing: 0.5px;
+}
+.toc-list a:hover { background: rgba(255,255,255,0.06); color: var(--cyan); }
+.toc-num { color: var(--crimson); font-size: 10px; min-width: 22px; }
+.toc-list .toc-h2 a { padding-left: 24px; font-size: 10px; color: rgba(255,255,255,0.25); }
+.toc-list .toc-h2 a:hover { color: rgba(0,194,212,0.7); }
+
+/* ─── CONTENT WRAPPER ─── */
+.content-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 64px;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 80px;
+  align-items: start;
+}
+
+/* ─── ARTICLE BODY ─── */
+.article-body { min-width: 0; }
+
+/* Section anchors */
+.art-section { margin-bottom: 72px; scroll-margin-top: 100px; }
+
+.art-section-tag {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.art-section-tag::before { content:''; display:block; width:20px; height:1px; background:var(--crimson); }
+
+.art-h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(36px, 4vw, 52px);
+  line-height: 1;
+  color: var(--coal);
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--smoke);
+  padding-bottom: 16px;
+}
+
+.art-h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.5px;
+  color: var(--coal);
+  margin: 40px 0 12px;
+}
+.art-h2 .num { color: var(--crimson); }
+
+.art-h3 {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--coal);
+  margin: 28px 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 12px;
+}
+
+.art-p {
+  color: #3a3730;
+  line-height: 1.85;
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+
+/* ─── ARCHITECTURE DIAGRAMS ─── */
+.arch-diagram {
+  background: var(--coal);
+  border-radius: 8px;
+  padding: 32px;
+  margin: 32px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.arch-diagram::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(50,108,229,0.12) 0%, transparent 60%);
+}
+
+.arch-diagram-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Control Plane Diagram */
+.cp-diagram {
+  position: relative;
+  z-index: 2;
+}
+
+.cp-outer {
+  border: 1.5px dashed rgba(50,108,229,0.5);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.cp-outer-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(50,108,229,0.8);
+  margin-bottom: 16px;
+}
+
+.cp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.cp-node {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 14px 12px;
+  text-align: center;
+  transition: background 0.2s, border-color 0.2s;
+  cursor: default;
+}
+.cp-node:hover { background: rgba(50,108,229,0.15); border-color: rgba(50,108,229,0.5); }
+
+.cp-node-icon { font-size: 20px; margin-bottom: 6px; }
+.cp-node-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.8);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.cp-node-role {
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  line-height: 1.4;
+}
+
+/* Arrow connector */
+.arch-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 10px 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 1px;
+}
+.arch-arrow-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,194,212,0.4), transparent);
+}
+
+/* Worker nodes row */
+.wn-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+.wn-node {
+  border: 1.5px dashed rgba(0,137,123,0.5);
+  border-radius: 8px;
+  padding: 14px;
+}
+.wn-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(0,194,212,0.7);
+  margin-bottom: 10px;
+}
+.wn-pods { display: flex; flex-wrap: wrap; gap: 5px; }
+.wn-pod {
+  background: rgba(132,204,22,0.15);
+  border: 1px solid rgba(132,204,22,0.3);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--lime);
+  letter-spacing: 0.5px;
+}
+.wn-pod.pending { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: var(--amber); }
+.wn-components { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.wn-comp {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: rgba(255,255,255,0.4);
+}
+
+/* ─── POD ANATOMY DIAGRAM ─── */
+.pod-diagram {
+  position: relative;
+  z-index: 2;
+}
+
+.pod-outer {
+  border: 2px solid rgba(50,108,229,0.6);
+  border-radius: 10px;
+  padding: 20px;
+  background: rgba(50,108,229,0.05);
+}
+
+.pod-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(50,108,229,0.8);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.pod-label-dot { width:6px; height:6px; border-radius:50%; background:var(--k-blue); }
+
+.pod-shared-resources {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.pod-resource {
+  background: rgba(0,194,212,0.08);
+  border: 1px solid rgba(0,194,212,0.2);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--cyan);
+  text-align: center;
+}
+.pod-resource-label { font-size: 8px; opacity: 0.6; margin-top: 2px; letter-spacing: 1px; }
+
+.containers-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+.container-box {
+  border-radius: 6px;
+  padding: 14px;
+  text-align: center;
+}
+.container-box.main { background: rgba(132,204,22,0.12); border: 1px solid rgba(132,204,22,0.3); }
+.container-box.init { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); border-style: dashed; }
+.container-box.sidecar { background: rgba(0,194,212,0.12); border: 1px solid rgba(0,194,212,0.3); }
+
+.container-icon { font-size: 18px; margin-bottom: 6px; }
+.container-name { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; margin-bottom: 4px; }
+.container-box.main .container-name { color: var(--lime); }
+.container-box.init .container-name { color: var(--amber); }
+.container-box.sidecar .container-name { color: var(--cyan); }
+.container-role { font-size: 9px; color: rgba(255,255,255,0.35); line-height: 1.4; }
+
+/* ─── STORAGE DIAGRAM ─── */
+.storage-flow {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  align-items: center;
+}
+
+.storage-layer {
+  text-align: center;
+  padding: 16px 8px;
+}
+
+.storage-box {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  padding: 14px 10px;
+  margin-bottom: 6px;
+  transition: background 0.2s;
+  cursor: default;
+}
+.storage-box:hover { background: rgba(123,47,190,0.2); border-color: rgba(123,47,190,0.5); }
+
+.storage-box-icon { font-size: 18px; margin-bottom: 6px; }
+.storage-box-name { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.7); letter-spacing: 0.5px; }
+.storage-box-sub { font-size: 9px; color: rgba(255,255,255,0.3); margin-top: 3px; }
+
+.storage-arrow {
+  text-align: center;
+  color: rgba(255,255,255,0.2);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── COMPONENT TABLE ─── */
+.comp-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 24px 0;
+  font-size: 13px;
+}
+
+.comp-table th {
+  background: var(--coal);
+  color: var(--paper);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  text-align: left;
+}
+.comp-table th:first-child { border-radius: 6px 0 0 0; }
+.comp-table th:last-child { border-radius: 0 6px 0 0; }
+
+.comp-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--smoke);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.comp-table tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
+.comp-table tr:last-child td { border-bottom: none; }
+.comp-table tr:last-child td:first-child { border-radius: 0 0 0 6px; }
+.comp-table tr:last-child td:last-child { border-radius: 0 0 6px 0; }
+.comp-table td:first-child { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: var(--k-blue); white-space: nowrap; }
+
+/* ─── INFO BOXES ─── */
+.info-box {
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin: 24px 0;
+}
+.info-box.note { background: rgba(50,108,229,0.06); border-left: 3px solid var(--k-blue); }
+.info-box.tip  { background: rgba(46,125,50,0.06); border-left: 3px solid var(--k-green); }
+.info-box.warn { background: rgba(230,81,0,0.06); border-left: 3px solid var(--k-orange); }
+.info-box.key  { background: rgba(123,47,190,0.06); border-left: 3px solid var(--k-purple); }
+
+.info-box-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.info-box.note .info-box-label { color: var(--k-blue); }
+.info-box.tip  .info-box-label { color: var(--k-green); }
+.info-box.warn .info-box-label { color: var(--k-orange); }
+.info-box.key  .info-box-label { color: var(--k-purple); }
+.info-box p { font-size: 14px; line-height: 1.7; color: #3a3730; margin-bottom: 8px; }
+.info-box p:last-child { margin-bottom: 0; }
+
+/* ─── CODE BLOCKS ─── */
+.code-block {
+  background: #12151c;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 20px 0;
+}
+
+.code-bar {
+  background: rgba(255,255,255,0.04);
+  padding: 8px 16px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.code-dots { display:flex; gap:5px; }
+.cd { width:9px; height:9px; border-radius:50%; }
+.cd.r { background:#ff5f57; }
+.cd.y { background:#ffbd2e; }
+.cd.g { background:#28c840; }
+.code-lang {
+  flex: 1;
+  text-align: right;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 1px;
+}
+
+.code-body {
+  padding: 16px 20px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  line-height: 2;
+  overflow-x: auto;
+}
+
+.code-body .kw  { color: #c792ea; }
+.code-body .str { color: #c3e88d; }
+.code-body .num { color: #f78c6c; }
+.code-body .cmt { color: rgba(255,255,255,0.25); }
+.code-body .key { color: #82aaff; }
+.code-body .val { color: #80cbc4; }
+.code-body .op  { color: rgba(255,255,255,0.5); }
+
+/* ─── FEATURE GRID ─── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.feature-card {
+  background: var(--smoke);
+  border-radius: 6px;
+  padding: 20px;
+  transition: background 0.2s, transform 0.2s;
+}
+.feature-card:hover { background: var(--coal); transform: translateY(-2px); }
+.feature-card:hover .fc-title { color: var(--paper); }
+.feature-card:hover .fc-desc { color: rgba(255,255,255,0.5); }
+
+.fc-icon { font-size: 22px; margin-bottom: 10px; }
+.fc-title { font-weight: 700; font-size: 14px; color: var(--coal); margin-bottom: 6px; transition: color 0.2s; }
+.fc-desc { font-size: 13px; color: var(--muted); line-height: 1.6; transition: color 0.2s; }
+
+/* ─── PROBE TABLE ─── */
+.probe-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.probe-card {
+  border-radius: 6px;
+  padding: 18px;
+  text-align: center;
+}
+.probe-card.liveness  { background: rgba(229,57,53,0.08); border: 1px solid rgba(229,57,53,0.25); }
+.probe-card.readiness { background: rgba(132,204,22,0.08); border: 1px solid rgba(132,204,22,0.25); }
+.probe-card.startup   { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); }
+
+.probe-icon { font-size: 24px; margin-bottom: 8px; }
+.probe-name { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 1px; margin-bottom: 6px; }
+.probe-card.liveness  .probe-name { color: var(--crimson); }
+.probe-card.readiness .probe-name { color: var(--lime); }
+.probe-card.startup   .probe-name { color: var(--amber); }
+.probe-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.probe-action { font-size: 11px; margin-top: 8px; font-family: 'DM Mono', monospace; }
+.probe-card.liveness  .probe-action { color: rgba(229,57,53,0.7); }
+.probe-card.readiness .probe-action { color: rgba(132,204,22,0.7); }
+.probe-card.startup   .probe-action { color: rgba(245,158,11,0.7); }
+
+/* ─── SIDEBAR ─── */
+.sidebar { position: sticky; top: 100px; }
+
+.sidebar-card {
+  background: var(--smoke);
+  border-radius: 6px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.sidebar-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+/* Progress indicator */
+.reading-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--crimson), var(--cyan));
+  z-index: 2000;
+  transition: width 0.1s;
+  width: 0%;
+}
+
+/* Active section nav */
+.sidebar-nav { list-style: none; }
+.sidebar-nav li { margin-bottom: 2px; }
+.sidebar-nav a {
+  display: block;
+  padding: 6px 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  text-decoration: none;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  transition: background 0.2s, color 0.2s;
+  border-left: 2px solid transparent;
+}
+.sidebar-nav a:hover { background: rgba(0,0,0,0.06); color: var(--coal); }
+.sidebar-nav a.active { background: rgba(229,57,53,0.08); color: var(--crimson); border-left-color: var(--crimson); }
+
+/* Component badges */
+.component-badges { display: flex; flex-direction: column; gap: 6px; }
+.comp-badge {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  background: var(--paper);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--coal);
+}
+.comp-badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* Divider */
+.section-divider {
+  border: none;
+  border-top: 2px solid var(--smoke);
+  margin: 60px 0;
+}
+
+/* ─── LIFECYCLE FLOW ─── */
+.lifecycle-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 24px 0;
+  overflow-x: auto;
+}
+
+.lf-step {
+  flex: 1;
+  min-width: 90px;
+  text-align: center;
+  padding: 14px 8px;
+  position: relative;
+}
+.lf-step::after {
+  content: '→';
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(0,0,0,0.2);
+  font-size: 14px;
+}
+.lf-step:last-child::after { display: none; }
+
+.lf-box {
+  border-radius: 6px;
+  padding: 10px 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.lf-step.pending  .lf-box { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+.lf-step.running  .lf-box { background: rgba(132,204,22,0.15); color: var(--lime); border: 1px solid rgba(132,204,22,0.3); }
+.lf-step.success  .lf-box { background: rgba(50,108,229,0.15); color: #82aaff; border: 1px solid rgba(50,108,229,0.3); }
+.lf-step.failed   .lf-box { background: rgba(229,57,53,0.15); color: var(--crimson); border: 1px solid rgba(229,57,53,0.3); }
+.lf-step.unknown  .lf-box { background: rgba(255,255,255,0.08); color: rgba(0,0,0,0.4); border: 1px solid rgba(0,0,0,0.1); }
+.lf-desc { font-size: 10px; color: var(--muted); line-height: 1.4; }
+
+/* ─── QOS CARDS ─── */
+.qos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 20px 0;
+}
+.qos-card { border-radius: 6px; padding: 18px; }
+.qos-card.guaranteed { background: rgba(50,108,229,0.08); border: 1px solid rgba(50,108,229,0.3); }
+.qos-card.burstable  { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); }
+.qos-card.besteffort { background: rgba(229,57,53,0.08); border: 1px solid rgba(229,57,53,0.3); }
+.qos-label { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 1px; margin-bottom: 8px; }
+.qos-card.guaranteed .qos-label { color: var(--k-blue); }
+.qos-card.burstable  .qos-label { color: var(--amber); }
+.qos-card.besteffort .qos-label { color: var(--crimson); }
+.qos-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.qos-priority { font-family: 'DM Mono', monospace; font-size: 10px; margin-top: 8px; }
+.qos-card.guaranteed .qos-priority { color: rgba(50,108,229,0.7); }
+.qos-card.burstable  .qos-priority { color: rgba(245,158,11,0.7); }
+.qos-card.besteffort .qos-priority { color: rgba(229,57,53,0.7); }
+
+/* ─── BREADCRUMB ─── */
+.breadcrumb {
+  background: var(--smoke);
+  padding: 12px 64px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.breadcrumb a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.breadcrumb a:hover { color: var(--crimson); }
+.breadcrumb-sep { color: var(--ash); }
+
+/* ─── FOOTER ─── */
+footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64px; }
+.footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+.footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; color: rgba(255,255,255,0.6); }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.25); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--cyan); }
+.footer-note { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; }
+
+/* ─── NEXT/PREV ─── */
+.article-nav {
+  background: var(--coal);
+  padding: 48px 64px;
+}
+.article-nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.an-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 24px 28px;
+  text-decoration: none;
+  display: block;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.an-card:hover { background: rgba(255,255,255,0.08); border-color: rgba(0,194,212,0.3); transform: translateY(-2px); }
+.an-dir { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--cyan); margin-bottom: 8px; text-transform: uppercase; }
+.an-title { font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 700; color: var(--paper); }
+.an-card.next { text-align: right; }
+
+/* ─── ANIMATIONS ─── */
+.reveal { opacity:0; transform:translateY(24px); transition:opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1024px) {
+  .content-wrap { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .article-hero-inner { grid-template-columns: 1fr; }
+  .toc-card { display: none; }
+  .cp-grid { grid-template-columns: repeat(2, 1fr); }
+  .wn-row { grid-template-columns: 1fr; }
+  .storage-flow { grid-template-columns: repeat(2, 1fr); }
+  .probe-grid { grid-template-columns: 1fr; }
+  .qos-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  nav { padding: 16px 24px; }
+  .nav-links { display: none; }
+  .article-hero { padding: 120px 32px 60px; }
+  .content-wrap { padding: 48px 32px; }
+  .breadcrumb { padding: 12px 32px; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .containers-row { grid-template-columns: 1fr; }
+  .article-nav { padding: 48px 32px; }
+  .article-nav-inner { grid-template-columns: 1fr; }
+  footer { padding: 40px 32px; }
+}
+</style>
+</head>
+<body>
+
+<div class="reading-progress" id="readingProgress"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav>
+  <a href="../../index.html" class="nav-logo">
+    <span></span>PLATFORM OPS
+  </a>
+  <ul class="nav-links">
+    <li><a href="../../index.html#topics">Topics</a></li>
+    <li><a href="../../index.html#issues">Issues</a></li>
+    <li><a href="../../index.html#authors">Authors</a></li>
+    <li><a href="../../index.html#subscribe" class="nav-cta">Subscribe →</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════ BREADCRUMB ═══════════ -->
+<div class="breadcrumb">
+  <a href="../../index.html">Platform Ops</a>
+  <span class="breadcrumb-sep">/</span>
+  <a href="#">DevOps</a>
+  <span class="breadcrumb-sep">/</span>
+  <a href="#">Kubernetes</a>
+  <span class="breadcrumb-sep">/</span>
+  <span>Architecture</span>
+</div>
+
+<!-- ═══════════ ARTICLE HERO ═══════════ -->
+<header class="article-hero">
+  <div class="article-hero-inner">
+    <div>
+      <div class="ah-eyebrow">
+        <span class="ah-eyebrow-line"></span>
+        Deep Dive · Kubernetes
+      </div>
+      <div class="ah-issue">April 2026 · Issue #048</div>
+      <h1 class="ah-title">
+        KUBERNETES<br>
+        <span class="accent">ARCHITECTURE</span>
+      </h1>
+      <p class="ah-sub">Storage Nodes, Worker Nodes, Containers & Pods — a complete structural guide to how Kubernetes actually works.</p>
+      <div class="ah-meta">
+        <div class="ah-meta-item"><span class="dot"></span> Vishal Abhinav</div>
+        <div class="ah-meta-item"><span class="dot"></span> Platform Ops Engineer</div>
+        <div class="ah-meta-item"><span class="dot"></span> 25 min read</div>
+      </div>
+      <div class="ah-tags">
+        <span class="ah-tag">Kubernetes</span>
+        <span class="ah-tag">Control Plane</span>
+        <span class="ah-tag">Worker Node</span>
+        <span class="ah-tag">Storage</span>
+        <span class="ah-tag">Pods</span>
+        <span class="ah-tag">Containers</span>
+        <span class="ah-tag">CSI</span>
+        <span class="ah-tag">Architecture</span>
+      </div>
+    </div>
+
+    <!-- Table of Contents card -->
+    <div class="toc-card">
+      <div class="toc-title">// Table of Contents</div>
+      <ul class="toc-list">
+        <li><a href="#intro"><span class="toc-num">01</span> Introduction</a></li>
+        <li><a href="#architecture"><span class="toc-num">02</span> High-Level Architecture</a></li>
+        <li class="toc-h2"><a href="#control-plane">↳ Control Plane</a></li>
+        <li><a href="#worker-node"><span class="toc-num">03</span> Worker Node</a></li>
+        <li class="toc-h2"><a href="#kubelet">↳ kubelet</a></li>
+        <li class="toc-h2"><a href="#kube-proxy">↳ kube-proxy</a></li>
+        <li class="toc-h2"><a href="#runtime">↳ Container Runtime</a></li>
+        <li><a href="#containers"><span class="toc-num">04</span> Containers</a></li>
+        <li class="toc-h2"><a href="#probes">↳ Health Probes</a></li>
+        <li><a href="#pods"><span class="toc-num">05</span> Pods</a></li>
+        <li class="toc-h2"><a href="#pod-lifecycle">↳ Lifecycle</a></li>
+        <li class="toc-h2"><a href="#scheduling">↳ Scheduling</a></li>
+        <li><a href="#storage"><span class="toc-num">06</span> Storage Nodes</a></li>
+        <li class="toc-h2"><a href="#pv-pvc">↳ PV / PVC / StorageClass</a></li>
+        <li class="toc-h2"><a href="#csi">↳ CSI Drivers</a></li>
+        <li><a href="#summary"><span class="toc-num">07</span> Architecture Summary</a></li>
+      </ul>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ CONTENT ═══════════ -->
+<div class="content-wrap">
+
+  <!-- ─── MAIN ARTICLE ─── -->
+  <article class="article-body">
+
+    <!-- ─── 1. INTRO ─── -->
+    <section class="art-section reveal" id="intro">
+      <div class="art-section-tag">Foundation</div>
+      <h2 class="art-h1">Introduction to Kubernetes</h2>
+      <p class="art-p">Kubernetes (K8s) is the de facto standard for container orchestration — an open-source platform originally built at Google, now stewarded by the Cloud Native Computing Foundation (CNCF). It automates deploying, scaling, and managing containerised applications across clusters of machines.</p>
+      <p class="art-p">Rather than manually placing containers on servers, you declare the desired state of your application. Kubernetes continuously reconciles the actual state of the cluster toward that desired state — restarting failed containers, rescheduling pods away from failed nodes, scaling replicas up or down — all without human intervention.</p>
+
+      <div class="info-box key">
+        <div class="info-box-label">⬡ Core Design Philosophy</div>
+        <p>Kubernetes is a <strong>declarative, self-healing platform</strong>. You describe what you want (desired state). The control loop observes what exists (actual state) and takes action to close the gap. This convergence loop is the foundation of everything Kubernetes does.</p>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="fc-icon">🔁</div>
+          <div class="fc-title">Desired State Management</div>
+          <div class="fc-desc">Declare intent via YAML manifests. Kubernetes continuously reconciles actual state toward it.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">💊</div>
+          <div class="fc-title">Self-Healing</div>
+          <div class="fc-desc">Restarts failed containers, replaces unhealthy pods, reschedules from failed nodes automatically.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">⚖️</div>
+          <div class="fc-title">Horizontal Scaling</div>
+          <div class="fc-desc">Scale out by adding pod replicas. HPA scales automatically on CPU, memory, or custom metrics.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">🌐</div>
+          <div class="fc-title">Service Discovery</div>
+          <div class="fc-desc">Built-in DNS and virtual IPs route traffic to healthy pods. No external load balancer needed for intra-cluster traffic.</div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ─── 2. HIGH-LEVEL ARCHITECTURE ─── -->
+    <section class="art-section reveal" id="architecture">
+      <div class="art-section-tag">Overview</div>
+      <h2 class="art-h1">High-Level Cluster Architecture</h2>
+      <p class="art-p">A Kubernetes cluster consists of a <strong>Control Plane</strong> (the brain — manages desired state, scheduling, and the API) and a <strong>Data Plane</strong> of Worker Nodes (the muscle — actually runs your workloads). A third concern, the <strong>Storage Layer</strong>, handles durable persistence for stateful applications.</p>
+
+      <!-- FULL CLUSTER DIAGRAM -->
+      <div class="arch-diagram reveal">
+        <div class="arch-diagram-title">// Kubernetes Cluster — Full Architecture View</div>
+        <div class="cp-diagram">
+
+          <!-- Control Plane -->
+          <div class="cp-outer">
+            <div class="cp-outer-label">◈ Control Plane  (manages cluster state — typically 3 or 5 nodes for HA)</div>
+            <div class="cp-grid">
+              <div class="cp-node">
+                <div class="cp-node-icon">🧠</div>
+                <div class="cp-node-name">kube-apiserver</div>
+                <div class="cp-node-role">Central API hub. All components talk through here.</div>
+              </div>
+              <div class="cp-node">
+                <div class="cp-node-icon">🗄️</div>
+                <div class="cp-node-name">etcd</div>
+                <div class="cp-node-role">Distributed key-value store. Sole source of truth.</div>
+              </div>
+              <div class="cp-node">
+                <div class="cp-node-icon">📅</div>
+                <div class="cp-node-name">kube-scheduler</div>
+                <div class="cp-node-role">Assigns unscheduled pods to nodes via filter + score.</div>
+              </div>
+              <div class="cp-node">
+                <div class="cp-node-icon">🔄</div>
+                <div class="cp-node-name">controller-manager</div>
+                <div class="cp-node-role">Runs all built-in control loops (Node, Deployment, HPA…)</div>
+              </div>
+              <div class="cp-node">
+                <div class="cp-node-icon">☁️</div>
+                <div class="cp-node-name">cloud-controller</div>
+                <div class="cp-node-role">Integrates with AWS/GCP/Azure for LBs and volumes.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="arch-arrow">
+            <div class="arch-arrow-line"></div>
+            <span>kubelet watches API server · schedules workloads</span>
+            <div class="arch-arrow-line"></div>
+          </div>
+
+          <!-- Worker Nodes -->
+          <div class="wn-row">
+            <div class="wn-node">
+              <div class="wn-label">Worker Node 1</div>
+              <div class="wn-pods">
+                <span class="wn-pod">api-pod</span>
+                <span class="wn-pod">cache-pod</span>
+              </div>
+              <div class="wn-components">
+                <span class="wn-comp">kubelet</span>
+                <span class="wn-comp">kube-proxy</span>
+                <span class="wn-comp">containerd</span>
+              </div>
+            </div>
+            <div class="wn-node">
+              <div class="wn-label">Worker Node 2</div>
+              <div class="wn-pods">
+                <span class="wn-pod">worker-pod</span>
+                <span class="wn-pod">db-pod</span>
+              </div>
+              <div class="wn-components">
+                <span class="wn-comp">kubelet</span>
+                <span class="wn-comp">kube-proxy</span>
+                <span class="wn-comp">containerd</span>
+              </div>
+            </div>
+            <div class="wn-node">
+              <div class="wn-label">Storage Node</div>
+              <div class="wn-pods">
+                <span class="wn-pod">postgres-0</span>
+                <span class="wn-pod pending">redis-0</span>
+              </div>
+              <div class="wn-components">
+                <span class="wn-comp">kubelet</span>
+                <span class="wn-comp">CSI-node</span>
+                <span class="wn-comp">NVMe SSD</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box note">
+        <div class="info-box-label">ℹ Key Insight: The API Server is the Only Communication Hub</div>
+        <p>Every component communicates exclusively through the <code>kube-apiserver</code> — never directly with each other. This centralises auth, RBAC, admission control, and audit logging. The API server is stateless; all state is durably persisted in etcd.</p>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ─── 3. WORKER NODE ─── -->
+    <section class="art-section reveal" id="worker-node">
+      <div class="art-section-tag">Compute Layer</div>
+      <h2 class="art-h1">Worker Node Architecture</h2>
+      <p class="art-p">Worker Nodes are the machines in a Kubernetes cluster that actually run containerised workloads. Each node hosts one or more Pods and must run three core components: the <strong>kubelet</strong>, <strong>kube-proxy</strong>, and a <strong>container runtime</strong>.</p>
+
+      <h3 class="art-h2" id="kubelet"><span class="num">3.1 </span>kubelet — The Node Agent</h3>
+      <p class="art-p">The kubelet is the primary agent on every worker node. It watches the API server for Pods assigned to its node and instructs the container runtime to start, stop, and restart containers accordingly. It also reports node health and resource usage back to the API server.</p>
+
+      <table class="comp-table">
+        <thead><tr><th>Responsibility</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td>Pod Lifecycle</td><td>Starts/stops containers via CRI. Enforces restartPolicy.</td></tr>
+          <tr><td>Health Probing</td><td>Executes liveness, readiness, and startup probes. Takes corrective action on failure.</td></tr>
+          <tr><td>Resource Reporting</td><td>Reports node CPU/memory capacity and allocatable resources to the API server.</td></tr>
+          <tr><td>Volume Mounting</td><td>Mounts PVCs, ConfigMaps, Secrets, and ephemeral volumes into pod filesystems.</td></tr>
+          <tr><td>Image Management</td><td>Pulls container images. Enforces imagePullPolicy. Manages local image cache.</td></tr>
+          <tr><td>Node Registration</td><td>Registers the node with the API server on startup. Advertises labels and taints.</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="art-h2" id="kube-proxy"><span class="num">3.2 </span>kube-proxy — The Service Router</h3>
+      <p class="art-p">kube-proxy maintains network rules on each node that implement the Kubernetes Service abstraction — routing traffic from a stable virtual IP to backend pod IPs. It operates in one of three modes:</p>
+
+      <table class="comp-table">
+        <thead><tr><th>Mode</th><th>Mechanism</th><th>Performance</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>iptables</td><td>Kernel netfilter rules</td><td>Good — O(n) rule lookup</td><td>Default in most clusters</td></tr>
+          <tr><td>IPVS</td><td>Kernel IP Virtual Server</td><td>Excellent — O(1) lookup</td><td>Best for 1000+ services</td></tr>
+          <tr><td>eBPF (Cilium)</td><td>Extended BPF programs</td><td>Best</td><td>Replaces kube-proxy entirely</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="art-h2" id="runtime"><span class="num">3.3 </span>Container Runtime</h3>
+      <p class="art-p">The container runtime pulls images and manages container lifecycle at the OS level. The kubelet communicates with it via the <strong>Container Runtime Interface (CRI)</strong> — a gRPC API. Modern clusters use <strong>containerd</strong> as the default runtime.</p>
+
+      <div class="code-block">
+        <div class="code-bar"><div class="code-dots"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div></div><div class="code-lang">shell</div></div>
+        <div class="code-body">
+<span class="cmt"># Check container runtime on a node</span>
+<span class="key">$ kubectl get node worker-1 -o jsonpath=</span><span class="str">'{.status.nodeInfo.containerRuntimeVersion}'</span>
+<span class="val">containerd://1.7.14</span>
+
+<span class="cmt"># kubelet CRI socket path</span>
+<span class="key">$ crictl --runtime-endpoint unix:///run/containerd/containerd.sock ps</span>
+<span class="val">CONTAINER   IMAGE     CREATED     STATE     NAME</span>
+<span class="val">a3f1e2b4d5  nginx     2 min ago   Running   nginx</span>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ─── 4. CONTAINERS ─── -->
+    <section class="art-section reveal" id="containers">
+      <div class="art-section-tag">Runtime Unit</div>
+      <h2 class="art-h1">Containers in Kubernetes</h2>
+      <p class="art-p">Containers are lightweight, isolated execution environments that package an application with all its runtime dependencies. In Kubernetes, containers always run inside a <strong>Pod</strong> — they cannot be scheduled independently. They are the atomic unit of execution.</p>
+
+      <div class="info-box tip">
+        <div class="info-box-label">🐧 Linux Primitives Behind Containers</div>
+        <p><strong>Namespaces</strong> provide isolation (PID, Network, Mount, UTS, IPC, User). <strong>cgroups</strong> enforce resource limits for CPU and memory. <strong>OverlayFS</strong> stacks read-only image layers with a thin writable layer on top. <strong>seccomp/AppArmor</strong> restrict system calls to reduce the attack surface.</p>
+      </div>
+
+      <h3 class="art-h2" id="probes"><span class="num">4.1 </span>Health Probes</h3>
+      <p class="art-p">Kubernetes uses three types of probes to monitor and manage container health. These are critical for ensuring only healthy containers receive traffic and unhealthy ones are automatically remediated.</p>
+
+      <div class="probe-grid">
+        <div class="probe-card liveness">
+          <div class="probe-icon">❤️</div>
+          <div class="probe-name">Liveness</div>
+          <div class="probe-desc">Is the container alive? Detects deadlocks and broken states that don't cause a process exit.</div>
+          <div class="probe-action">→ Container is killed and restarted</div>
+        </div>
+        <div class="probe-card readiness">
+          <div class="probe-icon">✅</div>
+          <div class="probe-name">Readiness</div>
+          <div class="probe-desc">Is the container ready to serve traffic? Gates inclusion in Service load balancer endpoints.</div>
+          <div class="probe-action">→ Removed from Service endpoints</div>
+        </div>
+        <div class="probe-card startup">
+          <div class="probe-icon">🚀</div>
+          <div class="probe-name">Startup</div>
+          <div class="probe-desc">Has the app finished initialising? Disables liveness/readiness until this passes.</div>
+          <div class="probe-action">→ Container killed if never passes</div>
+        </div>
+      </div>
+
+      <h3 class="art-h2"><span class="num">4.2 </span>Container Security Context</h3>
+      <p class="art-p">Always configure a security context to follow the principle of least privilege in production:</p>
+
+      <div class="code-block">
+        <div class="code-bar"><div class="code-dots"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div></div><div class="code-lang">yaml</div></div>
+        <div class="code-body">
+<span class="key">securityContext</span><span class="op">:</span>
+  <span class="key">runAsNonRoot</span><span class="op">:</span> <span class="val">true</span>
+  <span class="key">runAsUser</span><span class="op">:</span> <span class="num">1000</span>
+  <span class="key">readOnlyRootFilesystem</span><span class="op">:</span> <span class="val">true</span>
+  <span class="key">allowPrivilegeEscalation</span><span class="op">:</span> <span class="val">false</span>
+  <span class="key">capabilities</span><span class="op">:</span>
+    <span class="key">drop</span><span class="op">:</span> [<span class="str">"ALL"</span>]
+  <span class="key">seccompProfile</span><span class="op">:</span>
+    <span class="key">type</span><span class="op">:</span> <span class="str">RuntimeDefault</span>
+        </div>
+      </div>
+
+      <h3 class="art-h2"><span class="num">4.3 </span>Init Containers</h3>
+      <p class="art-p">Init containers run sequentially to completion before main application containers start. Each must succeed before the next begins. They share the pod's volumes but have their own images.</p>
+
+      <div class="info-box tip">
+        <div class="info-box-label">✅ Common Init Container Patterns</div>
+        <p>Waiting for a database to be ready before the app starts · Running DB schema migrations · Cloning git repos or fetching config into shared volumes · Fetching TLS certificates · Pre-populating a shared cache.</p>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ─── 5. PODS ─── -->
+    <section class="art-section reveal" id="pods">
+      <div class="art-section-tag">Deployment Unit</div>
+      <h2 class="art-h1">Pods — The Fundamental Unit</h2>
+      <p class="art-p">A <strong>Pod</strong> is the smallest deployable unit in Kubernetes. It encapsulates one or more containers, shared storage volumes, a unique cluster IP address, and configuration governing how containers run. Containers in a pod share the same network namespace — they communicate via <code>localhost</code> and share port space.</p>
+
+      <!-- POD ANATOMY DIAGRAM -->
+      <div class="arch-diagram reveal">
+        <div class="arch-diagram-title">// Pod Internal Anatomy</div>
+        <div class="pod-diagram">
+          <div class="pod-outer">
+            <div class="pod-label"><span class="pod-label-dot"></span>Pod (Shared Namespace)</div>
+            <div class="pod-shared-resources">
+              <div class="pod-resource">
+                🌐 Shared Network (eth0)
+                <div class="pod-resource-label">Single IP · Shared Ports</div>
+              </div>
+              <div class="pod-resource">
+                💾 Shared Volumes
+                <div class="pod-resource-label">emptyDir · PVC Mounts</div>
+              </div>
+            </div>
+            <div class="containers-row">
+              <div class="container-box init">
+                <div class="container-icon">⚙️</div>
+                <div class="container-name">Init Container</div>
+                <div class="container-role">Runs first. Waits for DB, runs migrations.</div>
+              </div>
+              <div class="container-box main">
+                <div class="container-icon">📦</div>
+                <div class="container-name">Main Container</div>
+                <div class="container-role">Application workload. Starts after init completes.</div>
+              </div>
+              <div class="container-box sidecar">
+                <div class="container-icon">🔭</div>
+                <div class="container-name">Sidecar</div>
+                <div class="container-role">Log shipper / Envoy proxy / Secret injector.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="art-h2" id="pod-lifecycle"><span class="num">5.1 </span>Pod Lifecycle Phases</h3>
+
+      <div class="lifecycle-flow">
+        <div class="lf-step pending">
+          <div class="lf-box">PENDING</div>
+          <div class="lf-desc">Waiting for scheduling or image pull</div>
+        </div>
+        <div class="lf-step running">
+          <div class="lf-box">RUNNING</div>
+          <div class="lf-desc">At least one container is running</div>
+        </div>
+        <div class="lf-step success">
+          <div class="lf-box">SUCCEEDED</div>
+          <div class="lf-desc">All containers exited 0</div>
+        </div>
+        <div class="lf-step failed">
+          <div class="lf-box">FAILED</div>
+          <div class="lf-desc">At least one container exited non-zero</div>
+        </div>
+        <div class="lf-step unknown">
+          <div class="lf-box">UNKNOWN</div>
+          <div class="lf-desc">Node communication lost</div>
+        </div>
+      </div>
+
+      <h3 class="art-h2"><span class="num">5.2 </span>Quality of Service (QoS) Classes</h3>
+      <p class="art-p">Kubernetes assigns a QoS class to every pod based on how its containers' resource requests and limits are configured. This directly determines eviction priority under node memory pressure.</p>
+
+      <div class="qos-grid">
+        <div class="qos-card guaranteed">
+          <div class="qos-label">GUARANTEED</div>
+          <div class="qos-desc">requests == limits for ALL containers in the pod. CPU + memory both set.</div>
+          <div class="qos-priority">↑ Highest Priority — Last Evicted</div>
+        </div>
+        <div class="qos-card burstable">
+          <div class="qos-label">BURSTABLE</div>
+          <div class="qos-desc">At least one container has a CPU or memory request or limit set. Not Guaranteed.</div>
+          <div class="qos-priority">→ Medium Priority</div>
+        </div>
+        <div class="qos-card besteffort">
+          <div class="qos-label">BESTEFFORT</div>
+          <div class="qos-desc">No resource requests or limits set on any container.</div>
+          <div class="qos-priority">↓ Lowest Priority — First Evicted</div>
+        </div>
+      </div>
+
+      <h3 class="art-h2" id="scheduling"><span class="num">5.3 </span>Scheduling Controls</h3>
+      <p class="art-p">Kubernetes provides a rich set of mechanisms to control where pods are placed. These range from simple label matching to complex topology-aware spreading.</p>
+
+      <table class="comp-table">
+        <thead><tr><th>Mechanism</th><th>Purpose</th><th>Hard / Soft</th></tr></thead>
+        <tbody>
+          <tr><td>nodeSelector</td><td>Match pods to nodes by label key-value pairs</td><td>Hard (required)</td></tr>
+          <tr><td>nodeAffinity</td><td>Rich expression-based node selection</td><td>Both</td></tr>
+          <tr><td>podAffinity</td><td>Co-locate pods with other pods by label</td><td>Both</td></tr>
+          <tr><td>podAntiAffinity</td><td>Spread pods away from other pods</td><td>Both</td></tr>
+          <tr><td>Taints + Tolerations</td><td>Repel pods from nodes unless pod has a matching toleration</td><td>Hard</td></tr>
+          <tr><td>topologySpreadConstraints</td><td>Evenly distribute pods across zones/nodes</td><td>Both</td></tr>
+          <tr><td>PriorityClass</td><td>Preempt lower-priority pods when resources are scarce</td><td>Hard</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="art-h2"><span class="num">5.4 </span>Pod Controllers</h3>
+      <p class="art-p">In production you never create pods directly. Higher-level controllers manage pod sets and handle resilience.</p>
+
+      <table class="comp-table">
+        <thead><tr><th>Controller</th><th>Use Case</th><th>Key Feature</th></tr></thead>
+        <tbody>
+          <tr><td>Deployment</td><td>Stateless apps</td><td>Rolling updates, rollbacks, replica management</td></tr>
+          <tr><td>StatefulSet</td><td>Databases, caches</td><td>Stable identity, ordered start/stop, per-pod PVC</td></tr>
+          <tr><td>DaemonSet</td><td>Node-level agents</td><td>One pod per node — CNI, log agents, CSI drivers</td></tr>
+          <tr><td>Job</td><td>One-off batch tasks</td><td>Run to completion with retry logic</td></tr>
+          <tr><td>CronJob</td><td>Scheduled batch tasks</td><td>Cron schedule syntax</td></tr>
+          <tr><td>ReplicaSet</td><td>Replica guarantee</td><td>Ensures N replicas are always running</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ─── 6. STORAGE ─── -->
+    <section class="art-section reveal" id="storage">
+      <div class="art-section-tag">Persistence Layer</div>
+      <h2 class="art-h1">Storage Nodes & Persistent Volumes</h2>
+      <p class="art-p">Stateful workloads — databases, message brokers, object stores — require durable storage that outlives any individual pod. Kubernetes abstracts storage through a layered model that decouples provisioning from consumption.</p>
+
+      <h3 class="art-h2"><span class="num">6.1 </span>What is a Storage Node?</h3>
+      <p class="art-p">A <strong>Storage Node</strong> is a worker node dedicated to or optimised for stateful workloads. It's configured with high-performance storage hardware (NVMe SSDs, high-IOPS disks) and is <em>labelled and tainted</em> so that only storage-intensive pods (PostgreSQL, Cassandra, Elasticsearch) are scheduled onto it.</p>
+
+      <div class="code-block">
+        <div class="code-bar"><div class="code-dots"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div></div><div class="code-lang">shell</div></div>
+        <div class="code-body">
+<span class="cmt"># Label and taint a storage node</span>
+<span class="key">$ kubectl label node storage-node-1</span> <span class="str">node-role=storage</span>
+<span class="key">$ kubectl taint node storage-node-1</span> <span class="str">dedicated=storage:NoSchedule</span>
+
+<span class="cmt"># Pod toleration to schedule onto storage nodes</span>
+<span class="key">tolerations</span><span class="op">:</span>
+  <span class="op">- </span><span class="key">key</span><span class="op">:</span> <span class="str">"dedicated"</span>
+    <span class="key">operator</span><span class="op">:</span> <span class="str">"Equal"</span>
+    <span class="key">value</span><span class="op">:</span> <span class="str">"storage"</span>
+    <span class="key">effect</span><span class="op">:</span> <span class="str">"NoSchedule"</span>
+        </div>
+      </div>
+
+      <h3 class="art-h2" id="pv-pvc"><span class="num">6.2 </span>The Storage Abstraction Model</h3>
+      <p class="art-p">Kubernetes provides four storage objects that form a clean separation between infrastructure and developer concerns:</p>
+
+      <!-- STORAGE FLOW DIAGRAM -->
+      <div class="arch-diagram reveal">
+        <div class="arch-diagram-title">// Kubernetes Storage Abstraction Layers</div>
+        <div class="storage-flow">
+          <div class="storage-layer">
+            <div class="storage-box">
+              <div class="storage-box-icon">⚙️</div>
+              <div class="storage-box-name">StorageClass</div>
+              <div class="storage-box-sub">Admin defines provisioner + parameters</div>
+            </div>
+          </div>
+          <div class="storage-arrow">→</div>
+          <div class="storage-layer">
+            <div class="storage-box">
+              <div class="storage-box-icon">💿</div>
+              <div class="storage-box-name">PersistentVolume</div>
+              <div class="storage-box-sub">Actual storage resource in the cluster</div>
+            </div>
+          </div>
+          <div class="storage-arrow">←</div>
+          <div class="storage-layer">
+            <div class="storage-box">
+              <div class="storage-box-icon">📋</div>
+              <div class="storage-box-name">PersistentVolumeClaim</div>
+              <div class="storage-box-sub">Developer's request for storage</div>
+            </div>
+          </div>
+          <div class="storage-arrow">→</div>
+          <div class="storage-layer">
+            <div class="storage-box">
+              <div class="storage-box-icon">📦</div>
+              <div class="storage-box-name">Volume Mount</div>
+              <div class="storage-box-sub">PVC mounted into pod container</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <table class="comp-table">
+        <thead><tr><th>Access Mode</th><th>Short</th><th>Description</th><th>Typical Use</th></tr></thead>
+        <tbody>
+          <tr><td>ReadWriteOnce</td><td>RWO</td><td>Read-write by a single node</td><td>Databases (MySQL, Postgres)</td></tr>
+          <tr><td>ReadOnlyMany</td><td>ROX</td><td>Read-only by many nodes</td><td>Shared config / static assets</td></tr>
+          <tr><td>ReadWriteMany</td><td>RWX</td><td>Read-write by many nodes</td><td>NFS shared content stores</td></tr>
+          <tr><td>ReadWriteOncePod</td><td>RWOP</td><td>Read-write by a single pod only</td><td>Strict single-writer workloads</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info-box warn">
+        <div class="info-box-label">⚠ Reclaim Policy — Production Critical</div>
+        <p>Always use <strong>Retain</strong> for production databases. With <code>Delete</code>, releasing a PVC permanently deletes the underlying storage — including all your data. <code>Retain</code> preserves the PV and data for manual recovery.</p>
+      </div>
+
+      <h3 class="art-h2" id="csi"><span class="num">6.3 </span>Container Storage Interface (CSI)</h3>
+      <p class="art-p">CSI is the standardised plugin API between Kubernetes and storage vendors. CSI drivers ship independently from Kubernetes, allowing any storage system to integrate without modifying core Kubernetes code.</p>
+
+      <div class="code-block">
+        <div class="code-bar"><div class="code-dots"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div></div><div class="code-lang">yaml</div></div>
+        <div class="code-body">
+<span class="cmt"># StorageClass using AWS EBS CSI driver</span>
+<span class="key">apiVersion</span><span class="op">:</span> <span class="str">storage.k8s.io/v1</span>
+<span class="key">kind</span><span class="op">:</span> <span class="str">StorageClass</span>
+<span class="key">metadata</span><span class="op">:</span>
+  <span class="key">name</span><span class="op">:</span> <span class="str">fast-nvme</span>
+<span class="key">provisioner</span><span class="op">:</span> <span class="str">ebs.csi.aws.com</span>
+<span class="key">parameters</span><span class="op">:</span>
+  <span class="key">type</span><span class="op">:</span> <span class="str">gp3</span>
+  <span class="key">iops</span><span class="op">:</span> <span class="str">"6000"</span>
+  <span class="key">throughput</span><span class="op">:</span> <span class="str">"250"</span>
+<span class="key">reclaimPolicy</span><span class="op">:</span> <span class="str">Retain</span>
+<span class="key">volumeBindingMode</span><span class="op">:</span> <span class="str">WaitForFirstConsumer</span>
+
+<span class="cmt">---</span>
+<span class="cmt"># PVC claiming from that StorageClass</span>
+<span class="key">apiVersion</span><span class="op">:</span> <span class="str">v1</span>
+<span class="key">kind</span><span class="op">:</span> <span class="str">PersistentVolumeClaim</span>
+<span class="key">metadata</span><span class="op">:</span>
+  <span class="key">name</span><span class="op">:</span> <span class="str">postgres-data</span>
+<span class="key">spec</span><span class="op">:</span>
+  <span class="key">storageClassName</span><span class="op">:</span> <span class="str">fast-nvme</span>
+  <span class="key">accessModes</span><span class="op">:</span> [<span class="str">ReadWriteOnce</span>]
+  <span class="key">resources</span><span class="op">:</span>
+    <span class="key">requests</span><span class="op">:</span>
+      <span class="key">storage</span><span class="op">:</span> <span class="str">100Gi</span>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ─── 7. SUMMARY ─── -->
+    <section class="art-section reveal" id="summary">
+      <div class="art-section-tag">Reference</div>
+      <h2 class="art-h1">Architecture Summary</h2>
+      <p class="art-p">The complete reference of all major Kubernetes components, their location, and function:</p>
+
+      <table class="comp-table">
+        <thead><tr><th>Component</th><th>Location</th><th>Primary Function</th></tr></thead>
+        <tbody>
+          <tr><td>kube-apiserver</td><td>Control Plane</td><td>Central API hub. All communication passes through. Enforces auth and admission.</td></tr>
+          <tr><td>etcd</td><td>Control Plane</td><td>Distributed key-value store. Single source of cluster truth.</td></tr>
+          <tr><td>kube-scheduler</td><td>Control Plane</td><td>Assigns unscheduled pods to nodes via filter + score phases.</td></tr>
+          <tr><td>kube-controller-manager</td><td>Control Plane</td><td>Runs all built-in control loops — Node, Deployment, HPA, etc.</td></tr>
+          <tr><td>cloud-controller-manager</td><td>Control Plane</td><td>Cloud API integration for load balancers, node lifecycle, volumes.</td></tr>
+          <tr><td>kubelet</td><td>Worker Node</td><td>Node agent. Manages pod/container lifecycle. Reports node status.</td></tr>
+          <tr><td>kube-proxy</td><td>Worker Node</td><td>Service routing. Maintains iptables/IPVS rules for virtual IPs.</td></tr>
+          <tr><td>Container Runtime</td><td>Worker Node</td><td>Pulls images and runs containers (containerd, CRI-O).</td></tr>
+          <tr><td>CNI Plugin</td><td>Worker Node</td><td>Pod networking. Assigns IPs. Enforces NetworkPolicies.</td></tr>
+          <tr><td>Pod</td><td>Worker Node</td><td>Smallest deployable unit. Wraps 1+ containers, network, storage.</td></tr>
+          <tr><td>PersistentVolume</td><td>Cluster-scoped</td><td>Represents a piece of durable storage in the cluster.</td></tr>
+          <tr><td>PersistentVolumeClaim</td><td>Namespace-scoped</td><td>Developer's request for persistent storage. Bound to a PV.</td></tr>
+          <tr><td>StorageClass</td><td>Cluster-scoped</td><td>Defines provisioner + parameters for dynamic PV creation.</td></tr>
+          <tr><td>CSI Driver</td><td>Cluster + Each Node</td><td>Plugin interface between Kubernetes and external storage systems.</td></tr>
+          <tr><td>Storage Node</td><td>Dedicated Worker Node</td><td>High-IOPS node tainted for stateful workloads only.</td></tr>
+          <tr><td>CoreDNS</td><td>kube-system</td><td>Cluster DNS. Resolves service and pod names to IPs.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info-box key">
+        <div class="info-box-label">⬡ Copyright</div>
+        <p>© <strong>Tech with Vishal Abhinav</strong> · Platform Ops Engineer · All rights reserved. This article is published as part of the Platform Ops Newsletter.</p>
+      </div>
+    </section>
+
+  </article>
+
+  <!-- ─── SIDEBAR ─── -->
+  <aside class="sidebar">
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">// In This Article</div>
+      <ul class="sidebar-nav" id="sidebarNav">
+        <li><a href="#intro" class="active">Introduction</a></li>
+        <li><a href="#architecture">High-Level Architecture</a></li>
+        <li><a href="#worker-node">Worker Node</a></li>
+        <li><a href="#kubelet">kubelet</a></li>
+        <li><a href="#kube-proxy">kube-proxy</a></li>
+        <li><a href="#runtime">Container Runtime</a></li>
+        <li><a href="#containers">Containers</a></li>
+        <li><a href="#probes">Health Probes</a></li>
+        <li><a href="#pods">Pods</a></li>
+        <li><a href="#pod-lifecycle">Pod Lifecycle</a></li>
+        <li><a href="#scheduling">Scheduling</a></li>
+        <li><a href="#storage">Storage Nodes</a></li>
+        <li><a href="#pv-pvc">PV / PVC / StorageClass</a></li>
+        <li><a href="#csi">CSI Drivers</a></li>
+        <li><a href="#summary">Summary</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">// Key Components</div>
+      <div class="component-badges">
+        <div class="comp-badge"><div class="comp-badge-dot" style="background:#326CE5"></div>kube-apiserver</div>
+        <div class="comp-badge"><div class="comp-badge-dot" style="background:#326CE5"></div>etcd</div>
+        <div class="comp-badge"><div class="comp-badge-dot" style="background:#00897B"></div>kubelet</div>
+        <div class="comp-badge"><div class="comp-badge-dot" style="background:#00897B"></div>kube-proxy</div>
+        <div class="comp-badge"><div class="comp-badge-dot" style="background:#84cc16"></div>containerd</div>
+        <div class="comp-badge"><div class="comp-badge-dot" style="background:#7B2FBE"></div>PersistentVolume</div>
+        <div class="comp-badge"><div class="comp-badge-dot" style="background:#7B2FBE"></div>CSI Driver</div>
+        <div class="comp-badge"><div class="comp-badge-dot" style="background:#E65100"></div>Storage Node</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">// Author</div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#e53935,#ff6b35);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:#fff;flex-shrink:0;">VA</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;color:var(--coal);">Vishal Abhinav</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Platform Ops Engineer</div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- ═══════════ NEXT / PREV ═══════════ -->
+<div class="article-nav">
+  <div class="article-nav-inner">
+    <a href="../Networking/k8-networking.html" class="an-card">
+      <div class="an-dir">← Previous Issue</div>
+      <div class="an-title">Kubernetes Networking Decoded</div>
+    </a>
+    <a href="../../index.html#issues" class="an-card next">
+      <div class="an-dir">Back to Archive →</div>
+      <div class="an-title">Browse All Issues</div>
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PLATFORM OPS</div>
+    <div class="footer-links">
+      <a href="../../index.html#topics">Topics</a>
+      <a href="../../index.html#issues">Archive</a>
+      <a href="https://github.com/Vishal-Abhinav" target="_blank">GitHub</a>
+      <a href="../../index.html#subscribe">Subscribe</a>
+    </div>
+    <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
+  </div>
+</footer>
+
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<script>
+/* Cursor */
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  cursor.style.left=mx+'px'; cursor.style.top=my+'px';
+});
+(function animRing(){
+  rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a,button,.feature-card,.comp-table tr,.probe-card,.qos-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ ring.style.width='52px'; ring.style.height='52px'; ring.style.borderColor='var(--crimson)'; cursor.style.transform='translate(-50%,-50%) scale(1.5)'; });
+  el.addEventListener('mouseleave',()=>{ ring.style.width='36px'; ring.style.height='36px'; ring.style.borderColor=''; cursor.style.transform='translate(-50%,-50%) scale(1)'; });
+});
+
+/* Reading progress bar */
+const progress = document.getElementById('readingProgress');
+window.addEventListener('scroll', () => {
+  const docH = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = (window.scrollY / docH * 100) + '%';
+});
+
+/* Scroll reveal */
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+/* Active sidebar nav */
+const sections = document.querySelectorAll('.art-section, [id]');
+const navLinks  = document.querySelectorAll('#sidebarNav a');
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(a=>a.classList.remove('active'));
+      const active = document.querySelector(`#sidebarNav a[href="#${e.target.id}"]`);
+      if(active) active.classList.add('active');
+    }
+  });
+},{rootMargin:'-20% 0px -70% 0px'});
+document.querySelectorAll('[id]').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
