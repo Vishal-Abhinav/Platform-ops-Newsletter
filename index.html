@@ -263,7 +263,7 @@ nav {
   margin-top: 4px;
 }
 
-/* ─── HERO RIGHT (VISUAL) ─── */
+/* ─── HERO RIGHT ─── */
 .hero-right {
   background: var(--coal);
   position: relative;
@@ -283,7 +283,6 @@ nav {
     radial-gradient(circle at 80% 70%, rgba(229,57,53,0.15) 0%, transparent 50%);
 }
 
-/* Terminal card */
 .terminal {
   background: #12151c;
   border: 1px solid rgba(255,255,255,0.08);
@@ -343,7 +342,6 @@ nav {
 }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* Badge strip */
 .badge-strip {
   display: flex; flex-wrap: wrap; gap: 8px;
   margin-top: 24px;
@@ -519,7 +517,6 @@ nav {
   transition: background 0.25s;
 }
 
-/* Accordion body */
 .tc-body {
   max-height: 0;
   overflow: hidden;
@@ -551,6 +548,24 @@ nav {
   text-transform: uppercase;
   transition: background 0.25s, color 0.25s;
 }
+
+/* Linked badge */
+.tc-badge-link {
+  display: inline-block;
+  background: rgba(229,57,53,0.1);
+  color: var(--crimson);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid rgba(229,57,53,0.2);
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
+}
+.tc-badge-link:hover { background: var(--crimson); color: #fff; }
+.topic-card:hover .tc-badge-link { background: rgba(229,57,53,0.2); border-color: rgba(229,57,53,0.4); }
 
 .tc-sub-group {
   width: 100%;
@@ -584,6 +599,115 @@ nav {
 .issues-inner .section-tag { color: rgba(255,255,255,0.4); }
 .issues-inner .section-lead { color: rgba(255,255,255,0.45); }
 
+/* ── FEATURED (latest) issue — full-width ── */
+.issue-featured {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  padding: 36px 36px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: center;
+  margin-bottom: 2px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.issue-featured::before {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--crimson), var(--cyan));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+}
+.issue-featured:hover { background: rgba(255,255,255,0.07); border-color: rgba(0,194,212,0.3); transform: translateY(-2px); }
+.issue-featured:hover::before { transform: scaleX(1); }
+
+.if-new-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(229,57,53,0.2);
+  border: 1px solid rgba(229,57,53,0.4);
+  color: var(--crimson);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+.if-new-badge-dot { width:5px; height:5px; border-radius:50%; background:var(--crimson); animation:pulse-dot 2s infinite; }
+
+.if-issue-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.25);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.if-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  color: var(--paper);
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.if-desc {
+  font-size: 14px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.6;
+  max-width: 620px;
+  margin-bottom: 20px;
+}
+
+.if-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.if-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+.if-tag.c { background: rgba(0,194,212,0.15); color: var(--cyan); }
+.if-tag.r { background: rgba(229,57,53,0.15); color: #ef5350; }
+.if-tag.l { background: rgba(132,204,22,0.15); color: var(--lime); }
+.if-tag.a { background: rgba(245,158,11,0.15); color: var(--amber); }
+
+.if-cta {
+  background: rgba(0,194,212,0.15);
+  border: 1px solid rgba(0,194,212,0.3);
+  color: var(--cyan);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 12px 24px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.issue-featured:hover .if-cta { background: rgba(0,194,212,0.3); }
+
+.if-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 96px;
+  line-height: 1;
+  color: rgba(255,255,255,0.04);
+  position: absolute;
+  bottom: 10px; right: 130px;
+}
+
+/* Regular grid */
 .issues-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -772,13 +896,11 @@ nav {
   width: 56px; height: 56px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 24px;
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px;
   flex-shrink: 0;
 }
 .author-avatar.v { background: linear-gradient(135deg, var(--crimson), #ff6b35); color: #fff; }
-.author-avatar.a { background: linear-gradient(135deg, var(--cyan), #0068d9); color: #fff; }
 
 .author-name { font-weight: 700; font-size: 16px; color: var(--coal); }
 .author-role {
@@ -852,6 +974,8 @@ footer {
   .topics-grid { grid-template-columns: 1fr; }
   .issues-grid { grid-template-columns: 1fr; }
   .issues-inner { padding: 64px 32px; }
+  .issue-featured { grid-template-columns: 1fr; }
+  .if-cta { display: none; }
   .authors-inner { grid-template-columns: 1fr; gap: 40px; }
   .authors-section { padding: 64px 32px; }
   .subscribe-inner { padding: 80px 32px; }
@@ -913,7 +1037,7 @@ footer {
 
     <div class="hero-stats">
       <div class="stat-item">
-        <div class="stat-num">47</div>
+        <div class="stat-num">48</div>
         <div class="stat-label">Issues Published</div>
       </div>
       <div class="stat-item">
@@ -921,46 +1045,45 @@ footer {
         <div class="stat-label">Subscribers</div>
       </div>
       <div class="stat-item">
-        <div class="stat-num"><0</div>
+        <div class="stat-num">&lt;1</div>
         <div class="stat-label">Years Running</div>
       </div>
     </div>
   </div>
 
   <div class="hero-right">
-    <!-- Terminal -->
     <div class="terminal">
       <div class="terminal-bar">
         <div class="t-dot r"></div>
         <div class="t-dot y"></div>
         <div class="t-dot g"></div>
-        <div class="t-title">platform-ops ~ issue #047</div>
+        <div class="t-title">platform-ops ~ issue #048</div>
       </div>
       <div class="terminal-body">
-        <span class="tl"><span class="tl-prompt">❯</span> <span class="tl-cmd">kubectl get pods -A</span></span>
-        <span class="tl tl-out">NAMESPACE   NAME             READY   STATUS</span>
-        <span class="tl"><span class="tl-k">kube-sys</span>    <span class="tl-out">coredns-xyz      </span><span class="tl-ok">1/1     Running</span></span>
-        <span class="tl"><span class="tl-k">platform</span>    <span class="tl-out">api-server-abc   </span><span class="tl-ok">3/3     Running</span></span>
-        <span class="tl"><span class="tl-k">monitor</span>     <span class="tl-out">prometheus-0     </span><span class="tl-ok">1/1     Running</span></span>
-        <span class="tl"><span class="tl-k">ingress</span>     <span class="tl-out">nginx-ctrl-xyz   </span><span class="tl-ok">1/1     Running</span></span>
+        <span class="tl"><span class="tl-prompt">❯</span> <span class="tl-cmd">kubectl get nodes -o wide</span></span>
+        <span class="tl tl-out">NAME           STATUS   ROLES           AGE</span>
+        <span class="tl"><span class="tl-k">control-01</span>   <span class="tl-ok">Ready</span>    <span class="tl-out">control-plane   14d</span></span>
+        <span class="tl"><span class="tl-k">worker-01</span>    <span class="tl-ok">Ready</span>    <span class="tl-out">worker          14d</span></span>
+        <span class="tl"><span class="tl-k">worker-02</span>    <span class="tl-ok">Ready</span>    <span class="tl-out">worker          14d</span></span>
+        <span class="tl"><span class="tl-k">storage-01</span>   <span class="tl-ok">Ready</span>    <span class="tl-out">storage         14d</span></span>
         <span class="tl"> </span>
-        <span class="tl"><span class="tl-prompt">❯</span> <span class="tl-cmd">helm upgrade --install newsletter ./chart</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Release "newsletter" deployed</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Issue #047 is LIVE 🚀</span></span>
+        <span class="tl"><span class="tl-prompt">❯</span> <span class="tl-cmd">kubectl get pvc -A</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">postgres-data   Bound   100Gi</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Issue #048 — K8s Architecture LIVE 🚀</span></span>
         <span class="tl"> </span>
         <span class="tl"><span class="tl-prompt">❯</span> <span class="cursor-blink"></span></span>
       </div>
     </div>
 
     <div class="badge-strip">
-      <span class="t-badge">Kubernetes</span>
-      <span class="t-badge">Helm</span>
-      <span class="t-badge">Cilium</span>
-      <span class="t-badge">ArgoCD</span>
-      <span class="t-badge">Prometheus</span>
-      <span class="t-badge">GitOps</span>
-      <span class="t-badge">eBPF</span>
-      <span class="t-badge">Terraform</span>
+      <span class="t-badge">Control Plane</span>
+      <span class="t-badge">Worker Node</span>
+      <span class="t-badge">Storage Node</span>
+      <span class="t-badge">Pods</span>
+      <span class="t-badge">CSI</span>
+      <span class="t-badge">kubelet</span>
+      <span class="t-badge">etcd</span>
+      <span class="t-badge">PVC</span>
     </div>
   </div>
 </section>
@@ -968,32 +1091,31 @@ footer {
 <!-- ═══════════ TICKER ═══════════ -->
 <div class="ticker-wrap">
   <div class="ticker-track">
-    <!-- doubled for seamless loop -->
-    <span class="ticker-item"><span class="ticker-dot"></span> Kubernetes Networking</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Kubernetes Architecture</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Storage Nodes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Worker Nodes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Containers & Pods</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Control Plane</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> CSI Drivers</span>
     <span class="ticker-item"><span class="ticker-dot"></span> GitOps</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Service Mesh</span>
     <span class="ticker-item"><span class="ticker-dot"></span> eBPF</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Platform Engineering</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Observability</span>
     <span class="ticker-item"><span class="ticker-dot"></span> SRE Practices</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> Cloud Native</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> ArgoCD</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> Helm Charts</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> Terraform</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> Cilium CNI</span>
     <!-- duplicate -->
-    <span class="ticker-item"><span class="ticker-dot"></span> Kubernetes Networking</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Kubernetes Architecture</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Storage Nodes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Worker Nodes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Containers & Pods</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Control Plane</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> CSI Drivers</span>
     <span class="ticker-item"><span class="ticker-dot"></span> GitOps</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Service Mesh</span>
     <span class="ticker-item"><span class="ticker-dot"></span> eBPF</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Platform Engineering</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Observability</span>
     <span class="ticker-item"><span class="ticker-dot"></span> SRE Practices</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> Cloud Native</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> ArgoCD</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> Helm Charts</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> Terraform</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> Cilium CNI</span>
   </div>
 </div>
 
@@ -1023,9 +1145,10 @@ footer {
             <span class="tc-badge">GitOps</span>
             <span class="tc-badge">Automation</span>
             <div class="tc-sub-group">
-              <div class="tc-sub-title">Containers</div>
+              <div class="tc-sub-title">Kubernetes — Articles</div>
               <span class="tc-badge">Docker</span>
-              <span class="tc-badge">Kubernetes</span>
+              <a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="tc-badge-link">⬡ K8 Architecture ↗</a>
+              <a href="DevOps/K8/Networking/k8-networking.html" class="tc-badge-link">⬡ K8 Networking ↗</a>
             </div>
             <div class="tc-sub-group">
               <div class="tc-sub-title">Toolchain</div>
@@ -1136,12 +1259,35 @@ footer {
     <h2 class="section-title" style="color:var(--paper)">LATEST ISSUES</h2>
     <p class="section-lead">Every issue is a deep-dive with architecture diagrams, code samples, and battle-tested insights.</p>
 
+    <!-- ── FEATURED: Issue #048 K8 Architecture ── -->
+    <a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="issue-featured">
+      <div>
+        <div class="if-new-badge"><span class="if-new-badge-dot"></span> Latest Issue</div>
+        <div class="if-issue-meta">April 2026 · #048</div>
+        <div class="if-title">Kubernetes Architecture Deep-Dive</div>
+        <div class="if-desc">
+          Complete structural guide covering Storage Nodes, Worker Nodes, Containers, Pods, the Control Plane, CSI drivers, PersistentVolumes, health probes, QoS classes, and scheduling controls — with interactive architecture diagrams.
+        </div>
+        <div class="if-tags">
+          <span class="if-tag c">Kubernetes</span>
+          <span class="if-tag c">Control Plane</span>
+          <span class="if-tag r">Worker Node</span>
+          <span class="if-tag r">Storage Node</span>
+          <span class="if-tag l">Pods</span>
+          <span class="if-tag a">CSI</span>
+          <span class="if-tag l">Architecture</span>
+        </div>
+      </div>
+      <div class="if-cta">Read Now →</div>
+      <div class="if-num">48</div>
+    </a>
+
+    <!-- ── GRID: Previous issues ── -->
     <div class="issues-grid">
 
-      <a href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/Networking/k8-networking.html" 
-         target="_blank" 
+      <a href="DevOps/K8/Networking/k8-networking.html"
+         target="_blank"
          style="text-decoration: none; color: inherit;">
-      
         <div class="issue-card">
           <div class="ic-issue">March 2026 · #047</div>
           <div class="ic-title">Kubernetes Networking Decoded</div>
@@ -1155,7 +1301,6 @@ footer {
           </div>
           <div class="ic-num">47</div>
         </div>
-      
       </a>
 
       <div class="issue-card">
@@ -1246,7 +1391,7 @@ footer {
   <div class="subscribe-bg-text">SUBSCRIBE</div>
   <div class="subscribe-inner reveal">
     <div class="section-tag" style="justify-content:center">Free Forever</div>
-    <h2 class="section-title">JOIN 200+<br>ENGINEERS</h2>
+    <h2 class="section-title">JOIN 250+<br>ENGINEERS</h2>
     <p class="section-lead">
       One deep-dive every month. No fluff, no spam — just battle-tested knowledge from the Platform Engineering trenches.
     </p>
@@ -1265,10 +1410,10 @@ footer {
     <div class="footer-links">
       <a href="#topics">Topics</a>
       <a href="#issues">Archive</a>
-      <a href="https://github.com/Tech_with_vishal_abhinav_Newsletter" target="_blank">GitHub</a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
       <a href="#subscribe">Subscribe</a>
     </div>
-    <div class="footer-note">© 2026 Vishal Abhinav · MIT License</div>
+    <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
   </div>
 </footer>
 
@@ -1293,7 +1438,7 @@ document.addEventListener('mousemove', e => {
   requestAnimationFrame(animRing);
 })();
 
-document.querySelectorAll('a, button, .topic-card, .issue-card').forEach(el => {
+document.querySelectorAll('a, button, .topic-card, .issue-card, .issue-featured').forEach(el => {
   el.addEventListener('mouseenter', () => {
     ring.style.width = '56px';
     ring.style.height = '56px';
@@ -1314,6 +1459,11 @@ function toggleTopic(card) {
   document.querySelectorAll('.topic-card').forEach(c => c.classList.remove('open'));
   if (!isOpen) card.classList.add('open');
 }
+
+/* Stop accordion toggle when clicking a link inside */
+document.querySelectorAll('.tc-badge-link').forEach(link => {
+  link.addEventListener('click', e => e.stopPropagation());
+});
 
 /* Scroll reveal */
 const observer = new IntersectionObserver(entries => {
