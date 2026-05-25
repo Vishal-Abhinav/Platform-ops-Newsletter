@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes Series · Platform Ops · Vishal Abhinav</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:    #08090c;
+  --paper:  #f2f0eb;
+  --smoke:  #e4e0d8;
+  --ash:    #b8b2a7;
+  --coal:   #1c1f26;
+  --cyan:   #00c2d4;
+  --amber:  #f59e0b;
+  --crimson:#e53935;
+  --lime:   #84cc16;
+  --text:   #1c1f26;
+  --muted:  #6b6860;
+  --purple: #7c3aed;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--paper);color:var(--text);
+  font-family:'Manrope',sans-serif;font-size:15px;
+  line-height:1.6;overflow-x:hidden;cursor:none;
+}
+
+/* ── CURSOR ── */
+.cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--crimson);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .15s ease,background .2s;transform:translate(-50%,-50%);}
+.cursor-ring{position:fixed;top:0;left:0;width:36px;height:36px;border:1.5px solid var(--coal);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .35s cubic-bezier(.25,.46,.45,.94),width .3s,height .3s,border-color .2s;transform:translate(-50%,-50%);}
+body:hover .cursor-ring{border-color:var(--crimson);}
+
+/* ── NOISE ── */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.6;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(242,240,235,0.9);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,0.08);transition:padding .3s,box-shadow .3s;}
+nav.scrolled{padding:12px 48px;box-shadow:0 4px 32px rgba(0,0,0,0.08);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--coal);display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo span{display:inline-block;width:8px;height:8px;background:var(--crimson);border-radius:50%;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:.6;}}
+.nav-breadcrumb{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+.nav-breadcrumb a{color:var(--muted);text-decoration:none;transition:color .2s;}
+.nav-breadcrumb a:hover{color:var(--crimson);}
+.nav-breadcrumb .sep{color:var(--ash);}
+.nav-breadcrumb .current{color:var(--coal);font-weight:600;}
+.nav-back{background:var(--coal);color:var(--paper);padding:8px 20px;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;}
+.nav-back:hover{background:var(--crimson);}
+
+/* ── PAGE HERO ── */
+.page-hero{min-height:70vh;background:var(--coal);display:grid;grid-template-columns:1fr 1fr;padding-top:74px;overflow:hidden;position:relative;}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 12% 50%,rgba(0,194,212,.12) 0%,transparent 55%),radial-gradient(circle at 88% 30%,rgba(229,57,53,.1) 0%,transparent 50%),radial-gradient(circle at 50% 100%,rgba(124,58,237,.07) 0%,transparent 50%);pointer-events:none;}
+.hero-ghost{position:absolute;bottom:-20px;left:-8px;font-family:'Bebas Neue',sans-serif;font-size:clamp(130px,18vw,240px);color:rgba(255,255,255,.022);letter-spacing:-4px;line-height:1;pointer-events:none;white-space:nowrap;}
+
+.hero-left{padding:80px 48px 80px 64px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;}
+.bc{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:28px;}
+.bc a{color:rgba(255,255,255,.28);text-decoration:none;transition:color .2s;}
+.bc a:hover{color:var(--cyan);}
+.bc .sep{color:rgba(255,255,255,.12);}
+.bc .here{color:var(--cyan);}
+.eyebrow{display:flex;align-items:center;gap:12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:20px;opacity:0;animation:fadeUp .7s ease .2s forwards;}
+.eyebrow-line{display:block;width:40px;height:1px;background:var(--crimson);}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,6.5vw,96px);line-height:.9;letter-spacing:-.5px;color:#fff;margin-bottom:12px;opacity:0;animation:fadeUp .8s ease .35s forwards;}
+.hero-title .hl{color:var(--cyan);}
+.hero-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:rgba(255,255,255,.38);margin-bottom:28px;line-height:1.4;opacity:0;animation:fadeUp .7s ease .5s forwards;}
+.hero-desc{font-size:14px;color:rgba(255,255,255,.32);max-width:420px;margin-bottom:36px;line-height:1.85;opacity:0;animation:fadeUp .7s ease .65s forwards;}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}from{opacity:0;transform:translateY(24px);}}
+.hero-meta-row{display:flex;gap:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.08);opacity:0;animation:fadeUp .7s ease .8s forwards;}
+.hm-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;color:#fff;}
+.hm-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:3px;}
+
+/* ── HERO RIGHT: K8 node diagram ── */
+.hero-right{display:flex;align-items:center;justify-content:center;padding:60px 48px;position:relative;z-index:2;opacity:0;animation:fadeUp .8s ease .4s forwards;}
+.k8-diagram{width:100%;max-width:380px;display:flex;flex-direction:column;gap:10px;}
+.k8-cluster{border:1px solid rgba(0,194,212,.3);border-radius:8px;padding:16px;background:rgba(0,194,212,.04);position:relative;}
+.k8-cluster-label{position:absolute;top:-9px;left:16px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;background:var(--coal);padding:0 8px;color:var(--cyan);}
+.k8-row{display:flex;gap:8px;}
+.k8-node{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:12px 14px;transition:all .25s;cursor:default;}
+.k8-node:hover{background:rgba(0,194,212,.1);border-color:rgba(0,194,212,.45);}
+.k8-node.cp:hover{background:rgba(229,57,53,.1);border-color:rgba(229,57,53,.45);}
+.k8-node.wk:hover{background:rgba(132,204,22,.1);border-color:rgba(132,204,22,.45);}
+.k8-node.st:hover{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.45);}
+.k8-node.err:hover{background:rgba(229,57,53,.1);border-color:rgba(229,57,53,.45);}
+.k8-node-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:5px;}
+.k8-node-name{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;line-height:1;margin-bottom:7px;}
+.k8-node-name.cyan{color:var(--cyan);}
+.k8-node-name.red{color:#ef5350;}
+.k8-node-name.lime{color:var(--lime);}
+.k8-node-name.amber{color:var(--amber);}
+.k8-node-name.crimson{color:var(--crimson);}
+.k8-node-pills{display:flex;flex-wrap:wrap;gap:4px;}
+.k8-pill{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.5px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.3);padding:3px 7px;border-radius:20px;}
+.k8-connector{display:flex;justify-content:center;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.14);text-transform:uppercase;}
+.k8-connector-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(0,194,212,.3),transparent);}
+
+/* ── TICKER ── */
+.ticker-wrap{background:var(--ink);overflow:hidden;padding:11px 0;border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);}
+.ticker-wrap:hover .ticker-track{animation-play-state:paused;}
+.ticker-track{display:flex;gap:0;animation:ticker 26s linear infinite;white-space:nowrap;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;gap:12px;padding:0 28px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);transition:color .2s;}
+.ticker-item:hover{color:var(--cyan);}
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--crimson);}
+
+/* ── SHARED SECTION STYLES ── */
+.section-tag{display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+.section-tag::before{content:'';display:block;width:24px;height:1px;background:var(--crimson);}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,4.5vw,60px);line-height:1;letter-spacing:-.5px;color:var(--coal);margin-bottom:12px;}
+.section-lead{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--muted);max-width:620px;margin-bottom:56px;}
+
+/* ── ARTICLES SECTION ── */
+.articles-section{max-width:1200px;margin:0 auto;padding:100px 64px;}
+
+/* ── ARTICLE CARDS ── */
+.articles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.article-card{background:var(--smoke);text-decoration:none;color:inherit;display:flex;flex-direction:column;overflow:hidden;position:relative;transition:background .3s,transform .3s;}
+.article-card:hover{background:var(--coal);transform:translateY(-4px);}
+.ac-top-bar{height:3px;width:0;transition:width .4s ease;}
+.article-card:hover .ac-top-bar{width:100%;}
+.article-card:nth-child(1) .ac-top-bar{background:linear-gradient(90deg,var(--crimson),var(--amber));}
+.article-card:nth-child(2) .ac-top-bar{background:linear-gradient(90deg,var(--cyan),var(--lime));}
+.article-card:nth-child(3) .ac-top-bar{background:linear-gradient(90deg,var(--crimson),var(--purple));}
+.ac-body{padding:36px 32px 28px;flex:1;display:flex;flex-direction:column;}
+.ac-issue-meta{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:10px;transition:color .3s;}
+.article-card:hover .ac-issue-meta{color:rgba(255,255,255,.3);}
+.ac-issue-num{font-family:'Bebas Neue',sans-serif;font-size:13px;background:var(--coal);color:var(--paper);padding:3px 10px;border-radius:2px;transition:background .3s,color .3s;}
+.article-card:hover .ac-issue-num{background:var(--crimson);color:#fff;}
+.ac-icon{font-size:32px;margin-bottom:16px;}
+.ac-title{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:.95;letter-spacing:.5px;color:var(--coal);margin-bottom:14px;transition:color .3s;}
+.article-card:hover .ac-title{color:var(--paper);}
+.ac-desc{font-size:13px;line-height:1.75;color:var(--muted);margin-bottom:24px;flex:1;transition:color .3s;}
+.article-card:hover .ac-desc{color:rgba(255,255,255,.4);}
+.ac-topics{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:28px;}
+.ac-topic{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:20px;}
+.ac-topic.c{background:rgba(0,194,212,.12);color:var(--cyan);}
+.ac-topic.r{background:rgba(229,57,53,.12);color:#ef5350;}
+.ac-topic.l{background:rgba(132,204,22,.12);color:var(--lime);}
+.ac-topic.a{background:rgba(245,158,11,.12);color:var(--amber);}
+.ac-topic.p{background:rgba(124,58,237,.12);color:#a78bfa;}
+.article-card:hover .ac-topic.c{background:rgba(0,194,212,.2);}
+.article-card:hover .ac-topic.r{background:rgba(229,57,53,.2);}
+.article-card:hover .ac-topic.l{background:rgba(132,204,22,.2);}
+.article-card:hover .ac-topic.a{background:rgba(245,158,11,.2);}
+.article-card:hover .ac-topic.p{background:rgba(124,58,237,.2);}
+.ac-footer{display:flex;align-items:center;justify-content:space-between;padding-top:18px;border-top:1px solid rgba(0,0,0,.08);transition:border-color .3s;}
+.article-card:hover .ac-footer{border-color:rgba(255,255,255,.08);}
+.ac-read-time{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ash);display:flex;align-items:center;gap:6px;transition:color .3s;}
+.article-card:hover .ac-read-time{color:rgba(255,255,255,.25);}
+.ac-cta{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--crimson);display:flex;align-items:center;gap:6px;transition:gap .2s,color .2s;}
+.article-card:hover .ac-cta{gap:10px;color:var(--cyan);}
+.ac-ghost-num{position:absolute;bottom:-8px;right:12px;font-family:'Bebas Neue',sans-serif;font-size:120px;line-height:1;color:rgba(0,0,0,.05);pointer-events:none;transition:color .3s;}
+.article-card:hover .ac-ghost-num{color:rgba(255,255,255,.04);}
+
+/* ── WHAT'S INSIDE ── */
+.inside-section{background:var(--coal);padding:0;}
+.inside-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.inside-inner .section-title{color:#fff;}
+.inside-inner .section-tag{color:rgba(255,255,255,.3);}
+.inside-inner .section-lead{color:rgba(255,255,255,.4);}
+.inside-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.inside-col{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);padding:28px 24px;transition:background .2s,border-color .2s;}
+.inside-col:hover{background:rgba(255,255,255,.06);border-color:rgba(0,194,212,.25);}
+.ic-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ic-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+.ic-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:#fff;margin-bottom:14px;line-height:1;}
+.ic-topics{display:flex;flex-direction:column;gap:7px;}
+.ic-topic-item{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;color:rgba(255,255,255,.4);}
+.ic-topic-item::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--crimson);flex-shrink:0;}
+
+/* ── LEARNING PATH ── */
+.path-section{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.path-track{display:flex;flex-direction:column;gap:0;position:relative;}
+.path-track::before{content:'';position:absolute;left:21px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--crimson),var(--cyan),var(--lime),var(--amber));}
+.path-item{display:flex;gap:32px;align-items:flex-start;padding:0 0 40px;position:relative;opacity:0;transform:translateX(-20px);transition:opacity .5s ease,transform .5s ease;}
+.path-item.visible{opacity:1;transform:translateX(0);}
+.path-dot{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;flex-shrink:0;position:relative;z-index:1;border:2px solid transparent;transition:transform .2s,box-shadow .2s;}
+.path-item:hover .path-dot{transform:scale(1.1);}
+.path-dot.d1{background:var(--coal);color:var(--crimson);border-color:var(--crimson);}
+.path-dot.d2{background:var(--coal);color:var(--cyan);border-color:var(--cyan);}
+.path-dot.d3{background:var(--coal);color:var(--crimson);border-color:var(--crimson);}
+.path-dot.d4{background:var(--coal);color:var(--lime);border-color:var(--lime);}
+.path-dot.d5{background:var(--coal);color:rgba(255,255,255,.3);border-color:rgba(255,255,255,.2);border-style:dashed;}
+.path-content{padding-top:6px;}
+.path-step-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.path-step-title{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--coal);letter-spacing:.5px;margin-bottom:6px;}
+.path-step-desc{font-size:13px;color:var(--muted);line-height:1.6;max-width:480px;}
+.path-step-link{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--crimson);text-decoration:none;transition:gap .2s,color .2s;}
+.path-step-link:hover{gap:10px;color:var(--cyan);}
+
+/* ── AUTHOR STRIP ── */
+.author-strip{background:var(--smoke);padding:60px 64px;}
+.author-strip-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.author-info{display:flex;align-items:center;gap:24px;}
+.author-avatar{width:64px;height:64px;background:linear-gradient(135deg,var(--crimson),#ff6b35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;color:#fff;flex-shrink:0;}
+.author-name{font-weight:700;font-size:17px;color:var(--coal);margin-bottom:4px;}
+.author-role{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.author-actions{display:flex;gap:12px;}
+.btn-sm{padding:10px 24px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;text-decoration:none;transition:background .2s,color .2s,border-color .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-sm.primary{background:var(--coal);color:var(--paper);}
+.btn-sm.primary:hover{background:var(--crimson);}
+.btn-sm.ghost{background:transparent;color:var(--coal);border:1.5px solid var(--coal);}
+.btn-sm.ghost:hover{border-color:var(--crimson);color:var(--crimson);}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:rgba(255,255,255,.6);}
+.footer-links{display:flex;gap:24px;}
+.footer-links a{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--cyan);}
+.footer-note{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  nav{padding:14px 20px;}
+  .nav-breadcrumb{display:none;}
+  .page-hero{grid-template-columns:1fr;}
+  .hero-right{min-height:260px;padding:32px 24px;}
+  .hero-left{padding:56px 28px;}
+  .articles-section{padding:64px 28px;}
+  .articles-grid{grid-template-columns:1fr;}
+  .inside-inner{padding:64px 28px;}
+  .inside-grid{grid-template-columns:1fr;}
+  .path-section{padding:64px 28px;}
+  .author-strip{padding:48px 28px;}
+  .author-strip-inner{flex-direction:column;align-items:flex-start;}
+  footer{padding:36px 28px;}
+  .footer-inner{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ═══ NAV ═══ -->
+<!-- File location: /DevOps/K8/index.html  → root is ../../ -->
+<nav id="mainNav">
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="nav-breadcrumb">
+    <a href="../../index.html">Home</a>
+    <span class="sep">/</span>
+    <a href="../../index.html#topics">DevOps</a>
+    <span class="sep">/</span>
+    <span class="current">Kubernetes</span>
+  </div>
+  <a href="../../index.html" class="nav-back">← Newsletter</a>
+</nav>
+
+<!-- ═══ PAGE HERO ═══ -->
+<section class="page-hero">
+  <div class="hero-ghost">K8S</div>
+
+  <div class="hero-left">
+    <div class="bc">
+      <a href="../../index.html">Platform Ops</a>
+      <span class="sep">›</span>
+      <a href="../../index.html#topics">DevOps</a>
+      <span class="sep">›</span>
+      <span class="here">Kubernetes</span>
+    </div>
+    <div class="eyebrow"><span class="eyebrow-line"></span>Deep Dive Series</div>
+    <h1 class="hero-title">KUBERNETES<br><span class="hl">DEEP DIVES</span></h1>
+    <p class="hero-sub">Architecture · Networking · Error Runbook</p>
+    <p class="hero-desc">Battle-tested technical guides covering every layer of Kubernetes — from control plane internals to real-world production debugging. Written from the Platform Ops trenches at 6D Technologies.</p>
+    <div class="hero-meta-row">
+      <div><div class="hm-num">3</div><div class="hm-label">Deep Dives</div></div>
+      <div><div class="hm-num">32</div><div class="hm-label">Error Types</div></div>
+      <div><div class="hm-num">K8s</div><div class="hm-label">1.24+ / OCP 4.x</div></div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="k8-diagram">
+      <div class="k8-cluster">
+        <span class="k8-cluster-label">K8s Cluster</span>
+        <div class="k8-node cp" style="margin-bottom:10px">
+          <div class="k8-node-title">Control Plane</div>
+          <div class="k8-node-name red">API Server</div>
+          <div class="k8-node-pills">
+            <span class="k8-pill">etcd</span>
+            <span class="k8-pill">scheduler</span>
+            <span class="k8-pill">controller-mgr</span>
+          </div>
+        </div>
+        <div class="k8-connector">
+          <span class="k8-connector-line"></span>
+          <span>reconcile loop</span>
+          <span class="k8-connector-line"></span>
+        </div>
+        <div class="k8-row" style="margin-top:10px">
+          <div class="k8-node wk">
+            <div class="k8-node-title">Worker Node</div>
+            <div class="k8-node-name lime">Kubelet</div>
+            <div class="k8-node-pills">
+              <span class="k8-pill">kube-proxy</span>
+              <span class="k8-pill">CNI</span>
+            </div>
+          </div>
+          <div class="k8-node wk">
+            <div class="k8-node-title">Worker Node</div>
+            <div class="k8-node-name lime">containerd</div>
+            <div class="k8-node-pills">
+              <span class="k8-pill">CRI-O</span>
+              <span class="k8-pill">Pods</span>
+            </div>
+          </div>
+        </div>
+        <div class="k8-connector" style="margin-top:10px">
+          <span class="k8-connector-line"></span>
+          <span>CSI / PVC</span>
+          <span class="k8-connector-line"></span>
+        </div>
+        <div class="k8-node st" style="margin-top:10px">
+          <div class="k8-node-title">Storage Layer</div>
+          <div class="k8-node-name amber">PersistentVolume</div>
+          <div class="k8-node-pills">
+            <span class="k8-pill">PVC</span>
+            <span class="k8-pill">StorageClass</span>
+            <span class="k8-pill">CSI Driver</span>
+          </div>
+        </div>
+      </div>
+      <div class="k8-node err" style="border-color:rgba(229,57,53,.25);background:rgba(229,57,53,.04)">
+        <div class="k8-node-title">Error Runbook</div>
+        <div class="k8-node-name crimson">32 Error Types</div>
+        <div class="k8-node-pills">
+          <span class="k8-pill">CrashLoopBackOff</span>
+          <span class="k8-pill">OOMKilled</span>
+          <span class="k8-pill">NotReady</span>
+          <span class="k8-pill">SCC</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TICKER ─── -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="ticker-dot"></span>Control Plane</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Worker Nodes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CrashLoopBackOff</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>etcd</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CNI Plugins</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>OOMKilled</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CSI Drivers</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>SCC Violations</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>NetworkPolicy</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>PersistentVolumes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Ingress</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CoreDNS</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Health Probes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>RBAC</span>
+    <!-- dup for seamless loop -->
+    <span class="ticker-item"><span class="ticker-dot"></span>Control Plane</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Worker Nodes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CrashLoopBackOff</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>etcd</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CNI Plugins</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>OOMKilled</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CSI Drivers</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>SCC Violations</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>NetworkPolicy</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>PersistentVolumes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Ingress</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CoreDNS</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Health Probes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>RBAC</span>
+  </div>
+</div>
+
+<!-- ═══ ARTICLES ═══ -->
+<section class="articles-section reveal">
+  <div class="section-tag">Published Articles</div>
+  <h2 class="section-title">KUBERNETES SERIES</h2>
+  <p class="section-lead">Three deep-dives covering the full K8s stack — architecture, networking, and a comprehensive error runbook.</p>
+
+  <div class="articles-grid">
+
+    <!-- #048 Architecture -->
+    <a href="ARCHITECTURE/k8-architecture.html" class="article-card">
+      <div class="ac-top-bar"></div>
+      <div class="ac-body">
+        <div class="ac-issue-meta"><span class="ac-issue-num">#048</span>April 2026</div>
+        <div class="ac-icon">⬡</div>
+        <div class="ac-title">K8s Architecture Deep‑Dive</div>
+        <p class="ac-desc">Complete structural guide — Storage Nodes, Worker Nodes, Pods, Control Plane, CSI, PVs, QoS classes, health probes, and scheduling controls with interactive diagrams.</p>
+        <div class="ac-topics">
+          <span class="ac-topic r">Control Plane</span>
+          <span class="ac-topic r">Worker Node</span>
+          <span class="ac-topic c">etcd</span>
+          <span class="ac-topic l">Pods</span>
+          <span class="ac-topic a">CSI / PVC</span>
+          <span class="ac-topic l">Scheduler</span>
+        </div>
+        <div class="ac-footer">
+          <span class="ac-read-time">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            15 min read
+          </span>
+          <span class="ac-cta">Read Article <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+      <div class="ac-ghost-num">48</div>
+    </a>
+
+    <!-- #047 Networking -->
+    <a href="Networking/k8-networking.html" class="article-card">
+      <div class="ac-top-bar"></div>
+      <div class="ac-body">
+        <div class="ac-issue-meta"><span class="ac-issue-num">#047</span>March 2026</div>
+        <div class="ac-icon">🌐</div>
+        <div class="ac-title">K8s Networking Decoded</div>
+        <p class="ac-desc">Six architecture diagrams — Pod-to-Pod networking, CNI internals, Ingress, Gateway API, NetworkPolicy deep-dive, CoreDNS resolution, and eBPF observability.</p>
+        <div class="ac-topics">
+          <span class="ac-topic c">CNI Plugins</span>
+          <span class="ac-topic c">Calico / Cilium</span>
+          <span class="ac-topic l">CoreDNS</span>
+          <span class="ac-topic r">NetworkPolicy</span>
+          <span class="ac-topic a">Ingress</span>
+          <span class="ac-topic l">eBPF</span>
+        </div>
+        <div class="ac-footer">
+          <span class="ac-read-time">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            12 min read
+          </span>
+          <span class="ac-cta">Read Article <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+      <div class="ac-ghost-num">47</div>
+    </a>
+
+    <!-- #049 Error Runbook — NEW -->
+    <a href="ERROR/K8-error.html" class="article-card">
+      <div class="ac-top-bar"></div>
+      <div class="ac-body">
+        <div class="ac-issue-meta">
+          <span class="ac-issue-num" style="background:var(--crimson)">#049</span>
+          May 2026 &nbsp;
+          <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(229,57,53,.15);color:var(--crimson);padding:2px 8px;border-radius:20px;letter-spacing:1px;">NEW</span>
+        </div>
+        <div class="ac-icon">🚨</div>
+        <div class="ac-title">K8s Error Runbook</div>
+        <p class="ac-desc">32 error types across 5 layers — Pod, Worker Node, Cluster, API Server, and OpenShift. Root causes, diagnostic commands, exit code table, and production fixes.</p>
+        <div class="ac-topics">
+          <span class="ac-topic r">CrashLoopBackOff</span>
+          <span class="ac-topic r">OOMKilled</span>
+          <span class="ac-topic a">Node NotReady</span>
+          <span class="ac-topic c">etcd Failure</span>
+          <span class="ac-topic p">SCC / OAuth</span>
+          <span class="ac-topic l">RBAC</span>
+        </div>
+        <div class="ac-footer">
+          <span class="ac-read-time">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            20 min read
+          </span>
+          <span class="ac-cta">Read Runbook <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+      <div class="ac-ghost-num">49</div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ═══ WHAT'S INSIDE ═══ -->
+<div class="inside-section">
+  <div class="inside-inner reveal">
+    <div class="section-tag" style="color:rgba(255,255,255,.3)">Content Map</div>
+    <h2 class="section-title" style="color:#fff">WHAT'S INSIDE</h2>
+    <p class="section-lead">Every article covers multiple layers — click the cards above to read the full deep-dive.</p>
+    <div class="inside-grid">
+
+      <div class="inside-col">
+        <div class="ic-label" style="color:#ef5350">Issue #048 · Architecture</div>
+        <div class="ic-title">CONTROL PLANE</div>
+        <div class="ic-topics">
+          <div class="ic-topic-item">kube-apiserver internals</div>
+          <div class="ic-topic-item">etcd data model & quorum</div>
+          <div class="ic-topic-item">kube-scheduler algorithm</div>
+          <div class="ic-topic-item">controller-manager loops</div>
+          <div class="ic-topic-item">cloud-controller-manager</div>
+          <div class="ic-topic-item">PV / CSI provisioning</div>
+        </div>
+      </div>
+
+      <div class="inside-col">
+        <div class="ic-label" style="color:var(--cyan)">Issue #047 · Networking</div>
+        <div class="ic-title">NETWORK STACK</div>
+        <div class="ic-topics">
+          <div class="ic-topic-item">Pod-to-Pod VXLAN tunnels</div>
+          <div class="ic-topic-item">CNI plugin comparison</div>
+          <div class="ic-topic-item">kube-proxy iptables / ipvs</div>
+          <div class="ic-topic-item">Ingress & Gateway API</div>
+          <div class="ic-topic-item">NetworkPolicy enforcement</div>
+          <div class="ic-topic-item">CoreDNS resolution chain</div>
+        </div>
+      </div>
+
+      <div class="inside-col">
+        <div class="ic-label" style="color:var(--crimson)">Issue #049 · Error Runbook</div>
+        <div class="ic-title">32 ERROR TYPES</div>
+        <div class="ic-topics">
+          <div class="ic-topic-item">CrashLoopBackOff & OOMKilled</div>
+          <div class="ic-topic-item">ImagePullBackOff & Pending</div>
+          <div class="ic-topic-item">Node NotReady & kubelet</div>
+          <div class="ic-topic-item">CNI / DNS / RBAC / PVC</div>
+          <div class="ic-topic-item">etcd Quorum Lost & Cert Expiry</div>
+          <div class="ic-topic-item">SCC / OAuth / Cluster Operators</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LEARNING PATH ═══ -->
+<section class="path-section reveal">
+  <div class="section-tag">Suggested Order</div>
+  <h2 class="section-title">LEARNING PATH</h2>
+  <p class="section-lead">New to Kubernetes? Follow this sequence to build a solid mental model before diving into production ops.</p>
+
+  <div class="path-track">
+
+    <div class="path-item">
+      <div class="path-dot d1">1</div>
+      <div class="path-content">
+        <div class="path-step-label">Foundation</div>
+        <div class="path-step-title">K8s Architecture Overview</div>
+        <p class="path-step-desc">Start with the big picture — how control plane, worker nodes, and storage interact. Understand the reconciliation loop before touching anything else.</p>
+        <a href="ARCHITECTURE/k8-architecture.html" class="path-step-link">Read Issue #048 → K8s Architecture <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+
+    <div class="path-item">
+      <div class="path-dot d2">2</div>
+      <div class="path-content">
+        <div class="path-step-label">Networking</div>
+        <div class="path-step-title">How Pods Actually Talk</div>
+        <p class="path-step-desc">Once you understand the architecture, layer in networking. CNI plugins, CoreDNS, Ingress, and NetworkPolicy are where most production headaches live.</p>
+        <a href="Networking/k8-networking.html" class="path-step-link">Read Issue #047 → K8s Networking <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+
+    <div class="path-item">
+      <div class="path-dot d3">3</div>
+      <div class="path-content">
+        <div class="path-step-label">Troubleshooting</div>
+        <div class="path-step-title">K8s Error Runbook</div>
+        <p class="path-step-desc">Now that you understand architecture and networking, learn how to diagnose every failure — 32 error types across 5 layers with production-tested fixes and diagnostic commands.</p>
+        <a href="ERROR/K8-error.html" class="path-step-link">Read Issue #049 → K8s Error Runbook <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+
+    <div class="path-item">
+      <div class="path-dot d4">4</div>
+      <div class="path-content">
+        <div class="path-step-label">Observability</div>
+        <div class="path-step-title">Prometheus + Loki + Tempo</div>
+        <p class="path-step-desc">Full observability stack with metrics, logs, and traces — covered in Issue #042 in the newsletter archive.</p>
+        <a href="../../index.html#issues" class="path-step-link">Browse Newsletter Archive <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+
+    <div class="path-item">
+      <div class="path-dot d5">→</div>
+      <div class="path-content">
+        <div class="path-step-label">Coming Soon</div>
+        <div class="path-step-title">More Kubernetes Deep-Dives</div>
+        <p class="path-step-desc">RBAC deep-dive, admission controllers, multi-cluster federation, and GitOps workflows are on the roadmap.</p>
+        <a href="../../index.html#subscribe" class="path-step-link">Subscribe for updates <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ AUTHOR STRIP ═══ -->
+<div class="author-strip reveal">
+  <div class="author-strip-inner">
+    <div class="author-info">
+      <div class="author-avatar">VA</div>
+      <div>
+        <div class="author-name">Vishal Abhinav</div>
+        <div class="author-role">Platform Ops Engineer · @6D Technologies · Ops Newsletter</div>
+      </div>
+    </div>
+    <div class="author-actions">
+      <a href="../../index.html#subscribe" class="btn-sm primary">Subscribe Free <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank" class="btn-sm ghost">GitHub ↗</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PLATFORM OPS</div>
+    <div class="footer-links">
+      <a href="../../index.html">Home</a>
+      <a href="ARCHITECTURE/k8-architecture.html">Architecture</a>
+      <a href="Networking/k8-networking.html">Networking</a>
+      <a href="ERROR/K8-error.html">Error Runbook</a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
+      <a href="../../index.html#subscribe">Subscribe</a>
+    </div>
+    <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
+  </div>
+</footer>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script>
+/* ── Cursor ── */
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+document.querySelectorAll('a,button,.article-card,.inside-col,.k8-node').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='56px';ring.style.height='56px';ring.style.borderColor='var(--crimson)';cursor.style.transform='translate(-50%,-50%) scale(1.5)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='';cursor.style.transform='translate(-50%,-50%) scale(1)';});
+});
+
+/* ── Nav shrink ── */
+window.addEventListener('scroll',()=>document.getElementById('mainNav').classList.toggle('scrolled',window.scrollY>60));
+
+/* ── Scroll reveal ── */
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+/* ── Learning path stagger ── */
+const pathObs=new IntersectionObserver(entries=>entries.forEach(e=>{
+  if(e.isIntersecting){e.target.classList.add('visible');}
+}),{threshold:.2});
+document.querySelectorAll('.path-item').forEach((item,i)=>{
+  item.style.transitionDelay=`${i*0.12}s`;
+  pathObs.observe(item);
+});
+
+/* ── Article cards stagger ── */
+document.querySelectorAll('.article-card').forEach((c,i)=>{
+  c.style.transitionDelay=`${i*0.08}s`;
+});
+
+/* ── K8 node cursor colour change ── */
+document.querySelectorAll('.k8-node').forEach(n=>{
+  n.addEventListener('mouseenter',()=>{cursor.style.background='var(--cyan)';});
+  n.addEventListener('mouseleave',()=>{cursor.style.background='var(--crimson)';});
+});
+
+/* ── Ticker pause on hover ── */
+// handled via CSS .ticker-wrap:hover .ticker-track
+</script>
+</body>
+</html>
