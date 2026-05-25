@@ -4,6 +4,37 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>K8s Error Runbook · Platform Ops · Vishal Abhinav</title>
+
+<!-- ── SEO ── -->
+<meta name="description" content="Kubernetes & OpenShift Error Runbook — 32 error types across 5 layers. Pod, Worker Node, Cluster, API Server, OpenShift. Root causes, diagnostic commands, and step-by-step fixes from production.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="keywords" content="Kubernetes, K8s, OpenShift, CrashLoopBackOff, OOMKilled, kubectl, DevOps, SRE, Platform Engineering, Error Runbook, etcd, SCC, RBAC">
+
+<!-- ── Open Graph (LinkedIn, Facebook, WhatsApp) ── -->
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="K8s & OpenShift Error Runbook — 32 Errors. 5 Layers. Every Fix.">
+<meta property="og:description" content="CrashLoopBackOff, OOMKilled, Node NotReady, etcd Quorum Lost, SCC Violations — and 27 more. Every error with root causes, diagnostic commands, and production-tested fixes.">
+<meta property="og:url" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/K8/ERROR/K8-error.html">
+<meta property="og:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/K8/ERROR/og-error.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="K8s Error Runbook — 32 error types across 5 layers">
+
+<!-- ── Twitter / X Card ── -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="K8s & OpenShift Error Runbook — 32 Errors. 5 Layers. Every Fix.">
+<meta name="twitter:description" content="CrashLoopBackOff, OOMKilled, Node NotReady, etcd Quorum Lost, SCC Violations — and 27 more. Every error with root causes, diagnostic commands, and fixes.">
+<meta name="twitter:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/K8/ERROR/og-error.png">
+<meta name="twitter:creator" content="@VishalAbhinav">
+
+<!-- ── Article meta ── -->
+<meta property="article:author" content="Vishal Abhinav">
+<meta property="article:published_time" content="2026-05-26">
+<meta property="article:section" content="Platform Engineering">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="SRE">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
