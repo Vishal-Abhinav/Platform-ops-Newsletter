@@ -1,1 +1,1871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K8s Error Runbook · Platform Ops · Vishal Abhinav</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:     #08090c;
+  --paper:   #f2f0eb;
+  --smoke:   #e4e0d8;
+  --ash:     #b8b2a7;
+  --coal:    #1c1f26;
+  --cyan:    #00c2d4;
+  --amber:   #f59e0b;
+  --crimson: #e53935;
+  --lime:    #84cc16;
+  --text:    #1c1f26;
+  --muted:   #6b6860;
+  --purple:  #7c3aed;
+  --teal:    #0d9488;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--paper);
+  color:var(--text);
+  font-family:'Manrope',sans-serif;
+  font-size:15px;line-height:1.6;
+  overflow-x:hidden;cursor:none;
+}
+.cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--crimson);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .15s ease,background .2s;transform:translate(-50%,-50%);}
+.cursor-ring{position:fixed;top:0;left:0;width:36px;height:36px;border:1.5px solid var(--coal);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .35s cubic-bezier(.25,.46,.45,.94),width .3s,height .3s,border-color .2s;transform:translate(-50%,-50%);}
+body:hover .cursor-ring{border-color:var(--crimson);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.6;}
 
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(8,9,12,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.06);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;color:#fff;display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo span{display:inline-block;width:8px;height:8px;background:var(--crimson);border-radius:50%;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:.6;}}
+.nav-breadcrumb{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+.nav-breadcrumb a{color:rgba(255,255,255,0.3);text-decoration:none;transition:color .2s;}
+.nav-breadcrumb a:hover{color:var(--cyan);}
+.nav-breadcrumb .sep{color:rgba(255,255,255,0.12);}
+.nav-breadcrumb .current{color:var(--cyan);}
+.nav-back{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);padding:8px 20px;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s,color .2s;border:1px solid rgba(255,255,255,0.1);}
+.nav-back:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);}
+
+/* ── HERO ── */
+.hero{min-height:72vh;background:var(--ink);display:grid;grid-template-columns:1fr 1fr;padding-top:72px;overflow:hidden;position:relative;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 10% 40%,rgba(0,194,212,.1) 0%,transparent 55%),radial-gradient(circle at 90% 60%,rgba(229,57,53,.1) 0%,transparent 50%),radial-gradient(circle at 50% 100%,rgba(124,58,237,.08) 0%,transparent 50%);pointer-events:none;}
+.hero-ghost{position:absolute;bottom:-20px;left:-10px;font-family:'Bebas Neue',sans-serif;font-size:clamp(140px,20vw,260px);color:rgba(255,255,255,.022);letter-spacing:-4px;line-height:1;pointer-events:none;white-space:nowrap;}
+.hero-left{padding:80px 48px 80px 64px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;}
+.bc{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:28px;}
+.bc a{color:rgba(255,255,255,.28);text-decoration:none;transition:color .2s;}
+.bc a:hover{color:var(--cyan);}
+.bc .sep{color:rgba(255,255,255,.12);}
+.bc .here{color:var(--crimson);}
+.eyebrow{display:flex;align-items:center;gap:12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:20px;}
+.eyebrow-line{display:block;width:40px;height:1px;background:var(--crimson);}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,6.5vw,96px);line-height:.9;letter-spacing:-.5px;color:#fff;margin-bottom:12px;}
+.hero-title .hl-red{color:var(--crimson);}
+.hero-title .hl-cyan{color:var(--cyan);}
+.hero-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:rgba(255,255,255,.38);margin-bottom:28px;line-height:1.4;}
+.hero-desc{font-size:14px;color:rgba(255,255,255,.32);max-width:420px;margin-bottom:36px;line-height:1.85;}
+.level-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px;}
+.lp{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;border-radius:20px;cursor:pointer;transition:all .2s;}
+.lp.pod   {background:rgba(229,57,53,.15);color:#ef5350;border:1px solid rgba(229,57,53,.3);}
+.lp.node  {background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);}
+.lp.cluster{background:rgba(0,194,212,.15);color:var(--cyan);border:1px solid rgba(0,194,212,.3);}
+.lp.api   {background:rgba(132,204,22,.15);color:var(--lime);border:1px solid rgba(132,204,22,.3);}
+.lp.ocp   {background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);}
+.lp:hover{transform:translateY(-2px);filter:brightness(1.3);}
+.hero-meta-row{display:flex;gap:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.07);}
+.hm-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;color:#fff;}
+.hm-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:3px;}
+
+/* ── HERO RIGHT: Error matrix viz ── */
+.hero-right{display:flex;align-items:center;justify-content:center;padding:60px 48px;position:relative;z-index:2;}
+.err-matrix{display:flex;flex-direction:column;gap:10px;width:100%;max-width:400px;}
+.err-layer{border:1px solid rgba(255,255,255,.07);border-radius:8px;overflow:hidden;transition:border-color .3s;}
+.err-layer:hover{border-color:rgba(255,255,255,.2);}
+.el-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.el-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;}
+.el-count{font-family:'Bebas Neue',sans-serif;font-size:20px;}
+.el-bar{height:3px;background:rgba(255,255,255,.06);}
+.el-fill{height:100%;border-radius:1px;transition:width 1.4s cubic-bezier(.25,.46,.45,.94);}
+.el-errors{padding:10px 20px 14px;display:flex;flex-wrap:wrap;gap:5px;}
+.ee{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.5px;padding:3px 9px;border-radius:12px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.35);}
+
+/* colors per layer */
+.err-layer.pod   .el-header{background:rgba(229,57,53,.08);}
+.err-layer.pod   .el-label{color:#ef5350;}
+.err-layer.pod   .el-count{color:#ef5350;}
+.err-layer.pod   .el-fill{background:linear-gradient(90deg,var(--crimson),#ff6b35);width:0;}
+
+.err-layer.node  .el-header{background:rgba(245,158,11,.08);}
+.err-layer.node  .el-label{color:var(--amber);}
+.err-layer.node  .el-count{color:var(--amber);}
+.err-layer.node  .el-fill{background:linear-gradient(90deg,var(--amber),#fbbf24);width:0;}
+
+.err-layer.cluster .el-header{background:rgba(0,194,212,.08);}
+.err-layer.cluster .el-label{color:var(--cyan);}
+.err-layer.cluster .el-count{color:var(--cyan);}
+.err-layer.cluster .el-fill{background:linear-gradient(90deg,var(--cyan),#38bdf8);width:0;}
+
+.err-layer.api   .el-header{background:rgba(132,204,22,.08);}
+.err-layer.api   .el-label{color:var(--lime);}
+.err-layer.api   .el-count{color:var(--lime);}
+.err-layer.api   .el-fill{background:linear-gradient(90deg,var(--lime),#4ade80);width:0;}
+
+.err-layer.ocp   .el-header{background:rgba(124,58,237,.08);}
+.err-layer.ocp   .el-label{color:#a78bfa;}
+.err-layer.ocp   .el-count{color:#a78bfa;}
+.err-layer.ocp   .el-fill{background:linear-gradient(90deg,var(--purple),#8b5cf6);width:0;}
+
+/* ── TICKER ── */
+.ticker-wrap{background:rgba(8,9,12,1);overflow:hidden;padding:11px 0;border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);}
+.ticker-track{display:flex;gap:0;animation:ticker 30s linear infinite;white-space:nowrap;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;gap:12px;padding:0 28px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);}
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--crimson);}
+
+/* ── ARCHITECTURE SECTION ── */
+.arch-section{background:var(--coal);padding:0;}
+.arch-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.arch-inner .section-tag{color:rgba(255,255,255,.3);}
+.arch-inner .section-title{color:#fff;}
+.arch-inner .section-lead{color:rgba(255,255,255,.4);}
+
+.section-tag{display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+.section-tag::before{content:'';display:block;width:24px;height:1px;background:var(--crimson);}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,4.5vw,60px);line-height:1;letter-spacing:-.5px;color:var(--coal);margin-bottom:12px;}
+.section-lead{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--muted);max-width:620px;margin-bottom:56px;}
+
+/* Architecture diagram */
+.arch-diagram{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:48px;}
+.arch-layer{display:flex;flex-direction:column;align-items:stretch;}
+.arch-layer-header{padding:14px 16px;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;text-align:center;}
+.arch-layer-body{flex:1;padding:16px;border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px;}
+.arch-comp{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.8px;color:rgba(255,255,255,.5);text-align:center;transition:all .2s;cursor:default;}
+.arch-comp:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);}
+
+.arch-layer.pod     .arch-layer-header{background:rgba(229,57,53,.15);color:#ef5350;}
+.arch-layer.pod     .arch-comp:hover{border-color:rgba(229,57,53,.4);}
+.arch-layer.node    .arch-layer-header{background:rgba(245,158,11,.15);color:var(--amber);}
+.arch-layer.node    .arch-comp:hover{border-color:rgba(245,158,11,.4);}
+.arch-layer.cluster .arch-layer-header{background:rgba(0,194,212,.15);color:var(--cyan);}
+.arch-layer.cluster .arch-comp:hover{border-color:rgba(0,194,212,.4);}
+.arch-layer.api     .arch-layer-header{background:rgba(132,204,22,.15);color:var(--lime);}
+.arch-layer.api     .arch-comp:hover{border-color:rgba(132,204,22,.4);}
+.arch-layer.ocp     .arch-layer-header{background:rgba(124,58,237,.15);color:#a78bfa;}
+.arch-layer.ocp     .arch-comp:hover{border-color:rgba(124,58,237,.4);}
+
+/* ── MAIN ERROR CONTENT ── */
+.content-section{max-width:1200px;margin:0 auto;padding:100px 64px;}
+
+/* Level navigation sidebar-style tabs */
+.level-tabs{display:flex;gap:2px;margin-bottom:2px;overflow-x:auto;}
+.level-tab{flex:1;min-width:140px;padding:16px 20px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s;background:var(--smoke);color:var(--muted);text-align:left;position:relative;overflow:hidden;}
+.level-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:transparent;transition:background .2s;}
+.level-tab:hover{background:var(--coal);color:#fff;}
+.level-tab.active{background:var(--coal);color:#fff;}
+.level-tab.active.pod    ::after,.level-tab.pod:hover::after   {background:var(--crimson);}
+.level-tab.active.node   ::after,.level-tab.node:hover::after  {background:var(--amber);}
+.level-tab.active.cluster::after,.level-tab.cluster:hover::after{background:var(--cyan);}
+.level-tab.active.api    ::after,.level-tab.api:hover::after   {background:var(--lime);}
+.level-tab.active.ocp    ::after,.level-tab.ocp:hover::after   {background:var(--purple);}
+.level-tab.active::after{background:inherit;}
+.level-tab.active.pod    {border-bottom:3px solid var(--crimson);}
+.level-tab.active.node   {border-bottom:3px solid var(--amber);}
+.level-tab.active.cluster{border-bottom:3px solid var(--cyan);}
+.level-tab.active.api    {border-bottom:3px solid var(--lime);}
+.level-tab.active.ocp    {border-bottom:3px solid var(--purple);}
+.tab-icon{font-size:16px;display:block;margin-bottom:4px;}
+.tab-label{display:block;font-size:10px;}
+.tab-count{display:block;font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;margin-top:2px;}
+
+/* ── LEVEL PANEL ── */
+.level-panel{display:none;}
+.level-panel.active{display:block;}
+
+.level-banner{padding:28px 40px;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;gap:20px;}
+.lb-left{}
+.lb-title{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:.95;letter-spacing:.5px;color:#fff;}
+.lb-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:16px;margin-top:6px;}
+.lb-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:20px;white-space:nowrap;}
+
+/* ── ERROR CARDS ── */
+.errors-list{display:flex;flex-direction:column;gap:2px;}
+
+.error-card{background:var(--smoke);overflow:hidden;transition:background .2s;}
+.error-card.open{background:#fff;}
+
+.ec-header{padding:24px 28px;display:flex;align-items:center;gap:20px;cursor:pointer;user-select:none;}
+.ec-header:hover{background:rgba(0,0,0,.03);}
+
+.ec-severity{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sev-critical{background:rgba(229,57,53,.15);border:1.5px solid rgba(229,57,53,.4);}
+.sev-high    {background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.4);}
+.sev-medium  {background:rgba(0,194,212,.15);border:1.5px solid rgba(0,194,212,.4);}
+.sev-low     {background:rgba(132,204,22,.15);border:1.5px solid rgba(132,204,22,.4);}
+
+.ec-main{flex:1;}
+.ec-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;color:var(--coal);line-height:1;}
+.ec-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.5;}
+.ec-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.ec-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+.ec-tag.c{background:rgba(0,194,212,.12);color:var(--cyan);}
+.ec-tag.r{background:rgba(229,57,53,.12);color:var(--crimson);}
+.ec-tag.l{background:rgba(132,204,22,.12);color:var(--lime);}
+.ec-tag.a{background:rgba(245,158,11,.12);color:var(--amber);}
+.ec-tag.p{background:rgba(124,58,237,.12);color:#a78bfa;}
+
+.ec-right{display:flex;align-items:center;gap:16px;}
+.ec-sev-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:20px;}
+.sev-badge-critical{background:rgba(229,57,53,.15);color:var(--crimson);}
+.sev-badge-high    {background:rgba(245,158,11,.15);color:var(--amber);}
+.sev-badge-medium  {background:rgba(0,194,212,.15);color:var(--cyan);}
+.sev-badge-low     {background:rgba(132,204,22,.15);color:var(--lime);}
+
+.ec-chevron{color:var(--muted);transition:transform .3s;font-size:18px;}
+.error-card.open .ec-chevron{transform:rotate(180deg);}
+
+/* Expand body */
+.ec-body{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.25,.46,.45,.94);}
+.error-card.open .ec-body{max-height:1200px;}
+
+.ec-inner{padding:0 28px 32px;display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+
+.ec-block{background:var(--paper);border-radius:4px;padding:20px 22px;}
+.ec-block.full{grid-column:1/-1;}
+
+.ec-block-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ec-block-title.diag  {color:var(--cyan);}
+.ec-block-title.causes{color:var(--amber);}
+.ec-block-title.fix   {color:var(--lime);}
+.ec-block-title.cmd   {color:var(--crimson);}
+.ec-block-title::after{content:'';flex:1;height:1px;background:rgba(0,0,0,.08);}
+
+/* Code blocks */
+.cmd-block{background:var(--coal);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+.cmd-bar{padding:8px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:6px;}
+.cmd-dot{width:8px;height:8px;border-radius:50%;}
+.cmd-dot.r{background:#ff5f57;}
+.cmd-dot.y{background:#ffbd2e;}
+.cmd-dot.g{background:#28c840;}
+.cmd-label{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);letter-spacing:1px;margin-left:4px;}
+.cmd-lines{padding:12px 16px;display:flex;flex-direction:column;gap:4px;}
+.cmd-line{font-family:'DM Mono',monospace;font-size:12px;line-height:1.6;display:flex;gap:8px;}
+.cmd-prompt{color:var(--cyan);}
+.cmd-text{color:#e2e8f0;}
+.cmd-comment{color:rgba(255,255,255,.25);}
+.cmd-output{color:rgba(255,255,255,.35);}
+.cmd-ok   {color:var(--lime);}
+.cmd-err  {color:var(--crimson);}
+.cmd-warn {color:var(--amber);}
+
+/* Causes list */
+.causes-list{display:flex;flex-direction:column;gap:8px;}
+.cause-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(0,0,0,.03);border-radius:4px;border-left:3px solid transparent;font-size:13px;line-height:1.5;}
+.cause-item.c-critical{border-color:var(--crimson);}
+.cause-item.c-high    {border-color:var(--amber);}
+.cause-item.c-medium  {border-color:var(--cyan);}
+.cause-item.c-low     {border-color:var(--lime);}
+.cause-icon{flex-shrink:0;font-size:14px;}
+.cause-text{color:var(--text);}
+.cause-text strong{color:var(--coal);font-weight:700;}
+
+/* Fix steps */
+.fix-steps{display:flex;flex-direction:column;gap:6px;}
+.fix-step{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:4px;transition:background .2s;}
+.fix-step:hover{background:rgba(0,0,0,.03);}
+.fix-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;flex-shrink:0;margin-top:1px;}
+.fix-num.pod    {background:rgba(229,57,53,.15);color:var(--crimson);}
+.fix-num.node   {background:rgba(245,158,11,.15);color:var(--amber);}
+.fix-num.cluster{background:rgba(0,194,212,.15);color:var(--cyan);}
+.fix-num.api    {background:rgba(132,204,22,.15);color:var(--lime);}
+.fix-num.ocp    {background:rgba(124,58,237,.15);color:#a78bfa;}
+.fix-text{font-size:13px;color:var(--text);line-height:1.55;}
+.fix-text strong{color:var(--coal);}
+.fix-text code{background:rgba(0,0,0,.07);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;}
+
+/* Exit code table */
+.exit-table{width:100%;border-collapse:collapse;}
+.exit-table th{background:var(--coal);color:#fff;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 14px;text-align:left;}
+.exit-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.06);}
+.exit-table tr:last-child td{border-bottom:none;}
+.exit-table tr:hover td{background:rgba(0,0,0,.03);}
+.exit-code{font-family:'Bebas Neue',sans-serif;font-size:22px;}
+.exit-sig{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+
+/* ── QUICK CHEATSHEET ── */
+.cheat-section{background:var(--coal);padding:0;}
+.cheat-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.cheat-inner .section-title{color:#fff;}
+.cheat-inner .section-tag{color:rgba(255,255,255,.3);}
+.cheat-inner .section-lead{color:rgba(255,255,255,.4);}
+
+.cheat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.cheat-block{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);padding:28px 24px;transition:background .2s,border-color .2s;}
+.cheat-block:hover{background:rgba(255,255,255,.06);border-color:rgba(0,194,212,.2);}
+.cheat-block-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.cheat-block-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+.cheat-cmd{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.5;display:flex;align-items:flex-start;gap:6px;}
+.cheat-cmd:last-child{border-bottom:none;}
+.cheat-cmd .prompt{color:var(--cyan);flex-shrink:0;}
+.cheat-cmd .comment{color:rgba(255,255,255,.2);font-style:italic;}
+
+/* ── AUTHOR STRIP ── */
+.author-strip{background:var(--smoke);padding:60px 64px;}
+.author-strip-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.author-info{display:flex;align-items:center;gap:24px;}
+.author-avatar{width:64px;height:64px;background:linear-gradient(135deg,var(--crimson),#ff6b35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;color:#fff;flex-shrink:0;}
+.author-name{font-weight:700;font-size:17px;color:var(--coal);margin-bottom:4px;}
+.author-role{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.author-actions{display:flex;gap:12px;}
+.btn-sm{padding:10px 24px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;text-decoration:none;transition:background .2s,color .2s,border-color .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-sm.primary{background:var(--coal);color:var(--paper);}
+.btn-sm.primary:hover{background:var(--crimson);}
+.btn-sm.ghost{background:transparent;color:var(--coal);border:1.5px solid var(--coal);}
+.btn-sm.ghost:hover{border-color:var(--crimson);color:var(--crimson);}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:rgba(255,255,255,.6);}
+.footer-links{display:flex;gap:24px;}
+.footer-links a{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--cyan);}
+.footer-note{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  nav{padding:14px 20px;}
+  .nav-breadcrumb{display:none;}
+  .hero{grid-template-columns:1fr;}
+  .hero-right{min-height:280px;padding:32px 24px;}
+  .hero-left{padding:60px 28px;}
+  .arch-inner{padding:64px 28px;}
+  .arch-diagram{grid-template-columns:1fr;gap:8px;}
+  .content-section{padding:64px 28px;}
+  .level-tabs{flex-wrap:wrap;}
+  .ec-inner{grid-template-columns:1fr;}
+  .cheat-inner{padding:64px 28px;}
+  .cheat-grid{grid-template-columns:1fr;}
+  .author-strip{padding:48px 28px;}
+  .author-strip-inner{flex-direction:column;align-items:flex-start;}
+  footer{padding:36px 28px;}
+  .footer-inner{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <a href="../../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="nav-breadcrumb">
+    <a href="../../../index.html">Home</a><span class="sep">/</span>
+    <a href="../../../DevOps/K8/index.html">DevOps</a><span class="sep">/</span>
+    <a href="../../../DevOps/K8/index.html">Kubernetes</a><span class="sep">/</span>
+    <span class="current">Error Runbook</span>
+  </div>
+  <a href="../../../DevOps/K8/index.html" class="nav-back">← K8s Series</a>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-ghost">ERRORS</div>
+  <div class="hero-left">
+    <div class="bc">
+      <a href="../../../index.html">Platform Ops</a><span class="sep">›</span>
+      <a href="../../../DevOps/K8/index.html">Kubernetes</a><span class="sep">›</span>
+      <span class="here">Error Runbook</span>
+    </div>
+    <div class="eyebrow"><span class="eyebrow-line"></span>Issue #049 · May 2026</div>
+    <h1 class="hero-title">
+      K8s <span class="hl-red">ERROR</span><br>
+      <span class="hl-cyan">RUNBOOK</span>
+    </h1>
+    <p class="hero-sub">Pod · Node · Cluster · API · OpenShift</p>
+    <p class="hero-desc">Comprehensive error reference for every layer of the Kubernetes stack — with root causes, diagnostic commands, and step-by-step fixes from production experience.</p>
+    <div class="level-pills">
+      <button class="lp pod"    onclick="switchLevel('pod')">🔴 Pod Level</button>
+      <button class="lp node"   onclick="switchLevel('node')">🟠 Worker Node</button>
+      <button class="lp cluster"onclick="switchLevel('cluster')">🔵 Cluster</button>
+      <button class="lp api"    onclick="switchLevel('api')">🟢 API Server</button>
+      <button class="lp ocp"    onclick="switchLevel('ocp')">🟣 OpenShift</button>
+    </div>
+    <div class="hero-meta-row">
+      <div><div class="hm-num">32</div><div class="hm-label">Error Types</div></div>
+      <div><div class="hm-num">5</div><div class="hm-label">Layers Covered</div></div>
+      <div><div class="hm-num">K8s</div><div class="hm-label">1.24+ / OCP 4.x</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="err-matrix">
+      <div class="err-layer pod">
+        <div class="el-header"><span class="el-label">Pod Level</span><span class="el-count">6</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="85%"></div></div>
+        <div class="el-errors">
+          <span class="ee">CrashLoopBackOff</span><span class="ee">OOMKilled</span>
+          <span class="ee">ImagePullBackOff</span><span class="ee">Pending</span>
+          <span class="ee">Init:Error</span><span class="ee">Evicted</span>
+        </div>
+      </div>
+      <div class="err-layer node">
+        <div class="el-header"><span class="el-label">Worker Node</span><span class="el-count">5</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="70%"></div></div>
+        <div class="el-errors">
+          <span class="ee">NotReady</span><span class="ee">kubelet Failure</span>
+          <span class="ee">DiskPressure</span><span class="ee">MemoryPressure</span>
+          <span class="ee">Runtime Error</span>
+        </div>
+      </div>
+      <div class="err-layer cluster">
+        <div class="el-header"><span class="el-label">Cluster</span><span class="el-count">5</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="60%"></div></div>
+        <div class="el-errors">
+          <span class="ee">CNI Failure</span><span class="ee">PVC Pending</span>
+          <span class="ee">RBAC 403</span><span class="ee">Quota Exceeded</span>
+          <span class="ee">HPA Unknown</span>
+        </div>
+      </div>
+      <div class="err-layer api">
+        <div class="el-header"><span class="el-label">API Server</span><span class="el-count">5</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="55%"></div></div>
+        <div class="el-errors">
+          <span class="ee">API Unreachable</span><span class="ee">etcd Quorum Lost</span>
+          <span class="ee">Webhook Failure</span><span class="ee">Rate Limited</span>
+          <span class="ee">Cert Expired</span>
+        </div>
+      </div>
+      <div class="err-layer ocp">
+        <div class="el-header"><span class="el-label">OpenShift</span><span class="el-count">6</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="75%"></div></div>
+        <div class="el-errors">
+          <span class="ee">SCC Violation</span><span class="ee">CO Degraded</span>
+          <span class="ee">Route 503</span><span class="ee">Build Fail</span>
+          <span class="ee">MCP Stuck</span><span class="ee">OAuth 502</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TICKER ─── -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="ticker-dot"></span>CrashLoopBackOff</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>OOMKilled</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>ImagePullBackOff</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Node NotReady</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>etcd Quorum Lost</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CNI Failure</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>SCC Violation</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>PVC Pending</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>RBAC 403</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Cert Expired</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>kubelet Failure</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Cluster Operator Degraded</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CrashLoopBackOff</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>OOMKilled</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>ImagePullBackOff</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Node NotReady</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>etcd Quorum Lost</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CNI Failure</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>SCC Violation</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>PVC Pending</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>RBAC 403</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Cert Expired</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>kubelet Failure</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Cluster Operator Degraded</span>
+  </div>
+</div>
+
+<!-- ═══ ARCHITECTURE ═══ -->
+<div class="arch-section">
+  <div class="arch-inner reveal">
+    <div class="section-tag" style="color:rgba(255,255,255,.3)">Architecture Map</div>
+    <h2 class="section-title" style="color:#fff">5-LAYER ERROR MODEL</h2>
+    <p class="section-lead">Every Kubernetes error belongs to exactly one layer. Diagnose from the bottom up — pod first, then node, cluster, API server, then platform.</p>
+    <div class="arch-diagram">
+      <div class="arch-layer pod">
+        <div class="arch-layer-header">🔴 Pod</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">Container Runtime</div>
+          <div class="arch-comp">Image Pull</div>
+          <div class="arch-comp">Liveness Probe</div>
+          <div class="arch-comp">Resource Limits</div>
+          <div class="arch-comp">Init Containers</div>
+          <div class="arch-comp">Env / Secrets</div>
+        </div>
+      </div>
+      <div class="arch-layer node">
+        <div class="arch-layer-header">🟠 Node</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">kubelet</div>
+          <div class="arch-comp">kube-proxy</div>
+          <div class="arch-comp">containerd</div>
+          <div class="arch-comp">Node OS</div>
+          <div class="arch-comp">Disk / Memory</div>
+          <div class="arch-comp">CNI Plugin</div>
+        </div>
+      </div>
+      <div class="arch-layer cluster">
+        <div class="arch-layer-header">🔵 Cluster</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">CNI / Networking</div>
+          <div class="arch-comp">CoreDNS</div>
+          <div class="arch-comp">StorageClass / PVC</div>
+          <div class="arch-comp">RBAC</div>
+          <div class="arch-comp">ResourceQuota</div>
+          <div class="arch-comp">HPA / VPA</div>
+        </div>
+      </div>
+      <div class="arch-layer api">
+        <div class="arch-layer-header">🟢 API Server</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">kube-apiserver</div>
+          <div class="arch-comp">etcd</div>
+          <div class="arch-comp">Webhooks</div>
+          <div class="arch-comp">TLS / Certs</div>
+          <div class="arch-comp">Rate Limiting</div>
+          <div class="arch-comp">Audit Logs</div>
+        </div>
+      </div>
+      <div class="arch-layer ocp">
+        <div class="arch-layer-header">🟣 OpenShift</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">SCC</div>
+          <div class="arch-comp">Cluster Operators</div>
+          <div class="arch-comp">Routes / HAProxy</div>
+          <div class="arch-comp">OAuth Server</div>
+          <div class="arch-comp">MachineConfig</div>
+          <div class="arch-comp">ImageRegistry</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ERROR CONTENT ═══ -->
+<section class="content-section reveal" id="errors">
+  <div class="section-tag">Runbook</div>
+  <h2 class="section-title">ERROR REFERENCE</h2>
+  <p class="section-lead">Click any layer to explore errors, causes, diagnostic commands, and step-by-step fixes.</p>
+
+  <!-- TABS -->
+  <div class="level-tabs">
+    <button class="level-tab pod active" onclick="switchLevel('pod')">
+      <span class="tab-icon">🔴</span>
+      <span class="tab-label">Pod Level</span>
+      <span class="tab-count">6</span>
+    </button>
+    <button class="level-tab node" onclick="switchLevel('node')">
+      <span class="tab-icon">🟠</span>
+      <span class="tab-label">Worker Node</span>
+      <span class="tab-count">5</span>
+    </button>
+    <button class="level-tab cluster" onclick="switchLevel('cluster')">
+      <span class="tab-icon">🔵</span>
+      <span class="tab-label">Cluster</span>
+      <span class="tab-count">5</span>
+    </button>
+    <button class="level-tab api" onclick="switchLevel('api')">
+      <span class="tab-icon">🟢</span>
+      <span class="tab-label">API Server</span>
+      <span class="tab-count">5</span>
+    </button>
+    <button class="level-tab ocp" onclick="switchLevel('ocp')">
+      <span class="tab-icon">🟣</span>
+      <span class="tab-label">OpenShift</span>
+      <span class="tab-count">6</span>
+    </button>
+  </div>
+
+  <!-- ════════ POD LEVEL ════════ -->
+  <div class="level-panel active" id="panel-pod">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(229,57,53,.2),rgba(229,57,53,.05));border:1px solid rgba(229,57,53,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:#ef5350;">POD-LEVEL ERRORS</div>
+        <div class="lb-sub" style="color:rgba(229,57,53,.6);">Container lifecycle · image pulling · resource limits · scheduling</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(229,57,53,.15);color:var(--crimson);border:1px solid rgba(229,57,53,.3);">6 Error Types</span>
+    </div>
+    <div class="errors-list">
+
+      <!-- 1. CrashLoopBackOff -->
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">💥</div>
+          <div class="ec-main">
+            <div class="ec-name">CrashLoopBackOff</div>
+            <div class="ec-desc">Container starts and exits repeatedly. Kubernetes applies exponential backoff (10s → 20s → 40s … max 5min).</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag c">Pod Lifecycle</span><span class="ec-tag a">Runtime</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe pod &lt;pod&gt; -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl logs &lt;pod&gt; --previous -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl logs &lt;pod&gt; --tail=100 -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get events -n &lt;ns&gt; --sort-by=.lastTimestamp</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Root Causes</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Application crash:</strong> Exit code 1 — check logs for stack trace</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>OOMKilled (exit 137):</strong> Memory limit too low — increase resources.limits.memory</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Missing ConfigMap/Secret:</strong> Key not found — verify env / volumeMount references</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Wrong entrypoint:</strong> Image CMD vs pod spec command mismatch</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Liveness probe:</strong> Probe failing before app is ready — increase initialDelaySeconds</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Dependency unreachable:</strong> DB / service not ready — use initContainers with wait-for</span></div>
+              </div>
+            </div>
+            <div class="ec-block full">
+              <div class="ec-block-title fix">Fix Steps</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num pod">1</div><div class="fix-text">Check <code>kubectl logs &lt;pod&gt; --previous</code> — find the last error before crash</div></div>
+                <div class="fix-step"><div class="fix-num pod">2</div><div class="fix-text">Check exit code in <code>kubectl describe pod</code> → <strong>137 = OOM</strong>, <strong>1 = app error</strong>, <strong>127 = binary not found</strong></div></div>
+                <div class="fix-step"><div class="fix-num pod">3</div><div class="fix-text">If OOM: increase <code>resources.limits.memory</code> and add <code>resources.requests.memory</code></div></div>
+                <div class="fix-step"><div class="fix-num pod">4</div><div class="fix-text">If config error: verify all <code>env.valueFrom.secretKeyRef</code> and <code>configMapKeyRef</code> keys exist</div></div>
+                <div class="fix-step"><div class="fix-num pod">5</div><div class="fix-text">Add <code>startupProbe</code> with high <code>failureThreshold</code> if app takes long to initialize</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. ImagePullBackOff -->
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🚫</div>
+          <div class="ec-main">
+            <div class="ec-name">ImagePullBackOff / ErrImagePull</div>
+            <div class="ec-desc">Kubernetes cannot pull the container image from the registry. Pod stays in Waiting state.</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag c">Image Registry</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe pod &lt;pod&gt; | grep -A 10 Events</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get events -n &lt;ns&gt; | grep -i image</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get pod &lt;pod&gt; -o jsonpath='{.spec.containers[*].image}'</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Root Causes</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Image not found:</strong> manifest unknown — verify image name, tag, registry path</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Auth failure:</strong> unauthorized: access denied — missing or wrong imagePullSecret</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Registry unreachable:</strong> Network policy or firewall blocking node → registry</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Rate limiting:</strong> Docker Hub toomanyrequests — use authenticated pull or mirror</span></div>
+              </div>
+            </div>
+            <div class="ec-block full">
+              <div class="ec-block-title fix">Fix — Create Image Pull Secret</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl create secret docker-registry regcred \</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt"> </span><span class="cmd-text">  --docker-server=&lt;registry&gt; --docker-username=&lt;user&gt; \</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt"> </span><span class="cmd-text">  --docker-password=&lt;token&gt; -n &lt;namespace&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl patch sa default -n &lt;ns&gt; \</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt"> </span><span class="cmd-text">  -p '{"imagePullSecrets":[{"name":"regcred"}]}'</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. OOMKilled -->
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">💾</div>
+          <div class="ec-main">
+            <div class="ec-name">OOMKilled (Exit Code 137)</div>
+            <div class="ec-desc">Container exceeded memory limit. Kernel OOM killer terminates the process immediately.</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag a">Memory</span><span class="ec-tag c">Resources</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe pod &lt;pod&gt; | grep -E 'OOMKilled|Limits|Requests'</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl top pod &lt;pod&gt; -n &lt;ns&gt; --containers</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get pod &lt;pod&gt; -o jsonpath='{.status.containerStatuses[*].lastState}'</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">Fix Steps</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num pod">1</div><div class="fix-text">Increase <code>resources.limits.memory</code> in pod spec (e.g. 256Mi → 512Mi)</div></div>
+                <div class="fix-step"><div class="fix-num pod">2</div><div class="fix-text">Set <code>requests = limits</code> for <strong>Guaranteed</strong> QoS class — prevents preemption</div></div>
+                <div class="fix-step"><div class="fix-num pod">3</div><div class="fix-text">Profile app memory with JVM heap flags or heap dump on OOM</div></div>
+                <div class="fix-step"><div class="fix-num pod">4</div><div class="fix-text">Deploy <strong>VPA (Vertical Pod Autoscaler)</strong> in recommendation mode to right-size</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Pending -->
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">⏳</div>
+          <div class="ec-main">
+            <div class="ec-name">Pod Stuck in Pending</div>
+            <div class="ec-desc">Scheduler cannot place pod on any node. Pod stays in Pending state indefinitely.</div>
+            <div class="ec-tags"><span class="ec-tag a">High</span><span class="ec-tag c">Scheduler</span><span class="ec-tag l">Resources</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">High</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe pod &lt;pod&gt; | grep -A 20 Events</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get nodes -o wide</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe nodes | grep -A 5 'Allocated resources'</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get pvc -n &lt;ns&gt; <span class="cmd-comment"># if volume mount</span></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Root Causes</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Insufficient CPU/Memory:</strong> 0/N nodes insufficient cpu — scale cluster or reduce requests</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>nodeSelector mismatch:</strong> Label on pod doesn't match any node — fix labels</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Taint not tolerated:</strong> Node has taint, pod missing toleration</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>PVC unbound:</strong> StorageClass provisioner not running or no PV available</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Pod affinity unmet:</strong> Relax affinity rules or adjust topologySpreadConstraints</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Init Container Failure -->
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">🔧</div>
+          <div class="ec-main">
+            <div class="ec-name">Init Container Failure</div>
+            <div class="ec-desc">InitContainers must complete before main container starts. A failing init blocks pod indefinitely.</div>
+            <div class="ec-tags"><span class="ec-tag a">High</span><span class="ec-tag c">Init</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">High</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl logs &lt;pod&gt; -c &lt;init-container-name&gt; -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe pod &lt;pod&gt; | grep -A 5 'Init Containers'</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">Fix Steps</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num pod">1</div><div class="fix-text">Read init container logs for the specific failure reason</div></div>
+                <div class="fix-step"><div class="fix-num pod">2</div><div class="fix-text">For DB wait: use <code>until nc -z db 5432; do sleep 1; done</code> as init command</div></div>
+                <div class="fix-step"><div class="fix-num pod">3</div><div class="fix-text">Verify all secrets and configmaps referenced by init container exist</div></div>
+                <div class="fix-step"><div class="fix-num pod">4</div><div class="fix-text">Confirm init container image name and tag are correct</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Eviction -->
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">🗑️</div>
+          <div class="ec-main">
+            <div class="ec-name">Pod Eviction</div>
+            <div class="ec-desc">kubelet evicts pods when node drops below eviction thresholds for memory, disk, or PIDs.</div>
+            <div class="ec-tags"><span class="ec-tag a">High</span><span class="ec-tag c">Node Pressure</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">High</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get events -n &lt;ns&gt; | grep Evicted</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe node &lt;node&gt; | grep -E 'Eviction|pressure'</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get pod &lt;pod&gt; -o jsonpath='{.status.reason}'</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Eviction Thresholds</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">💾</span><span class="cause-text"><strong>memory.available &lt; 100Mi:</strong> Increase node memory; reduce pod memory requests</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">💿</span><span class="cause-text"><strong>nodefs.available &lt; 10%:</strong> Clean up: <code>crictl rmi --prune</code>, log rotation</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🖼️</span><span class="cause-text"><strong>imagefs.available &lt; 15%:</strong> Remove unused images, add larger container disk</span></div>
+                <div class="cause-item c-low"><span class="cause-icon">⚙️</span><span class="cause-text"><strong>pid.available &lt; 1000:</strong> Check for fork bombs; increase pid limit</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /pod errors-list -->
+  </div>
+
+  <!-- ════════ WORKER NODE LEVEL ════════ -->
+  <div class="level-panel" id="panel-node">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.05));border:1px solid rgba(245,158,11,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:var(--amber);">WORKER NODE ERRORS</div>
+        <div class="lb-sub" style="color:rgba(245,158,11,.6);">kubelet · container runtime · disk · memory · node conditions</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);">5 Error Types</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🔴</div>
+          <div class="ec-main">
+            <div class="ec-name">Node NotReady</div>
+            <div class="ec-desc">Node fails to report healthy status within node-monitor-grace-period (default 40s). All pods on node affected.</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag a">Node Health</span><span class="ec-tag c">kubelet</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl + node</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get nodes</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe node &lt;node-name&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemctl status kubelet</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">journalctl -u kubelet -f --since '10 min ago'</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get events --field-selector involvedObject.name=&lt;node&gt;</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Node Conditions</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>MemoryPressure=True:</strong> dmesg | grep -i oom; reduce pod density</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>DiskPressure=True:</strong> df -h; clean /var/lib/docker or /var/log</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>PIDPressure=True:</strong> ps aux | wc -l; check for runaway processes</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>NetworkUnavailable=True:</strong> CNI plugin not configured; restart CNI daemonset</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>kubelet not running:</strong> All conditions Unknown; systemctl restart kubelet</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">⚙️</div>
+          <div class="ec-main">
+            <div class="ec-name">kubelet Failure</div>
+            <div class="ec-desc">kubelet is the node agent managing pod lifecycle. Failures prevent pod creation and health reporting.</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag a">kubelet</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">systemd</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemctl status kubelet</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">journalctl -u kubelet --since '30 min ago' | tail -200</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">openssl x509 -in /var/lib/kubelet/pki/kubelet-client-current.pem -noout -dates</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">cat /var/lib/kubelet/config.yaml</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Common Errors</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Certificate expired:</strong> kubeadm certs renew all</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>PLEG not healthy:</strong> Container runtime down — restart containerd</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>API server unreachable:</strong> Check network/firewall to control plane</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Config file error:</strong> Validate /var/lib/kubelet/config.yaml syntax</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Disk full:</strong> Failed to create pod sandbox — check df -i (inodes)</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">📦</div>
+          <div class="ec-main">
+            <div class="ec-name">Container Runtime Failure</div>
+            <div class="ec-desc">containerd or CRI-O failure prevents pod creation and container management across the node.</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag a">containerd</span><span class="ec-tag c">CRI</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">crictl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemctl status containerd</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">journalctl -u containerd -n 200</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">crictl ps && crictl pods</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">crictl rm $(crictl ps -a -q --state exited) <span class="cmd-comment"># cleanup</span></span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">crictl rmi --prune <span class="cmd-comment"># remove unused images</span></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">Fix Steps</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num node">1</div><div class="fix-text">Restart runtime: <code>systemctl restart containerd</code></div></div>
+                <div class="fix-step"><div class="fix-num node">2</div><div class="fix-text">Check socket: <code>ls -la /var/run/containerd/containerd.sock</code></div></div>
+                <div class="fix-step"><div class="fix-num node">3</div><div class="fix-text">Review config: <code>/etc/containerd/config.toml</code></div></div>
+                <div class="fix-step"><div class="fix-num node">4</div><div class="fix-text">Free disk: prune stopped containers and unused images</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">💿</div>
+          <div class="ec-main">
+            <div class="ec-name">Node Disk Pressure</div>
+            <div class="ec-desc">Node filesystem usage above eviction threshold. Pods are evicted and new pods cannot be scheduled.</div>
+            <div class="ec-tags"><span class="ec-tag a">High</span><span class="ec-tag c">Storage</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">High</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="ec-block-title cmd">Cleanup Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">node shell</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">df -h && df -i <span class="cmd-comment"># check disk + inode usage</span></span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">du -sh /var/lib/containerd/* | sort -rh | head -20</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">du -sh /var/log/* | sort -rh | head -10</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">crictl rmi --prune <span class="cmd-comment"># remove unused images</span></span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">find /var/log -name '*.log' -size +100M -exec truncate -s 0 {} \;</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">🔧</div>
+          <div class="ec-main">
+            <div class="ec-name">Node Maintenance (Cordon / Drain)</div>
+            <div class="ec-desc">Safe procedure to remove a node from service for maintenance without disrupting workloads.</div>
+            <div class="ec-tags"><span class="ec-tag c">Medium</span><span class="ec-tag l">Maintenance</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Procedure</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="ec-block-title cmd">Maintenance Workflow</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl cordon &lt;node-name&gt; <span class="cmd-comment"># step 1: prevent new scheduling</span></span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl drain &lt;node-name&gt; --ignore-daemonsets \</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt"> </span><span class="cmd-text">  --delete-emptydir-data --grace-period=60 <span class="cmd-comment"># step 2: evict</span></span></div>
+                  <div class="cmd-line"><span class="cmd-comment"> </span><span class="cmd-comment"># --- perform maintenance ---</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl uncordon &lt;node-name&gt; <span class="cmd-comment"># step 3: return to service</span></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ CLUSTER LEVEL ════════ -->
+  <div class="level-panel" id="panel-cluster">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(0,194,212,.2),rgba(0,194,212,.05));border:1px solid rgba(0,194,212,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:var(--cyan);">CLUSTER-LEVEL ERRORS</div>
+        <div class="lb-sub" style="color:rgba(0,194,212,.6);">networking · storage · RBAC · quotas · autoscaling</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(0,194,212,.15);color:var(--cyan);border:1px solid rgba(0,194,212,.3);">5 Error Types</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🌐</div>
+          <div class="ec-main">
+            <div class="ec-name">CNI / Networking Failure</div>
+            <div class="ec-desc">CNI plugin failure causes pod-to-pod or pod-to-service communication failures cluster-wide.</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag c">CNI</span><span class="ec-tag l">CoreDNS</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get pods -n kube-system | grep -E 'calico|flannel|cilium|weave'</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl run nettest --image=busybox --rm -it -- wget -qO- http://&lt;svc&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl run dnstest --image=busybox --rm -it -- nslookup kubernetes.default</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl logs -n kube-system &lt;cni-pod&gt; --tail=100</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">Fix by Symptom</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num cluster">1</div><div class="fix-text"><strong>DNS broken:</strong> <code>kubectl rollout restart deploy/coredns -n kube-system</code></div></div>
+                <div class="fix-step"><div class="fix-num cluster">2</div><div class="fix-text"><strong>CNI down:</strong> Restart CNI daemonset pods in kube-system</div></div>
+                <div class="fix-step"><div class="fix-num cluster">3</div><div class="fix-text"><strong>kube-proxy:</strong> <code>kubectl rollout restart ds/kube-proxy -n kube-system</code></div></div>
+                <div class="fix-step"><div class="fix-num cluster">4</div><div class="fix-text"><strong>NetworkPolicy blocking:</strong> Audit policies with <code>kubectl get netpol -A</code></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">💾</div>
+          <div class="ec-main">
+            <div class="ec-name">PersistentVolume / Storage Errors</div>
+            <div class="ec-desc">Storage errors prevent pods from mounting volumes. PVC stuck in Pending, Lost, or Terminating state.</div>
+            <div class="ec-tags"><span class="ec-tag a">High</span><span class="ec-tag c">PVC</span><span class="ec-tag l">CSI</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">High</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get pv,pvc -A</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe pvc &lt;name&gt; -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get events -A | grep -i 'provision\|mount\|volume'</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get storageclass</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">PVC State Reference</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Pending:</strong> No matching PV or CSI provisioner not running</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Lost:</strong> Backing PV deleted — recreate PV with same claimRef</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Terminating stuck:</strong> <code>kubectl patch pvc &lt;name&gt; -p '{"metadata":{"finalizers":null}}'</code></span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>RWX unsupported:</strong> Use NFS, EFS, or CephFS StorageClass</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">🔐</div>
+          <div class="ec-main">
+            <div class="ec-name">RBAC 403 Forbidden</div>
+            <div class="ec-desc">Role-Based Access Control misconfigurations cause 403 errors on API calls from pods or users.</div>
+            <div class="ec-tags"><span class="ec-tag a">High</span><span class="ec-tag c">RBAC</span><span class="ec-tag l">Security</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">High</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl auth</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl auth can-i list pods --as=system:serviceaccount:&lt;ns&gt;:&lt;sa&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl auth can-i create deployments --as=&lt;user&gt; -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get roles,rolebindings,clusterroles,clusterrolebindings -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl create rolebinding &lt;name&gt; --clusterrole=view \</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt"> </span><span class="cmd-text">  --serviceaccount=&lt;ns&gt;:&lt;sa&gt; -n &lt;ns&gt;</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">Fix Steps</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num cluster">1</div><div class="fix-text">Use <code>kubectl auth can-i</code> to identify exactly what permission is missing</div></div>
+                <div class="fix-step"><div class="fix-num cluster">2</div><div class="fix-text">Create Role or ClusterRole with the required verbs and resources</div></div>
+                <div class="fix-step"><div class="fix-num cluster">3</div><div class="fix-text">Bind it to the ServiceAccount via RoleBinding</div></div>
+                <div class="fix-step"><div class="fix-num cluster">4</div><div class="fix-text">Verify with <code>kubectl auth can-i</code> using <code>--as</code> flag again</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">📊</div>
+          <div class="ec-main">
+            <div class="ec-name">Resource Quota Exceeded</div>
+            <div class="ec-desc">Namespace resource quotas block pod creation when CPU, memory, or object count limits are reached.</div>
+            <div class="ec-tags"><span class="ec-tag c">Medium</span><span class="ec-tag a">Quota</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Medium</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe resourcequota -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe limitrange -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get events -n &lt;ns&gt; | grep -i quota</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Error Messages</div>
+              <div class="causes-list">
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>exceeded quota: requests.cpu</strong> — Increase quota or reduce pod CPU requests</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>must specify limits.memory</strong> — LimitRange requires explicit limits in pod spec</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>exceeded quota: count/pods</strong> — Increase pod quota; delete unused pods</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">📈</div>
+          <div class="ec-main">
+            <div class="ec-name">HPA Not Scaling / Unknown Metrics</div>
+            <div class="ec-desc">Horizontal Pod Autoscaler unable to read metrics or stuck at min/max replicas.</div>
+            <div class="ec-tags"><span class="ec-tag c">Medium</span><span class="ec-tag l">HPA</span><span class="ec-tag a">Autoscaling</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Medium</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get hpa -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe hpa &lt;name&gt; -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl top pods -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get pods -n kube-system | grep metrics-server</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">HPA Conditions</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>AbleToScale: False:</strong> metrics-server not installed — deploy metrics-server</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Unknown metrics:</strong> Custom metrics API unavailable — install Prometheus adapter</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>ScaleDown blocked:</strong> PodDisruptionBudget preventing scale-down — review PDB</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ API SERVER LEVEL ════════ -->
+  <div class="level-panel" id="panel-api">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(132,204,22,.2),rgba(132,204,22,.05));border:1px solid rgba(132,204,22,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:var(--lime);">API SERVER ERRORS</div>
+        <div class="lb-sub" style="color:rgba(132,204,22,.6);">kube-apiserver · etcd · webhooks · certificates · rate limiting</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(132,204,22,.15);color:var(--lime);border:1px solid rgba(132,204,22,.3);">5 Error Types</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🚨</div>
+          <div class="ec-main">
+            <div class="ec-name">API Server Unreachable</div>
+            <div class="ec-desc">kube-apiserver is down or not accepting connections on port 6443. All cluster operations fail.</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag l">API Server</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl + node</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl cluster-info</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get --raw='/healthz'</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get --raw='/readyz'</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">crictl logs $(crictl ps -q --name=kube-apiserver)</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">cat /etc/kubernetes/manifests/kube-apiserver.yaml</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Root Causes</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Pod crashed:</strong> Check static pod manifest in /etc/kubernetes/manifests/</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>etcd unreachable:</strong> etcd cluster unhealthy — check etcd health</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Certificate expired:</strong> kubeadm certs renew all; restart API server</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>OOMKilled:</strong> Increase API server memory limits in static pod manifest</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Audit log disk full:</strong> Rotate audit logs; tune audit policy</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🗄️</div>
+          <div class="ec-main">
+            <div class="ec-name">etcd Failure / Quorum Lost</div>
+            <div class="ec-desc">etcd stores all cluster state. Losing quorum (majority of members) makes the cluster read-only or unavailable.</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag l">etcd</span><span class="ec-tag a">Quorum</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">etcdctl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 \</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt"> </span><span class="cmd-text">  --cacert=/etc/kubernetes/pki/etcd/ca.crt \</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt"> </span><span class="cmd-text">  --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt \</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt"> </span><span class="cmd-text">  --key=/etc/kubernetes/pki/etcd/healthcheck-client.key \</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt"> </span><span class="cmd-text">  endpoint health --cluster</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">etcdctl endpoint status --cluster -w table</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">etcdctl defrag --cluster <span class="cmd-comment"># maintenance: defragment</span></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">etcd Error Reference</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>No leader elected:</strong> Check network between etcd nodes; restart etcd</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>DB size limit:</strong> mvcc: database space exceeded — defragment + compact history</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Slow disk I/O:</strong> High latency, leader elections — use SSD for etcd</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Peer unreachable:</strong> Fix network; check TLS peer certs</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">🪝</div>
+          <div class="ec-main">
+            <div class="ec-name">Webhook / Admission Controller Failure</div>
+            <div class="ec-desc">Mutating or Validating webhooks blocking pod creation when unavailable or misconfigured.</div>
+            <div class="ec-tags"><span class="ec-tag a">High</span><span class="ec-tag c">Webhooks</span><span class="ec-tag l">Admission</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">High</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get validatingwebhookconfigurations</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get mutatingwebhookconfigurations</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get events -A | grep -i webhook</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe validatingwebhookconfiguration &lt;name&gt;</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">Fix Steps</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num api">1</div><div class="fix-text">Verify webhook service and pod are running and healthy</div></div>
+                <div class="fix-step"><div class="fix-num api">2</div><div class="fix-text">Check webhook TLS certificate validity and CA bundle</div></div>
+                <div class="fix-step"><div class="fix-num api">3</div><div class="fix-text">Set <code>failurePolicy: Ignore</code> temporarily to restore operations</div></div>
+                <div class="fix-step"><div class="fix-num api">4</div><div class="fix-text">Review timeout — default 10s. Increase if webhook is slow</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">⏱️</div>
+          <div class="ec-main">
+            <div class="ec-name">API Rate Limiting / Throttling</div>
+            <div class="ec-desc">HTTP 429 errors or slow kubectl responses due to too many concurrent requests to the API server.</div>
+            <div class="ec-tags"><span class="ec-tag c">Medium</span><span class="ec-tag a">Rate Limit</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Medium</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get events -A | grep -i throttl</span></div>
+                  <div class="cmd-line"><span class="cmd-comment"> </span><span class="cmd-comment"># Watch for: "Throttling request took X seconds"</span></div>
+                  <div class="cmd-line"><span class="cmd-comment"> </span><span class="cmd-comment"># HTTP 429 Too Many Requests in client logs</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get flowschemas,prioritylevelconfigurations <span class="cmd-comment"># APF config</span></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🔑</div>
+          <div class="ec-main">
+            <div class="ec-name">Certificate Expired</div>
+            <div class="ec-desc">All Kubernetes components use mTLS. Expired certificates cause widespread authentication failures.</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag l">TLS</span><span class="ec-tag a">Certs</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="ec-block-title cmd">Certificate Management</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubeadm</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubeadm certs check-expiration <span class="cmd-comment"># check all cert expiry dates</span></span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubeadm certs renew all <span class="cmd-comment"># renew all certificates</span></span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kill -s SIGHUP $(pidof kube-apiserver) <span class="cmd-comment"># reload without restart</span></span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kill -s SIGHUP $(pidof kube-controller-manager)</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kill -s SIGHUP $(pidof kube-scheduler)</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ OPENSHIFT LEVEL ════════ -->
+  <div class="level-panel" id="panel-ocp">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:#a78bfa;">OPENSHIFT ERRORS</div>
+        <div class="lb-sub" style="color:rgba(124,58,237,.6);">SCC · Cluster Operators · Routes · Builds · MCO · OAuth</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);">6 Error Types</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🛡️</div>
+          <div class="ec-main">
+            <div class="ec-name">SCC Violation (Security Context Constraints)</div>
+            <div class="ec-desc">Pod rejected because its security context violates the allowed SCC. Most common OpenShift error.</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag p">SCC</span><span class="ec-tag l">Security</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">oc</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc get pod &lt;pod&gt; -o yaml | grep scc</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc get scc</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc get events -n &lt;ns&gt; | grep -i scc</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc adm policy who-can use scc restricted</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc adm policy add-scc-to-user anyuid -z &lt;sa&gt; -n &lt;ns&gt;</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">SCC Error Reference</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>unable to validate against any SCC:</strong> Grant appropriate SCC to ServiceAccount</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>runAsUser not allowed:</strong> Container runs as root — grant anyuid SCC</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>hostPath not allowed:</strong> Grant hostmount-anyuid SCC or use PVC</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>hostNetwork not allowed:</strong> Grant hostnetwork SCC to ServiceAccount</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">📊</div>
+          <div class="ec-main">
+            <div class="ec-name">Cluster Operator Degraded</div>
+            <div class="ec-desc">OpenShift cluster operators manage platform components. Degraded state blocks upgrades and indicates failures.</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag p">Cluster Operator</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">oc</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc get clusteroperators <span class="cmd-comment"># check all operators</span></span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc describe co &lt;operator-name&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc logs -n openshift-&lt;operator&gt; deploy/&lt;operator&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc adm inspect co/&lt;operator&gt; <span class="cmd-comment"># full diagnostic bundle</span></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Operator Reference</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>kube-apiserver:</strong> etcd issues, cert expiry, master node failure</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>authentication:</strong> OAuth provider unreachable, CA cert mismatch</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>image-registry:</strong> Storage backend unavailable, PVC unbound</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>monitoring:</strong> Prometheus OOM, PVC full, scrape errors</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>machine-config:</strong> Node stuck in config, MCO loop</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">🔀</div>
+          <div class="ec-main">
+            <div class="ec-name">Route / Ingress Failure</div>
+            <div class="ec-desc">OpenShift Routes (HAProxy) not routing traffic. 503 errors or TLS handshake failures.</div>
+            <div class="ec-tags"><span class="ec-tag a">High</span><span class="ec-tag p">Route</span><span class="ec-tag c">HAProxy</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">High</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">oc</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc get route -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc describe route &lt;name&gt; -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc get pods -n openshift-ingress</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc describe ingresscontroller default -n openshift-ingress-operator</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc get endpoints &lt;svc&gt; -n &lt;ns&gt; <span class="cmd-comment"># check backend pods</span></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Route Error Reference</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>503:</strong> Backend pods not ready or wrong service port — check endpoints</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>TLS failure:</strong> Cert/key mismatch or expired — update route TLS secret</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Route not admitted:</strong> Hostname conflict — use unique hostname</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Router crashloop:</strong> HAProxy config error — check router pod logs</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">🏗️</div>
+          <div class="ec-main">
+            <div class="ec-name">Build / ImageStream Failure</div>
+            <div class="ec-desc">OpenShift S2I builds or ImageStream imports failing. CI/CD pipeline cannot produce images.</div>
+            <div class="ec-tags"><span class="ec-tag a">High</span><span class="ec-tag p">Build</span><span class="ec-tag c">ImageStream</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">High</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">oc</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc get builds -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc logs build/&lt;build-name&gt; -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc get imagestream -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc describe co image-registry</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Build Errors</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Failed to pull base image:</strong> Add pull secret to builder SA</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Push to registry failed:</strong> Check image-registry operator status and PVC</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>S2I assemble failed:</strong> Application compile error — check build logs</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Build pod evicted:</strong> Node under resource pressure — free resources</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">⚙️</div>
+          <div class="ec-main">
+            <div class="ec-name">Machine Config Pool (MCP) Stuck</div>
+            <div class="ec-desc">MCO manages node OS config. Node stuck in Updating or Degraded state during config rollout.</div>
+            <div class="ec-tags"><span class="ec-tag a">High</span><span class="ec-tag p">MCO</span><span class="ec-tag c">Node OS</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">High</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">oc</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc get mcp</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc describe mcp worker</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc logs -n openshift-machine-config-operator deploy/machine-config-operator --tail=100</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc debug node/&lt;node&gt; <span class="cmd-comment"># open shell on stuck node</span></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">MCP States</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Degraded: True:</strong> Node failed to apply config — check MCD logs</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Updating: stuck:</strong> Node unreachable — check node health, drain if needed</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Config render failed:</strong> Invalid MachineConfig YAML — oc get mc to find bad config</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🔑</div>
+          <div class="ec-main">
+            <div class="ec-name">OAuth / Authentication Failure</div>
+            <div class="ec-desc">OpenShift OAuth server handles all user authentication. Failures prevent any user from logging in.</div>
+            <div class="ec-tags"><span class="ec-tag r">Critical</span><span class="ec-tag p">OAuth</span><span class="ec-tag l">Auth</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Critical</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">oc</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc get pods -n openshift-authentication</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc logs -n openshift-authentication deploy/oauth-openshift --tail=100</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc get oauth cluster -o yaml</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">oc describe co authentication</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Auth Errors</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>502 Bad Gateway:</strong> OAuth pod not running — restart oauth-openshift deployment</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>LDAP: connection refused:</strong> Check network; update OAuth CA cert bundle</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Invalid client secret:</strong> Recreate oauth client secret in openshift-config</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Certificate not trusted:</strong> Add CA to additionalTrustBundle in OAuth config</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ EXIT CODE TABLE ═══ -->
+<div class="cheat-section">
+  <div class="cheat-inner reveal">
+    <div class="section-tag" style="color:rgba(255,255,255,.3)">Reference</div>
+    <h2 class="section-title" style="color:#fff">EXIT CODE REFERENCE</h2>
+    <p class="section-lead">The exit code is the fastest way to diagnose a crashed container. Check it first in <code style="background:rgba(255,255,255,.1);padding:2px 8px;border-radius:3px;font-family:'DM Mono',monospace;font-size:14px">kubectl describe pod</code>.</p>
+    <table class="exit-table" style="margin-bottom:64px">
+      <thead><tr><th>Code</th><th>Signal</th><th>Meaning</th><th>Kubernetes Cause</th></tr></thead>
+      <tbody>
+        <tr style="background:rgba(255,255,255,.03)">
+          <td><span class="exit-code" style="color:var(--lime)">0</span></td>
+          <td><span class="exit-sig">—</span></td>
+          <td style="color:rgba(255,255,255,.7)">Graceful exit</td>
+          <td style="color:rgba(255,255,255,.4)">Process completed normally. Check if it's expected.</td>
+        </tr>
+        <tr>
+          <td><span class="exit-code" style="color:var(--crimson)">1</span></td>
+          <td><span class="exit-sig">—</span></td>
+          <td style="color:rgba(255,255,255,.7)">General error</td>
+          <td style="color:rgba(255,255,255,.4)">Application error — check logs for stack trace.</td>
+        </tr>
+        <tr style="background:rgba(255,255,255,.03)">
+          <td><span class="exit-code" style="color:var(--amber)">126</span></td>
+          <td><span class="exit-sig">—</span></td>
+          <td style="color:rgba(255,255,255,.7)">Permission denied</td>
+          <td style="color:rgba(255,255,255,.4)">Command not executable — check file permissions in image.</td>
+        </tr>
+        <tr>
+          <td><span class="exit-code" style="color:var(--amber)">127</span></td>
+          <td><span class="exit-sig">—</span></td>
+          <td style="color:rgba(255,255,255,.7)">Command not found</td>
+          <td style="color:rgba(255,255,255,.4)">Missing binary in container image. Check CMD/ENTRYPOINT.</td>
+        </tr>
+        <tr style="background:rgba(255,255,255,.03)">
+          <td><span class="exit-code" style="color:var(--crimson)">134</span></td>
+          <td><span class="exit-sig">SIGABRT</span></td>
+          <td style="color:rgba(255,255,255,.7)">Abnormal termination</td>
+          <td style="color:rgba(255,255,255,.4)">Assert failure, heap corruption — check application.</td>
+        </tr>
+        <tr>
+          <td><span class="exit-code" style="color:var(--crimson)">137</span></td>
+          <td><span class="exit-sig">SIGKILL</span></td>
+          <td style="color:rgba(255,255,255,.7)">OOMKilled / forced kill</td>
+          <td style="color:rgba(255,255,255,.4);font-weight:700">Memory limit exceeded → increase resources.limits.memory</td>
+        </tr>
+        <tr style="background:rgba(255,255,255,.03)">
+          <td><span class="exit-code" style="color:var(--crimson)">139</span></td>
+          <td><span class="exit-sig">SIGSEGV</span></td>
+          <td style="color:rgba(255,255,255,.7)">Segmentation fault</td>
+          <td style="color:rgba(255,255,255,.4)">Null pointer or buffer overflow in application.</td>
+        </tr>
+        <tr>
+          <td><span class="exit-code" style="color:var(--lime)">143</span></td>
+          <td><span class="exit-sig">SIGTERM</span></td>
+          <td style="color:rgba(255,255,255,.7)">Graceful termination</td>
+          <td style="color:rgba(255,255,255,.4)">Kubernetes graceful shutdown signal. Normal during drain.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-tag" style="color:rgba(255,255,255,.3)">Quick Reference</div>
+    <h2 class="section-title" style="color:#fff;margin-bottom:40px">COMMAND CHEATSHEET</h2>
+    <div class="cheat-grid">
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--crimson)">Pod Debugging</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get pods -A -o wide</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl describe pod &lt;p&gt; -n &lt;ns&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl logs &lt;p&gt; --previous -n &lt;ns&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl exec -it &lt;p&gt; -- /bin/sh</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl debug &lt;p&gt; -it --image=busybox</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl port-forward &lt;p&gt; 8080:80</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--amber)">Node Debugging</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get nodes -o wide</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl describe node &lt;node&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl top nodes</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl debug node/&lt;n&gt; -it --image=busybox</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl drain &lt;n&gt; --ignore-daemonsets</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl cordon / uncordon &lt;node&gt;</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--cyan)">Cluster Health</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl cluster-info</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get componentstatuses</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get events -A --sort-by=.lastTimestamp</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl top pods -A --sort-by=memory</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get --raw='/healthz'</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get --raw='/readyz'</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--lime)">etcd / API</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubeadm certs check-expiration</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubeadm certs renew all</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>etcdctl endpoint health --cluster</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>etcdctl endpoint status -w table</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>etcdctl defrag --cluster</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get flowschemas</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:#a78bfa">OpenShift</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>oc get co</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>oc get mcp</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>oc adm top nodes</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>oc adm must-gather</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>oc adm inspect co/&lt;operator&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>oc adm policy add-scc-to-user anyuid -z &lt;sa&gt;</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--amber)">Storage</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get pv,pvc -A</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl describe pvc &lt;name&gt; -n &lt;ns&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get storageclass</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get events -A | grep provision</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>crictl rmi --prune</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>df -h && df -i</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AUTHOR STRIP ═══ -->
+<div class="author-strip">
+  <div class="author-strip-inner">
+    <div class="author-info">
+      <div class="author-avatar">VA</div>
+      <div>
+        <div class="author-name">Vishal Abhinav</div>
+        <div class="author-role">Platform Ops Engineer · @6D Technologies · Ops Newsletter — Issue #049</div>
+      </div>
+    </div>
+    <div class="author-actions">
+      <a href="../../../index.html#subscribe" class="btn-sm primary">
+        Subscribe Free
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank" class="btn-sm ghost">GitHub ↗</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PLATFORM OPS</div>
+    <div class="footer-links">
+      <a href="../../../DevOps/K8/index.html">← K8s Series</a>
+      <a href="../ARCHITECTURE/k8-architecture.html">Architecture</a>
+      <a href="../Networking/k8-networking.html">Networking</a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
+      <a href="../../../index.html#subscribe">Subscribe</a>
+    </div>
+    <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
+  </div>
+</footer>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script>
+/* ── Custom cursor ── */
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+document.querySelectorAll('a,button,.error-card,.arch-comp,.cheat-block').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='56px';ring.style.height='56px';ring.style.borderColor='var(--crimson)';cursor.style.transform='translate(-50%,-50%) scale(1.5)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='';cursor.style.transform='translate(-50%,-50%) scale(1)';});
+});
+
+/* ── Tab switching ── */
+function switchLevel(level){
+  document.querySelectorAll('.level-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.level-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.level-tab.'+level).forEach(t=>t.classList.add('active'));
+  const panel=document.getElementById('panel-'+level);
+  if(panel){panel.classList.add('active');}
+  // scroll to errors section
+  document.getElementById('errors').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ── Error card accordion ── */
+function toggleCard(card){
+  const isOpen=card.classList.contains('open');
+  // close all siblings
+  card.parentElement.querySelectorAll('.error-card').forEach(c=>c.classList.remove('open'));
+  if(!isOpen) card.classList.add('open');
+}
+
+/* ── Level pill buttons in hero ── */
+document.querySelectorAll('.lp').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const level=Array.from(btn.classList).find(c=>['pod','node','cluster','api','ocp'].includes(c));
+    if(level) switchLevel(level);
+  });
+});
+
+/* ── Animate error bars on load ── */
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.querySelectorAll('.el-fill').forEach(el=>{
+      el.style.width=el.dataset.width;
+    });
+  },600);
+});
+
+/* ── Scroll reveal ── */
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
