@@ -183,6 +183,7 @@ nav.scrolled{padding:12px 48px;box-shadow:0 4px 32px rgba(0,0,0,0.08);}
 .path-dot.d3{background:var(--coal);color:var(--crimson);border-color:var(--crimson);}
 .path-dot.d4{background:var(--coal);color:var(--lime);border-color:var(--lime);}
 .path-dot.d5{background:var(--coal);color:rgba(255,255,255,.3);border-color:rgba(255,255,255,.2);border-style:dashed;}
+.path-dot.d6{background:var(--coal);color:var(--amber);border-color:var(--amber);}
 .path-content{padding-top:6px;}
 .path-step-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
 .path-step-title{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--coal);letter-spacing:.5px;margin-bottom:6px;}
@@ -268,10 +269,10 @@ footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
     </div>
     <div class="eyebrow"><span class="eyebrow-line"></span>Deep Dive Series</div>
     <h1 class="hero-title">KUBERNETES<br><span class="hl">DEEP DIVES</span></h1>
-    <p class="hero-sub">Architecture · Networking · Error Runbook</p>
+    <p class="hero-sub">Architecture · Networking · Error Runbook · Storage · Observability</p>
     <p class="hero-desc">Battle-tested technical guides covering every layer of Kubernetes — from control plane internals to real-world production debugging. Written from the Platform Ops trenches at 6D Technologies.</p>
     <div class="hero-meta-row">
-      <div><div class="hm-num">3</div><div class="hm-label">Deep Dives</div></div>
+      <div><div class="hm-num">5</div><div class="hm-label">Deep Dives</div></div>
       <div><div class="hm-num">32</div><div class="hm-label">Error Types</div></div>
       <div><div class="hm-num">K8s</div><div class="hm-label">1.24+ / OCP 4.x</div></div>
     </div>
@@ -381,7 +382,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
 <section class="articles-section reveal">
   <div class="section-tag">Published Articles</div>
   <h2 class="section-title">KUBERNETES SERIES</h2>
-  <p class="section-lead">Three deep-dives covering the full K8s stack — architecture, networking, and a comprehensive error runbook.</p>
+  <p class="section-lead">Five deep-dives covering the full K8s stack — architecture, networking, error runbook, storage, and observability.</p>
 
   <div class="articles-grid">
 
@@ -443,11 +444,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
     <a href="ERROR/K8-error.html" class="article-card">
       <div class="ac-top-bar"></div>
       <div class="ac-body">
-        <div class="ac-issue-meta">
-          <span class="ac-issue-num" style="background:var(--crimson)">#049</span>
-          May 2026 &nbsp;
-          <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(229,57,53,.15);color:var(--crimson);padding:2px 8px;border-radius:20px;letter-spacing:1px;">NEW</span>
-        </div>
+        <div class="ac-issue-meta"><span class="ac-issue-num">#049</span>May 2026</div>
         <div class="ac-icon">🚨</div>
         <div class="ac-title">K8s Error Runbook</div>
         <p class="ac-desc">32 error types across 5 layers — Pod, Worker Node, Cluster, API Server, and OpenShift. Root causes, diagnostic commands, exit code table, and production fixes.</p>
@@ -468,6 +465,64 @@ footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
         </div>
       </div>
       <div class="ac-ghost-num">49</div>
+    </a>
+
+    <!-- #050 Storage -->
+    <a href="STORAGE/k8-storage.html" class="article-card">
+      <div class="ac-top-bar"></div>
+      <div class="ac-body">
+        <div class="ac-issue-meta"><span class="ac-issue-num">#050</span>June 2026</div>
+        <div class="ac-icon">📦</div>
+        <div class="ac-title">K8s Storage Deep‑Dive</div>
+        <p class="ac-desc">PV/PVC lifecycle, StorageClasses & dynamic provisioning, CSI driver internals, StatefulSets, and a backup/DR strategy with VolumeSnapshots and Velero.</p>
+        <div class="ac-topics">
+          <span class="ac-topic a">PV / PVC</span>
+          <span class="ac-topic a">StorageClass</span>
+          <span class="ac-topic c">CSI</span>
+          <span class="ac-topic l">StatefulSet</span>
+          <span class="ac-topic p">Velero</span>
+          <span class="ac-topic r">Snapshots</span>
+        </div>
+        <div class="ac-footer">
+          <span class="ac-read-time">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            17 min read
+          </span>
+          <span class="ac-cta">Read Article <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+      <div class="ac-ghost-num">50</div>
+    </a>
+
+    <!-- #051 Observability — NEW -->
+    <a href="OBSERVABILITY/k8-observability.html" class="article-card">
+      <div class="ac-top-bar"></div>
+      <div class="ac-body">
+        <div class="ac-issue-meta">
+          <span class="ac-issue-num" style="background:var(--crimson)">#051</span>
+          July 2026 &nbsp;
+          <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(229,57,53,.15);color:var(--crimson);padding:2px 8px;border-radius:20px;letter-spacing:1px;">NEW</span>
+        </div>
+        <div class="ac-icon">📡</div>
+        <div class="ac-title">Observability Stack Deep‑Dive</div>
+        <p class="ac-desc">Metrics (Prometheus + Grafana), logs (Loki/ELK), traces (Jaeger/OpenTelemetry), SLO burn-rate alerting, and how a platform like OpsCore ties every signal together.</p>
+        <div class="ac-topics">
+          <span class="ac-topic r">Prometheus</span>
+          <span class="ac-topic r">Grafana</span>
+          <span class="ac-topic a">Loki / ELK</span>
+          <span class="ac-topic c">Jaeger</span>
+          <span class="ac-topic l">Alerting</span>
+          <span class="ac-topic p">OpsCore</span>
+        </div>
+        <div class="ac-footer">
+          <span class="ac-read-time">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            18 min read
+          </span>
+          <span class="ac-cta">Read Article <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+      <div class="ac-ghost-num">51</div>
     </a>
 
   </div>
@@ -520,6 +575,32 @@ footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
         </div>
       </div>
 
+      <div class="inside-col">
+        <div class="ic-label" style="color:var(--amber)">Issue #050 · Storage</div>
+        <div class="ic-title">PERSISTENCE LAYER</div>
+        <div class="ic-topics">
+          <div class="ic-topic-item">PV / PVC binding lifecycle</div>
+          <div class="ic-topic-item">StorageClasses & provisioning</div>
+          <div class="ic-topic-item">CSI controller / node plugins</div>
+          <div class="ic-topic-item">StatefulSets & volumeClaimTemplates</div>
+          <div class="ic-topic-item">VolumeSnapshots & Velero</div>
+          <div class="ic-topic-item">RPO / RTO & DR strategy</div>
+        </div>
+      </div>
+
+      <div class="inside-col">
+        <div class="ic-label" style="color:#a78bfa">Issue #051 · Observability</div>
+        <div class="ic-title">METRICS, LOGS & TRACES</div>
+        <div class="ic-topics">
+          <div class="ic-topic-item">Prometheus scraping & PromQL</div>
+          <div class="ic-topic-item">Loki / ELK log pipelines</div>
+          <div class="ic-topic-item">OpenTelemetry & Jaeger tracing</div>
+          <div class="ic-topic-item">Alertmanager & SLO burn rate</div>
+          <div class="ic-topic-item">Grafana dashboarding</div>
+          <div class="ic-topic-item">OpsCore correlation layer</div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -543,7 +624,17 @@ footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
     </div>
 
     <div class="path-item">
-      <div class="path-dot d2">2</div>
+      <div class="path-dot d6">2</div>
+      <div class="path-content">
+        <div class="path-step-label">Storage</div>
+        <div class="path-step-title">Persistence & Stateful Workloads</div>
+        <p class="path-step-desc">Architecture introduced Storage Nodes and CSI at a glance — this is where PV/PVC binding, StorageClasses, and StatefulSets get the full treatment.</p>
+        <a href="STORAGE/k8-storage.html" class="path-step-link">Read Issue #050 → K8s Storage <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+
+    <div class="path-item">
+      <div class="path-dot d2">3</div>
       <div class="path-content">
         <div class="path-step-label">Networking</div>
         <div class="path-step-title">How Pods Actually Talk</div>
@@ -553,22 +644,22 @@ footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
     </div>
 
     <div class="path-item">
-      <div class="path-dot d3">3</div>
+      <div class="path-dot d3">4</div>
       <div class="path-content">
         <div class="path-step-label">Troubleshooting</div>
         <div class="path-step-title">K8s Error Runbook</div>
-        <p class="path-step-desc">Now that you understand architecture and networking, learn how to diagnose every failure — 32 error types across 5 layers with production-tested fixes and diagnostic commands.</p>
+        <p class="path-step-desc">Now that you understand architecture, storage, and networking, learn how to diagnose every failure — 32 error types across 5 layers with production-tested fixes and diagnostic commands.</p>
         <a href="ERROR/K8-error.html" class="path-step-link">Read Issue #049 → K8s Error Runbook <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
       </div>
     </div>
 
     <div class="path-item">
-      <div class="path-dot d4">4</div>
+      <div class="path-dot d4">5</div>
       <div class="path-content">
         <div class="path-step-label">Observability</div>
-        <div class="path-step-title">Prometheus + Loki + Tempo</div>
-        <p class="path-step-desc">Full observability stack with metrics, logs, and traces — covered in Issue #042 in the newsletter archive.</p>
-        <a href="../../index.html#issues" class="path-step-link">Browse Newsletter Archive <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        <div class="path-step-title">Metrics, Logs & Traces</div>
+        <p class="path-step-desc">Prometheus + Grafana, Loki/ELK, and Jaeger/OpenTelemetry — plus how a platform like OpsCore ties every signal together into one pane of glass.</p>
+        <a href="OBSERVABILITY/k8-observability.html" class="path-step-link">Read Issue #051 → K8s Observability <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
       </div>
     </div>
 
@@ -577,8 +668,8 @@ footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
       <div class="path-content">
         <div class="path-step-label">Coming Soon</div>
         <div class="path-step-title">More Kubernetes Deep-Dives</div>
-        <p class="path-step-desc">RBAC deep-dive, admission controllers, multi-cluster federation, and GitOps workflows are on the roadmap.</p>
-        <a href="../../index.html#subscribe" class="path-step-link">Subscribe for updates <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        <p class="path-step-desc">RBAC deep-dive, admission controllers, and multi-cluster federation are on the roadmap. Looking for GitOps? That's now its own deep-dive in the CI/CD series.</p>
+        <a href="../CICD/cicd-pipelines.html" class="path-step-link">Read CI/CD & GitOps → Issue #052 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
       </div>
     </div>
 
@@ -611,6 +702,9 @@ footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
       <a href="ARCHITECTURE/k8-architecture.html">Architecture</a>
       <a href="Networking/k8-networking.html">Networking</a>
       <a href="ERROR/K8-error.html">Error Runbook</a>
+      <a href="STORAGE/k8-storage.html">Storage</a>
+      <a href="OBSERVABILITY/k8-observability.html">Observability</a>
+      <a href="../CICD/cicd-pipelines.html">CI/CD & GitOps</a>
       <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
       <a href="../../index.html#subscribe">Subscribe</a>
     </div>
