@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K8s Storage Deep-Dive · Platform Ops · Vishal Abhinav</title>
+
+<!-- ── SEO ── -->
+<meta name="description" content="Kubernetes Storage Deep-Dive — PV/PVC lifecycle, StorageClasses & dynamic provisioning, CSI driver architecture, StatefulSets, and backup/DR strategy. Production-tested patterns and commands.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="keywords" content="Kubernetes, K8s, OpenShift, PersistentVolume, PVC, StorageClass, CSI, StatefulSet, Velero, VolumeSnapshot, DevOps, SRE, Platform Engineering">
+
+<!-- ── Open Graph ── -->
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="K8s Storage Deep-Dive — PV/PVC, StorageClasses, CSI, StatefulSets & DR">
+<meta property="og:description" content="Everything storage in Kubernetes: provisioning models, CSI internals, stateful workloads, and how to actually back the cluster up.">
+<meta property="og:url" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/K8/STORAGE/k8-storage.html">
+<meta property="og:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/K8/STORAGE/og-storage.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="K8s Storage Deep-Dive — PV, PVC, StorageClass, CSI, StatefulSet">
+
+<!-- ── Twitter / X ── -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="K8s Storage Deep-Dive — PV/PVC, StorageClasses, CSI, StatefulSets & DR">
+<meta name="twitter:description" content="Provisioning models, CSI internals, stateful workloads, backup & DR — with commands and YAML from production.">
+<meta name="twitter:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/K8/STORAGE/og-storage.png">
+<meta name="twitter:creator" content="@VishalAbhinav">
+
+<!-- ── Article meta ── -->
+<meta property="article:author" content="Vishal Abhinav">
+<meta property="article:published_time" content="2026-06-08">
+<meta property="article:section" content="Platform Engineering">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="Storage">
+<meta property="article:tag" content="DevOps">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:     #08090c;
+  --paper:   #f2f0eb;
+  --smoke:   #e4e0d8;
+  --ash:     #b8b2a7;
+  --coal:    #1c1f26;
+  --cyan:    #00c2d4;
+  --amber:   #f59e0b;
+  --crimson: #e53935;
+  --lime:    #84cc16;
+  --text:    #1c1f26;
+  --muted:   #6b6860;
+  --purple:  #7c3aed;
+  --teal:    #0d9488;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--paper);
+  color:var(--text);
+  font-family:'Manrope',sans-serif;
+  font-size:15px;line-height:1.6;
+  overflow-x:hidden;cursor:none;
+}
+.cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--crimson);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .15s ease,background .2s;transform:translate(-50%,-50%);}
+.cursor-ring{position:fixed;top:0;left:0;width:36px;height:36px;border:1.5px solid var(--coal);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .35s cubic-bezier(.25,.46,.45,.94),width .3s,height .3s,border-color .2s;transform:translate(-50%,-50%);}
+body:hover .cursor-ring{border-color:var(--crimson);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.6;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(8,9,12,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.06);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;color:#fff;display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo span{display:inline-block;width:8px;height:8px;background:var(--crimson);border-radius:50%;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:.6;}}
+.nav-breadcrumb{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+.nav-breadcrumb a{color:rgba(255,255,255,0.3);text-decoration:none;transition:color .2s;}
+.nav-breadcrumb a:hover{color:var(--cyan);}
+.nav-breadcrumb .sep{color:rgba(255,255,255,0.12);}
+.nav-breadcrumb .current{color:var(--cyan);}
+.nav-back{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);padding:8px 20px;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s,color .2s;border:1px solid rgba(255,255,255,0.1);}
+.nav-back:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);}
+
+/* ── HERO ── */
+.hero{min-height:72vh;background:var(--ink);display:grid;grid-template-columns:1fr 1fr;padding-top:72px;overflow:hidden;position:relative;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 10% 40%,rgba(0,194,212,.1) 0%,transparent 55%),radial-gradient(circle at 90% 60%,rgba(229,57,53,.1) 0%,transparent 50%),radial-gradient(circle at 50% 100%,rgba(124,58,237,.08) 0%,transparent 50%);pointer-events:none;}
+.hero-ghost{position:absolute;bottom:-20px;left:-10px;font-family:'Bebas Neue',sans-serif;font-size:clamp(140px,20vw,260px);color:rgba(255,255,255,.022);letter-spacing:-4px;line-height:1;pointer-events:none;white-space:nowrap;}
+.hero-left{padding:80px 48px 80px 64px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;}
+.bc{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:28px;}
+.bc a{color:rgba(255,255,255,.28);text-decoration:none;transition:color .2s;}
+.bc a:hover{color:var(--cyan);}
+.bc .sep{color:rgba(255,255,255,.12);}
+.bc .here{color:var(--crimson);}
+.eyebrow{display:flex;align-items:center;gap:12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:20px;}
+.eyebrow-line{display:block;width:40px;height:1px;background:var(--crimson);}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,6.5vw,96px);line-height:.9;letter-spacing:-.5px;color:#fff;margin-bottom:12px;}
+.hero-title .hl-red{color:var(--crimson);}
+.hero-title .hl-cyan{color:var(--cyan);}
+.hero-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:rgba(255,255,255,.38);margin-bottom:28px;line-height:1.4;}
+.hero-desc{font-size:14px;color:rgba(255,255,255,.32);max-width:440px;margin-bottom:36px;line-height:1.85;}
+.level-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px;}
+.lp{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;border-radius:20px;cursor:pointer;transition:all .2s;border:none;}
+.lp.pv    {background:rgba(229,57,53,.15);color:#ef5350;border:1px solid rgba(229,57,53,.3);}
+.lp.sc    {background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);}
+.lp.csi   {background:rgba(0,194,212,.15);color:var(--cyan);border:1px solid rgba(0,194,212,.3);}
+.lp.sts   {background:rgba(132,204,22,.15);color:var(--lime);border:1px solid rgba(132,204,22,.3);}
+.lp.bak   {background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);}
+.lp:hover{transform:translateY(-2px);filter:brightness(1.3);}
+.hero-meta-row{display:flex;gap:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.07);}
+.hm-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;color:#fff;}
+.hm-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:3px;}
+
+/* ── HERO RIGHT: storage matrix viz ── */
+.hero-right{display:flex;align-items:center;justify-content:center;padding:60px 48px;position:relative;z-index:2;}
+.err-matrix{display:flex;flex-direction:column;gap:10px;width:100%;max-width:400px;}
+.err-layer{border:1px solid rgba(255,255,255,.07);border-radius:8px;overflow:hidden;transition:border-color .3s;}
+.err-layer:hover{border-color:rgba(255,255,255,.2);}
+.el-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.el-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;}
+.el-count{font-family:'Bebas Neue',sans-serif;font-size:20px;}
+.el-bar{height:3px;background:rgba(255,255,255,.06);}
+.el-fill{height:100%;border-radius:1px;transition:width 1.4s cubic-bezier(.25,.46,.45,.94);width:0;}
+.el-errors{padding:10px 20px 14px;display:flex;flex-wrap:wrap;gap:5px;}
+.ee{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.5px;padding:3px 9px;border-radius:12px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.35);}
+
+.err-layer.pv   .el-header{background:rgba(229,57,53,.08);}
+.err-layer.pv   .el-label{color:#ef5350;}
+.err-layer.pv   .el-count{color:#ef5350;}
+.err-layer.pv   .el-fill{background:linear-gradient(90deg,var(--crimson),#ff6b35);}
+.err-layer.sc   .el-header{background:rgba(245,158,11,.08);}
+.err-layer.sc   .el-label{color:var(--amber);}
+.err-layer.sc   .el-count{color:var(--amber);}
+.err-layer.sc   .el-fill{background:linear-gradient(90deg,var(--amber),#fbbf24);}
+.err-layer.csi  .el-header{background:rgba(0,194,212,.08);}
+.err-layer.csi  .el-label{color:var(--cyan);}
+.err-layer.csi  .el-count{color:var(--cyan);}
+.err-layer.csi  .el-fill{background:linear-gradient(90deg,var(--cyan),#38bdf8);}
+.err-layer.sts  .el-header{background:rgba(132,204,22,.08);}
+.err-layer.sts  .el-label{color:var(--lime);}
+.err-layer.sts  .el-count{color:var(--lime);}
+.err-layer.sts  .el-fill{background:linear-gradient(90deg,var(--lime),#4ade80);}
+.err-layer.bak  .el-header{background:rgba(124,58,237,.08);}
+.err-layer.bak  .el-label{color:#a78bfa;}
+.err-layer.bak  .el-count{color:#a78bfa;}
+.err-layer.bak  .el-fill{background:linear-gradient(90deg,var(--purple),#8b5cf6);}
+
+/* ── TICKER ── */
+.ticker-wrap{background:rgba(8,9,12,1);overflow:hidden;padding:11px 0;border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);}
+.ticker-track{display:flex;gap:0;animation:ticker 32s linear infinite;white-space:nowrap;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;gap:12px;padding:0 28px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);}
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--crimson);}
+
+/* ── ARCHITECTURE SECTION ── */
+.arch-section{background:var(--coal);padding:0;}
+.arch-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.arch-inner .section-tag{color:rgba(255,255,255,.3);}
+.arch-inner .section-title{color:#fff;}
+.arch-inner .section-lead{color:rgba(255,255,255,.4);}
+
+.section-tag{display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+.section-tag::before{content:'';display:block;width:24px;height:1px;background:var(--crimson);}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,4.5vw,60px);line-height:1;letter-spacing:-.5px;color:var(--coal);margin-bottom:12px;}
+.section-lead{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--muted);max-width:640px;margin-bottom:56px;}
+
+.arch-diagram{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:48px;}
+.arch-layer{display:flex;flex-direction:column;align-items:stretch;}
+.arch-layer-header{padding:14px 16px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;text-align:center;}
+.arch-layer-body{flex:1;padding:16px;border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px;}
+.arch-comp{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.8px;color:rgba(255,255,255,.5);text-align:center;transition:all .2s;cursor:default;}
+.arch-comp:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);}
+
+.arch-layer.pv    .arch-layer-header{background:rgba(229,57,53,.15);color:#ef5350;}
+.arch-layer.pv    .arch-comp:hover{border-color:rgba(229,57,53,.4);}
+.arch-layer.sc    .arch-layer-header{background:rgba(245,158,11,.15);color:var(--amber);}
+.arch-layer.sc    .arch-comp:hover{border-color:rgba(245,158,11,.4);}
+.arch-layer.csi   .arch-layer-header{background:rgba(0,194,212,.15);color:var(--cyan);}
+.arch-layer.csi   .arch-comp:hover{border-color:rgba(0,194,212,.4);}
+.arch-layer.sts   .arch-layer-header{background:rgba(132,204,22,.15);color:var(--lime);}
+.arch-layer.sts   .arch-comp:hover{border-color:rgba(132,204,22,.4);}
+.arch-layer.bak   .arch-layer-header{background:rgba(124,58,237,.15);color:#a78bfa;}
+.arch-layer.bak   .arch-comp:hover{border-color:rgba(124,58,237,.4);}
+
+/* ── MAIN CONTENT ── */
+.content-section{max-width:1200px;margin:0 auto;padding:100px 64px;}
+
+.level-tabs{display:flex;gap:2px;margin-bottom:2px;overflow-x:auto;}
+.level-tab{flex:1;min-width:140px;padding:16px 20px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s;background:var(--smoke);color:var(--muted);text-align:left;position:relative;overflow:hidden;}
+.level-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:transparent;transition:background .2s;}
+.level-tab:hover{background:var(--coal);color:#fff;}
+.level-tab.active{background:var(--coal);color:#fff;}
+.level-tab.active.pv    ::after,.level-tab.pv:hover::after   {background:var(--crimson);}
+.level-tab.active.sc    ::after,.level-tab.sc:hover::after   {background:var(--amber);}
+.level-tab.active.csi   ::after,.level-tab.csi:hover::after  {background:var(--cyan);}
+.level-tab.active.sts   ::after,.level-tab.sts:hover::after  {background:var(--lime);}
+.level-tab.active.bak   ::after,.level-tab.bak:hover::after  {background:var(--purple);}
+.tab-icon{font-size:16px;display:block;margin-bottom:4px;}
+.tab-label{display:block;font-size:10px;}
+.tab-count{display:block;font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;margin-top:2px;}
+
+.level-panel{display:none;}
+.level-panel.active{display:block;}
+
+.level-banner{padding:28px 40px;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.lb-title{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:.95;letter-spacing:.5px;color:#fff;}
+.lb-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:16px;margin-top:6px;}
+.lb-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:20px;white-space:nowrap;}
+
+.errors-list{display:flex;flex-direction:column;gap:2px;}
+.error-card{background:var(--smoke);overflow:hidden;transition:background .2s;}
+.error-card.open{background:#fff;}
+.ec-header{padding:24px 28px;display:flex;align-items:center;gap:20px;cursor:pointer;user-select:none;}
+.ec-header:hover{background:rgba(0,0,0,.03);}
+.ec-severity{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sev-critical{background:rgba(229,57,53,.15);border:1.5px solid rgba(229,57,53,.4);}
+.sev-high    {background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.4);}
+.sev-medium  {background:rgba(0,194,212,.15);border:1.5px solid rgba(0,194,212,.4);}
+.sev-low     {background:rgba(132,204,22,.15);border:1.5px solid rgba(132,204,22,.4);}
+.ec-main{flex:1;}
+.ec-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;color:var(--coal);line-height:1;}
+.ec-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.5;}
+.ec-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.ec-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+.ec-tag.c{background:rgba(0,194,212,.12);color:var(--cyan);}
+.ec-tag.r{background:rgba(229,57,53,.12);color:var(--crimson);}
+.ec-tag.l{background:rgba(132,204,22,.12);color:var(--lime);}
+.ec-tag.a{background:rgba(245,158,11,.12);color:var(--amber);}
+.ec-tag.p{background:rgba(124,58,237,.12);color:#a78bfa;}
+.ec-right{display:flex;align-items:center;gap:16px;}
+.ec-sev-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:20px;}
+.sev-badge-critical{background:rgba(229,57,53,.15);color:var(--crimson);}
+.sev-badge-high    {background:rgba(245,158,11,.15);color:var(--amber);}
+.sev-badge-medium  {background:rgba(0,194,212,.15);color:var(--cyan);}
+.sev-badge-low     {background:rgba(132,204,22,.15);color:var(--lime);}
+.ec-chevron{color:var(--muted);transition:transform .3s;font-size:18px;}
+.error-card.open .ec-chevron{transform:rotate(180deg);}
+.ec-body{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.25,.46,.45,.94);}
+.error-card.open .ec-body{max-height:1400px;}
+.ec-inner{padding:0 28px 32px;display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+.ec-block{background:var(--paper);border-radius:4px;padding:20px 22px;}
+.ec-block.full{grid-column:1/-1;}
+.ec-block-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ec-block-title.diag  {color:var(--cyan);}
+.ec-block-title.causes{color:var(--amber);}
+.ec-block-title.fix   {color:var(--lime);}
+.ec-block-title.cmd   {color:var(--crimson);}
+.ec-block-title::after{content:'';flex:1;height:1px;background:rgba(0,0,0,.08);}
+
+.cmd-block{background:var(--coal);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+.cmd-bar{padding:8px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:6px;}
+.cmd-dot{width:8px;height:8px;border-radius:50%;}
+.cmd-dot.r{background:#ff5f57;}
+.cmd-dot.y{background:#ffbd2e;}
+.cmd-dot.g{background:#28c840;}
+.cmd-label{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);letter-spacing:1px;margin-left:4px;}
+.cmd-lines{padding:12px 16px;display:flex;flex-direction:column;gap:4px;}
+.cmd-line{font-family:'DM Mono',monospace;font-size:12px;line-height:1.6;display:flex;gap:8px;white-space:pre-wrap;}
+.cmd-prompt{color:var(--cyan);}
+.cmd-text{color:#e2e8f0;}
+.cmd-comment{color:rgba(255,255,255,.25);}
+.cmd-yaml{color:#e2e8f0;}
+.cmd-key{color:#7dd3fc;}
+.cmd-val{color:#bef264;}
+
+.causes-list{display:flex;flex-direction:column;gap:8px;}
+.cause-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(0,0,0,.03);border-radius:4px;border-left:3px solid transparent;font-size:13px;line-height:1.5;}
+.cause-item.c-critical{border-color:var(--crimson);}
+.cause-item.c-high    {border-color:var(--amber);}
+.cause-item.c-medium  {border-color:var(--cyan);}
+.cause-item.c-low     {border-color:var(--lime);}
+.cause-icon{flex-shrink:0;font-size:14px;}
+.cause-text{color:var(--text);}
+.cause-text strong{color:var(--coal);font-weight:700;}
+
+.fix-steps{display:flex;flex-direction:column;gap:6px;}
+.fix-step{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:4px;transition:background .2s;}
+.fix-step:hover{background:rgba(0,0,0,.03);}
+.fix-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;flex-shrink:0;margin-top:1px;}
+.fix-num.pv    {background:rgba(229,57,53,.15);color:var(--crimson);}
+.fix-num.sc    {background:rgba(245,158,11,.15);color:var(--amber);}
+.fix-num.csi   {background:rgba(0,194,212,.15);color:var(--cyan);}
+.fix-num.sts   {background:rgba(132,204,22,.15);color:var(--lime);}
+.fix-num.bak   {background:rgba(124,58,237,.15);color:#a78bfa;}
+.fix-text{font-size:13px;color:var(--text);line-height:1.55;}
+.fix-text strong{color:var(--coal);}
+.fix-text code{background:rgba(0,0,0,.07);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;}
+
+.exit-table{width:100%;border-collapse:collapse;}
+.exit-table th{background:var(--coal);color:#fff;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 14px;text-align:left;}
+.exit-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.06);}
+.exit-table tr:last-child td{border-bottom:none;}
+.exit-table tr:hover td{background:rgba(0,0,0,.03);}
+.exit-code{font-family:'Bebas Neue',sans-serif;font-size:20px;}
+.exit-sig{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+
+/* ── CHEATSHEET ── */
+.cheat-section{background:var(--coal);padding:0;}
+.cheat-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.cheat-inner .section-title{color:#fff;}
+.cheat-inner .section-tag{color:rgba(255,255,255,.3);}
+.cheat-inner .section-lead{color:rgba(255,255,255,.4);}
+.cheat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.cheat-block{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);padding:28px 24px;transition:background .2s,border-color .2s;}
+.cheat-block:hover{background:rgba(255,255,255,.06);border-color:rgba(0,194,212,.2);}
+.cheat-block-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.cheat-block-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+.cheat-cmd{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.5;display:flex;align-items:flex-start;gap:6px;}
+.cheat-cmd:last-child{border-bottom:none;}
+.cheat-cmd .prompt{color:var(--cyan);flex-shrink:0;}
+.cheat-cmd .comment{color:rgba(255,255,255,.2);font-style:italic;}
+
+/* ── DECISION TABLE ── */
+.decision-wrap{margin-bottom:56px;overflow-x:auto;}
+.decision-table{width:100%;border-collapse:collapse;background:var(--smoke);min-width:760px;}
+.decision-table th{background:var(--coal);color:#fff;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 16px;text-align:left;}
+.decision-table td{padding:14px 16px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.08);vertical-align:top;}
+.decision-table tr:last-child td{border-bottom:none;}
+.decision-table tr:hover td{background:rgba(0,0,0,.03);}
+.decision-table td strong{color:var(--coal);}
+.pill-mini{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 9px;border-radius:12px;background:rgba(0,194,212,.12);color:var(--cyan);margin:2px 4px 2px 0;}
+
+/* ── AUTHOR STRIP ── */
+.author-strip{background:var(--smoke);padding:60px 64px;}
+.author-strip-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.author-info{display:flex;align-items:center;gap:24px;}
+.author-avatar{width:64px;height:64px;background:linear-gradient(135deg,var(--crimson),#ff6b35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;color:#fff;flex-shrink:0;}
+.author-name{font-weight:700;font-size:17px;color:var(--coal);margin-bottom:4px;}
+.author-role{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.author-actions{display:flex;gap:12px;}
+.btn-sm{padding:10px 24px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;text-decoration:none;transition:background .2s,color .2s,border-color .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-sm.primary{background:var(--coal);color:var(--paper);}
+.btn-sm.primary:hover{background:var(--crimson);}
+.btn-sm.ghost{background:transparent;color:var(--coal);border:1.5px solid var(--coal);}
+.btn-sm.ghost:hover{border-color:var(--crimson);color:var(--crimson);}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:rgba(255,255,255,.6);}
+.footer-links{display:flex;gap:24px;flex-wrap:wrap;}
+.footer-links a{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--cyan);}
+.footer-note{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;}
+
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:900px){
+  nav{padding:14px 20px;}
+  .nav-breadcrumb{display:none;}
+  .hero{grid-template-columns:1fr;}
+  .hero-right{min-height:280px;padding:32px 24px;}
+  .hero-left{padding:60px 28px;}
+  .arch-inner{padding:64px 28px;}
+  .arch-diagram{grid-template-columns:1fr;gap:8px;}
+  .content-section{padding:64px 28px;}
+  .level-tabs{flex-wrap:wrap;}
+  .ec-inner{grid-template-columns:1fr;}
+  .cheat-inner{padding:64px 28px;}
+  .cheat-grid{grid-template-columns:1fr;}
+  .author-strip{padding:48px 28px;}
+  .author-strip-inner{flex-direction:column;align-items:flex-start;}
+  footer{padding:36px 28px;}
+  .footer-inner{flex-direction:column;align-items:flex-start;}
+  .decision-table{min-width:640px;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <a href="../../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="nav-breadcrumb">
+    <a href="../../../index.html">Home</a><span class="sep">/</span>
+    <a href="../../../DevOps/K8/index.html">DevOps</a><span class="sep">/</span>
+    <a href="../../../DevOps/K8/index.html">Kubernetes</a><span class="sep">/</span>
+    <span class="current">Storage</span>
+  </div>
+  <a href="../../../DevOps/K8/index.html" class="nav-back">← K8s Series</a>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-ghost">STORAGE</div>
+  <div class="hero-left">
+    <div class="bc">
+      <a href="../../../index.html">Platform Ops</a><span class="sep">›</span>
+      <a href="../../../DevOps/K8/index.html">Kubernetes</a><span class="sep">›</span>
+      <span class="here">Storage</span>
+    </div>
+    <div class="eyebrow"><span class="eyebrow-line"></span>Issue #050 · June 2026</div>
+    <h1 class="hero-title">
+      K8s <span class="hl-red">STORAGE</span><br>
+      <span class="hl-cyan">DEEP-DIVE</span>
+    </h1>
+    <p class="hero-sub">PV/PVC · StorageClasses · CSI · StatefulSets · Backup</p>
+    <p class="hero-desc">How data actually persists in a cluster that's designed to treat everything as disposable — provisioning models, the CSI plugin architecture, running stateful workloads correctly, and backing all of it up before you need to.</p>
+    <div class="level-pills">
+      <button class="lp pv"  onclick="switchLevel('pv')">🔴 PV / PVC</button>
+      <button class="lp sc"  onclick="switchLevel('sc')">🟠 StorageClasses</button>
+      <button class="lp csi" onclick="switchLevel('csi')">🔵 CSI Drivers</button>
+      <button class="lp sts" onclick="switchLevel('sts')">🟢 StatefulSets</button>
+      <button class="lp bak" onclick="switchLevel('bak')">🟣 Backup & DR</button>
+    </div>
+    <div class="hero-meta-row">
+      <div><div class="hm-num">18</div><div class="hm-label">Concepts Covered</div></div>
+      <div><div class="hm-num">5</div><div class="hm-label">Storage Layers</div></div>
+      <div><div class="hm-num">K8s</div><div class="hm-label">1.24+ / OCP 4.x</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="err-matrix">
+      <div class="err-layer pv">
+        <div class="el-header"><span class="el-label">PV / PVC</span><span class="el-count">4</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="80%"></div></div>
+        <div class="el-errors">
+          <span class="ee">Static Binding</span><span class="ee">Dynamic Binding</span>
+          <span class="ee">Access Modes</span><span class="ee">Reclaim Policy</span>
+        </div>
+      </div>
+      <div class="err-layer sc">
+        <div class="el-header"><span class="el-label">StorageClasses</span><span class="el-count">4</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="70%"></div></div>
+        <div class="el-errors">
+          <span class="ee">Provisioner</span><span class="ee">Binding Mode</span>
+          <span class="ee">Expansion</span><span class="ee">Default Class</span>
+        </div>
+      </div>
+      <div class="err-layer csi">
+        <div class="el-header"><span class="el-label">CSI Drivers</span><span class="el-count">3</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="65%"></div></div>
+        <div class="el-errors">
+          <span class="ee">Controller Plugin</span><span class="ee">Node Plugin</span>
+          <span class="ee">Sidecars</span>
+        </div>
+      </div>
+      <div class="err-layer sts">
+        <div class="el-header"><span class="el-label">StatefulSets</span><span class="el-count">4</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="75%"></div></div>
+        <div class="el-errors">
+          <span class="ee">Stable Identity</span><span class="ee">Headless Svc</span>
+          <span class="ee">Ordered Rollout</span><span class="ee">volumeClaimTemplates</span>
+        </div>
+      </div>
+      <div class="err-layer bak">
+        <div class="el-header"><span class="el-label">Backup & DR</span><span class="el-count">3</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="55%"></div></div>
+        <div class="el-errors">
+          <span class="ee">VolumeSnapshot</span><span class="ee">Velero</span>
+          <span class="ee">RPO / RTO</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TICKER ─── -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="ticker-dot"></span>PersistentVolume</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>PersistentVolumeClaim</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>StorageClass</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CSI Controller Plugin</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CSI Node Plugin</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>VolumeAttachment</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>StatefulSet</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>volumeClaimTemplates</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>WaitForFirstConsumer</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>VolumeSnapshot</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Velero</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>ReclaimPolicy: Retain</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>PersistentVolume</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>PersistentVolumeClaim</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>StorageClass</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CSI Controller Plugin</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>CSI Node Plugin</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>VolumeAttachment</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>StatefulSet</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>volumeClaimTemplates</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>WaitForFirstConsumer</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>VolumeSnapshot</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Velero</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>ReclaimPolicy: Retain</span>
+  </div>
+</div>
+
+<!-- ═══ ARCHITECTURE ═══ -->
+<div class="arch-section">
+  <div class="arch-inner reveal">
+    <div class="section-tag" style="color:rgba(255,255,255,.3)">Architecture Map</div>
+    <h2 class="section-title" style="color:#fff">THE STORAGE STACK</h2>
+    <p class="section-lead">Five layers sit between "a pod wants a disk" and "a disk is actually attached." Understand them top to bottom before you touch a StatefulSet in production.</p>
+    <div class="arch-diagram">
+      <div class="arch-layer pv">
+        <div class="arch-layer-header">🔴 PV / PVC</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">PersistentVolume</div>
+          <div class="arch-comp">PersistentVolumeClaim</div>
+          <div class="arch-comp">Access Modes</div>
+          <div class="arch-comp">Reclaim Policy</div>
+          <div class="arch-comp">Binding Controller</div>
+        </div>
+      </div>
+      <div class="arch-layer sc">
+        <div class="arch-layer-header">🟠 StorageClass</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">Provisioner</div>
+          <div class="arch-comp">Parameters</div>
+          <div class="arch-comp">volumeBindingMode</div>
+          <div class="arch-comp">allowVolumeExpansion</div>
+          <div class="arch-comp">Default Class</div>
+        </div>
+      </div>
+      <div class="arch-layer csi">
+        <div class="arch-layer-header">🔵 CSI Driver</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">Controller Plugin</div>
+          <div class="arch-comp">Node Plugin</div>
+          <div class="arch-comp">external-provisioner</div>
+          <div class="arch-comp">external-attacher</div>
+          <div class="arch-comp">node-driver-registrar</div>
+        </div>
+      </div>
+      <div class="arch-layer sts">
+        <div class="arch-layer-header">🟢 StatefulSet</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">Stable Pod Identity</div>
+          <div class="arch-comp">Headless Service</div>
+          <div class="arch-comp">Ordered Deploy/Scale</div>
+          <div class="arch-comp">volumeClaimTemplates</div>
+          <div class="arch-comp">PVC Retention Policy</div>
+        </div>
+      </div>
+      <div class="arch-layer bak">
+        <div class="arch-layer-header">🟣 Backup / DR</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">VolumeSnapshotClass</div>
+          <div class="arch-comp">VolumeSnapshot</div>
+          <div class="arch-comp">Velero</div>
+          <div class="arch-comp">Cross-Region Replication</div>
+          <div class="arch-comp">RPO / RTO Targets</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<section class="content-section reveal" id="topics">
+  <div class="section-tag">Deep-Dive</div>
+  <h2 class="section-title">STORAGE REFERENCE</h2>
+  <p class="section-lead">Click any layer to explore concepts, YAML, and production-tested guidance.</p>
+
+  <div class="level-tabs">
+    <button class="level-tab pv active" onclick="switchLevel('pv')">
+      <span class="tab-icon">🔴</span><span class="tab-label">PV / PVC</span><span class="tab-count">3</span>
+    </button>
+    <button class="level-tab sc" onclick="switchLevel('sc')">
+      <span class="tab-icon">🟠</span><span class="tab-label">StorageClasses</span><span class="tab-count">3</span>
+    </button>
+    <button class="level-tab csi" onclick="switchLevel('csi')">
+      <span class="tab-icon">🔵</span><span class="tab-label">CSI Drivers</span><span class="tab-count">3</span>
+    </button>
+    <button class="level-tab sts" onclick="switchLevel('sts')">
+      <span class="tab-icon">🟢</span><span class="tab-label">StatefulSets</span><span class="tab-count">3</span>
+    </button>
+    <button class="level-tab bak" onclick="switchLevel('bak')">
+      <span class="tab-icon">🟣</span><span class="tab-label">Backup & DR</span><span class="tab-count">3</span>
+    </button>
+  </div>
+
+  <!-- ════════ PV / PVC ════════ -->
+  <div class="level-panel active" id="panel-pv">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(229,57,53,.2),rgba(229,57,53,.05));border:1px solid rgba(229,57,53,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:#ef5350;">PERSISTENTVOLUME & PERSISTENTVOLUMECLAIM</div>
+        <div class="lb-sub" style="color:rgba(229,57,53,.6);">The abstraction that decouples "where the disk lives" from "what pod uses it"</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(229,57,53,.15);color:var(--crimson);border:1px solid rgba(229,57,53,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">📦</div>
+          <div class="ec-main">
+            <div class="ec-name">Static vs Dynamic Provisioning</div>
+            <div class="ec-desc">A PV is a cluster resource representing actual storage. A PVC is a namespaced request for that storage. How the PV gets created is the whole story.</div>
+            <div class="ec-tags"><span class="ec-tag r">Must Know</span><span class="ec-tag c">Provisioning</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="ec-block-title cmd">Static: admin pre-creates the PV</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">pv-static.yaml</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-text">apiVersion: v1</span></div>
+                  <div class="cmd-line"><span class="cmd-text">kind: PersistentVolume</span></div>
+                  <div class="cmd-line"><span class="cmd-text">metadata: {name: pv-billing-logs}</span></div>
+                  <div class="cmd-line"><span class="cmd-text">spec:</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;capacity: {storage: 50Gi}</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;accessModes: [ReadWriteOnce]</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;persistentVolumeReclaimPolicy: Retain</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;nfs: {server: 10.20.4.5, path: /export/billing}</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Static Provisioning</div>
+              <div class="causes-list">
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">Admin creates the PV up front (NFS export, pre-carved LUN, existing disk)</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">A matching PVC binds to it — no provisioner call involved</span></div>
+                <div class="cause-item c-low"><span class="cause-icon">🟢</span><span class="cause-text">Good for: NFS shares, pre-existing SAN LUNs, migration scenarios</span></div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">Dynamic Provisioning</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num pv">1</div><div class="fix-text">PVC references a <code>storageClassName</code> instead of an existing PV</div></div>
+                <div class="fix-step"><div class="fix-num pv">2</div><div class="fix-text">The CSI external-provisioner sidecar watches for unbound PVCs</div></div>
+                <div class="fix-step"><div class="fix-num pv">3</div><div class="fix-text">It calls the backend API (EBS, Ceph, etc.) and creates the PV automatically</div></div>
+                <div class="fix-step"><div class="fix-num pv">4</div><div class="fix-text">This is the default in almost every production cluster today</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">🔐</div>
+          <div class="ec-main">
+            <div class="ec-name">Access Modes</div>
+            <div class="ec-desc">Access modes describe how many nodes can mount the volume simultaneously — not a permissions system. Getting this wrong causes multi-attach errors.</div>
+            <div class="ec-tags"><span class="ec-tag a">Important</span><span class="ec-tag c">Binding</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="ec-block-title causes">The Four Access Modes</div>
+              <table class="exit-table">
+                <tr><th>Mode</th><th>Meaning</th><th>Typical Backend</th></tr>
+                <tr><td class="exit-code" style="font-size:14px">RWO</td><td>ReadWriteOnce — one node, read-write</td><td>EBS, Azure Disk, GCE PD</td></tr>
+                <tr><td class="exit-code" style="font-size:14px">ROX</td><td>ReadOnlyMany — many nodes, read-only</td><td>NFS, CephFS</td></tr>
+                <tr><td class="exit-code" style="font-size:14px">RWX</td><td>ReadWriteMany — many nodes, read-write</td><td>NFS, CephFS, EFS, Azure Files</td></tr>
+                <tr><td class="exit-code" style="font-size:14px">RWOP</td><td>ReadWriteOncePod — single <em>pod</em> (K8s 1.22+), stricter than RWO</td><td>CSI drivers supporting block-mode RWOP</td></tr>
+              </table>
+            </div>
+            <div class="ec-block full">
+              <div class="ec-block-title fix">Common Mistake</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num pv">1</div><div class="fix-text">Requesting <code>RWX</code> on EBS/Azure Disk — these block-storage backends only support <code>RWO</code>. Use EFS/Azure Files/CephFS instead.</div></div>
+                <div class="fix-step"><div class="fix-num pv">2</div><div class="fix-text">Scaling a Deployment with an RWO PVC beyond 1 replica → new pod stuck <code>Pending</code> with a multi-attach error since two nodes can't mount the same RWO volume.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">♻️</div>
+          <div class="ec-main">
+            <div class="ec-name">Reclaim Policy & PVC Lifecycle</div>
+            <div class="ec-desc">What happens to the underlying disk once the PVC is deleted — the single most consequential setting for data safety.</div>
+            <div class="ec-tags"><span class="ec-tag c">Data Safety</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title causes">Reclaim Policies</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Delete</strong> (default for dynamic): backend volume is destroyed when the PVC is deleted — irreversible</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Retain:</strong> PV becomes <code>Released</code>, data stays, needs manual admin cleanup/reclaim before reuse</span></div>
+                <div class="cause-item c-low"><span class="cause-icon">🟢</span><span class="cause-text"><strong>Recycle</strong> (deprecated): basic <code>rm -rf</code> scrub — don't use it</span></div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">PVC Binding Lifecycle</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num pv">1</div><div class="fix-text">PVC created → <code>Pending</code></div></div>
+                <div class="fix-step"><div class="fix-num pv">2</div><div class="fix-text">Matching PV found/provisioned → <code>Bound</code></div></div>
+                <div class="fix-step"><div class="fix-num pv">3</div><div class="fix-text">PVC deleted → PV becomes <code>Released</code> (Retain) or is destroyed (Delete)</div></div>
+                <div class="fix-step"><div class="fix-num pv">4</div><div class="fix-text">Set <code>persistentVolumeReclaimPolicy: Retain</code> on anything holding data you can't regenerate</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ STORAGECLASSES ════════ -->
+  <div class="level-panel" id="panel-sc">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.05));border:1px solid rgba(245,158,11,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:var(--amber);">STORAGECLASSES & DYNAMIC PROVISIONING</div>
+        <div class="lb-sub" style="color:rgba(245,158,11,.7);">The template that tells Kubernetes how to provision a volume on demand</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">⚙️</div>
+          <div class="ec-main">
+            <div class="ec-name">Defining a StorageClass</div>
+            <div class="ec-desc">A StorageClass names a provisioner and passes it backend-specific parameters. PVCs reference the class by name — that's the entire contract.</div>
+            <div class="ec-tags"><span class="ec-tag r">Must Know</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="ec-block-title cmd">storageclass-fast-ssd.yaml</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">yaml</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-text">apiVersion: storage.k8s.io/v1</span></div>
+                  <div class="cmd-line"><span class="cmd-text">kind: StorageClass</span></div>
+                  <div class="cmd-line"><span class="cmd-text">metadata: {name: fast-ssd}</span></div>
+                  <div class="cmd-line"><span class="cmd-text">provisioner: ebs.csi.aws.com</span></div>
+                  <div class="cmd-line"><span class="cmd-text">parameters: {type: gp3, iops: "3000", throughput: "125"}</span></div>
+                  <div class="cmd-line"><span class="cmd-text">reclaimPolicy: Delete</span></div>
+                  <div class="cmd-line"><span class="cmd-text">allowVolumeExpansion: true</span></div>
+                  <div class="cmd-line"><span class="cmd-text">volumeBindingMode: WaitForFirstConsumer</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block full">
+              <div class="ec-block-title diag">Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get storageclass</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe storageclass fast-ssd</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get sc -o jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].metadata.name}'</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">⏱️</div>
+          <div class="ec-main">
+            <div class="ec-name">Volume Binding Mode</div>
+            <div class="ec-desc">Controls when the volume is actually provisioned — immediately at PVC creation, or once a pod is scheduled and its node is known.</div>
+            <div class="ec-tags"><span class="ec-tag a">Important</span><span class="ec-tag c">Scheduling</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title causes">Immediate</div>
+              <div class="causes-list">
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">Volume is provisioned as soon as the PVC is created, before any pod is scheduled</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">Risk: the volume can land in an AZ where no eligible node exists → pod stuck <code>Pending</code></span></div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">WaitForFirstConsumer</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num sc">1</div><div class="fix-text">Scheduler picks a node for the pod <strong>first</strong></div></div>
+                <div class="fix-step"><div class="fix-num sc">2</div><div class="fix-text">Provisioner then creates the volume in that node's zone</div></div>
+                <div class="fix-step"><div class="fix-num sc">3</div><div class="fix-text">Eliminates zone-mismatch scheduling failures — the default recommendation for cloud CSI drivers</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">📐</div>
+          <div class="ec-main">
+            <div class="ec-name">Volume Expansion & Multi-Class Strategy</div>
+            <div class="ec-desc">Growing a volume without downtime, and running more than one StorageClass for different performance tiers.</div>
+            <div class="ec-tags"><span class="ec-tag c">Operations</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title fix">Expanding a PVC</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num sc">1</div><div class="fix-text">StorageClass must have <code>allowVolumeExpansion: true</code></div></div>
+                <div class="fix-step"><div class="fix-num sc">2</div><div class="fix-text">Edit the PVC's <code>spec.resources.requests.storage</code> to a larger value</div></div>
+                <div class="fix-step"><div class="fix-num sc">3</div><div class="fix-text">Most CSI drivers expand online; some filesystems need a pod restart to see the new size</div></div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Multi-Class Pattern</div>
+              <div class="causes-list">
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>fast-ssd</strong> — databases, indexing workloads</span></div>
+                <div class="cause-item c-low"><span class="cause-icon">🟢</span><span class="cause-text"><strong>standard</strong> — general application data, default class</span></div>
+                <div class="cause-item c-low"><span class="cause-icon">🟢</span><span class="cause-text"><strong>archive-hdd</strong> — logs, cold backups, cost-optimized</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ CSI DRIVERS ════════ -->
+  <div class="level-panel" id="panel-csi">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(0,194,212,.2),rgba(0,194,212,.05));border:1px solid rgba(0,194,212,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:var(--cyan);">CSI DRIVER ARCHITECTURE</div>
+        <div class="lb-sub" style="color:rgba(0,194,212,.7);">Container Storage Interface — how Kubernetes talks to any storage backend without vendor code in core</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(0,194,212,.15);color:var(--cyan);border:1px solid rgba(0,194,212,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🧩</div>
+          <div class="ec-main">
+            <div class="ec-name">Controller Plugin vs Node Plugin</div>
+            <div class="ec-desc">Every CSI driver ships as two components running very different jobs, each wrapped with sidecar containers that talk to the Kubernetes API.</div>
+            <div class="ec-tags"><span class="ec-tag r">Must Know</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title causes">Controller Plugin (Deployment, 1-3 replicas)</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text">Runs cluster-wide, calls the storage backend's API</span></div>
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text">Sidecars: <strong>external-provisioner</strong> (create/delete), <strong>external-attacher</strong> (attach/detach), <strong>external-resizer</strong> (expand), <strong>external-snapshotter</strong></span></div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">Node Plugin (DaemonSet, every node)</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num csi">1</div><div class="fix-text">Mounts/unmounts the already-attached volume into the pod's filesystem</div></div>
+                <div class="fix-step"><div class="fix-num csi">2</div><div class="fix-text">Sidecar: <code>node-driver-registrar</code> registers the driver with kubelet</div></div>
+                <div class="fix-step"><div class="fix-num csi">3</div><div class="fix-text">Talks to kubelet over a Unix socket at <code>/var/lib/kubelet/plugins/&lt;driver&gt;/csi.sock</code></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">🏭</div>
+          <div class="ec-main">
+            <div class="ec-name">Choosing a CSI Driver</div>
+            <div class="ec-desc">The backend decides your access modes, snapshot support, and expansion story. Pick deliberately, not by default.</div>
+            <div class="ec-tags"><span class="ec-tag a">Important</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <table class="exit-table">
+                <tr><th>Driver</th><th>Best For</th><th>RWX Support</th></tr>
+                <tr><td class="exit-code" style="font-size:15px">aws-ebs-csi-driver</td><td>Single-node block storage on EKS</td><td>No (block-mode only)</td></tr>
+                <tr><td class="exit-code" style="font-size:15px">aws-efs-csi-driver</td><td>Shared file storage, config volumes</td><td>Yes</td></tr>
+                <tr><td class="exit-code" style="font-size:15px">ceph-csi (RBD / CephFS)</td><td>On-prem / OpenShift, mixed workloads</td><td>CephFS: yes · RBD: no</td></tr>
+                <tr><td class="exit-code" style="font-size:15px">portworx</td><td>High-IO databases, replicated on-prem storage</td><td>Yes</td></tr>
+                <tr><td class="exit-code" style="font-size:15px">nfs-subdir-external-provisioner</td><td>Simple shared storage on existing NFS</td><td>Yes</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">🩺</div>
+          <div class="ec-main">
+            <div class="ec-name">Volume Lifecycle Troubleshooting</div>
+            <div class="ec-desc">Where "PVC stuck Pending" and "multi-attach error" actually come from, and which component to check first.</div>
+            <div class="ec-tags"><span class="ec-tag c">Troubleshooting</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title diag">Diagnostic Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">kubectl</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl describe pvc &lt;name&gt; -n &lt;ns&gt;</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get events -A | grep -i provision</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl get volumeattachments</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">kubectl -n kube-system logs -l app=ebs-csi-controller -c csi-provisioner</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Common Root Causes</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>Multi-attach error:</strong> RWO volume still attached to old node — pod eviction race, wait for detach or force-delete the stuck pod</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Stuck Pending:</strong> zone mismatch with <code>Immediate</code> binding, or IAM/role permissions missing on the CSI controller</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Provisioning quota exceeded:</strong> cloud account volume-count limit hit — check provisioner logs for throttling errors</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ STATEFULSETS ════════ -->
+  <div class="level-panel" id="panel-sts">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(132,204,22,.2),rgba(132,204,22,.05));border:1px solid rgba(132,204,22,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:var(--lime);">STATEFULSETS</div>
+        <div class="lb-sub" style="color:rgba(132,204,22,.7);">Running workloads that need stable identity, ordering, and per-replica storage</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(132,204,22,.15);color:var(--lime);border:1px solid rgba(132,204,22,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🆔</div>
+          <div class="ec-main">
+            <div class="ec-name">StatefulSet vs Deployment</div>
+            <div class="ec-desc">A Deployment's pods are interchangeable. A StatefulSet's pods each have a fixed name, fixed network identity, and their own dedicated PVC.</div>
+            <div class="ec-tags"><span class="ec-tag r">Must Know</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="ec-block-title cmd">statefulset-postgres.yaml</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">yaml</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-text">apiVersion: apps/v1</span></div>
+                  <div class="cmd-line"><span class="cmd-text">kind: StatefulSet</span></div>
+                  <div class="cmd-line"><span class="cmd-text">spec:</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;serviceName: postgres-headless</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;replicas: 3</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;volumeClaimTemplates:</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;- metadata: {name: data}</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;&#160;&#160;spec: {accessModes: [ReadWriteOnce], resources: {requests: {storage: 100Gi}}}</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title causes">Pods Get Fixed Names</div>
+              <div class="causes-list">
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><code>postgres-0</code>, <code>postgres-1</code>, <code>postgres-2</code> — never renamed, never mixed up</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">Each gets its own PVC: <code>data-postgres-0</code>, <code>data-postgres-1</code>...</span></div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">Ordered Lifecycle</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num sts">1</div><div class="fix-text">Scale up: pods created <strong>0 → N</strong>, each waits for the previous to be Ready</div></div>
+                <div class="fix-step"><div class="fix-num sts">2</div><div class="fix-text">Scale down: pods terminated <strong>N → 0</strong>, reverse order</div></div>
+                <div class="fix-step"><div class="fix-num sts">3</div><div class="fix-text">Matters for quorum-based systems: primary election, replica bootstrap order</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">🌐</div>
+          <div class="ec-main">
+            <div class="ec-name">Headless Services & Stable DNS</div>
+            <div class="ec-desc">A StatefulSet needs a headless Service (<code>clusterIP: None</code>) so each pod gets its own resolvable DNS name — required for peer discovery.</div>
+            <div class="ec-tags"><span class="ec-tag a">Important</span><span class="ec-tag c">Networking</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="ec-block-title cmd">DNS pattern</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">resolvable names</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-comment"># &lt;pod-name&gt;.&lt;service-name&gt;.&lt;namespace&gt;.svc.cluster.local</span></div>
+                  <div class="cmd-line"><span class="cmd-text">postgres-0.postgres-headless.billing.svc.cluster.local</span></div>
+                  <div class="cmd-line"><span class="cmd-text">postgres-1.postgres-headless.billing.svc.cluster.local</span></div>
+                  <div class="cmd-line"><span class="cmd-text">postgres-2.postgres-headless.billing.svc.cluster.local</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block full">
+              <div class="ec-block-title causes">Why It Matters</div>
+              <div class="causes-list">
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">Replicas can address each other by a name that survives pod restarts — clustered databases (etcd, Cassandra, Kafka) depend on this for peer discovery</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">🔄</div>
+          <div class="ec-main">
+            <div class="ec-name">Update Strategy & PVC Retention</div>
+            <div class="ec-desc">RollingUpdate with partitions for canary-style rollouts, and what happens to volumes when you scale down or delete.</div>
+            <div class="ec-tags"><span class="ec-tag c">Operations</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title causes">Update Strategies</div>
+              <div class="causes-list">
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>RollingUpdate</strong> (default): highest ordinal updated first, one at a time</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>partition: N</strong>: only pods with ordinal ≥ N are updated — canary a single replica before the rest</span></div>
+                <div class="cause-item c-low"><span class="cause-icon">🟢</span><span class="cause-text"><strong>OnDelete</strong>: pods only update when manually deleted — full manual control</span></div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">PVC Retention (K8s 1.27+)</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num sts">1</div><div class="fix-text">By default, PVCs from <code>volumeClaimTemplates</code> <strong>outlive</strong> the StatefulSet — deleting the STS does not delete the data</div></div>
+                <div class="fix-step"><div class="fix-num sts">2</div><div class="fix-text">Set <code>persistentVolumeClaimRetentionPolicy.whenDeleted/whenScaled: Delete</code> to change that behavior explicitly</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ BACKUP & DR ════════ -->
+  <div class="level-panel" id="panel-bak">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:#a78bfa;">BACKUP, SNAPSHOTS & DISASTER RECOVERY</div>
+        <div class="lb-sub" style="color:rgba(124,58,237,.7);">Because "the cluster is stateless" was never true for the data that matters</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">📸</div>
+          <div class="ec-main">
+            <div class="ec-name">The VolumeSnapshot API</div>
+            <div class="ec-desc">A native Kubernetes API — backed by the CSI snapshotter sidecar — for point-in-time, storage-level snapshots you can restore straight into a new PVC.</div>
+            <div class="ec-tags"><span class="ec-tag r">Must Know</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="ec-block-title cmd">snapshot-and-restore.yaml</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">yaml</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-comment"># 1. Take the snapshot</span></div>
+                  <div class="cmd-line"><span class="cmd-text">apiVersion: snapshot.storage.k8s.io/v1</span></div>
+                  <div class="cmd-line"><span class="cmd-text">kind: VolumeSnapshot</span></div>
+                  <div class="cmd-line"><span class="cmd-text">spec: {volumeSnapshotClassName: csi-snap, source: {persistentVolumeClaimName: data-postgres-0}}</span></div>
+                  <div class="cmd-line"><span class="cmd-comment"># 2. Restore into a brand-new PVC</span></div>
+                  <div class="cmd-line"><span class="cmd-text">apiVersion: v1</span></div>
+                  <div class="cmd-line"><span class="cmd-text">kind: PersistentVolumeClaim</span></div>
+                  <div class="cmd-line"><span class="cmd-text">spec: {dataSource: {name: pg-snap-0930, kind: VolumeSnapshot, apiGroup: snapshot.storage.k8s.io}}</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">🗄️</div>
+          <div class="ec-main">
+            <div class="ec-name">Cluster Backup Tools</div>
+            <div class="ec-desc">Snapshots cover the disk. A real backup strategy also captures Kubernetes object state — the two are not the same thing.</div>
+            <div class="ec-tags"><span class="ec-tag a">Important</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <table class="exit-table">
+                <tr><th>Tool</th><th>Backs Up</th><th>Notes</th></tr>
+                <tr><td class="exit-code" style="font-size:15px">Velero</td><td>K8s objects + PV data (via CSI snapshots or restic/kopia)</td><td>Most widely adopted, CNCF project</td></tr>
+                <tr><td class="exit-code" style="font-size:15px">Kasten K10</td><td>K8s objects + PV data + app-consistent hooks</td><td>Commercial, strong for stateful DBs</td></tr>
+                <tr><td class="exit-code" style="font-size:15px">Portworx PX-Backup</td><td>Portworx-managed volumes + K8s metadata</td><td>Tightly coupled to Portworx storage</td></tr>
+              </table>
+            </div>
+            <div class="ec-block full">
+              <div class="ec-block-title diag">Velero Quick Commands</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">velero</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">velero backup create billing-ns-backup --include-namespaces billing</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">velero schedule create nightly --schedule="0 2 * * *" --include-namespaces billing</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">velero restore create --from-backup billing-ns-backup</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">🎯</div>
+          <div class="ec-main">
+            <div class="ec-name">RPO / RTO & DR Strategy</div>
+            <div class="ec-desc">Backups without a defined recovery objective are just disk space being consumed. Define the numbers before the incident, not during it.</div>
+            <div class="ec-tags"><span class="ec-tag c">Planning</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title causes">Define These First</div>
+              <div class="causes-list">
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>RPO</strong> (Recovery Point Objective): how much data loss is acceptable — sets your snapshot/backup frequency</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>RTO</strong> (Recovery Time Objective): how fast you must be back up — sets whether you need warm standby or cold restore is fine</span></div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">Cross-Region Pattern</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num bak">1</div><div class="fix-text">Replicate snapshots to a second region/bucket on a schedule</div></div>
+                <div class="fix-step"><div class="fix-num bak">2</div><div class="fix-text">Test restore quarterly — an untested backup is a guess, not a plan</div></div>
+                <div class="fix-step"><div class="fix-num bak">3</div><div class="fix-text">Document the exact restore runbook — who runs it, in what order, with what access</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══ DECISION GUIDE ═══ -->
+<section class="content-section reveal">
+  <div class="section-tag">Decision Guide</div>
+  <h2 class="section-title">WHICH ACCESS MODE / CLASS DO I NEED?</h2>
+  <p class="section-lead">A quick lookup for the question that comes up in almost every PVC review.</p>
+  <div class="decision-wrap">
+    <table class="decision-table">
+      <tr><th>Workload</th><th>Access Mode</th><th>Backend Fit</th><th>Notes</th></tr>
+      <tr><td><strong>Single-replica database</strong></td><td><span class="pill-mini">RWO</span></td><td>EBS / Azure Disk / GCE PD</td><td>Cheapest, fastest, standard choice</td></tr>
+      <tr><td><strong>StatefulSet database cluster</strong></td><td><span class="pill-mini">RWO</span> per replica</td><td>EBS + volumeClaimTemplates</td><td>Each replica gets its own dedicated disk</td></tr>
+      <tr><td><strong>Shared config / static assets</strong></td><td><span class="pill-mini">RWX</span></td><td>NFS / EFS / Azure Files</td><td>Multiple pods reading the same files</td></tr>
+      <tr><td><strong>Log aggregation buffer</strong></td><td><span class="pill-mini">RWX</span> or <span class="pill-mini">RWO</span></td><td>NFS or local emptyDir + sidecar ship</td><td>Depends on whether multiple writers exist</td></tr>
+      <tr><td><strong>CI/CD build cache</strong></td><td><span class="pill-mini">RWO</span></td><td>Fast SSD class</td><td>Ephemeral-ish, prioritize IOPS over durability</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ CHEATSHEET ═══ -->
+<div class="cheat-section">
+  <div class="cheat-inner reveal">
+    <div class="section-tag" style="color:rgba(255,255,255,.3)">Quick Reference</div>
+    <h2 class="section-title" style="color:#fff;margin-bottom:40px">COMMAND CHEATSHEET</h2>
+    <div class="cheat-grid">
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--crimson)">PV / PVC</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get pv,pvc -A</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl describe pvc &lt;name&gt; -n &lt;ns&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl patch pv &lt;name&gt; -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get pvc -o jsonpath='{.items[*].status.phase}'</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--amber)">StorageClasses</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get storageclass</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl describe sc &lt;name&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl patch storageclass &lt;name&gt; -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--cyan)">CSI Drivers</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get csidrivers</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get csinodes</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get volumeattachments</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl -n kube-system logs -l app=csi-controller --all-containers</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--lime)">StatefulSets</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get sts -n &lt;ns&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl rollout status sts/&lt;name&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl scale sts &lt;name&gt; --replicas=5</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl delete pod &lt;name&gt;-0 --force --grace-period=0</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:#a78bfa">Snapshots</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get volumesnapshot -A</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl get volumesnapshotclass</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl describe volumesnapshot &lt;name&gt;</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--amber)">Velero</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>velero backup get</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>velero backup describe &lt;name&gt; --details</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>velero restore get</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>velero backup logs &lt;name&gt;</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AUTHOR STRIP ═══ -->
+<div class="author-strip">
+  <div class="author-strip-inner">
+    <div class="author-info">
+      <div class="author-avatar">VA</div>
+      <div>
+        <div class="author-name">Vishal Abhinav</div>
+        <div class="author-role">Platform Ops Engineer · @6D Technologies · Ops Newsletter — Issue #050</div>
+      </div>
+    </div>
+    <div class="author-actions">
+      <a href="../../../index.html#subscribe" class="btn-sm primary">
+        Subscribe Free
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank" class="btn-sm ghost">GitHub ↗</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PLATFORM OPS</div>
+    <div class="footer-links">
+      <a href="../../../DevOps/K8/index.html">← K8s Series</a>
+      <a href="../ARCHITECTURE/k8-architecture.html">Architecture</a>
+      <a href="../Networking/k8-networking.html">Networking</a>
+      <a href="../ERROR/K8-error.html">Error Runbook</a>
+      <a href="../OBSERVABILITY/k8-observability.html">Observability</a>
+      <a href="../../CICD/cicd-pipelines.html">CI/CD & GitOps</a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
+      <a href="../../../index.html#subscribe">Subscribe</a>
+    </div>
+    <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
+  </div>
+</footer>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+document.querySelectorAll('a,button,.error-card,.arch-comp,.cheat-block').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='56px';ring.style.height='56px';ring.style.borderColor='var(--crimson)';cursor.style.transform='translate(-50%,-50%) scale(1.5)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='';cursor.style.transform='translate(-50%,-50%) scale(1)';});
+});
+
+function switchLevel(level){
+  document.querySelectorAll('.level-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.level-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.level-tab.'+level).forEach(t=>t.classList.add('active'));
+  const panel=document.getElementById('panel-'+level);
+  if(panel){panel.classList.add('active');}
+  document.getElementById('topics').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toggleCard(card){
+  const isOpen=card.classList.contains('open');
+  card.parentElement.querySelectorAll('.error-card').forEach(c=>c.classList.remove('open'));
+  if(!isOpen) card.classList.add('open');
+}
+
+document.querySelectorAll('.lp').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const level=Array.from(btn.classList).find(c=>['pv','sc','csi','sts','bak'].includes(c));
+    if(level) switchLevel(level);
+  });
+});
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.querySelectorAll('.el-fill').forEach(el=>{
+      el.style.width=el.dataset.width;
+    });
+  },600);
+});
+
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
