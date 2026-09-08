@@ -127,6 +127,15 @@ nav.scrolled {
   display: grid; grid-template-columns: 1fr 1fr;
   padding-top: 80px; overflow: hidden; position: relative;
 }
+.hero::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22160%22%20viewBox%3D%220%200%20160%20160%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%231c1f26%22%20stroke-width%3D%221%22%20opacity%3D%220.07%22%3E%3Cpath%20d%3D%22M0%2C40%20H60%20V0%22/%3E%3Cpath%20d%3D%22M160%2C120%20H100%20V160%22/%3E%3Cpath%20d%3D%22M0%2C160%20V140%20H40%22/%3E%3Cpath%20d%3D%22M160%2C0%20V60%20H120%22/%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2240%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22120%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%22140%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%22120%22%20cy%3D%2260%22%20r%3D%223%22/%3E%3Cpath%20d%3D%22M0%2C90%20H160%22%20stroke-dasharray%3D%222%206%22/%3E%3Cpath%20d%3D%22M80%2C0%20V160%22%20stroke-dasharray%3D%222%206%22/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  animation: bg-drift 50s linear infinite;
+  pointer-events: none; z-index: 0;
+}
+@keyframes bg-drift { from{background-position:0 0;} to{background-position:640px 320px;} }
 .hero-left {
   padding: 80px 48px 80px 64px;
   display: flex; flex-direction: column; justify-content: center;
@@ -389,6 +398,54 @@ nav.scrolled {
   text-transform: uppercase; color: var(--cyan); margin-bottom: 8px;
 }
 .topic-card:hover .tc-sub-title { color: var(--cyan); }
+
+/* ─── LIVE / ROADMAP STATUS SYSTEM ─── */
+.legend-row{display:flex;align-items:center;gap:24px;margin:-32px 0 40px;flex-wrap:wrap;}
+
+.kmap-terminal{background:#0d0f14;border:1px solid rgba(255,255,255,0.08);border-radius:8px;box-shadow:0 32px 80px rgba(0,0,0,.45);overflow:hidden;margin-bottom:48px;position:relative;}
+.kmap-terminal::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22160%22%20viewBox%3D%220%200%20160%20160%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M0%2C40%20H60%20V0%22/%3E%3Cpath%20d%3D%22M160%2C120%20H100%20V160%22/%3E%3Cpath%20d%3D%22M0%2C160%20V140%20H40%22/%3E%3Cpath%20d%3D%22M160%2C0%20V60%20H120%22/%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2240%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22120%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%22140%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%22120%22%20cy%3D%2260%22%20r%3D%223%22/%3E%3Cpath%20d%3D%22M0%2C90%20H160%22%20stroke-dasharray%3D%222%206%22/%3E%3Cpath%20d%3D%22M80%2C0%20V160%22%20stroke-dasharray%3D%222%206%22/%3E%3C/g%3E%3C/svg%3E");background-size:160px 160px;animation:bg-drift 60s linear infinite;pointer-events:none;z-index:0;}
+.kmap-terminal .terminal-bar{position:relative;z-index:1;}
+.kmap-body{position:relative;z-index:1;padding:28px 32px;font-family:'DM Mono',monospace;font-size:12.5px;line-height:2;overflow-x:auto;}
+.kt-row{display:block;white-space:pre;opacity:0;transform:translateX(-10px);transition:opacity .45s ease,transform .45s ease;}
+.kt-row.visible{opacity:1;transform:translateX(0);}
+.tl-branch{color:rgba(255,255,255,.16);}
+.tl-dir{color:rgba(255,255,255,.55);}
+.tl-live{color:#fff;text-decoration:none;border-bottom:1px dashed rgba(132,204,22,.55);transition:color .2s,border-color .2s;white-space:normal;}
+.tl-live:hover{color:var(--lime);border-color:var(--lime);}
+.tl-live::before{content:'● ';color:var(--lime);font-size:8px;}
+.tl-soon{color:rgba(255,255,255,.25);white-space:normal;}
+.tl-count-live{color:var(--lime);}
+.tl-count-soon{color:rgba(255,255,255,.32);}
+@media(max-width:900px){ .kmap-body{font-size:10.5px;padding:22px 16px;} }
+.legend-item{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.legend-dot.live{background:var(--lime);box-shadow:0 0 0 3px rgba(132,204,22,0.18);animation:legend-pulse 2s ease-in-out infinite;}
+.legend-dot.soon{background:transparent;border:1.5px dashed var(--muted);}
+@keyframes legend-pulse{0%,100%{box-shadow:0 0 0 3px rgba(132,204,22,0.18);}50%{box-shadow:0 0 0 5px rgba(132,204,22,0.08);}}
+
+.tc-status{display:inline-flex;align-items:center;gap:6px;margin-top:3px;}
+.tc-status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.tc-status-dot.live{background:var(--lime);animation:legend-pulse 2s ease-in-out infinite;}
+.tc-status-dot.soon{background:transparent;border:1.5px dashed var(--ash);}
+.tc-status-text{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
+.tc-status-text .n{color:var(--lime);font-weight:700;}
+.topic-card:hover .tc-status-text{color:rgba(255,255,255,0.5);}
+
+.tc-zone-label{width:100%;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;margin:14px 0 8px;display:flex;align-items:center;gap:8px;}
+.tc-zone-label:first-child{margin-top:0;}
+.tc-zone-label::after{content:'';flex:1;height:1px;background:rgba(0,0,0,0.08);}
+.topic-card:hover .tc-zone-label::after{background:rgba(255,255,255,0.1);}
+.tc-zone-label.live{color:#5a9c1a;}
+.topic-card:hover .tc-zone-label.live{color:var(--lime);}
+.tc-zone-label.soon{color:var(--ash);}
+.topic-card:hover .tc-zone-label.soon{color:rgba(255,255,255,0.35);}
+
+.tc-badge-link .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--lime);margin-right:6px;vertical-align:middle;box-shadow:0 0 0 2px rgba(132,204,22,0.2);}
+.tc-badge.soon{background:transparent;border:1.5px dashed rgba(0,0,0,0.15);color:var(--ash);}
+.topic-card:hover .tc-badge.soon{border-color:rgba(255,255,255,0.18);background:transparent;color:rgba(255,255,255,0.3);}
+
+.ic-soon-flag{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-top:8px;}
+.ic-soon-flag::before{content:'';width:5px;height:5px;border-radius:50%;border:1.5px dashed rgba(255,255,255,0.25);}
 
 /* ─── TOOLCHAIN DIAGRAM ─── */
 .toolchain-section{background:var(--ink);padding:0;position:relative;overflow:hidden;}
@@ -815,6 +872,40 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
     <div class="section-tag">Knowledge Map</div>
     <h2 class="section-title">WHAT WE COVER</h2>
     <p class="section-lead">Deep technical content across the full Platform Engineering stack — click any domain to explore.</p>
+    <div class="legend-row">
+      <div class="legend-item"><span class="legend-dot live"></span> Live — published & linked</div>
+      <div class="legend-item"><span class="legend-dot soon"></span> On the roadmap — not yet published</div>
+    </div>
+
+    <div class="kmap-terminal">
+      <div class="terminal-bar">
+        <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
+        <div class="t-title">platform-ops ~ knowledge-map</div>
+      </div>
+      <div class="terminal-body kmap-body">
+        <span class="tl kt-row"><span class="tl-prompt">❯</span> <span class="tl-cmd">tree platform-ops/ --content-map --road-map</span></span>
+        <span class="tl kt-row">platform-ops/</span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><span class="tl-dir">content-map/</span>                    <span class="tl-count-live">[ 7 LIVE ]</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   ├── </span><span class="tl-dir">devops/</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="tl-live">k8-architecture.html</a> <span class="tl-out">· issue #048</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/Networking/k8-networking.html" class="tl-live">k8-networking.html</a> <span class="tl-out">· issue #047</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/ERROR/K8-error.html" class="tl-live">k8-error-runbook.html</a> <span class="tl-out">· issue #049</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/STORAGE/k8-storage.html" class="tl-live">k8-storage.html</a> <span class="tl-out">· issue #050</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/OBSERVABILITY/k8-observability.html" class="tl-live">k8-observability.html</a> <span class="tl-out">· issue #051</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   │   └── </span><a href="DevOps/CICD/cicd-pipelines.html" class="tl-live">cicd-gitops.html</a> <span class="tl-out">· issue #052</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   └── </span><span class="tl-dir">networking/</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│       └── </span><a href="DevOps/K8/Networking/k8-networking.html" class="tl-live">k8-networking-decoded.html</a> <span class="tl-out">· issue #047</span></span>
+        <span class="tl kt-row"><span class="tl-branch">└── </span><span class="tl-dir">road-map/</span>                      <span class="tl-count-soon">[ 19 PLANNED ]</span></span>
+        <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">devops/</span>          <span class="tl-soon">rbac · admission-controllers · multi-cluster-federation</span></span>
+        <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">sre/</span>              <span class="tl-soon">slis-slos-slas · incident-mgmt · error-budgets · reliability-eng · postmortems · chaos-eng</span></span>
+        <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">infrastructure/</span>   <span class="tl-soon">linux(rhel·centos·ubuntu·systemd) · virtualization · aws · azure · gcp</span></span>
+        <span class="tl kt-row"><span class="tl-branch">    └── </span><span class="tl-dir">networking/</span>       <span class="tl-soon">osi · tcp-ip · load-balancing · gateway-api · service-mesh · ebpf</span></span>
+        <span class="tl kt-row"> </span>
+        <span class="tl kt-row"><span class="tl-ok">✓</span> <span class="tl-out">7 directories, 7 live articles, 19 planned topics</span></span>
+        <span class="tl kt-row"><span class="tl-prompt">❯</span> <span class="cursor-blink"></span></span>
+      </div>
+    </div>
+
     <div class="topics-grid">
 
       <!-- DEVOPS -->
@@ -824,31 +915,28 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
           <div class="tc-icon-wrap">⚙️</div>
           <div class="tc-meta">
             <div class="tc-title">DevOps</div>
-            <div class="tc-count">13 subtopics</div>
+            <div class="tc-status"><span class="tc-status-dot live"></span><span class="tc-status-text"><span class="n">6</span> Live · 3 Planned</span></div>
           </div>
           <span class="tc-arrow">↓</span>
         </div>
         <div class="tc-body">
           <div class="tc-items">
-            <span class="tc-badge">Automation</span>
+            <div class="tc-zone-label live">✅ Live Now</div>
+            <a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="tc-badge-link"><span class="dot"></span>K8 Architecture ↗</a>
+            <a href="DevOps/K8/Networking/k8-networking.html" class="tc-badge-link"><span class="dot"></span>K8 Networking ↗</a>
+            <a href="DevOps/K8/ERROR/K8-error.html" class="tc-badge-link" style="background:rgba(229,57,53,0.15);border-color:rgba(229,57,53,0.35);"><span class="dot"></span>K8 Error Runbook ↗</a>
+            <a href="DevOps/K8/STORAGE/k8-storage.html" class="tc-badge-link" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.35);"><span class="dot"></span>K8 Storage ↗</a>
+            <a href="DevOps/K8/OBSERVABILITY/k8-observability.html" class="tc-badge-link" style="background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.35);"><span class="dot"></span>K8 Observability ↗</a>
+            <a href="DevOps/CICD/cicd-pipelines.html" class="tc-badge-link" style="background:rgba(0,194,212,0.15);border-color:rgba(0,194,212,0.35);"><span class="dot"></span>CI/CD & GitOps ↗</a>
+
+            <div class="tc-zone-label soon">🔜 On the Roadmap</div>
+            <span class="tc-badge soon">RBAC Deep-Dive</span>
+            <span class="tc-badge soon">Admission Controllers</span>
+            <span class="tc-badge soon">Multi-Cluster Federation</span>
+
             <div class="tc-sub-group">
-              <div class="tc-sub-title">Kubernetes — Articles</div>
+              <div class="tc-sub-title">Also touched on</div>
               <span class="tc-badge">Docker</span>
-              <a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="tc-badge-link">⬡ K8 Architecture ↗</a>
-              <a href="DevOps/K8/Networking/k8-networking.html" class="tc-badge-link">⬡ K8 Networking ↗</a>
-              <a href="DevOps/K8/ERROR/K8-error.html" class="tc-badge-link" style="background:rgba(229,57,53,0.15);border-color:rgba(229,57,53,0.35);">🚨 K8 Error Runbook ↗</a>
-              <a href="DevOps/K8/STORAGE/k8-storage.html" class="tc-badge-link" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.35);">📦 K8 Storage ↗</a>
-              <a href="DevOps/K8/OBSERVABILITY/k8-observability.html" class="tc-badge-link" style="background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.35);">📡 K8 Observability ↗</a>
-            </div>
-            <div class="tc-sub-group">
-              <div class="tc-sub-title">CI/CD — Articles</div>
-              <a href="DevOps/CICD/cicd-pipelines.html" class="tc-badge-link" style="background:rgba(229,57,53,0.15);border-color:rgba(229,57,53,0.35);">🚀 CI/CD & GitOps ↗</a>
-            </div>
-            <div class="tc-sub-group">
-              <div class="tc-sub-title">Toolchain</div>
-              <span class="tc-badge">Git</span>
-              <span class="tc-badge">Jenkins</span>
-              <span class="tc-badge">ArgoCD</span>
               <span class="tc-badge">Terraform</span>
               <span class="tc-badge">Ansible</span>
               <span class="tc-badge">Helm</span>
@@ -867,18 +955,19 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
           <div class="tc-icon-wrap">📡</div>
           <div class="tc-meta">
             <div class="tc-title">SRE</div>
-            <div class="tc-count">4 subtopics</div>
+            <div class="tc-status"><span class="tc-status-dot soon"></span><span class="tc-status-text">Coming Soon</span></div>
           </div>
           <span class="tc-arrow">↓</span>
         </div>
         <div class="tc-body">
           <div class="tc-items">
-            <span class="tc-badge">SLIs / SLOs / SLAs</span>
-            <span class="tc-badge">Incident Management</span>
-            <span class="tc-badge">Error Budgets</span>
-            <span class="tc-badge">Reliability Engineering</span>
-            <span class="tc-badge">Postmortems</span>
-            <span class="tc-badge">Chaos Engineering</span>
+            <div class="tc-zone-label soon">🔜 On the Roadmap</div>
+            <span class="tc-badge soon">SLIs / SLOs / SLAs</span>
+            <span class="tc-badge soon">Incident Management</span>
+            <span class="tc-badge soon">Error Budgets</span>
+            <span class="tc-badge soon">Reliability Engineering</span>
+            <span class="tc-badge soon">Postmortems</span>
+            <span class="tc-badge soon">Chaos Engineering</span>
           </div>
         </div>
       </div>
@@ -890,25 +979,26 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
           <div class="tc-icon-wrap">🏗️</div>
           <div class="tc-meta">
             <div class="tc-title">Infrastructure</div>
-            <div class="tc-count">8 subtopics</div>
+            <div class="tc-status"><span class="tc-status-dot soon"></span><span class="tc-status-text">Coming Soon</span></div>
           </div>
           <span class="tc-arrow">↓</span>
         </div>
         <div class="tc-body">
           <div class="tc-items">
+            <div class="tc-zone-label soon">🔜 On the Roadmap</div>
             <div class="tc-sub-group">
               <div class="tc-sub-title">Linux</div>
-              <span class="tc-badge">RHEL</span>
-              <span class="tc-badge">CentOS</span>
-              <span class="tc-badge">Ubuntu</span>
-              <span class="tc-badge">Systemd</span>
+              <span class="tc-badge soon">RHEL</span>
+              <span class="tc-badge soon">CentOS</span>
+              <span class="tc-badge soon">Ubuntu</span>
+              <span class="tc-badge soon">Systemd</span>
             </div>
-            <span class="tc-badge">Virtualization</span>
+            <span class="tc-badge soon">Virtualization</span>
             <div class="tc-sub-group">
               <div class="tc-sub-title">Cloud Providers</div>
-              <span class="tc-badge">AWS</span>
-              <span class="tc-badge">Azure</span>
-              <span class="tc-badge">GCP</span>
+              <span class="tc-badge soon">AWS</span>
+              <span class="tc-badge soon">Azure</span>
+              <span class="tc-badge soon">GCP</span>
             </div>
           </div>
         </div>
@@ -921,23 +1011,22 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
           <div class="tc-icon-wrap">🌐</div>
           <div class="tc-meta">
             <div class="tc-title">Networking</div>
-            <div class="tc-count">7 subtopics</div>
+            <div class="tc-status"><span class="tc-status-dot live"></span><span class="tc-status-text"><span class="n">1</span> Live · 6 Planned</span></div>
           </div>
           <span class="tc-arrow">↓</span>
         </div>
         <div class="tc-body">
           <div class="tc-items">
-            <span class="tc-badge">OSI Model</span>
-            <span class="tc-badge">TCP/IP</span>
-            <span class="tc-badge">DNS / CoreDNS</span>
-            <span class="tc-badge">Load Balancing</span>
-            <span class="tc-badge">Ingress</span>
-            <span class="tc-badge">Gateway API</span>
-            <span class="tc-badge">Service Mesh</span>
-            <span class="tc-badge">CNI Plugins</span>
-            <span class="tc-badge">Kubernetes Networking</span>
-            <span class="tc-badge">NetworkPolicy</span>
-            <span class="tc-badge">eBPF</span>
+            <div class="tc-zone-label live">✅ Live Now</div>
+            <a href="DevOps/K8/Networking/k8-networking.html" class="tc-badge-link"><span class="dot"></span>K8 Networking Decoded ↗</a>
+
+            <div class="tc-zone-label soon">🔜 On the Roadmap</div>
+            <span class="tc-badge soon">OSI Model</span>
+            <span class="tc-badge soon">TCP/IP</span>
+            <span class="tc-badge soon">Load Balancing</span>
+            <span class="tc-badge soon">Gateway API</span>
+            <span class="tc-badge soon">Service Mesh</span>
+            <span class="tc-badge soon">eBPF Deep-Dive</span>
           </div>
         </div>
       </div>
@@ -1179,6 +1268,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
           <span class="ic-tag l">Cloud</span>
           <span class="ic-tag c">K8s</span>
         </div>
+        <div class="ic-soon-flag">Archive listing · no page yet</div>
         <div class="ic-num">46</div>
       </div>
 
@@ -1191,6 +1281,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
           <span class="ic-tag c">Kubernetes</span>
           <span class="ic-tag a">GPU</span>
         </div>
+        <div class="ic-soon-flag">Archive listing · no page yet</div>
         <div class="ic-num">45</div>
       </div>
 
@@ -1202,6 +1293,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
           <span class="ic-tag r">Platform Eng</span>
           <span class="ic-tag c">Backstage</span>
         </div>
+        <div class="ic-soon-flag">Archive listing · no page yet</div>
         <div class="ic-num">44</div>
       </div>
 
@@ -1214,6 +1306,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
           <span class="ic-tag c">ArgoCD</span>
           <span class="ic-tag c">Flux</span>
         </div>
+        <div class="ic-soon-flag">Archive listing · no page yet</div>
         <div class="ic-num">43</div>
       </div>
 
@@ -1226,6 +1319,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
           <span class="ic-tag l">Grafana</span>
           <span class="ic-tag r">SRE</span>
         </div>
+        <div class="ic-soon-flag">Archive listing · no page yet</div>
         <div class="ic-num">42</div>
       </div>
 
@@ -1330,6 +1424,20 @@ const observer = new IntersectionObserver(entries=>{
   entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
 },{threshold:0.1});
 document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+/* ── Knowledge-map tree: staggered terminal-typing reveal ── */
+document.querySelectorAll('.kt-row').forEach((row,i)=>{
+  row.style.transitionDelay = `${i*0.09}s`;
+});
+const kmapObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.kt-row').forEach(r=>r.classList.add('visible'));
+      kmapObs.unobserve(e.target);
+    }
+  });
+},{threshold:0.2});
+document.querySelectorAll('.kmap-terminal').forEach(el=>kmapObs.observe(el));
 
 /* ── Counter animation ── */
 function animateCounter(el) {
