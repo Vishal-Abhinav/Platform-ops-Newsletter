@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CI/CD & GitOps Deep-Dive · Platform Ops · Vishal Abhinav</title>
+
+<!-- ── SEO ── -->
+<meta name="description" content="CI/CD Deep-Dive — Jenkins & GitLab CI pipeline design, GitOps with ArgoCD/Flux, pipeline security gates, deployment strategies, and secrets/artifact management. Production-tested patterns.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="keywords" content="CI/CD, Jenkins, GitLab CI, ArgoCD, Flux, GitOps, DevSecOps, Canary, Blue-Green, Kubernetes, DevOps, SRE">
+
+<!-- ── Open Graph ── -->
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="CI/CD & GitOps — Pipelines, ArgoCD/Flux, Security Gates & Deploy Strategy">
+<meta property="og:description" content="Jenkins/GitLab CI pipeline design, GitOps reconciliation, pipeline security, canary/blue-green rollouts, and secrets management.">
+<meta property="og:url" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/CICD/cicd-pipelines.html">
+<meta property="og:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/CICD/og-cicd.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="CI/CD & GitOps Deep-Dive">
+
+<!-- ── Twitter / X ── -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CI/CD & GitOps — Pipelines, ArgoCD/Flux, Security Gates & Deploy Strategy">
+<meta name="twitter:description" content="Jenkins/GitLab CI, GitOps reconciliation, pipeline security, canary/blue-green, secrets management.">
+<meta name="twitter:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/CICD/og-cicd.png">
+<meta name="twitter:creator" content="@VishalAbhinav">
+
+<!-- ── Article meta ── -->
+<meta property="article:author" content="Vishal Abhinav">
+<meta property="article:published_time" content="2026-08-10">
+<meta property="article:section" content="Platform Engineering">
+<meta property="article:tag" content="CI/CD">
+<meta property="article:tag" content="GitOps">
+<meta property="article:tag" content="DevOps">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:     #08090c;
+  --paper:   #f2f0eb;
+  --smoke:   #e4e0d8;
+  --ash:     #b8b2a7;
+  --coal:    #1c1f26;
+  --cyan:    #00c2d4;
+  --amber:   #f59e0b;
+  --crimson: #e53935;
+  --lime:    #84cc16;
+  --text:    #1c1f26;
+  --muted:   #6b6860;
+  --purple:  #7c3aed;
+  --teal:    #0d9488;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--text);font-family:'Manrope',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden;cursor:none;}
+.cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--crimson);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .15s ease,background .2s;transform:translate(-50%,-50%);}
+.cursor-ring{position:fixed;top:0;left:0;width:36px;height:36px;border:1.5px solid var(--coal);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .35s cubic-bezier(.25,.46,.45,.94),width .3s,height .3s,border-color .2s;transform:translate(-50%,-50%);}
+body:hover .cursor-ring{border-color:var(--crimson);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.6;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(8,9,12,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.06);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;color:#fff;display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo span{display:inline-block;width:8px;height:8px;background:var(--crimson);border-radius:50%;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:.6;}}
+.nav-breadcrumb{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+.nav-breadcrumb a{color:rgba(255,255,255,0.3);text-decoration:none;transition:color .2s;}
+.nav-breadcrumb a:hover{color:var(--cyan);}
+.nav-breadcrumb .sep{color:rgba(255,255,255,0.12);}
+.nav-breadcrumb .current{color:var(--cyan);}
+.nav-back{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);padding:8px 20px;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s,color .2s;border:1px solid rgba(255,255,255,0.1);}
+.nav-back:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);}
+
+.hero{min-height:72vh;background:var(--ink);display:grid;grid-template-columns:1fr 1fr;padding-top:72px;overflow:hidden;position:relative;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 10% 40%,rgba(0,194,212,.1) 0%,transparent 55%),radial-gradient(circle at 90% 60%,rgba(229,57,53,.1) 0%,transparent 50%),radial-gradient(circle at 50% 100%,rgba(124,58,237,.08) 0%,transparent 50%);pointer-events:none;}
+.hero-ghost{position:absolute;bottom:-20px;left:-10px;font-family:'Bebas Neue',sans-serif;font-size:clamp(140px,20vw,260px);color:rgba(255,255,255,.022);letter-spacing:-4px;line-height:1;pointer-events:none;white-space:nowrap;}
+.hero-left{padding:80px 48px 80px 64px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;}
+.bc{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:28px;}
+.bc a{color:rgba(255,255,255,.28);text-decoration:none;transition:color .2s;}
+.bc a:hover{color:var(--cyan);}
+.bc .sep{color:rgba(255,255,255,.12);}
+.bc .here{color:var(--crimson);}
+.eyebrow{display:flex;align-items:center;gap:12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:20px;}
+.eyebrow-line{display:block;width:40px;height:1px;background:var(--crimson);}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,6vw,88px);line-height:.92;letter-spacing:-.5px;color:#fff;margin-bottom:12px;}
+.hero-title .hl-red{color:var(--crimson);}
+.hero-title .hl-cyan{color:var(--cyan);}
+.hero-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:rgba(255,255,255,.38);margin-bottom:28px;line-height:1.4;}
+.hero-desc{font-size:14px;color:rgba(255,255,255,.32);max-width:440px;margin-bottom:36px;line-height:1.85;}
+.level-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px;}
+.lp{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;border-radius:20px;cursor:pointer;transition:all .2s;border:none;}
+.lp.ci     {background:rgba(229,57,53,.15);color:#ef5350;border:1px solid rgba(229,57,53,.3);}
+.lp.gitops {background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);}
+.lp.sec    {background:rgba(0,194,212,.15);color:var(--cyan);border:1px solid rgba(0,194,212,.3);}
+.lp.deploy {background:rgba(132,204,22,.15);color:var(--lime);border:1px solid rgba(132,204,22,.3);}
+.lp.art    {background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);}
+.lp:hover{transform:translateY(-2px);filter:brightness(1.3);}
+.hero-meta-row{display:flex;gap:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.07);}
+.hm-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;color:#fff;}
+.hm-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:3px;}
+
+.hero-right{display:flex;align-items:center;justify-content:center;padding:60px 48px;position:relative;z-index:2;}
+.err-matrix{display:flex;flex-direction:column;gap:10px;width:100%;max-width:400px;}
+.err-layer{border:1px solid rgba(255,255,255,.07);border-radius:8px;overflow:hidden;transition:border-color .3s;}
+.err-layer:hover{border-color:rgba(255,255,255,.2);}
+.el-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.el-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;}
+.el-count{font-family:'Bebas Neue',sans-serif;font-size:20px;}
+.el-bar{height:3px;background:rgba(255,255,255,.06);}
+.el-fill{height:100%;border-radius:1px;transition:width 1.4s cubic-bezier(.25,.46,.45,.94);width:0;}
+.el-errors{padding:10px 20px 14px;display:flex;flex-wrap:wrap;gap:5px;}
+.ee{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.5px;padding:3px 9px;border-radius:12px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.35);}
+
+.err-layer.ci     .el-header{background:rgba(229,57,53,.08);}
+.err-layer.ci     .el-label{color:#ef5350;}
+.err-layer.ci     .el-count{color:#ef5350;}
+.err-layer.ci     .el-fill{background:linear-gradient(90deg,var(--crimson),#ff6b35);}
+.err-layer.gitops .el-header{background:rgba(245,158,11,.08);}
+.err-layer.gitops .el-label{color:var(--amber);}
+.err-layer.gitops .el-count{color:var(--amber);}
+.err-layer.gitops .el-fill{background:linear-gradient(90deg,var(--amber),#fbbf24);}
+.err-layer.sec    .el-header{background:rgba(0,194,212,.08);}
+.err-layer.sec    .el-label{color:var(--cyan);}
+.err-layer.sec    .el-count{color:var(--cyan);}
+.err-layer.sec    .el-fill{background:linear-gradient(90deg,var(--cyan),#38bdf8);}
+.err-layer.deploy .el-header{background:rgba(132,204,22,.08);}
+.err-layer.deploy .el-label{color:var(--lime);}
+.err-layer.deploy .el-count{color:var(--lime);}
+.err-layer.deploy .el-fill{background:linear-gradient(90deg,var(--lime),#4ade80);}
+.err-layer.art    .el-header{background:rgba(124,58,237,.08);}
+.err-layer.art    .el-label{color:#a78bfa;}
+.err-layer.art    .el-count{color:#a78bfa;}
+.err-layer.art    .el-fill{background:linear-gradient(90deg,var(--purple),#8b5cf6);}
+
+.ticker-wrap{background:rgba(8,9,12,1);overflow:hidden;padding:11px 0;border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);}
+.ticker-track{display:flex;gap:0;animation:ticker 32s linear infinite;white-space:nowrap;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;gap:12px;padding:0 28px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);}
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--crimson);}
+
+.arch-section{background:var(--coal);padding:0;}
+.arch-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.arch-inner .section-tag{color:rgba(255,255,255,.3);}
+.arch-inner .section-title{color:#fff;}
+.arch-inner .section-lead{color:rgba(255,255,255,.4);}
+.section-tag{display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+.section-tag::before{content:'';display:block;width:24px;height:1px;background:var(--crimson);}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,4.5vw,60px);line-height:1;letter-spacing:-.5px;color:var(--coal);margin-bottom:12px;}
+.section-lead{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--muted);max-width:640px;margin-bottom:56px;}
+
+.arch-diagram{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:48px;}
+.arch-layer{display:flex;flex-direction:column;align-items:stretch;}
+.arch-layer-header{padding:14px 16px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;text-align:center;}
+.arch-layer-body{flex:1;padding:16px;border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px;}
+.arch-comp{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.8px;color:rgba(255,255,255,.5);text-align:center;transition:all .2s;cursor:default;}
+.arch-comp:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);}
+.arch-layer.ci     .arch-layer-header{background:rgba(229,57,53,.15);color:#ef5350;}
+.arch-layer.ci     .arch-comp:hover{border-color:rgba(229,57,53,.4);}
+.arch-layer.gitops .arch-layer-header{background:rgba(245,158,11,.15);color:var(--amber);}
+.arch-layer.gitops .arch-comp:hover{border-color:rgba(245,158,11,.4);}
+.arch-layer.sec    .arch-layer-header{background:rgba(0,194,212,.15);color:var(--cyan);}
+.arch-layer.sec    .arch-comp:hover{border-color:rgba(0,194,212,.4);}
+.arch-layer.deploy .arch-layer-header{background:rgba(132,204,22,.15);color:var(--lime);}
+.arch-layer.deploy .arch-comp:hover{border-color:rgba(132,204,22,.4);}
+.arch-layer.art    .arch-layer-header{background:rgba(124,58,237,.15);color:#a78bfa;}
+.arch-layer.art    .arch-comp:hover{border-color:rgba(124,58,237,.4);}
+
+.content-section{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.level-tabs{display:flex;gap:2px;margin-bottom:2px;overflow-x:auto;}
+.level-tab{flex:1;min-width:140px;padding:16px 20px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s;background:var(--smoke);color:var(--muted);text-align:left;position:relative;overflow:hidden;}
+.level-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:transparent;transition:background .2s;}
+.level-tab:hover{background:var(--coal);color:#fff;}
+.level-tab.active{background:var(--coal);color:#fff;}
+.level-tab.active.ci     ::after,.level-tab.ci:hover::after    {background:var(--crimson);}
+.level-tab.active.gitops ::after,.level-tab.gitops:hover::after{background:var(--amber);}
+.level-tab.active.sec    ::after,.level-tab.sec:hover::after   {background:var(--cyan);}
+.level-tab.active.deploy ::after,.level-tab.deploy:hover::after{background:var(--lime);}
+.level-tab.active.art    ::after,.level-tab.art:hover::after   {background:var(--purple);}
+.tab-icon{font-size:16px;display:block;margin-bottom:4px;}
+.tab-label{display:block;font-size:10px;}
+.tab-count{display:block;font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;margin-top:2px;}
+
+.level-panel{display:none;}
+.level-panel.active{display:block;}
+.level-banner{padding:28px 40px;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.lb-title{font-family:'Bebas Neue',sans-serif;font-size:40px;line-height:.95;letter-spacing:.5px;color:#fff;}
+.lb-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:16px;margin-top:6px;}
+.lb-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:20px;white-space:nowrap;}
+
+.errors-list{display:flex;flex-direction:column;gap:2px;}
+.error-card{background:var(--smoke);overflow:hidden;transition:background .2s;}
+.error-card.open{background:#fff;}
+.ec-header{padding:24px 28px;display:flex;align-items:center;gap:20px;cursor:pointer;user-select:none;}
+.ec-header:hover{background:rgba(0,0,0,.03);}
+.ec-severity{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sev-critical{background:rgba(229,57,53,.15);border:1.5px solid rgba(229,57,53,.4);}
+.sev-high    {background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.4);}
+.sev-medium  {background:rgba(0,194,212,.15);border:1.5px solid rgba(0,194,212,.4);}
+.sev-low     {background:rgba(132,204,22,.15);border:1.5px solid rgba(132,204,22,.4);}
+.ec-main{flex:1;}
+.ec-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;color:var(--coal);line-height:1;}
+.ec-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.5;}
+.ec-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.ec-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+.ec-tag.c{background:rgba(0,194,212,.12);color:var(--cyan);}
+.ec-tag.r{background:rgba(229,57,53,.12);color:var(--crimson);}
+.ec-tag.l{background:rgba(132,204,22,.12);color:var(--lime);}
+.ec-tag.a{background:rgba(245,158,11,.12);color:var(--amber);}
+.ec-tag.p{background:rgba(124,58,237,.12);color:#a78bfa;}
+.ec-right{display:flex;align-items:center;gap:16px;}
+.ec-sev-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:20px;}
+.sev-badge-critical{background:rgba(229,57,53,.15);color:var(--crimson);}
+.sev-badge-high    {background:rgba(245,158,11,.15);color:var(--amber);}
+.sev-badge-medium  {background:rgba(0,194,212,.15);color:var(--cyan);}
+.sev-badge-low     {background:rgba(132,204,22,.15);color:var(--lime);}
+.ec-chevron{color:var(--muted);transition:transform .3s;font-size:18px;}
+.error-card.open .ec-chevron{transform:rotate(180deg);}
+.ec-body{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.25,.46,.45,.94);}
+.error-card.open .ec-body{max-height:1400px;}
+.ec-inner{padding:0 28px 32px;display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+.ec-block{background:var(--paper);border-radius:4px;padding:20px 22px;}
+.ec-block.full{grid-column:1/-1;}
+.ec-block-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ec-block-title.diag  {color:var(--cyan);}
+.ec-block-title.causes{color:var(--amber);}
+.ec-block-title.fix   {color:var(--lime);}
+.ec-block-title.cmd   {color:var(--crimson);}
+.ec-block-title::after{content:'';flex:1;height:1px;background:rgba(0,0,0,.08);}
+
+.cmd-block{background:var(--coal);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+.cmd-bar{padding:8px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:6px;}
+.cmd-dot{width:8px;height:8px;border-radius:50%;}
+.cmd-dot.r{background:#ff5f57;}
+.cmd-dot.y{background:#ffbd2e;}
+.cmd-dot.g{background:#28c840;}
+.cmd-label{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);letter-spacing:1px;margin-left:4px;}
+.cmd-lines{padding:12px 16px;display:flex;flex-direction:column;gap:4px;}
+.cmd-line{font-family:'DM Mono',monospace;font-size:12px;line-height:1.6;display:flex;gap:8px;white-space:pre-wrap;}
+.cmd-prompt{color:var(--cyan);}
+.cmd-text{color:#e2e8f0;}
+.cmd-comment{color:rgba(255,255,255,.25);}
+
+.causes-list{display:flex;flex-direction:column;gap:8px;}
+.cause-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(0,0,0,.03);border-radius:4px;border-left:3px solid transparent;font-size:13px;line-height:1.5;}
+.cause-item.c-critical{border-color:var(--crimson);}
+.cause-item.c-high    {border-color:var(--amber);}
+.cause-item.c-medium  {border-color:var(--cyan);}
+.cause-item.c-low     {border-color:var(--lime);}
+.cause-icon{flex-shrink:0;font-size:14px;}
+.cause-text{color:var(--text);}
+.cause-text strong{color:var(--coal);font-weight:700;}
+
+.fix-steps{display:flex;flex-direction:column;gap:6px;}
+.fix-step{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:4px;transition:background .2s;}
+.fix-step:hover{background:rgba(0,0,0,.03);}
+.fix-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;flex-shrink:0;margin-top:1px;}
+.fix-num.ci{background:rgba(229,57,53,.15);color:var(--crimson);}
+.fix-num.gitops{background:rgba(245,158,11,.15);color:var(--amber);}
+.fix-num.sec{background:rgba(0,194,212,.15);color:var(--cyan);}
+.fix-num.deploy{background:rgba(132,204,22,.15);color:var(--lime);}
+.fix-num.art{background:rgba(124,58,237,.15);color:#a78bfa;}
+.fix-text{font-size:13px;color:var(--text);line-height:1.55;}
+.fix-text strong{color:var(--coal);}
+.fix-text code{background:rgba(0,0,0,.07);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;}
+
+.exit-table{width:100%;border-collapse:collapse;}
+.exit-table th{background:var(--coal);color:#fff;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 14px;text-align:left;}
+.exit-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.06);}
+.exit-table tr:last-child td{border-bottom:none;}
+.exit-table tr:hover td{background:rgba(0,0,0,.03);}
+
+.cheat-section{background:var(--coal);padding:0;}
+.cheat-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.cheat-inner .section-title{color:#fff;}
+.cheat-inner .section-tag{color:rgba(255,255,255,.3);}
+.cheat-inner .section-lead{color:rgba(255,255,255,.4);}
+.cheat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.cheat-block{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);padding:28px 24px;transition:background .2s,border-color .2s;}
+.cheat-block:hover{background:rgba(255,255,255,.06);border-color:rgba(0,194,212,.2);}
+.cheat-block-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.cheat-block-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+.cheat-cmd{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.5;display:flex;align-items:flex-start;gap:6px;}
+.cheat-cmd:last-child{border-bottom:none;}
+.cheat-cmd .prompt{color:var(--cyan);flex-shrink:0;}
+
+/* ── GitOps push-vs-pull diagram ── */
+.flow-wrap{display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:stretch;margin-bottom:16px;}
+.flow-col{background:var(--smoke);border-radius:8px;padding:24px;}
+.flow-col-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.5px;margin-bottom:14px;}
+.flow-step{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);}
+.flow-num{width:20px;height:20px;border-radius:50%;background:var(--coal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.flow-arrow{display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--muted);}
+
+/* ── decision table ── */
+.decision-wrap{margin-bottom:56px;overflow-x:auto;}
+.decision-table{width:100%;border-collapse:collapse;background:var(--smoke);min-width:760px;}
+.decision-table th{background:var(--coal);color:#fff;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 16px;text-align:left;}
+.decision-table td{padding:14px 16px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.08);vertical-align:top;}
+.decision-table tr:last-child td{border-bottom:none;}
+.decision-table tr:hover td{background:rgba(0,0,0,.03);}
+.decision-table td strong{color:var(--coal);}
+.pill-mini{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 9px;border-radius:12px;background:rgba(0,194,212,.12);color:var(--cyan);margin:2px 4px 2px 0;}
+
+.author-strip{background:var(--smoke);padding:60px 64px;}
+.author-strip-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.author-info{display:flex;align-items:center;gap:24px;}
+.author-avatar{width:64px;height:64px;background:linear-gradient(135deg,var(--crimson),#ff6b35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;color:#fff;flex-shrink:0;}
+.author-name{font-weight:700;font-size:17px;color:var(--coal);margin-bottom:4px;}
+.author-role{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.author-actions{display:flex;gap:12px;}
+.btn-sm{padding:10px 24px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;text-decoration:none;transition:background .2s,color .2s,border-color .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-sm.primary{background:var(--coal);color:var(--paper);}
+.btn-sm.primary:hover{background:var(--crimson);}
+.btn-sm.ghost{background:transparent;color:var(--coal);border:1.5px solid var(--coal);}
+.btn-sm.ghost:hover{border-color:var(--crimson);color:var(--crimson);}
+
+footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:rgba(255,255,255,.6);}
+.footer-links{display:flex;gap:24px;flex-wrap:wrap;}
+.footer-links a{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--cyan);}
+.footer-note{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;}
+
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:900px){
+  nav{padding:14px 20px;}
+  .nav-breadcrumb{display:none;}
+  .hero{grid-template-columns:1fr;}
+  .hero-right{min-height:280px;padding:32px 24px;}
+  .hero-left{padding:60px 28px;}
+  .arch-inner{padding:64px 28px;}
+  .arch-diagram{grid-template-columns:1fr;gap:8px;}
+  .content-section{padding:64px 28px;}
+  .level-tabs{flex-wrap:wrap;}
+  .ec-inner{grid-template-columns:1fr;}
+  .cheat-inner{padding:64px 28px;}
+  .cheat-grid{grid-template-columns:1fr;}
+  .author-strip{padding:48px 28px;}
+  .author-strip-inner{flex-direction:column;align-items:flex-start;}
+  footer{padding:36px 28px;}
+  .footer-inner{flex-direction:column;align-items:flex-start;}
+  .flow-wrap{grid-template-columns:1fr;}
+  .flow-arrow{transform:rotate(90deg);}
+  .decision-table{min-width:640px;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="nav-breadcrumb">
+    <a href="../../index.html">Home</a><span class="sep">/</span>
+    <a href="../../index.html#topics">DevOps</a><span class="sep">/</span>
+    <span class="current">CI/CD & GitOps</span>
+  </div>
+  <a href="../../index.html#topics" class="nav-back">← Newsletter</a>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-ghost">DEPLOY</div>
+  <div class="hero-left">
+    <div class="bc">
+      <a href="../../index.html">Platform Ops</a><span class="sep">›</span>
+      <a href="../../index.html#topics">DevOps</a><span class="sep">›</span>
+      <span class="here">CI/CD & GitOps</span>
+    </div>
+    <div class="eyebrow"><span class="eyebrow-line"></span>Issue #052 · August 2026</div>
+    <h1 class="hero-title">
+      CI/CD & <span class="hl-red">GITOPS</span><br>
+      <span class="hl-cyan">DEEP-DIVE</span>
+    </h1>
+    <p class="hero-sub">Pipelines · ArgoCD/Flux · Security Gates · Deploy Strategy</p>
+    <p class="hero-desc">From commit to production: building pipelines that don't lie to you, letting Git — not a script — be the source of truth for what's running, gating builds before they ship, and rolling out changes without betting the whole fleet at once.</p>
+    <div class="level-pills">
+      <button class="lp ci"     onclick="switchLevel('ci')">🔴 CI Pipelines</button>
+      <button class="lp gitops" onclick="switchLevel('gitops')">🟠 GitOps</button>
+      <button class="lp sec"    onclick="switchLevel('sec')">🔵 Pipeline Security</button>
+      <button class="lp deploy" onclick="switchLevel('deploy')">🟢 Deploy Strategies</button>
+      <button class="lp art"    onclick="switchLevel('art')">🟣 Secrets & Artifacts</button>
+    </div>
+    <div class="hero-meta-row">
+      <div><div class="hm-num">15</div><div class="hm-label">Concepts Covered</div></div>
+      <div><div class="hm-num">5</div><div class="hm-label">Pipeline Layers</div></div>
+      <div><div class="hm-num">2</div><div class="hm-label">GitOps Engines</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="err-matrix">
+      <div class="err-layer ci">
+        <div class="el-header"><span class="el-label">CI Pipelines</span><span class="el-count">3</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="80%"></div></div>
+        <div class="el-errors">
+          <span class="ee">Jenkinsfile</span><span class="ee">.gitlab-ci.yml</span><span class="ee">Stages</span>
+        </div>
+      </div>
+      <div class="err-layer gitops">
+        <div class="el-header"><span class="el-label">GitOps</span><span class="el-count">3</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="75%"></div></div>
+        <div class="el-errors">
+          <span class="ee">ArgoCD</span><span class="ee">Flux</span><span class="ee">Reconciliation</span>
+        </div>
+      </div>
+      <div class="err-layer sec">
+        <div class="el-header"><span class="el-label">Pipeline Security</span><span class="el-count">3</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="65%"></div></div>
+        <div class="el-errors">
+          <span class="ee">SAST</span><span class="ee">Image Scan</span><span class="ee">SBOM</span>
+        </div>
+      </div>
+      <div class="err-layer deploy">
+        <div class="el-header"><span class="el-label">Deploy Strategies</span><span class="el-count">3</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="70%"></div></div>
+        <div class="el-errors">
+          <span class="ee">Canary</span><span class="ee">Blue-Green</span><span class="ee">Rollback</span>
+        </div>
+      </div>
+      <div class="err-layer art">
+        <div class="el-header"><span class="el-label">Secrets & Artifacts</span><span class="el-count">3</span></div>
+        <div class="el-bar"><div class="el-fill" data-width="55%"></div></div>
+        <div class="el-errors">
+          <span class="ee">Vault</span><span class="ee">Sealed Secrets</span><span class="ee">Registry</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TICKER ─── -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="ticker-dot"></span>Jenkinsfile</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>GitLab CI</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>ArgoCD</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Flux</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Reconciliation Loop</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>SAST / DAST</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Trivy Image Scan</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>SBOM</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Canary Rollout</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Blue-Green Deploy</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>HashiCorp Vault</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Sealed Secrets</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Jenkinsfile</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>GitLab CI</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>ArgoCD</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Flux</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Reconciliation Loop</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>SAST / DAST</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Trivy Image Scan</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>SBOM</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Canary Rollout</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Blue-Green Deploy</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>HashiCorp Vault</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Sealed Secrets</span>
+  </div>
+</div>
+
+<!-- ═══ ARCHITECTURE ═══ -->
+<div class="arch-section">
+  <div class="arch-inner reveal">
+    <div class="section-tag" style="color:rgba(255,255,255,.3)">Architecture Map</div>
+    <h2 class="section-title" style="color:#fff">COMMIT TO PRODUCTION</h2>
+    <p class="section-lead">Five stages between a developer's push and a change running in the cluster — each with its own failure modes and its own tooling.</p>
+    <div class="arch-diagram">
+      <div class="arch-layer ci">
+        <div class="arch-layer-header">🔴 Build & Test</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">Jenkins / GitLab CI</div>
+          <div class="arch-comp">Unit / Integration Tests</div>
+          <div class="arch-comp">Container Build</div>
+          <div class="arch-comp">Artifact Push</div>
+          <div class="arch-comp">Pipeline as Code</div>
+        </div>
+      </div>
+      <div class="arch-layer gitops">
+        <div class="arch-layer-header">🟠 GitOps Sync</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">Git Repo (Desired State)</div>
+          <div class="arch-comp">ArgoCD / Flux Controller</div>
+          <div class="arch-comp">Reconciliation Loop</div>
+          <div class="arch-comp">Drift Detection</div>
+          <div class="arch-comp">Auto / Manual Sync</div>
+        </div>
+      </div>
+      <div class="arch-layer sec">
+        <div class="arch-layer-header">🔵 Security Gates</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">SAST (code)</div>
+          <div class="arch-comp">Image Scanning</div>
+          <div class="arch-comp">SBOM Generation</div>
+          <div class="arch-comp">Policy Admission (OPA)</div>
+          <div class="arch-comp">DAST (runtime)</div>
+        </div>
+      </div>
+      <div class="arch-layer deploy">
+        <div class="arch-layer-header">🟢 Rollout</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">Canary</div>
+          <div class="arch-comp">Blue-Green</div>
+          <div class="arch-comp">Progressive Delivery</div>
+          <div class="arch-comp">Automated Rollback</div>
+          <div class="arch-comp">Health Gates</div>
+        </div>
+      </div>
+      <div class="arch-layer art">
+        <div class="arch-layer-header">🟣 Secrets / Artifacts</div>
+        <div class="arch-layer-body">
+          <div class="arch-comp">Vault / Sealed Secrets</div>
+          <div class="arch-comp">Container Registry</div>
+          <div class="arch-comp">Image Signing (cosign)</div>
+          <div class="arch-comp">Helm / OCI Charts</div>
+          <div class="arch-comp">Retention Policy</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<section class="content-section reveal" id="topics">
+  <div class="section-tag">Deep-Dive</div>
+  <h2 class="section-title">CI/CD REFERENCE</h2>
+  <p class="section-lead">Click any layer to explore concepts, pipeline snippets, and production-tested guidance.</p>
+
+  <div class="level-tabs">
+    <button class="level-tab ci active" onclick="switchLevel('ci')"><span class="tab-icon">🔴</span><span class="tab-label">CI Pipelines</span><span class="tab-count">3</span></button>
+    <button class="level-tab gitops" onclick="switchLevel('gitops')"><span class="tab-icon">🟠</span><span class="tab-label">GitOps</span><span class="tab-count">3</span></button>
+    <button class="level-tab sec" onclick="switchLevel('sec')"><span class="tab-icon">🔵</span><span class="tab-label">Security</span><span class="tab-count">3</span></button>
+    <button class="level-tab deploy" onclick="switchLevel('deploy')"><span class="tab-icon">🟢</span><span class="tab-label">Deploy Strategy</span><span class="tab-count">3</span></button>
+    <button class="level-tab art" onclick="switchLevel('art')"><span class="tab-icon">🟣</span><span class="tab-label">Secrets/Artifacts</span><span class="tab-count">3</span></button>
+  </div>
+
+  <!-- ════════ CI PIPELINES ════════ -->
+  <div class="level-panel active" id="panel-ci">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(229,57,53,.2),rgba(229,57,53,.05));border:1px solid rgba(229,57,53,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:#ef5350;">CI PIPELINES — JENKINS & GITLAB CI</div>
+        <div class="lb-sub" style="color:rgba(229,57,53,.6);">Turning a commit into a tested, versioned, deployable artifact</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(229,57,53,.15);color:var(--crimson);border:1px solid rgba(229,57,53,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🏗️</div>
+          <div class="ec-main">
+            <div class="ec-name">Pipeline as Code</div>
+            <div class="ec-desc">The pipeline definition lives in the repo it builds — versioned, reviewed, and reproducible, instead of a job configured by hand in a UI.</div>
+            <div class="ec-tags"><span class="ec-tag r">Must Know</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title cmd">Jenkinsfile (declarative)</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">Jenkinsfile</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-text">pipeline {</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;agent any</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;stages {</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;&#160;&#160;stage('Build')&#160;{ steps { sh 'mvn package' } }</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;&#160;&#160;stage('Test')&#160;&#160;{ steps { sh 'mvn test' } }</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;&#160;&#160;stage('Image')&#160;{ steps { sh 'docker build -t $REGISTRY/app:$TAG .' } }</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;}</span></div>
+                  <div class="cmd-line"><span class="cmd-text">}</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title cmd">.gitlab-ci.yml</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">yaml</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-text">stages: [build, test, image, deploy]</span></div>
+                  <div class="cmd-line"><span class="cmd-text">build:</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;stage: build</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;script: [mvn package]</span></div>
+                  <div class="cmd-line"><span class="cmd-text">image:</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;stage: image</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;script: [docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .]</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">⚖️</div>
+          <div class="ec-main">
+            <div class="ec-name">Jenkins vs GitLab CI</div>
+            <div class="ec-desc">Both run stages of shell commands in containers or agents. The difference is mostly about coupling, runner model, and plugin ecosystem.</div>
+            <div class="ec-tags"><span class="ec-tag a">Important</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <table class="exit-table">
+                <tr><th>Trait</th><th>Jenkins</th><th>GitLab CI</th></tr>
+                <tr><td><strong>Coupling</strong></td><td>Standalone server, any SCM</td><td>Tightly integrated with GitLab repos/MRs</td></tr>
+                <tr><td><strong>Config</strong></td><td>Jenkinsfile (Groovy DSL)</td><td>.gitlab-ci.yml (pure YAML)</td></tr>
+                <tr><td><strong>Runners</strong></td><td>Static/dynamic agents, plugin-managed</td><td>GitLab Runners — shared, group, or project-specific</td></tr>
+                <tr><td><strong>Ecosystem</strong></td><td>1800+ plugins, huge but uneven quality</td><td>Built-in features (SAST, container scanning, etc.)</td></tr>
+                <tr><td><strong>Ops burden</strong></td><td>You maintain the Jenkins master + plugins</td><td>Lower if using GitLab.com or GitLab-managed runners</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">⚡</div>
+          <div class="ec-main">
+            <div class="ec-name">Pipeline Performance & Caching</div>
+            <div class="ec-desc">A slow pipeline is a productivity tax paid every single commit. Cache dependencies, parallelize what doesn't depend on itself.</div>
+            <div class="ec-tags"><span class="ec-tag c">Operations</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num ci">1</div><div class="fix-text">Cache package manager directories (<code>.m2</code>, <code>node_modules</code>, pip wheel cache) between runs</div></div>
+                <div class="fix-step"><div class="fix-num ci">2</div><div class="fix-text">Run independent test suites (unit, lint, security scan) in parallel stages, not sequentially</div></div>
+                <div class="fix-step"><div class="fix-num ci">3</div><div class="fix-text">Use layer caching for Docker builds — order Dockerfile instructions from least to most frequently changed</div></div>
+                <div class="fix-step"><div class="fix-num ci">4</div><div class="fix-text">Fail fast: run the cheapest checks (lint, unit tests) before the expensive ones (integration, image build)</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ GITOPS ════════ -->
+  <div class="level-panel" id="panel-gitops">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.05));border:1px solid rgba(245,158,11,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:var(--amber);">GITOPS — ARGOCD & FLUX</div>
+        <div class="lb-sub" style="color:rgba(245,158,11,.7);">Git is the single source of truth; a controller makes the cluster match it</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🔁</div>
+          <div class="ec-main">
+            <div class="ec-name">Push vs Pull Deployment</div>
+            <div class="ec-desc">Traditional CI/CD pushes changes into the cluster with kubectl/helm from the pipeline. GitOps flips it: an in-cluster agent pulls and reconciles.</div>
+            <div class="ec-tags"><span class="ec-tag r">Must Know</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="flow-wrap">
+                <div class="flow-col">
+                  <div class="flow-col-title" style="color:var(--crimson)">Push (Traditional CI/CD)</div>
+                  <div class="flow-step"><span class="flow-num">1</span>Pipeline builds image</div>
+                  <div class="flow-step"><span class="flow-num">2</span>Pipeline runs <code>kubectl apply</code> / <code>helm upgrade</code></div>
+                  <div class="flow-step"><span class="flow-num">3</span>Pipeline needs cluster credentials</div>
+                  <div class="flow-step"><span class="flow-num">4</span>No record of drift if someone edits the cluster directly</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-col">
+                  <div class="flow-col-title" style="color:var(--amber)">Pull (GitOps)</div>
+                  <div class="flow-step"><span class="flow-num">1</span>Pipeline builds image, updates a manifest repo</div>
+                  <div class="flow-step"><span class="flow-num">2</span>ArgoCD/Flux inside the cluster notices the Git change</div>
+                  <div class="flow-step"><span class="flow-num">3</span>Controller applies it — no external credentials needed</div>
+                  <div class="flow-step"><span class="flow-num">4</span>Continuously reconciles — drift is detected and can self-heal</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">⚖️</div>
+          <div class="ec-main">
+            <div class="ec-name">ArgoCD vs Flux</div>
+            <div class="ec-desc">Both implement the GitOps pattern; they differ in UI philosophy and how tightly they integrate with the rest of the Flux/Argo ecosystems.</div>
+            <div class="ec-tags"><span class="ec-tag a">Important</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <table class="exit-table">
+                <tr><th>Trait</th><th>ArgoCD</th><th>Flux</th></tr>
+                <tr><td><strong>UI</strong></td><td>Rich web UI, app-of-apps visual tree</td><td>CLI/API-first, UI via Weave GitOps (optional)</td></tr>
+                <tr><td><strong>Model</strong></td><td>"Application" CRD per deployable unit</td><td>Kustomization/HelmRelease CRDs, more composable</td></tr>
+                <tr><td><strong>Multi-tenancy</strong></td><td>Projects with RBAC built in</td><td>Namespace-based, relies more on K8s RBAC directly</td></tr>
+                <tr><td><strong>Best fit</strong></td><td>Teams that want visibility/UI for many apps</td><td>Teams already deep in Flux/Kustomize, GitOps purists</td></tr>
+              </table>
+            </div>
+            <div class="ec-block full">
+              <div class="ec-block-title cmd">ArgoCD Application (excerpt)</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">yaml</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-text">apiVersion: argoproj.io/v1alpha1</span></div>
+                  <div class="cmd-line"><span class="cmd-text">kind: Application</span></div>
+                  <div class="cmd-line"><span class="cmd-text">spec:</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;source: {repoURL: git@repo:billing-manifests.git, path: overlays/prod}</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;syncPolicy: {automated: {prune: true, selfHeal: true}}</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">🧬</div>
+          <div class="ec-main">
+            <div class="ec-name">The Two-Repo Pattern</div>
+            <div class="ec-desc">Application source code and Kubernetes manifests live in separate repos — the pipeline's job ends where GitOps begins.</div>
+            <div class="ec-tags"><span class="ec-tag c">Pattern</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title causes">Why Split Repos</div>
+              <div class="causes-list">
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">App repo change frequency ≠ deploy frequency — decouples "code changed" from "environment changed"</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">Manifest repo becomes the audit trail: every prod change is a diffable commit</span></div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">Typical Flow</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num gitops">1</div><div class="fix-text">CI builds image, tags it <code>app:sha-abc123</code></div></div>
+                <div class="fix-step"><div class="fix-num gitops">2</div><div class="fix-text">CI bumps the image tag in the manifest repo (via a bot commit or PR)</div></div>
+                <div class="fix-step"><div class="fix-num gitops">3</div><div class="fix-text">ArgoCD/Flux picks up the manifest change and syncs the cluster</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ SECURITY ════════ -->
+  <div class="level-panel" id="panel-sec">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(0,194,212,.2),rgba(0,194,212,.05));border:1px solid rgba(0,194,212,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:var(--cyan);">PIPELINE SECURITY GATES</div>
+        <div class="lb-sub" style="color:rgba(0,194,212,.7);">Catching problems before they're an image running in production</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(0,194,212,.15);color:var(--cyan);border:1px solid rgba(0,194,212,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🔬</div>
+          <div class="ec-main">
+            <div class="ec-name">SAST, Dependency & Image Scanning</div>
+            <div class="ec-desc">Three different scanners catch three different classes of problems — code flaws, vulnerable dependencies, and vulnerable base images.</div>
+            <div class="ec-tags"><span class="ec-tag r">Must Know</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title causes">Scan Types</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>SAST</strong> (Static Application Security Testing) — scans your own source for code-level flaws (SonarQube, Semgrep)</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>SCA</strong> (dependency scanning) — flags known CVEs in third-party libraries (Snyk, Dependabot)</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>Container/image scanning</strong> — checks the built image's OS packages and layers (Trivy, Grype)</span></div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title cmd">CI stage: image scan gate</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">trivy</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">trivy image --exit-code 1 --severity CRITICAL,HIGH $REGISTRY/app:$TAG</span></div>
+                  <div class="cmd-line"><span class="cmd-comment"># Non-zero exit fails the pipeline — no image with a critical CVE ships</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">📋</div>
+          <div class="ec-main">
+            <div class="ec-name">SBOM & Supply Chain</div>
+            <div class="ec-desc">A Software Bill of Materials lists every component in the image — the artifact you need when the next zero-day drops and you must answer "are we affected?" in minutes, not days.</div>
+            <div class="ec-tags"><span class="ec-tag a">Important</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num sec">1</div><div class="fix-text">Generate an SBOM per build (<code>syft $IMAGE -o spdx-json</code>) and store it alongside the artifact</div></div>
+                <div class="fix-step"><div class="fix-num sec">2</div><div class="fix-text">Sign images with <code>cosign</code> so deployment can verify provenance before running them</div></div>
+                <div class="fix-step"><div class="fix-num sec">3</div><div class="fix-text">When a CVE drops, grep SBOMs across all past builds instead of re-scanning everything from scratch</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">🚧</div>
+          <div class="ec-main">
+            <div class="ec-name">Admission Control (OPA / Kyverno)</div>
+            <div class="ec-desc">The last gate isn't in the pipeline at all — it's at the cluster's API server, refusing to admit anything that violates policy, pipeline or not.</div>
+            <div class="ec-tags"><span class="ec-tag c">Runtime</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="causes-list">
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">Block unsigned images, images with <code>:latest</code> tag, or missing resource limits — before they're admitted</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">Kyverno and OPA/Gatekeeper both implement this as ValidatingAdmissionWebhooks — policy as code, versioned in Git like everything else</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ DEPLOY STRATEGIES ════════ -->
+  <div class="level-panel" id="panel-deploy">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(132,204,22,.2),rgba(132,204,22,.05));border:1px solid rgba(132,204,22,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:var(--lime);">DEPLOYMENT STRATEGIES</div>
+        <div class="lb-sub" style="color:rgba(132,204,22,.7);">Shipping a change without betting the entire fleet on it at once</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(132,204,22,.15);color:var(--lime);border:1px solid rgba(132,204,22,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🐤</div>
+          <div class="ec-main">
+            <div class="ec-name">Canary Releases</div>
+            <div class="ec-desc">Route a small slice of traffic to the new version, watch the golden signals, and only then ramp it up — or auto-rollback if it looks bad.</div>
+            <div class="ec-tags"><span class="ec-tag r">Must Know</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="ec-block-title cmd">Argo Rollouts canary step (excerpt)</div>
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">yaml</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-text">strategy:</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;canary:</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;&#160;&#160;steps:</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;&#160;&#160;- {setWeight: 10}</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;&#160;&#160;- {pause: {duration: 5m}}</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;&#160;&#160;- {setWeight: 50}</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;&#160;&#160;- {pause: {duration: 10m}}</span></div>
+                  <div class="cmd-line"><span class="cmd-text">&#160;&#160;&#160;&#160;- {setWeight: 100}</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ec-block full">
+              <div class="ec-block-title causes">Why It Works</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text">Blast radius of a bad release is capped at the canary weight, not 100% of traffic</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">Pair with automated analysis (Argo Rollouts + Prometheus) to auto-abort on error-rate regressions</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">🔵🟢</div>
+          <div class="ec-main">
+            <div class="ec-name">Blue-Green Deployment</div>
+            <div class="ec-desc">Run two full environments side by side; switch traffic all at once by flipping a service selector or load balancer target.</div>
+            <div class="ec-tags"><span class="ec-tag a">Important</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title causes">Trade-offs vs Canary</div>
+              <div class="causes-list">
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">Instant rollback — flip the selector back, no gradual ramp needed</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">Costs 2x resources while both environments are live</span></div>
+                <div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">All-or-nothing traffic switch — no gradual exposure to catch subtle regressions</span></div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">Best Fit</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num deploy">1</div><div class="fix-text">Database-schema-sensitive releases where you want an instant, clean cutover</div></div>
+                <div class="fix-step"><div class="fix-num deploy">2</div><div class="fix-text">Low-traffic or batch services where gradual canary weighting adds little value</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">⏪</div>
+          <div class="ec-main">
+            <div class="ec-name">Automated Rollback</div>
+            <div class="ec-desc">A rollback that requires a human to notice, decide, and type a command is a rollback that happens too late.</div>
+            <div class="ec-tags"><span class="ec-tag c">Reliability</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num deploy">1</div><div class="fix-text">Wire canary analysis to real SLIs — error rate, p99 latency — not just pod readiness</div></div>
+                <div class="fix-step"><div class="fix-num deploy">2</div><div class="fix-text">In GitOps, rollback is a <code>git revert</code> on the manifest repo — the controller reconciles back automatically</div></div>
+                <div class="fix-step"><div class="fix-num deploy">3</div><div class="fix-text">Keep the previous ReplicaSet/revision around (<code>kubectl rollout undo</code>) as the manual fallback of last resort</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ SECRETS & ARTIFACTS ════════ -->
+  <div class="level-panel" id="panel-art">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.2);">
+      <div class="lb-left">
+        <div class="lb-title" style="color:#a78bfa;">SECRETS & ARTIFACT MANAGEMENT</div>
+        <div class="lb-sub" style="color:rgba(124,58,237,.7);">Nothing sensitive belongs in a Git diff — including in your GitOps manifest repo</div>
+      </div>
+      <span class="lb-badge" style="background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-critical">🔑</div>
+          <div class="ec-main">
+            <div class="ec-name">The GitOps Secrets Problem</div>
+            <div class="ec-desc">GitOps wants everything in Git — but plaintext secrets in Git is a non-starter. Two patterns solve this without breaking the "Git is truth" model.</div>
+            <div class="ec-tags"><span class="ec-tag r">Must Know</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block">
+              <div class="ec-block-title causes">Sealed Secrets</div>
+              <div class="causes-list">
+                <div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text">Encrypt the secret client-side with a cluster-specific public key</span></div>
+                <div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">Commit the encrypted blob to Git safely — only the in-cluster controller can decrypt it</span></div>
+              </div>
+            </div>
+            <div class="ec-block">
+              <div class="ec-block-title fix">External Secrets Operator + Vault</div>
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num art">1</div><div class="fix-text">Secret values never touch Git at all — they stay in Vault/AWS Secrets Manager/Azure Key Vault</div></div>
+                <div class="fix-step"><div class="fix-num art">2</div><div class="fix-text">Only a <em>reference</em> (which secret, which path) is committed — an ExternalSecret CRD</div></div>
+                <div class="fix-step"><div class="fix-num art">3</div><div class="fix-text">The operator syncs the real value into a native K8s Secret at runtime</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-high">📦</div>
+          <div class="ec-main">
+            <div class="ec-name">Artifact & Registry Hygiene</div>
+            <div class="ec-desc">Images and Helm charts pile up fast — retention policy is not optional once storage bills start showing up.</div>
+            <div class="ec-tags"><span class="ec-tag a">Important</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="fix-steps">
+                <div class="fix-step"><div class="fix-num art">1</div><div class="fix-text">Tag images with commit SHA, never rely on <code>:latest</code> in any deployed manifest</div></div>
+                <div class="fix-step"><div class="fix-num art">2</div><div class="fix-text">Set a retention policy: keep last N tags per branch, expire untagged/dangling images automatically</div></div>
+                <div class="fix-step"><div class="fix-num art">3</div><div class="fix-text">Package Helm charts as OCI artifacts in the same registry — one system to secure and back up, not two</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header">
+          <div class="ec-severity sev-medium">✍️</div>
+          <div class="ec-main">
+            <div class="ec-name">Image Signing & Verification</div>
+            <div class="ec-desc">Proving an image came from your pipeline and hasn't been tampered with since — closing the loop the SBOM opened.</div>
+            <div class="ec-tags"><span class="ec-tag c">Supply Chain</span></div>
+          </div>
+          <div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div>
+        </div>
+        <div class="ec-body">
+          <div class="ec-inner">
+            <div class="ec-block full">
+              <div class="cmd-block">
+                <div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">cosign</span></div>
+                <div class="cmd-lines">
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">cosign sign --key cosign.key $REGISTRY/app:$TAG</span></div>
+                  <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">cosign verify --key cosign.pub $REGISTRY/app:$TAG</span></div>
+                  <div class="cmd-line"><span class="cmd-comment"># Pair with a Kyverno/OPA policy that rejects unsigned images at admission</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══ DECISION GUIDE ═══ -->
+<section class="content-section reveal">
+  <div class="section-tag">Decision Guide</div>
+  <h2 class="section-title">WHICH ROLLOUT STRATEGY?</h2>
+  <p class="section-lead">A quick lookup for the question that comes up in almost every release-planning conversation.</p>
+  <div class="decision-wrap">
+    <table class="decision-table">
+      <tr><th>Situation</th><th>Strategy</th><th>Why</th></tr>
+      <tr><td><strong>High-traffic user-facing API</strong></td><td><span class="pill-mini">Canary</span></td><td>Gradual exposure catches regressions before they hit everyone</td></tr>
+      <tr><td><strong>Database schema migration involved</strong></td><td><span class="pill-mini">Blue-Green</span></td><td>Clean cutover avoids two schema versions running concurrently</td></tr>
+      <tr><td><strong>Internal batch/cron job</strong></td><td><span class="pill-mini">Rolling Update</span></td><td>Simplicity wins — low blast radius already, no user-facing traffic</td></tr>
+      <tr><td><strong>Regulatory / compliance-critical release</strong></td><td><span class="pill-mini">Blue-Green</span> + manual gate</td><td>Instant rollback and a clear approval checkpoint before cutover</td></tr>
+      <tr><td><strong>Frequent, low-risk microservice</strong></td><td><span class="pill-mini">Canary</span> + auto-promote</td><td>Automated analysis lets you ship many times a day safely</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ CHEATSHEET ═══ -->
+<div class="cheat-section">
+  <div class="cheat-inner reveal">
+    <div class="section-tag" style="color:rgba(255,255,255,.3)">Quick Reference</div>
+    <h2 class="section-title" style="color:#fff;margin-bottom:40px">COMMAND CHEATSHEET</h2>
+    <div class="cheat-grid">
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--crimson)">Jenkins</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>jenkins-cli build &lt;job&gt; -f</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>jenkins-cli console &lt;job&gt; -f</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>curl -s $JENKINS_URL/job/&lt;job&gt;/lastBuild/api/json</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--amber)">GitLab CI</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>gitlab-runner exec docker build</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>glab ci status</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>glab ci view</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--amber)">ArgoCD</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>argocd app sync &lt;app&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>argocd app diff &lt;app&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>argocd app rollback &lt;app&gt; &lt;revision&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>argocd app get &lt;app&gt; -o wide</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--cyan)">Flux</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>flux get kustomizations</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>flux reconcile source git &lt;name&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>flux logs --follow</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:var(--lime)">Rollouts / Rollback</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl argo rollouts get rollout &lt;name&gt; --watch</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl rollout undo deploy/&lt;name&gt;</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubectl rollout history deploy/&lt;name&gt;</span></div>
+      </div>
+      <div class="cheat-block">
+        <div class="cheat-block-title" style="color:#a78bfa">Secrets / Supply Chain</div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>kubeseal --format yaml &lt; secret.yaml</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>trivy image $IMAGE</span></div>
+        <div class="cheat-cmd"><span class="prompt">❯</span><span>syft $IMAGE -o spdx-json</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AUTHOR STRIP ═══ -->
+<div class="author-strip">
+  <div class="author-strip-inner">
+    <div class="author-info">
+      <div class="author-avatar">VA</div>
+      <div>
+        <div class="author-name">Vishal Abhinav</div>
+        <div class="author-role">Platform Ops Engineer · @6D Technologies · Ops Newsletter — Issue #052</div>
+      </div>
+    </div>
+    <div class="author-actions">
+      <a href="../../index.html#subscribe" class="btn-sm primary">
+        Subscribe Free
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank" class="btn-sm ghost">GitHub ↗</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PLATFORM OPS</div>
+    <div class="footer-links">
+      <a href="../../index.html#topics">← Newsletter</a>
+      <a href="../K8/ARCHITECTURE/k8-architecture.html">K8s Architecture</a>
+      <a href="../K8/STORAGE/k8-storage.html">K8s Storage</a>
+      <a href="../K8/OBSERVABILITY/k8-observability.html">Observability</a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
+      <a href="../../index.html#subscribe">Subscribe</a>
+    </div>
+    <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
+  </div>
+</footer>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+document.querySelectorAll('a,button,.error-card,.arch-comp,.cheat-block').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='56px';ring.style.height='56px';ring.style.borderColor='var(--crimson)';cursor.style.transform='translate(-50%,-50%) scale(1.5)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='';cursor.style.transform='translate(-50%,-50%) scale(1)';});
+});
+
+function switchLevel(level){
+  document.querySelectorAll('.level-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.level-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.level-tab.'+level).forEach(t=>t.classList.add('active'));
+  const panel=document.getElementById('panel-'+level);
+  if(panel){panel.classList.add('active');}
+  document.getElementById('topics').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toggleCard(card){
+  const isOpen=card.classList.contains('open');
+  card.parentElement.querySelectorAll('.error-card').forEach(c=>c.classList.remove('open'));
+  if(!isOpen) card.classList.add('open');
+}
+
+document.querySelectorAll('.lp').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const level=Array.from(btn.classList).find(c=>['ci','gitops','sec','deploy','art'].includes(c));
+    if(level) switchLevel(level);
+  });
+});
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.querySelectorAll('.el-fill').forEach(el=>{
+      el.style.width=el.dataset.width;
+    });
+  },600);
+});
+
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
