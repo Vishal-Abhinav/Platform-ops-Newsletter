@@ -390,6 +390,43 @@ nav.scrolled {
 }
 .topic-card:hover .tc-sub-title { color: var(--cyan); }
 
+/* ─── TOOLCHAIN DIAGRAM ─── */
+.toolchain-section{background:var(--ink);padding:0;position:relative;overflow:hidden;}
+.toolchain-inner{max-width:1200px;margin:0 auto;padding:100px 64px 80px;position:relative;z-index:2;}
+.tool-track-wrap{max-width:920px;margin:20px auto 0;}
+.tool-track-svg{width:100%;height:auto;display:block;overflow:visible;}
+.loop-center-glyph{font-family:'Bebas Neue',sans-serif;font-size:150px;fill:rgba(255,255,255,.035);}
+.loop-center-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:4px;fill:rgba(255,255,255,.22);text-anchor:middle;text-transform:uppercase;}
+.track-path{fill:none;stroke:rgba(255,255,255,.14);stroke-width:2;stroke-dasharray:8 10;animation:dash-flow 24s linear infinite;}
+@keyframes dash-flow{to{stroke-dashoffset:-2000;}}
+.flow-dot{fill:var(--cyan);filter:drop-shadow(0 0 6px rgba(0,194,212,.9));}
+.tool-node{cursor:pointer;}
+.tool-node .tn-inner{transform-box:fill-box;transform-origin:center;transition:transform .3s cubic-bezier(.25,.46,.45,.94);}
+.tool-node:hover .tn-inner{transform:scale(1.18);}
+.tool-node .tn-pulse{fill:none;stroke:currentColor;stroke-width:6;opacity:0;animation:tn-pulse-anim 3.2s ease-out infinite;}
+.tool-node:nth-of-type(1) .tn-pulse{animation-delay:0s;}
+.tool-node:nth-of-type(2) .tn-pulse{animation-delay:.4s;}
+.tool-node:nth-of-type(3) .tn-pulse{animation-delay:.8s;}
+.tool-node:nth-of-type(4) .tn-pulse{animation-delay:1.2s;}
+.tool-node:nth-of-type(5) .tn-pulse{animation-delay:1.6s;}
+.tool-node:nth-of-type(6) .tn-pulse{animation-delay:2s;}
+.tool-node:nth-of-type(7) .tn-pulse{animation-delay:2.4s;}
+.tool-node:nth-of-type(8) .tn-pulse{animation-delay:2.8s;}
+@keyframes tn-pulse-anim{0%{opacity:.5;r:22px;stroke-width:6;}100%{opacity:0;r:42px;stroke-width:0;}}
+.tool-node .tn-ring{fill:none;stroke:currentColor;stroke-width:1.5;opacity:.4;}
+.tool-node .tn-core{fill:var(--ink);stroke:currentColor;stroke-width:2;transition:fill .3s;}
+.tool-node:hover .tn-core{fill:currentColor;}
+.tool-node .tn-icon{font-size:18px;text-anchor:middle;dominant-baseline:middle;pointer-events:none;}
+.tool-node .tn-stage{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.5px;fill:rgba(255,255,255,.88);text-anchor:middle;}
+.tool-node .tn-tool{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;fill:rgba(255,255,255,.35);text-anchor:middle;text-transform:uppercase;}
+.tool-flow-caption{text-align:center;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:28px;}
+.tool-flow-caption span{color:var(--cyan);}
+@media(max-width:900px){
+  .toolchain-inner{padding:64px 20px 56px;}
+  .tool-node .tn-stage{font-size:12px;}
+  .tool-node .tn-tool{font-size:7.5px;}
+}
+
 /* ─── LATEST ISSUES ─── */
 .issues-bg { background: var(--coal); padding: 0; }
 .issues-inner { max-width: 1200px; margin: 0 auto; padding: 100px 64px; }
@@ -670,7 +707,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
     </div>
     <div class="hero-stats">
       <div class="stat-item">
-        <div class="stat-num"><span class="count-up" data-target="49">0</span></div>
+        <div class="stat-num"><span class="count-up" data-target="52">0</span></div>
         <div class="stat-label">Issues Published</div>
       </div>
       <div class="stat-item">
@@ -685,35 +722,34 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
   </div>
 
   <div class="hero-right">
-    <a href="DevOps/K8/ERROR/K8-error.html" class="hero-new-badge">🚨 New — Issue #049</a>
+    <a href="DevOps/CICD/cicd-pipelines.html" class="hero-new-badge">🚀 New — Issue #052</a>
     <div class="terminal">
       <div class="terminal-bar">
         <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
-        <div class="t-title">platform-ops ~ issue #049</div>
+        <div class="t-title">platform-ops ~ issue #052</div>
       </div>
       <div class="terminal-body">
-        <span class="tl"><span class="tl-prompt">❯</span> <span class="tl-cmd">kubectl get pods -A | grep -v Running</span></span>
-        <span class="tl tl-out">NAMESPACE   NAME           STATUS</span>
-        <span class="tl"><span class="tl-k">default</span>     <span class="tl-k">api-7d9f</span>   <span class="tl-err">CrashLoopBackOff</span></span>
-        <span class="tl"><span class="tl-k">staging</span>     <span class="tl-k">db-0</span>        <span class="tl-err">OOMKilled</span></span>
-        <span class="tl"><span class="tl-k">prod</span>        <span class="tl-k">worker-3</span>    <span class="tl-err">ImagePullBackOff</span></span>
+        <span class="tl"><span class="tl-prompt">❯</span> <span class="tl-cmd">argocd app diff billing-api --revision HEAD</span></span>
+        <span class="tl tl-out">NAME          SYNC STATUS   HEALTH</span>
+        <span class="tl"><span class="tl-k">billing-api</span>   <span class="tl-err">OutOfSync</span>     <span class="tl-out">Healthy</span></span>
         <span class="tl"> </span>
-        <span class="tl"><span class="tl-prompt">❯</span> <span class="tl-cmd">kubectl logs api-7d9f --previous | tail -3</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Exit code 137 → OOMKilled</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Issue #049 — K8s Error Runbook 🚀</span></span>
+        <span class="tl"><span class="tl-prompt">❯</span> <span class="tl-cmd">argocd app sync billing-api</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">canary weight 10% → 50% → 100%</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Synced · Healthy</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Issue #052 — CI/CD & GitOps 🚀</span></span>
         <span class="tl"> </span>
         <span class="tl"><span class="tl-prompt">❯</span> <span class="cursor-blink"></span></span>
       </div>
     </div>
     <div class="badge-strip">
-      <span class="t-badge">CrashLoopBackOff</span>
-      <span class="t-badge">OOMKilled</span>
-      <span class="t-badge">Node NotReady</span>
-      <span class="t-badge">etcd</span>
-      <span class="t-badge">SCC</span>
-      <span class="t-badge">RBAC</span>
-      <span class="t-badge">CNI</span>
-      <span class="t-badge">OAuth</span>
+      <span class="t-badge">ArgoCD</span>
+      <span class="t-badge">Canary</span>
+      <span class="t-badge">StatefulSet</span>
+      <span class="t-badge">PVC</span>
+      <span class="t-badge">Prometheus</span>
+      <span class="t-badge">Loki</span>
+      <span class="t-badge">Vault</span>
+      <span class="t-badge">SBOM</span>
     </div>
   </div>
 </section>
@@ -721,34 +757,50 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
 <!-- ═══════════ TICKER ═══════════ -->
 <div class="ticker-wrap">
   <div class="ticker-track">
+    <span class="ticker-item"><span class="ticker-dot"></span> CI/CD & GitOps</span>
     <span class="ticker-item"><span class="ticker-dot"></span> K8s Error Runbook</span>
     <span class="ticker-item"><span class="ticker-dot"></span> CrashLoopBackOff</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Kubernetes Architecture</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Node NotReady</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> Storage Nodes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> PersistentVolumeClaim</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> StorageClass</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> CSI Drivers</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> StatefulSets</span>
     <span class="ticker-item"><span class="ticker-dot"></span> OOMKilled</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Worker Nodes</span>
     <span class="ticker-item"><span class="ticker-dot"></span> etcd Quorum</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Control Plane</span>
     <span class="ticker-item"><span class="ticker-dot"></span> SCC Violations</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> GitOps</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> ArgoCD / Flux</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Prometheus + Grafana</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Loki / ELK</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Jaeger Tracing</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Canary Rollouts</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Service Mesh</span>
     <span class="ticker-item"><span class="ticker-dot"></span> eBPF</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Platform Engineering</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Observability</span>
     <span class="ticker-item"><span class="ticker-dot"></span> SRE Practices</span>
     <!-- duplicate for seamless loop -->
+    <span class="ticker-item"><span class="ticker-dot"></span> CI/CD & GitOps</span>
     <span class="ticker-item"><span class="ticker-dot"></span> K8s Error Runbook</span>
     <span class="ticker-item"><span class="ticker-dot"></span> CrashLoopBackOff</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Kubernetes Architecture</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Node NotReady</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> Storage Nodes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> PersistentVolumeClaim</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> StorageClass</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> CSI Drivers</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> StatefulSets</span>
     <span class="ticker-item"><span class="ticker-dot"></span> OOMKilled</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Worker Nodes</span>
     <span class="ticker-item"><span class="ticker-dot"></span> etcd Quorum</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Control Plane</span>
     <span class="ticker-item"><span class="ticker-dot"></span> SCC Violations</span>
-    <span class="ticker-item"><span class="ticker-dot"></span> GitOps</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> ArgoCD / Flux</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Prometheus + Grafana</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Loki / ELK</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Jaeger Tracing</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Canary Rollouts</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Service Mesh</span>
     <span class="ticker-item"><span class="ticker-dot"></span> eBPF</span>
     <span class="ticker-item"><span class="ticker-dot"></span> Platform Engineering</span>
@@ -772,14 +824,12 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
           <div class="tc-icon-wrap">⚙️</div>
           <div class="tc-meta">
             <div class="tc-title">DevOps</div>
-            <div class="tc-count">10 subtopics</div>
+            <div class="tc-count">13 subtopics</div>
           </div>
           <span class="tc-arrow">↓</span>
         </div>
         <div class="tc-body">
           <div class="tc-items">
-            <span class="tc-badge">CI/CD</span>
-            <span class="tc-badge">GitOps</span>
             <span class="tc-badge">Automation</span>
             <div class="tc-sub-group">
               <div class="tc-sub-title">Kubernetes — Articles</div>
@@ -787,6 +837,12 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
               <a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="tc-badge-link">⬡ K8 Architecture ↗</a>
               <a href="DevOps/K8/Networking/k8-networking.html" class="tc-badge-link">⬡ K8 Networking ↗</a>
               <a href="DevOps/K8/ERROR/K8-error.html" class="tc-badge-link" style="background:rgba(229,57,53,0.15);border-color:rgba(229,57,53,0.35);">🚨 K8 Error Runbook ↗</a>
+              <a href="DevOps/K8/STORAGE/k8-storage.html" class="tc-badge-link" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.35);">📦 K8 Storage ↗</a>
+              <a href="DevOps/K8/OBSERVABILITY/k8-observability.html" class="tc-badge-link" style="background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.35);">📡 K8 Observability ↗</a>
+            </div>
+            <div class="tc-sub-group">
+              <div class="tc-sub-title">CI/CD — Articles</div>
+              <a href="DevOps/CICD/cicd-pipelines.html" class="tc-badge-link" style="background:rgba(229,57,53,0.15);border-color:rgba(229,57,53,0.35);">🚀 CI/CD & GitOps ↗</a>
             </div>
             <div class="tc-sub-group">
               <div class="tc-sub-title">Toolchain</div>
@@ -890,6 +946,127 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
   </div>
 </div>
 
+<!-- ═══════════ TOOLCHAIN DIAGRAM ═══════════ -->
+<div class="toolchain-section">
+  <div class="toolchain-inner reveal">
+    <div class="section-tag" style="color:rgba(255,255,255,0.3)">Continuous Delivery Loop</div>
+    <h2 class="section-title" style="color:var(--paper)">THE TOOLCHAIN IN MOTION</h2>
+    <p class="section-lead" style="color:rgba(255,255,255,0.4)">Eight tools, one loop — a commit becomes production, and production feeds straight back into the next commit.</p>
+
+    <div class="tool-track-wrap">
+      <svg viewBox="0 0 900 460" class="tool-track-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <path id="toolLoop" class="track-path" d="M300,90 L600,90 A130,130 0 0 1 600,350 L300,350 A130,130 0 0 1 300,90 Z"></path>
+
+        <text x="450" y="248" text-anchor="middle" class="loop-center-glyph">∞</text>
+        <text x="450" y="230" class="loop-center-label">Ship</text>
+        <text x="450" y="248" class="loop-center-label" style="font-size:10px;letter-spacing:3px;">Daily</text>
+
+        <circle r="5" class="flow-dot">
+          <animateMotion dur="9s" repeatCount="indefinite" begin="0s"><mpath href="#toolLoop" xlink:href="#toolLoop"></mpath></animateMotion>
+        </circle>
+        <circle r="5" class="flow-dot">
+          <animateMotion dur="9s" repeatCount="indefinite" begin="-2.25s"><mpath href="#toolLoop" xlink:href="#toolLoop"></mpath></animateMotion>
+        </circle>
+        <circle r="5" class="flow-dot">
+          <animateMotion dur="9s" repeatCount="indefinite" begin="-4.5s"><mpath href="#toolLoop" xlink:href="#toolLoop"></mpath></animateMotion>
+        </circle>
+        <circle r="5" class="flow-dot">
+          <animateMotion dur="9s" repeatCount="indefinite" begin="-6.75s"><mpath href="#toolLoop" xlink:href="#toolLoop"></mpath></animateMotion>
+        </circle>
+
+        <g class="tool-node" style="color:var(--crimson)" transform="translate(300,90)">
+          <g class="tn-inner">
+            <circle r="22" class="tn-pulse"></circle>
+            <circle r="22" class="tn-ring"></circle>
+            <circle r="17" class="tn-core"></circle>
+            <text class="tn-icon" y="1">🔀</text>
+          </g>
+          <text class="tn-stage" y="-34">Plan / Code</text>
+          <text class="tn-tool" y="-20">Git</text>
+        </g>
+
+        <g class="tool-node" style="color:var(--amber)" transform="translate(600,90)">
+          <g class="tn-inner">
+            <circle r="22" class="tn-pulse"></circle>
+            <circle r="22" class="tn-ring"></circle>
+            <circle r="17" class="tn-core"></circle>
+            <text class="tn-icon" y="1">🏗️</text>
+          </g>
+          <text class="tn-stage" y="-34">Build & Test</text>
+          <text class="tn-tool" y="-20">Jenkins · GitLab CI</text>
+        </g>
+
+        <g class="tool-node" style="color:var(--cyan)" transform="translate(730,150)">
+          <g class="tn-inner">
+            <circle r="22" class="tn-pulse"></circle>
+            <circle r="22" class="tn-ring"></circle>
+            <circle r="17" class="tn-core"></circle>
+            <text class="tn-icon" y="1">🛡️</text>
+          </g>
+          <text class="tn-stage" y="46">Scan</text>
+          <text class="tn-tool" y="60">Trivy · SAST</text>
+        </g>
+
+        <g class="tool-node" style="color:var(--lime)" transform="translate(730,290)">
+          <g class="tn-inner">
+            <circle r="22" class="tn-pulse"></circle>
+            <circle r="22" class="tn-ring"></circle>
+            <circle r="17" class="tn-core"></circle>
+            <text class="tn-icon" y="1">📦</text>
+          </g>
+          <text class="tn-stage" y="46">Package</text>
+          <text class="tn-tool" y="60">Helm · Registry</text>
+        </g>
+
+        <g class="tool-node" style="color:var(--crimson)" transform="translate(600,350)">
+          <g class="tn-inner">
+            <circle r="22" class="tn-pulse"></circle>
+            <circle r="22" class="tn-ring"></circle>
+            <circle r="17" class="tn-core"></circle>
+            <text class="tn-icon" y="1">🚀</text>
+          </g>
+          <text class="tn-stage" y="46">Deploy</text>
+          <text class="tn-tool" y="60">ArgoCD · Flux</text>
+        </g>
+
+        <g class="tool-node" style="color:var(--amber)" transform="translate(300,350)">
+          <g class="tn-inner">
+            <circle r="22" class="tn-pulse"></circle>
+            <circle r="22" class="tn-ring"></circle>
+            <circle r="17" class="tn-core"></circle>
+            <text class="tn-icon" y="1">☸️</text>
+          </g>
+          <text class="tn-stage" y="46">Run</text>
+          <text class="tn-tool" y="60">Kubernetes</text>
+        </g>
+
+        <g class="tool-node" style="color:var(--cyan)" transform="translate(170,290)">
+          <g class="tn-inner">
+            <circle r="22" class="tn-pulse"></circle>
+            <circle r="22" class="tn-ring"></circle>
+            <circle r="17" class="tn-core"></circle>
+            <text class="tn-icon" y="1">📊</text>
+          </g>
+          <text class="tn-stage" y="46">Monitor</text>
+          <text class="tn-tool" y="60">Prometheus · Grafana</text>
+        </g>
+
+        <g class="tool-node" style="color:var(--lime)" transform="translate(170,150)">
+          <g class="tn-inner">
+            <circle r="22" class="tn-pulse"></circle>
+            <circle r="22" class="tn-ring"></circle>
+            <circle r="17" class="tn-core"></circle>
+            <text class="tn-icon" y="1">🔔</text>
+          </g>
+          <text class="tn-stage" y="-34">Feedback</text>
+          <text class="tn-tool" y="-20">Loki · Alertmanager</text>
+        </g>
+      </svg>
+    </div>
+    <div class="tool-flow-caption">Code <span>→</span> Build <span>→</span> Scan <span>→</span> Package <span>→</span> Deploy <span>→</span> Run <span>→</span> Monitor <span>→</span> Feedback <span>→</span> Code</div>
+  </div>
+</div>
+
 <!-- ═══════════ LATEST ISSUES ═══════════ -->
 <div class="issues-bg" id="issues">
   <div class="issues-inner reveal">
@@ -897,54 +1074,89 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
     <h2 class="section-title" style="color:var(--paper)">LATEST ISSUES</h2>
     <p class="section-lead">Every issue is a deep-dive with architecture diagrams, code samples, and battle-tested insights.</p>
 
-    <!-- ── NEW FEATURED: Issue #049 K8s Error Runbook ── -->
-    <a href="DevOps/K8/ERROR/K8-error.html" class="issue-featured-new">
+    <!-- ── NEW FEATURED: Issue #052 CI/CD & GitOps ── -->
+    <a href="DevOps/CICD/cicd-pipelines.html" class="issue-featured-new">
       <div>
         <div class="ifn-new-badge"><span class="ifn-dot"></span> New Issue</div>
-        <div class="ifn-issue-meta">May 2026 · #049</div>
-        <div class="ifn-title">Kubernetes & OpenShift Error Runbook</div>
+        <div class="ifn-issue-meta">August 2026 · #052</div>
+        <div class="ifn-title">CI/CD & GitOps Deep-Dive</div>
         <div class="ifn-desc">
-          Comprehensive error reference for every layer of the K8s stack — Pod, Worker Node, Cluster, API Server, and OpenShift. 32 error types with root causes, diagnostic commands, exit code reference, and step-by-step production fixes.
+          Commit to production, five stages at a time — Jenkins & GitLab CI pipeline design, GitOps reconciliation with ArgoCD/Flux, pipeline security gates (SAST/SBOM/signing), canary & blue-green deployment strategy, and secrets/artifact management.
         </div>
         <div class="ifn-tags">
-          <span class="ifn-tag r">Pod Level</span>
-          <span class="ifn-tag a">Worker Node</span>
-          <span class="ifn-tag c">Cluster</span>
-          <span class="ifn-tag l">API Server</span>
-          <span class="ifn-tag p">OpenShift</span>
-          <span class="ifn-tag r">CrashLoopBackOff</span>
-          <span class="ifn-tag a">OOMKilled</span>
-          <span class="ifn-tag c">etcd</span>
-          <span class="ifn-tag p">SCC</span>
+          <span class="ifn-tag r">CI Pipelines</span>
+          <span class="ifn-tag a">GitOps</span>
+          <span class="ifn-tag c">ArgoCD</span>
+          <span class="ifn-tag c">Flux</span>
+          <span class="ifn-tag l">Canary</span>
+          <span class="ifn-tag l">Blue-Green</span>
+          <span class="ifn-tag p">Secrets</span>
+          <span class="ifn-tag p">Supply Chain</span>
         </div>
       </div>
-      <div class="ifn-cta">Read Runbook →</div>
-      <div class="ifn-num">49</div>
+      <div class="ifn-cta">Read Deep-Dive →</div>
+      <div class="ifn-num">52</div>
     </a>
 
-    <!-- ── PREVIOUS FEATURED: Issue #048 Architecture ── -->
-    <a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="issue-featured">
+    <!-- ── PREVIOUS FEATURED: Issue #051 Observability ── -->
+    <a href="DevOps/K8/OBSERVABILITY/k8-observability.html" class="issue-featured">
       <div>
         <div class="if-new-badge"><span class="if-new-badge-dot"></span> Previous Issue</div>
-        <div class="if-issue-meta">April 2026 · #048</div>
-        <div class="if-title">Kubernetes Architecture Deep-Dive</div>
-        <div class="if-desc">Complete structural guide covering Storage Nodes, Worker Nodes, Containers, Pods, the Control Plane, CSI drivers, PersistentVolumes, health probes, QoS classes, and scheduling controls — with interactive architecture diagrams.</div>
+        <div class="if-issue-meta">July 2026 · #051</div>
+        <div class="if-title">Observability Stack Deep-Dive</div>
+        <div class="if-desc">Metrics, logs, and traces — Prometheus + Grafana, Loki/ELK, Jaeger/OpenTelemetry, SLO burn-rate alerting, and how an internal platform like OpsCore ties every signal together into one pane of glass.</div>
         <div class="if-tags">
-          <span class="if-tag c">Kubernetes</span>
-          <span class="if-tag c">Control Plane</span>
-          <span class="if-tag r">Worker Node</span>
-          <span class="if-tag r">Storage Node</span>
-          <span class="if-tag l">Pods</span>
-          <span class="if-tag a">CSI</span>
-          <span class="if-tag l">Architecture</span>
+          <span class="if-tag c">Prometheus</span>
+          <span class="if-tag c">Grafana</span>
+          <span class="if-tag r">Loki</span>
+          <span class="if-tag r">ELK</span>
+          <span class="if-tag l">Jaeger</span>
+          <span class="if-tag a">OpenTelemetry</span>
+          <span class="if-tag l">OpsCore</span>
         </div>
       </div>
       <div class="if-cta">Read Now →</div>
-      <div class="if-num">48</div>
+      <div class="if-num">51</div>
     </a>
 
     <!-- ── GRID: Previous issues ── -->
     <div class="issues-grid">
+
+      <a href="DevOps/K8/STORAGE/k8-storage.html" class="issue-card">
+        <div class="ic-issue">June 2026 · #050</div>
+        <div class="ic-title">Kubernetes Storage Deep-Dive</div>
+        <div class="ic-desc">PV/PVC, StorageClasses, CSI driver internals, StatefulSets, and a backup & DR strategy that's actually been tested.</div>
+        <div class="ic-tags">
+          <span class="ic-tag a">Storage</span>
+          <span class="ic-tag c">CSI</span>
+          <span class="ic-tag r">StatefulSet</span>
+        </div>
+        <div class="ic-num">50</div>
+      </a>
+
+      <a href="DevOps/K8/ERROR/K8-error.html" class="issue-card">
+        <div class="ic-issue">May 2026 · #049</div>
+        <div class="ic-title">Kubernetes & OpenShift Error Runbook</div>
+        <div class="ic-desc">32 error types across 5 layers — Pod, Worker Node, Cluster, API Server, OpenShift — with root causes and production fixes.</div>
+        <div class="ic-tags">
+          <span class="ic-tag r">Errors</span>
+          <span class="ic-tag a">Runbook</span>
+          <span class="ic-tag c">OpenShift</span>
+        </div>
+        <div class="ic-num">49</div>
+      </a>
+
+      <a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="issue-card">
+        <div class="ic-issue">April 2026 · #048</div>
+        <div class="ic-title">Kubernetes Architecture Deep-Dive</div>
+        <div class="ic-desc">Control Plane, Worker Nodes, Storage Nodes, CSI, PersistentVolumes, QoS classes, and scheduling — with interactive diagrams.</div>
+        <div class="ic-tags">
+          <span class="ic-tag c">Kubernetes</span>
+          <span class="ic-tag r">Control Plane</span>
+          <span class="ic-tag l">Architecture</span>
+        </div>
+        <div class="ic-num">48</div>
+      </a>
 
       <a href="DevOps/K8/Networking/k8-networking.html" class="issue-card">
         <div class="ic-issue">March 2026 · #047</div>
@@ -1064,7 +1276,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
       <a href="#topics">Topics</a>
       <a href="#issues">Archive</a>
       <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
-      <a href="DevOps/K8/ERROR/K8-error.html">Error Runbook</a>
+      <a href="DevOps/CICD/cicd-pipelines.html">Latest Issue</a>
       <a href="#subscribe">Subscribe</a>
     </div>
     <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
@@ -1086,7 +1298,7 @@ document.addEventListener('mousemove', e => {
   ring.style.left=rx+'px'; ring.style.top=ry+'px';
   requestAnimationFrame(animRing);
 })();
-document.querySelectorAll('a,button,.topic-card,.issue-card,.issue-featured,.issue-featured-new,.author-card').forEach(el=>{
+document.querySelectorAll('a,button,.topic-card,.issue-card,.issue-featured,.issue-featured-new,.author-card,.tool-node').forEach(el=>{
   el.addEventListener('mouseenter',()=>{
     ring.style.width='56px'; ring.style.height='56px';
     ring.style.borderColor='var(--crimson)';
