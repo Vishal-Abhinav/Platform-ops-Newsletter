@@ -316,39 +316,42 @@ nav.scrolled {
   animation: float 5s ease-in-out infinite, terminalIn 0.8s ease 0.4s both;
 }
 
-/* ─── TOOLCHAIN MINI (moved from full-width section into hero) ─── */
-.tool-mini {
-  position: absolute; top: -38px; right: -38px; width: 108px; height: 108px;
-  z-index: 4; pointer-events: none;
+/* ─── LIVE DEVOPS INFINITY LOOP (hero right) ─── */
+.devops-loop {
+  width: min(400px, 100%); margin: 0 auto 30px;
+  position: relative; z-index: 4; pointer-events: none;
+  animation: dol-in 0.9s ease 0.45s both;
 }
-.tool-mini-ring { position: relative; width: 100%; height: 100%; border-radius: 50%; }
-.tool-mini-ring::before {
-  content: ''; position: absolute; inset: 6px; border-radius: 50%;
-  border: 1px dashed rgba(255,255,255,0.32);
-  background: radial-gradient(circle, rgba(18,21,28,0.55) 0%, transparent 72%);
+@keyframes dol-in { from{opacity:0; transform:translateY(-16px) scale(0.96);} to{opacity:1; transform:translateY(0) scale(1);} }
+.devops-loop svg { width: 100%; height: auto; display: block; overflow: visible; }
+.dol-glow {
+  fill: none; stroke: url(#dolAll); stroke-width: 15; stroke-linecap: round;
+  opacity: 0.2; filter: blur(8px);
+  animation: dol-breathe 5s ease-in-out infinite;
 }
-.tm-node {
-  position: absolute; top: 50%; left: 50%; width: 22px; height: 22px; margin: -11px;
-  display: flex; align-items: center; justify-content: center;
-  background: #12151c; border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 50%; font-size: 11px; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  transform: rotate(calc(var(--i) * 45deg)) translate(48px) rotate(calc(var(--i) * -45deg));
-  animation: tm-pulse-op 4s ease-in-out infinite;
-  animation-delay: calc(var(--i) * 0.3s);
+@keyframes dol-breathe { 0%,100%{opacity:0.14;} 50%{opacity:0.3;} }
+.dol-track { fill: none; stroke-width: 7; stroke-linecap: round; }
+.dol-track-dev { stroke: url(#dolDev); }
+.dol-track-ops { stroke: url(#dolOps); }
+.dol-comet {
+  fill: none; stroke: #fff; stroke-width: 3.2; stroke-linecap: round;
+  stroke-dasharray: 30 970;
+  filter: drop-shadow(0 0 7px rgba(255,255,255,0.85));
+  animation: dol-run 7s linear infinite;
 }
-@keyframes tm-pulse-op { 0%,100%{opacity:.5;} 50%{opacity:1;} }
-.tm-orbit-wrap { position: absolute; inset: 0; animation: tm-spin 7s linear infinite; }
-.tm-orbit-wrap-2 { animation-duration: 7s; animation-delay: -3.5s; }
-.tm-orbit-dot {
-  position: absolute; top: 0; left: 50%; width: 5px; height: 5px; margin-left: -2.5px;
-  border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
+.dol-comet-2 { stroke: rgba(255,255,255,0.55); stroke-width: 2.2; animation-delay: -3.5s; }
+@keyframes dol-run { to { stroke-dashoffset: -1000; } }
+.dol-node { animation: dol-pulse 4.2s ease-in-out infinite; }
+@keyframes dol-pulse { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+.dol-label {
+  font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 1.4px;
+  fill: rgba(255,255,255,0.5); text-transform: uppercase; text-anchor: middle;
 }
-@keyframes tm-spin { to { transform: rotate(360deg); } }
-.tm-center {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  font-size: 15px; color: rgba(255,255,255,0.35);
+.dol-lobe {
+  font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px;
+  fill: rgba(255,255,255,0.93); text-anchor: middle;
 }
-@media (max-width: 900px) { .tool-mini { display: none; } }
+@media (max-width: 900px) { .devops-loop { width: min(330px, 100%); margin: 0 auto 22px; } }
 @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
 @keyframes terminalIn { from{opacity:0;transform:translateY(40px) scale(0.96);} to{opacity:1;transform:translateY(0) scale(1);} }
 .terminal-bar {
@@ -1010,22 +1013,68 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 64px 64p
 
   <div class="hero-right">
     <a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html" class="hero-new-badge">📖 New — Issue #057</a>
+
+    <!-- ── LIVE DEVOPS LOOP ── -->
+    <div class="devops-loop" role="img" aria-label="The DevOps lifecycle loop: plan, code, build, test, release, deploy, operate, monitor">
+      <svg viewBox="-34 0 388 190" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="dolDev" gradientUnits="userSpaceOnUse" x1="0" y1="45" x2="0" y2="145">
+            <stop offset="0" stop-color="#00c2d4"/>
+            <stop offset="1" stop-color="#84cc16"/>
+          </linearGradient>
+          <linearGradient id="dolOps" gradientUnits="userSpaceOnUse" x1="0" y1="45" x2="0" y2="145">
+            <stop offset="0" stop-color="#f59e0b"/>
+            <stop offset="1" stop-color="#e53935"/>
+          </linearGradient>
+          <linearGradient id="dolAll" gradientUnits="userSpaceOnUse" x1="52" y1="0" x2="268" y2="0">
+            <stop offset="0" stop-color="#00c2d4"/>
+            <stop offset="0.45" stop-color="#84cc16"/>
+            <stop offset="0.55" stop-color="#f59e0b"/>
+            <stop offset="1" stop-color="#e53935"/>
+          </linearGradient>
+        </defs>
+
+        <!-- soft neon glow underlay -->
+        <path class="dol-glow" d="M160,95 C160,60 185,45 212,45 C245,45 268,67 268,95 C268,123 245,145 212,145 C185,145 160,130 160,95 C160,60 135,45 108,45 C75,45 52,67 52,95 C52,123 75,145 108,145 C135,145 160,130 160,95 Z"/>
+
+        <!-- the two lobes -->
+        <path class="dol-track dol-track-dev" d="M160,95 C160,60 135,45 108,45 C75,45 52,67 52,95 C52,123 75,145 108,145 C135,145 160,130 160,95"/>
+        <path class="dol-track dol-track-ops" d="M160,95 C160,60 185,45 212,45 C245,45 268,67 268,95 C268,123 245,145 212,145 C185,145 160,130 160,95"/>
+
+        <!-- live pulses racing the loop -->
+        <path class="dol-comet" pathLength="1000" d="M160,95 C160,60 185,45 212,45 C245,45 268,67 268,95 C268,123 245,145 212,145 C185,145 160,130 160,95 C160,60 135,45 108,45 C75,45 52,67 52,95 C52,123 75,145 108,145 C135,145 160,130 160,95 Z"/>
+        <path class="dol-comet dol-comet-2" pathLength="1000" d="M160,95 C160,60 185,45 212,45 C245,45 268,67 268,95 C268,123 245,145 212,145 C185,145 160,130 160,95 C160,60 135,45 108,45 C75,45 52,67 52,95 C52,123 75,145 108,145 C135,145 160,130 160,95 Z"/>
+
+        <!-- DEV / OPS -->
+        <text class="dol-lobe" x="106" y="108" textLength="62" lengthAdjust="spacingAndGlyphs">DEV</text>
+        <text class="dol-lobe" x="214" y="108" textLength="62" lengthAdjust="spacingAndGlyphs">OPS</text>
+
+        <!-- stage stations -->
+        <circle class="dol-node" cx="144" cy="57"    r="6" fill="#171b22" stroke="#00c2d4" stroke-width="2.5" style="animation-delay:0s"/>
+        <circle class="dol-node" cx="68"  cy="59.5"  r="6" fill="#171b22" stroke="#00c2d4" stroke-width="2.5" style="animation-delay:.5s"/>
+        <circle class="dol-node" cx="52"  cy="95"    r="6" fill="#171b22" stroke="#42c775" stroke-width="2.5" style="animation-delay:1s"/>
+        <circle class="dol-node" cx="68"  cy="130.5" r="6" fill="#171b22" stroke="#84cc16" stroke-width="2.5" style="animation-delay:1.5s"/>
+        <circle class="dol-node" cx="176" cy="57"    r="6" fill="#171b22" stroke="#f59e0b" stroke-width="2.5" style="animation-delay:2s"/>
+        <circle class="dol-node" cx="252" cy="59.5"  r="6" fill="#171b22" stroke="#f59e0b" stroke-width="2.5" style="animation-delay:2.5s"/>
+        <circle class="dol-node" cx="268" cy="95"    r="6" fill="#171b22" stroke="#ed6b20" stroke-width="2.5" style="animation-delay:3s"/>
+        <circle class="dol-node" cx="252" cy="130.5" r="6" fill="#171b22" stroke="#e53935" stroke-width="2.5" style="animation-delay:3.5s"/>
+
+        <!-- DEV -> OPS handoff marker at the crossing -->
+        <circle cx="160" cy="95" r="7" fill="#171b22" stroke="rgba(255,255,255,0.75)" stroke-width="2"/>
+
+        <!-- stage labels -->
+        <text class="dol-label" x="134" y="32">Plan</text>
+        <text class="dol-label" x="64"  y="32">Code</text>
+        <text class="dol-label" x="20"  y="99">Build</text>
+        <text class="dol-label" x="64"  y="164">Test</text>
+        <text class="dol-label" x="188" y="32">Release</text>
+        <text class="dol-label" x="256" y="32">Deploy</text>
+        <text class="dol-label" x="307" y="99">Operate</text>
+        <text class="dol-label" x="256" y="164">Monitor</text>
+      </svg>
+    </div>
+
     <div class="terminal">
-      <div class="tool-mini" title="The Toolchain in Motion — Code -> Build -> Scan -> Package -> Deploy -> Run -> Monitor -> Feedback -> Code">
-        <div class="tool-mini-ring">
-          <div class="tm-node" style="--i:0;--c:var(--crimson);">🔀</div>
-          <div class="tm-node" style="--i:1;--c:var(--amber);">🏗️</div>
-          <div class="tm-node" style="--i:2;--c:var(--cyan);">🛡️</div>
-          <div class="tm-node" style="--i:3;--c:var(--lime);">📦</div>
-          <div class="tm-node" style="--i:4;--c:var(--crimson);">🚀</div>
-          <div class="tm-node" style="--i:5;--c:var(--amber);">☸️</div>
-          <div class="tm-node" style="--i:6;--c:var(--cyan);">📊</div>
-          <div class="tm-node" style="--i:7;--c:var(--lime);">🔔</div>
-          <div class="tm-orbit-wrap"><div class="tm-orbit-dot"></div></div>
-          <div class="tm-orbit-wrap tm-orbit-wrap-2"><div class="tm-orbit-dot"></div></div>
-          <div class="tm-center">⟲</div>
-        </div>
-      </div>
       <div class="terminal-bar">
         <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
         <div class="t-title">platform-ops ~ issue #057</div>
