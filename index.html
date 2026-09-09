@@ -807,6 +807,21 @@ nav.scrolled {
 }
 .sub-btn:hover { background: var(--crimson); }
 .sub-note { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ash); }
+.sub-btn[disabled] { opacity: 0.6; cursor: wait; }
+.sub-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.sub-status {
+  min-height: 20px; margin: 0 auto 14px; max-width: 480px;
+  font-family: 'DM Mono', monospace; font-size: 11.5px; letter-spacing: 0.5px;
+  opacity: 0; transition: opacity 0.25s;
+}
+.sub-status.show { opacity: 1; }
+.sub-status.ok  { color: #5a9c1a; }
+.sub-status.err { color: var(--crimson); }
+html[data-theme="dark"] .sub-status.ok { color: var(--lime); }
 
 /* ─── AUTHORS ─── */
 .authors-section { background: var(--panel-bg); padding: 80px 64px; }
@@ -1606,11 +1621,17 @@ a.footer-logo:hover{color:#fff;}
     <div class="section-tag" style="justify-content:center">Free Forever</div>
     <h2 class="section-title">JOIN 250+<br>ENGINEERS</h2>
     <p class="section-lead">One deep-dive every month. No fluff, no spam — just battle-tested knowledge from the Platform Engineering trenches.</p>
-    <div class="sub-form">
-      <input class="sub-input" type="email" placeholder="your@email.com" />
-      <button class="sub-btn">Subscribe →</button>
-    </div>
+    <form class="sub-form" id="subscribeForm" method="post" action="" target="subscribeSink">
+      <label class="sr-only" for="subEmail">Email address</label>
+      <input class="sub-input" id="subEmail" type="email" name="email"
+             placeholder="your@email.com" required autocomplete="email" />
+      <!-- honeypot: hidden from people, irresistible to bots -->
+      <input class="sub-hp" type="text" name="hp_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <button class="sub-btn" type="submit">Subscribe →</button>
+    </form>
+    <div class="sub-status" id="subStatus" role="status" aria-live="polite"></div>
     <div class="sub-note">No spam · Unsubscribe anytime · Published monthly</div>
+    <iframe name="subscribeSink" id="subscribeSink" class="sr-only" title="Subscription response" aria-hidden="true"></iframe>
   </div>
 </div>
 
@@ -1694,6 +1715,89 @@ window.addEventListener('scroll', () => {
       document.documentElement.setAttribute('data-theme', 'dark');
     }
     try { localStorage.setItem('po-theme', isDark ? 'light' : 'dark'); } catch(e) {}
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════════════════
+   NEWSLETTER SIGNUP
+   ──────────────────────────────────────────────────────────────────────
+   This site is static (GitHub Pages), so there is no backend to receive
+   the form. Instead it posts straight to a newsletter provider's PUBLIC
+   embed endpoint. Set ONE value below and signup goes live.
+
+   ⚠  NEVER paste a secret API key here. This file is public — anyone can
+      read it. Only ever use the provider's public form / embed URL.
+
+   Paste the provider's form URL into ENDPOINT:
+
+     Buttondown  https://buttondown.com/api/emails/embed-subscribe/USERNAME
+     Kit         https://app.kit.com/forms/FORM_ID/subscriptions
+     MailerLite  the POST url shown in an embedded (HTML) form
+     Listmonk    https://YOUR-HOST/subscription/form   (self-hosted, open source)
+
+   Some providers name the email field something else — set FIELD to match
+   (Buttondown/Kit use "email", Listmonk uses "email", MailerLite uses
+   "fields[email]"). Check the HTML snippet the provider gives you.
+   ══════════════════════════════════════════════════════════════════════ */
+const NEWSLETTER = {
+  ENDPOINT: '',        // ← paste the provider form URL here to switch signup on
+  FIELD:    'email',   // ← name of the email input the provider expects
+};
+
+(function(){
+  const form   = document.getElementById('subscribeForm');
+  const input  = document.getElementById('subEmail');
+  const btn    = form && form.querySelector('.sub-btn');
+  const status = document.getElementById('subStatus');
+  const sink   = document.getElementById('subscribeSink');
+  if (!form || !input || !status) return;
+
+  function say(msg, kind){
+    status.textContent = msg;
+    status.className = 'sub-status show ' + (kind || '');
+  }
+
+  // Point the form at the provider and use their field name.
+  if (NEWSLETTER.ENDPOINT) {
+    form.setAttribute('action', NEWSLETTER.ENDPOINT);
+    input.setAttribute('name', NEWSLETTER.FIELD);
+  }
+
+  form.addEventListener('submit', (e) => {
+    // Not configured yet — say so honestly instead of pretending it worked.
+    if (!NEWSLETTER.ENDPOINT) {
+      e.preventDefault();
+      say('Signup isn’t connected yet — please check back shortly.', 'err');
+      return;
+    }
+    // Honeypot: a filled hidden field means a bot. Drop it silently.
+    if (form.hp_website && form.hp_website.value) { e.preventDefault(); return; }
+
+    if (!input.checkValidity()) {
+      e.preventDefault();
+      say('That doesn’t look like a valid email address.', 'err');
+      input.focus();
+      return;
+    }
+
+    // Let the form post natively into the hidden iframe (no CORS problems,
+    // and it still works if fetch is blocked). We can't read a cross-origin
+    // response, so we confirm the post completed and point at the inbox.
+    btn.disabled = true;
+    btn.textContent = 'Subscribing…';
+    say('Sending…', '');
+
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      btn.disabled = false;
+      btn.textContent = 'Subscribe →';
+      say('Almost there — check your inbox to confirm your subscription.', 'ok');
+      form.reset();
+    };
+    if (sink) sink.addEventListener('load', finish, { once: true });
+    setTimeout(finish, 4000);   // fallback if the iframe load never fires
   });
 })();
 
