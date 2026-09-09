@@ -1735,13 +1735,16 @@ window.addEventListener('scroll', () => {
      MailerLite  the POST url shown in an embedded (HTML) form
      Listmonk    https://YOUR-HOST/subscription/form   (self-hosted, open source)
 
-   Some providers name the email field something else — set FIELD to match
-   (Buttondown/Kit use "email", Listmonk uses "email", MailerLite uses
-   "fields[email]"). Check the HTML snippet the provider gives you.
+   Providers disagree on what the email field is called — Kit uses
+   "email_address", Buttondown and Listmonk use "email". To make a wrong
+   guess impossible, the form posts the address under BOTH names; the
+   provider reads the one it wants and ignores the other. If yours expects
+   something else again (MailerLite uses "fields[email]"), copy the exact
+   name out of the embed snippet they gave you and put it in FIELD.
    ══════════════════════════════════════════════════════════════════════ */
 const NEWSLETTER = {
-  ENDPOINT: '',        // ← paste the provider form URL here to switch signup on
-  FIELD:    'email',   // ← name of the email input the provider expects
+  ENDPOINT: '',                // ← paste the provider form URL here to switch signup on
+  FIELD:    'email_address',   // ← Kit's name; posted alongside "email" either way
 };
 
 (function(){
@@ -1779,6 +1782,22 @@ const NEWSLETTER = {
       input.focus();
       return;
     }
+
+    // Post the address under every common field name, so a provider that
+    // wants "email_address" and one that wants "email" both find it. Only
+    // the names not already used by the visible input get added.
+    ['email', 'email_address'].forEach((name) => {
+      if (name === input.getAttribute('name')) return;
+      let alt = form.querySelector('input[data-alias="' + name + '"]');
+      if (!alt) {
+        alt = document.createElement('input');
+        alt.type = 'hidden';
+        alt.name = name;
+        alt.setAttribute('data-alias', name);
+        form.appendChild(alt);
+      }
+      alt.value = input.value;
+    });
 
     // Let the form post natively into the hidden iframe (no CORS problems,
     // and it still works if fetch is blocked). We can't read a cross-origin
