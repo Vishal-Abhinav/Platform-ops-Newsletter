@@ -663,7 +663,7 @@ nav.scrolled {
 .author-cards { display: flex; flex-direction: column; gap: 16px; }
 .author-card {
   background: var(--paper); padding: 24px;
-  display: flex; align-items: center; gap: 20px;
+  display: flex; align-items: flex-start; gap: 20px;
   border-radius: 4px; box-shadow: 0 2px 20px rgba(0,0,0,0.06);
   transition: box-shadow 0.2s, transform 0.2s;
 }
@@ -676,6 +676,7 @@ nav.scrolled {
 .author-avatar.v { background: linear-gradient(135deg, var(--crimson), #ff6b35); color: #fff; }
 .author-name { font-weight: 700; font-size: 16px; color: var(--coal); }
 .author-role { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.author-bio { font-size: 14px; line-height: 1.6; color: var(--coal); margin-top: 12px; max-width: 560px; }
 
 /* ─── FOOTER ─── */
 footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64px; }
@@ -1406,7 +1407,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
     <div>
       <div class="section-tag">Behind the Newsletter</div>
       <h2 class="section-title">THE AUTHORS</h2>
-      <p class="section-lead" style="margin-bottom:0">Two practitioners building in the trenches of Platform Engineering, sharing what actually works.</p>
+      <p class="section-lead" style="margin-bottom:0">One practitioner building in the trenches of Platform Engineering, sharing what actually works.</p>
     </div>
     <div class="author-cards">
       <div class="author-card">
@@ -1414,6 +1415,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
         <div>
           <div class="author-name">Vishal Abhinav</div>
           <div class="author-role">· Platform Ops · Kubernetes · Platform Engineering · Cloud Architecture · DevOps · SRE · Infrastructure Automation</div>
+          <p class="author-bio">Building and breaking Kubernetes clusters in production so you don't have to. This newsletter is the field notes — real runbooks, real postmortems, no theory-only content.</p>
         </div>
       </div>
     </div>
