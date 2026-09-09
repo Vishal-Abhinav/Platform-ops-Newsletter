@@ -241,6 +241,40 @@ nav.scrolled {
   position: relative; z-index: 2;
   animation: float 5s ease-in-out infinite, terminalIn 0.8s ease 0.4s both;
 }
+
+/* ─── TOOLCHAIN MINI (moved from full-width section into hero) ─── */
+.tool-mini {
+  position: absolute; top: -38px; right: -38px; width: 108px; height: 108px;
+  z-index: 4; pointer-events: none;
+}
+.tool-mini-ring { position: relative; width: 100%; height: 100%; border-radius: 50%; }
+.tool-mini-ring::before {
+  content: ''; position: absolute; inset: 6px; border-radius: 50%;
+  border: 1px dashed rgba(255,255,255,0.32);
+  background: radial-gradient(circle, rgba(18,21,28,0.55) 0%, transparent 72%);
+}
+.tm-node {
+  position: absolute; top: 50%; left: 50%; width: 22px; height: 22px; margin: -11px;
+  display: flex; align-items: center; justify-content: center;
+  background: #12151c; border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50%; font-size: 11px; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  transform: rotate(calc(var(--i) * 45deg)) translate(48px) rotate(calc(var(--i) * -45deg));
+  animation: tm-pulse-op 4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.3s);
+}
+@keyframes tm-pulse-op { 0%,100%{opacity:.5;} 50%{opacity:1;} }
+.tm-orbit-wrap { position: absolute; inset: 0; animation: tm-spin 7s linear infinite; }
+.tm-orbit-wrap-2 { animation-duration: 7s; animation-delay: -3.5s; }
+.tm-orbit-dot {
+  position: absolute; top: 0; left: 50%; width: 5px; height: 5px; margin-left: -2.5px;
+  border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
+}
+@keyframes tm-spin { to { transform: rotate(360deg); } }
+.tm-center {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  font-size: 15px; color: rgba(255,255,255,0.35);
+}
+@media (max-width: 900px) { .tool-mini { display: none; } }
 @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
 @keyframes terminalIn { from{opacity:0;transform:translateY(40px) scale(0.96);} to{opacity:1;transform:translateY(0) scale(1);} }
 .terminal-bar {
@@ -317,6 +351,20 @@ nav.scrolled {
 
 /* ─── SECTION FRAMEWORK ─── */
 .section { padding: 100px 64px; max-width: 1200px; margin: 0 auto; }
+
+/* ─── KNOWLEDGE ROW (Topics + Latest Issues side by side) ─── */
+.knowledge-row { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; }
+.kr-topics.section { max-width: none; margin: 0; padding: 100px 40px 80px 64px; }
+.kr-issues.issues-bg { padding: 0; }
+.kr-issues .issues-inner { max-width: none; margin: 0; padding: 100px 64px 80px 40px; }
+.kr-topics .topics-grid { grid-template-columns: 1fr; }
+.kr-issues .issues-grid { grid-template-columns: 1fr; }
+.kr-issues .issue-featured, .kr-issues .issue-featured-new { padding: 28px; }
+@media (max-width: 1100px) {
+  .knowledge-row { grid-template-columns: 1fr; }
+  .kr-topics.section { padding: 80px 32px 56px; }
+  .kr-issues .issues-inner { padding: 56px 32px 80px; }
+}
 .section-tag {
   display: inline-flex; align-items: center; gap: 10px;
   font-family: 'DM Mono', monospace; font-size: 11px;
@@ -679,6 +727,25 @@ nav.scrolled {
 .author-name { font-weight: 700; font-size: 16px; color: var(--coal); }
 .author-role { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
 .author-bio { font-size: 14px; line-height: 1.6; color: var(--coal); margin-top: 12px; max-width: 560px; }
+.author-certs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.cert-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1);
+  color: var(--coal); font-family: 'DM Mono', monospace; font-size: 10.5px;
+  letter-spacing: 0.5px; padding: 6px 12px; border-radius: 20px;
+  transition: all 0.2s;
+}
+.cert-badge .cert-icon { font-size: 13px; line-height: 1; }
+.cert-badge:hover { background: var(--crimson); border-color: var(--crimson); color: #fff; }
+.cert-badge.progress { background: transparent; border: 1.5px dashed rgba(0,0,0,0.2); color: var(--muted); }
+.author-specialties { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(0,0,0,0.08); }
+.author-specialties .as-label { font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.spec-badge {
+  display: inline-flex; align-items: center; background: rgba(0,194,212,0.08);
+  border: 1px solid rgba(0,194,212,0.25); color: #0a7a86;
+  font-family: 'DM Mono', monospace; font-size: 10.5px; padding: 5px 11px;
+  border-radius: 16px; margin: 0 6px 6px 0;
+}
 
 /* ─── FOOTER ─── */
 footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64px; }
@@ -784,6 +851,21 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
   <div class="hero-right">
     <a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html" class="hero-new-badge">📖 New — Issue #057</a>
     <div class="terminal">
+      <div class="tool-mini" title="The Toolchain in Motion — Code -> Build -> Scan -> Package -> Deploy -> Run -> Monitor -> Feedback -> Code">
+        <div class="tool-mini-ring">
+          <div class="tm-node" style="--i:0;--c:var(--crimson);">🔀</div>
+          <div class="tm-node" style="--i:1;--c:var(--amber);">🏗️</div>
+          <div class="tm-node" style="--i:2;--c:var(--cyan);">🛡️</div>
+          <div class="tm-node" style="--i:3;--c:var(--lime);">📦</div>
+          <div class="tm-node" style="--i:4;--c:var(--crimson);">🚀</div>
+          <div class="tm-node" style="--i:5;--c:var(--amber);">☸️</div>
+          <div class="tm-node" style="--i:6;--c:var(--cyan);">📊</div>
+          <div class="tm-node" style="--i:7;--c:var(--lime);">🔔</div>
+          <div class="tm-orbit-wrap"><div class="tm-orbit-dot"></div></div>
+          <div class="tm-orbit-wrap tm-orbit-wrap-2"><div class="tm-orbit-dot"></div></div>
+          <div class="tm-center">⟲</div>
+        </div>
+      </div>
       <div class="terminal-bar">
         <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
         <div class="t-title">platform-ops ~ issue #057</div>
@@ -870,8 +952,8 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
 </div>
 
 <!-- ═══════════ TOPICS ═══════════ -->
-<div id="topics">
-  <div class="section reveal">
+<div class="knowledge-row">
+  <div class="kr-col kr-topics section reveal" id="topics">
     <div class="section-tag">Knowledge Map</div>
     <h2 class="section-title">WHAT WE COVER</h2>
     <p class="section-lead">Deep technical content across the full Platform Engineering stack — click any domain to explore.</p>
@@ -1053,131 +1135,9 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
 
     </div>
   </div>
-</div>
 
-<!-- ═══════════ TOOLCHAIN DIAGRAM ═══════════ -->
-<div class="toolchain-section">
-  <div class="toolchain-inner reveal">
-    <div class="section-tag" style="color:rgba(255,255,255,0.3)">Continuous Delivery Loop</div>
-    <h2 class="section-title" style="color:var(--paper)">THE TOOLCHAIN IN MOTION</h2>
-    <p class="section-lead" style="color:rgba(255,255,255,0.4)">Eight tools, one loop — a commit becomes production, and production feeds straight back into the next commit.</p>
-
-    <div class="tool-track-wrap">
-      <svg viewBox="0 0 900 460" class="tool-track-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <path id="toolLoop" class="track-path" d="M300,90 L600,90 A130,130 0 0 1 600,350 L300,350 A130,130 0 0 1 300,90 Z"></path>
-
-        <text x="450" y="248" text-anchor="middle" class="loop-center-glyph">∞</text>
-        <text x="450" y="230" class="loop-center-label">Ship</text>
-        <text x="450" y="248" class="loop-center-label" style="font-size:10px;letter-spacing:3px;">Daily</text>
-
-        <circle r="5" class="flow-dot">
-          <animateMotion dur="9s" repeatCount="indefinite" begin="0s"><mpath href="#toolLoop" xlink:href="#toolLoop"></mpath></animateMotion>
-        </circle>
-        <circle r="5" class="flow-dot">
-          <animateMotion dur="9s" repeatCount="indefinite" begin="-2.25s"><mpath href="#toolLoop" xlink:href="#toolLoop"></mpath></animateMotion>
-        </circle>
-        <circle r="5" class="flow-dot">
-          <animateMotion dur="9s" repeatCount="indefinite" begin="-4.5s"><mpath href="#toolLoop" xlink:href="#toolLoop"></mpath></animateMotion>
-        </circle>
-        <circle r="5" class="flow-dot">
-          <animateMotion dur="9s" repeatCount="indefinite" begin="-6.75s"><mpath href="#toolLoop" xlink:href="#toolLoop"></mpath></animateMotion>
-        </circle>
-
-        <g class="tool-node" style="color:var(--crimson)" transform="translate(300,90)">
-          <g class="tn-inner">
-            <circle r="22" class="tn-pulse"></circle>
-            <circle r="22" class="tn-ring"></circle>
-            <circle r="17" class="tn-core"></circle>
-            <text class="tn-icon" y="1">🔀</text>
-          </g>
-          <text class="tn-stage" y="-34">Plan / Code</text>
-          <text class="tn-tool" y="-20">Git</text>
-        </g>
-
-        <g class="tool-node" style="color:var(--amber)" transform="translate(600,90)">
-          <g class="tn-inner">
-            <circle r="22" class="tn-pulse"></circle>
-            <circle r="22" class="tn-ring"></circle>
-            <circle r="17" class="tn-core"></circle>
-            <text class="tn-icon" y="1">🏗️</text>
-          </g>
-          <text class="tn-stage" y="-34">Build & Test</text>
-          <text class="tn-tool" y="-20">Jenkins · GitLab CI</text>
-        </g>
-
-        <g class="tool-node" style="color:var(--cyan)" transform="translate(730,150)">
-          <g class="tn-inner">
-            <circle r="22" class="tn-pulse"></circle>
-            <circle r="22" class="tn-ring"></circle>
-            <circle r="17" class="tn-core"></circle>
-            <text class="tn-icon" y="1">🛡️</text>
-          </g>
-          <text class="tn-stage" y="46">Scan</text>
-          <text class="tn-tool" y="60">Trivy · SAST</text>
-        </g>
-
-        <g class="tool-node" style="color:var(--lime)" transform="translate(730,290)">
-          <g class="tn-inner">
-            <circle r="22" class="tn-pulse"></circle>
-            <circle r="22" class="tn-ring"></circle>
-            <circle r="17" class="tn-core"></circle>
-            <text class="tn-icon" y="1">📦</text>
-          </g>
-          <text class="tn-stage" y="46">Package</text>
-          <text class="tn-tool" y="60">Helm · Registry</text>
-        </g>
-
-        <g class="tool-node" style="color:var(--crimson)" transform="translate(600,350)">
-          <g class="tn-inner">
-            <circle r="22" class="tn-pulse"></circle>
-            <circle r="22" class="tn-ring"></circle>
-            <circle r="17" class="tn-core"></circle>
-            <text class="tn-icon" y="1">🚀</text>
-          </g>
-          <text class="tn-stage" y="46">Deploy</text>
-          <text class="tn-tool" y="60">ArgoCD · Flux</text>
-        </g>
-
-        <g class="tool-node" style="color:var(--amber)" transform="translate(300,350)">
-          <g class="tn-inner">
-            <circle r="22" class="tn-pulse"></circle>
-            <circle r="22" class="tn-ring"></circle>
-            <circle r="17" class="tn-core"></circle>
-            <text class="tn-icon" y="1">☸️</text>
-          </g>
-          <text class="tn-stage" y="46">Run</text>
-          <text class="tn-tool" y="60">Kubernetes</text>
-        </g>
-
-        <g class="tool-node" style="color:var(--cyan)" transform="translate(170,290)">
-          <g class="tn-inner">
-            <circle r="22" class="tn-pulse"></circle>
-            <circle r="22" class="tn-ring"></circle>
-            <circle r="17" class="tn-core"></circle>
-            <text class="tn-icon" y="1">📊</text>
-          </g>
-          <text class="tn-stage" y="46">Monitor</text>
-          <text class="tn-tool" y="60">Prometheus · Grafana</text>
-        </g>
-
-        <g class="tool-node" style="color:var(--lime)" transform="translate(170,150)">
-          <g class="tn-inner">
-            <circle r="22" class="tn-pulse"></circle>
-            <circle r="22" class="tn-ring"></circle>
-            <circle r="17" class="tn-core"></circle>
-            <text class="tn-icon" y="1">🔔</text>
-          </g>
-          <text class="tn-stage" y="-34">Feedback</text>
-          <text class="tn-tool" y="-20">Loki · Alertmanager</text>
-        </g>
-      </svg>
-    </div>
-    <div class="tool-flow-caption">Code <span>→</span> Build <span>→</span> Scan <span>→</span> Package <span>→</span> Deploy <span>→</span> Run <span>→</span> Monitor <span>→</span> Feedback <span>→</span> Code</div>
-  </div>
-</div>
-
-<!-- ═══════════ LATEST ISSUES ═══════════ -->
-<div class="issues-bg" id="issues">
+  <!-- ═══════════ LATEST ISSUES ═══════════ -->
+  <div class="kr-col kr-issues issues-bg" id="issues">
   <div class="issues-inner reveal">
     <div class="section-tag" style="color:rgba(255,255,255,0.35)">Archive</div>
     <h2 class="section-title" style="color:var(--paper)">LATEST ISSUES</h2>
@@ -1402,6 +1362,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
     </div>
   </div>
 </div>
+</div>
 
 <!-- ═══════════ AUTHORS ═══════════ -->
 <div class="authors-section" id="authors">
@@ -1417,7 +1378,19 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
         <div>
           <div class="author-name">Vishal Abhinav</div>
           <div class="author-role">· Platform Ops · Kubernetes · Platform Engineering · Cloud Architecture · DevOps · SRE · Infrastructure Automation</div>
-          <p class="author-bio">Building and breaking Kubernetes clusters in production so you don't have to. This newsletter is the field notes — real runbooks, real postmortems, no theory-only content.</p>
+          <p class="author-bio">I'm a Platform Ops Engineer with 4+ years of experience across Kubernetes, infrastructure, and SRE-engineered systems — designing for failure, automating the boring parts, and writing the runbooks I wish existed the first time something broke at 2 AM. Beyond core K8s and infra, I specialize in notification engine architecture: building and scaling high-throughput messaging systems on SMPP and PDU session handling. This newsletter is the field notes from that work — real runbooks, real postmortems, no theory-only content.</p>
+          <div class="author-certs">
+            <span class="cert-badge"><span class="cert-icon">☁️</span> OCI Certified</span>
+            <span class="cert-badge"><span class="cert-icon">🛡️</span> CISSP Certified</span>
+            <span class="cert-badge"><span class="cert-icon">🔶</span> AWS Certified</span>
+            <span class="cert-badge progress"><span class="cert-icon">⎈</span> Cloud Native — In Progress</span>
+          </div>
+          <div class="author-specialties">
+            <div class="as-label">Specialties</div>
+            <span class="spec-badge">Infrastructure & Automation Specialist</span>
+            <span class="spec-badge">SMPP</span>
+            <span class="spec-badge">PDU Session</span>
+          </div>
         </div>
       </div>
     </div>
