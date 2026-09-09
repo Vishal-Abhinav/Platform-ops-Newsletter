@@ -1,0 +1,90 @@
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  PLATFORM OPS — Kit email template (wrapper)
+
+  This is NOT a finished email. It is the chrome that wraps every issue:
+  header on top, footer underneath. Kit injects whatever you write in the
+  broadcast editor into the middle, at the message_content variable.
+
+  So each month you write the issue normally in Kit's editor — no HTML —
+  and it comes out wrapped in this branding.
+
+  Three Kit variables are required for this to work and to be allowed to
+  send. Do not delete them:
+    message_content    where your issue text is injected
+    unsubscribe_link   Kit disables sending without it in a custom template
+    address            your physical address, from account settings
+
+  Set your address first: Settings then Email, or Kit will render it blank.
+  ══════════════════════════════════════════════════════════════════════
+-->
+<div style="margin:0;padding:0;background-color:#e8e6e1;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#e8e6e1;">
+    <tr>
+      <td align="center" style="padding:24px 10px;">
+
+        <!--[if mso]>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td>
+        <![endif]-->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;max-width:600px;background-color:#f2f0eb;">
+
+          <!-- ─────────── HEADER ─────────── -->
+          <tr>
+            <td bgcolor="#0c0e12" style="background-color:#0c0e12;padding:24px 28px;">
+              <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:17px;font-weight:bold;letter-spacing:2px;color:#ffffff;text-transform:uppercase;">
+                <span style="color:#e53935;">&#9679;</span>&nbsp; Platform Ops
+              </div>
+              <div style="font-family:'DM Mono','SF Mono',Consolas,'Courier New',monospace;font-size:10px;letter-spacing:2px;color:#84cc16;text-transform:uppercase;padding-top:7px;">
+                Monthly technical newsletter
+              </div>
+            </td>
+          </tr>
+
+          <!-- ─────────── ISSUE CONTENT ───────────
+               Everything you type into the Kit broadcast editor lands here.
+               The styles on this cell set the base look for that text. -->
+          <tr>
+            <td style="padding:36px 28px 30px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#3a3833;">
+              {{ message_content }}
+            </td>
+          </tr>
+
+          <!-- ─────────── FOOTER ─────────── -->
+          <tr>
+            <td bgcolor="#0c0e12" style="background-color:#0c0e12;padding:26px 28px;">
+              <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;letter-spacing:2.5px;color:#ffffff;text-transform:uppercase;padding-bottom:10px;">
+                Platform Ops
+              </div>
+              <div style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:13px;line-height:1.6;color:#8b8880;padding-bottom:16px;">
+                Field notes on Kubernetes, SRE and Platform Engineering —<br>written from production, not slideware.
+              </div>
+
+              <div style="font-family:'DM Mono','SF Mono',Consolas,'Courier New',monospace;font-size:11px;line-height:1.9;">
+                <a href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/" style="color:#00c2d4;text-decoration:none;">Read online</a>
+                <span style="color:#4a4740;">&nbsp;&middot;&nbsp;</span>
+                <a href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/#issues" style="color:#00c2d4;text-decoration:none;">Archive</a>
+                <span style="color:#4a4740;">&nbsp;&middot;&nbsp;</span>
+                <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" style="color:#00c2d4;text-decoration:none;">GitHub</a>
+              </div>
+
+              <!-- Required by Kit. Removing either one disables sending. -->
+              <div style="font-family:'DM Mono','SF Mono',Consolas,'Courier New',monospace;font-size:10px;line-height:1.8;color:#5a574f;padding-top:18px;margin-top:18px;border-top:1px solid #23262e;">
+                You're receiving this because you subscribed to Platform Ops.<br>
+                <a href="{{ unsubscribe_url }}" style="color:#8b8880;text-decoration:underline;">Unsubscribe</a>
+                <span style="color:#4a4740;">&nbsp;&middot;&nbsp;</span>
+                <a href="{{ subscriber_preferences_url }}" style="color:#8b8880;text-decoration:underline;">Update your preferences</a>
+                <br><br>
+                {{ address }}
+              </div>
+            </td>
+          </tr>
+
+        </table>
+        <!--[if mso]>
+        </td></tr></table>
+        <![endif]-->
+
+      </td>
+    </tr>
+  </table>
+</div>
