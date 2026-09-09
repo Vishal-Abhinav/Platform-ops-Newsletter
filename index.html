@@ -407,6 +407,8 @@ nav.scrolled {
 .kmap-terminal .terminal-bar{position:relative;z-index:1;}
 .kmap-body{position:relative;z-index:1;padding:28px 32px;font-family:'DM Mono',monospace;font-size:12.5px;line-height:2;overflow-x:auto;}
 .kt-row{display:block;white-space:pre;opacity:0;transform:translateX(-10px);transition:opacity .45s ease,transform .45s ease;}
+.kt-row-split{display:flex!important;align-items:baseline;gap:10px;white-space:normal;}
+.kt-row-split .kt-left{white-space:pre;}
 .kt-row.visible{opacity:1;transform:translateX(0);}
 .tl-branch{color:rgba(255,255,255,.16);}
 .tl-dir{color:rgba(255,255,255,.55);}
@@ -886,7 +888,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
       <div class="terminal-body kmap-body">
         <span class="tl kt-row"><span class="tl-prompt">❯</span> <span class="tl-cmd">tree platform-ops/ --content-map --road-map</span></span>
         <span class="tl kt-row">platform-ops/</span>
-        <span class="tl kt-row"><span class="tl-branch">├── </span><span class="tl-dir">content-map/</span>                    <span class="tl-count-live">[ 12 LIVE ]</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">├── </span><span class="tl-dir">content-map/</span></span><span class="tl-count-live">[ 12 LIVE ]</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   ├── </span><span class="tl-dir">devops/</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="tl-live">k8-architecture.html</a> <span class="tl-out">· issue #048</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/Networking/k8-networking.html" class="tl-live">k8-networking.html</a> <span class="tl-out">· issue #047</span></span>
@@ -904,7 +906,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
         <span class="tl kt-row"><span class="tl-branch">│           ├── </span><a href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html" class="tl-live">linux-advanced.html</a> <span class="tl-out">· issue #055</span></span>
         <span class="tl kt-row"><span class="tl-branch">│           ├── </span><a href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html" class="tl-live">linux-troubleshooting.html</a> <span class="tl-out">· issue #056</span></span>
         <span class="tl kt-row"><span class="tl-branch">│           └── </span><a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html" class="tl-live">linux-unix-glossary.html</a> <span class="tl-out">· issue #057 (190 terms)</span></span>
-        <span class="tl kt-row"><span class="tl-branch">└── </span><span class="tl-dir">road-map/</span>                      <span class="tl-count-soon">[ 14 PLANNED ]</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">└── </span><span class="tl-dir">road-map/</span></span><span class="tl-count-soon">[ 14 PLANNED ]</span></span>
         <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">devops/</span>          <span class="tl-soon">rbac · admission-controllers · multi-cluster-federation</span></span>
         <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">sre/</span>              <span class="tl-soon">slis-slos-slas · error-budgets · reliability-eng · chaos-eng · on-call-design</span></span>
         <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">infrastructure/</span>   <span class="tl-soon">windows-server · unix-bsd · virtualization · aws · azure · gcp</span></span>
