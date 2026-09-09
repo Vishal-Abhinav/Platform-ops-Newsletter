@@ -852,47 +852,23 @@ nav.scrolled {
 }
 
 /* ─── FOOTER ─── */
-footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 64px 64px 32px; }
-.footer-inner { max-width: 1200px; margin: 0 auto; }
-.footer-top {
-  display: grid; grid-template-columns: 1.2fr 2fr; gap: 60px;
-  padding-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-.footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; color: rgba(255,255,255,0.7); margin-bottom: 14px; }
-.footer-tagline {
-  font-family: 'Instrument Serif', serif; font-style: italic; font-size: 15px;
-  line-height: 1.6; color: rgba(255,255,255,0.4); max-width: 360px; margin-bottom: 18px;
-}
-.footer-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--lime); background: rgba(132,204,22,0.1); border: 1px solid rgba(132,204,22,0.25);
-  padding: 6px 14px; border-radius: 20px;
-}
-.fb-dot { width:5px; height:5px; border-radius:50%; background:var(--lime); animation: legend-pulse 2s ease-in-out infinite; flex-shrink:0; }
-.footer-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.footer-col { display: flex; flex-direction: column; gap: 10px; }
-.footer-col-title {
-  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px;
-  text-transform: uppercase; color: rgba(255,255,255,0.32); margin-bottom: 6px;
-}
-.footer-col a {
-  font-family: 'DM Mono', monospace; font-size: 12.5px; letter-spacing: 0.3px;
-  color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.2s;
-}
-.footer-col a:hover { color: var(--cyan); }
-.footer-bottom {
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 12px; padding-top: 24px;
-}
-.footer-note { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; }
-.footer-meta { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: rgba(255,255,255,0.2); }
-@media (max-width: 900px) {
-  .footer-top { grid-template-columns: 1fr; gap: 32px; }
-}
-@media (max-width: 600px) {
-  .footer-cols { grid-template-columns: 1fr 1fr; }
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ─── SCROLL REVEAL ─── */
 .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
@@ -920,9 +896,31 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 64px 64p
   .authors-inner{grid-template-columns:1fr;gap:40px;}
   .authors-section{padding:64px 32px;}
   .subscribe-inner{padding:80px 32px;}
-  footer{padding:40px 32px;}
-  .footer-inner{flex-direction:column;align-items:flex-start;}
+  
+  
 }
+
+/* ═══ SITE FOOTER (shared across every page) ═══ */
+footer{background:var(--ink,#08090c);color:rgba(255,255,255,.3);padding:64px 64px 32px;display:block;border:none;position:relative;z-index:1;}
+.footer-inner{max-width:1200px;margin:0 auto;}
+.footer-top{display:grid;grid-template-columns:1.2fr 2fr;gap:60px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.08);}
+.footer-brandbox{min-width:0;}
+.footer-logo{display:inline-block;font-family:'Bebas Neue',Impact,sans-serif;font-size:26px;letter-spacing:2px;color:rgba(255,255,255,.7);margin-bottom:14px;text-decoration:none;transition:color .2s;}
+a.footer-logo:hover{color:#fff;}
+.footer-tagline{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:15px;line-height:1.6;color:rgba(255,255,255,.4);max-width:360px;margin:0 0 18px;}
+.footer-badge{display:inline-flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--lime,#84cc16);background:rgba(132,204,22,.1);border:1px solid rgba(132,204,22,.25);padding:6px 14px;border-radius:20px;}
+.fb-dot{width:5px;height:5px;border-radius:50%;background:var(--lime,#84cc16);flex-shrink:0;animation:fb-dot-pulse 2s ease-in-out infinite;}
+@keyframes fb-dot-pulse{0%,100%{box-shadow:0 0 0 0 rgba(132,204,22,.5);}50%{box-shadow:0 0 0 5px rgba(132,204,22,0);}}
+.footer-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.footer-col{display:flex;flex-direction:column;gap:10px;}
+.footer-col-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.32);margin-bottom:6px;}
+.footer-col a{font-family:'DM Mono',monospace;font-size:12.5px;letter-spacing:.3px;color:rgba(255,255,255,.55);text-decoration:none;transition:color .2s;}
+.footer-col a:hover{color:var(--cyan,#00c2d4);}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:24px;}
+.footer-note{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;color:rgba(255,255,255,.3);}
+.footer-meta{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:rgba(255,255,255,.2);}
+@media (max-width:900px){footer{padding:56px 32px 28px;}.footer-top{grid-template-columns:1fr;gap:32px;}}
+@media (max-width:600px){footer{padding:48px 22px 24px;}.footer-cols{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
 <body>
@@ -1620,8 +1618,8 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 64px 64p
 <footer>
   <div class="footer-inner">
     <div class="footer-top">
-      <div class="footer-brand">
-        <div class="footer-logo">PLATFORM OPS</div>
+      <div class="footer-brandbox">
+        <a class="footer-logo" href="#">PLATFORM OPS</a>
         <p class="footer-tagline">Field notes on Kubernetes, SRE, and Platform Engineering — written from production, not slideware.</p>
         <div class="footer-badge"><span class="fb-dot"></span> Published monthly · Free forever</div>
       </div>
