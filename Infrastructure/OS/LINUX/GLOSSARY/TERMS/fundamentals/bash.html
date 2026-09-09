@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bash · Linux Glossary · Platform Ops</title>
+<meta name="description" content="What makes Bash specifically different from other shells, its startup files, and the login vs interactive distinction.">
+<meta name="author" content="Vishal Abhinav">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:     #08090c; --paper:   #f2f0eb; --smoke:   #e4e0d8; --ash:     #b8b2a7;
+  --coal:    #1c1f26; --cyan:    #00c2d4; --amber:   #f59e0b; --crimson: #e53935;
+  --lime:    #84cc16; --text:    #1c1f26; --muted:   #6b6860; --purple:  #7c3aed;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--text);font-family:'Manrope',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden;cursor:none;}
+.cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--crimson);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .15s ease,background .2s;transform:translate(-50%,-50%);}
+.cursor-ring{position:fixed;top:0;left:0;width:36px;height:36px;border:1.5px solid var(--coal);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .35s cubic-bezier(.25,.46,.45,.94),width .3s,height .3s,border-color .2s;transform:translate(-50%,-50%);}
+body:hover .cursor-ring{border-color:var(--crimson);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.6;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(8,9,12,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.06);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;color:#fff;display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo span{display:inline-block;width:8px;height:8px;background:var(--crimson);border-radius:50%;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:.6;}}
+.nav-breadcrumb{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+.nav-breadcrumb a{color:rgba(255,255,255,0.3);text-decoration:none;transition:color .2s;}
+.nav-breadcrumb a:hover{color:var(--cyan);}
+.nav-breadcrumb .sep{color:rgba(255,255,255,0.12);}
+.nav-breadcrumb .current{color:var(--cyan);}
+.nav-back{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);padding:8px 20px;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s,color .2s;border:1px solid rgba(255,255,255,0.1);}
+.nav-back:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);}
+
+.hero{min-height:46vh;background:var(--ink);padding:110px 64px 60px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 15% 30%,rgba(0,194,212,.1) 0%,transparent 55%),radial-gradient(circle at 85% 70%,rgba(229,57,53,.1) 0%,transparent 50%);pointer-events:none;}
+.hero-ghost{position:absolute;bottom:-30px;right:-10px;font-family:'Bebas Neue',sans-serif;font-size:clamp(90px,14vw,180px);color:rgba(255,255,255,.02);letter-spacing:-4px;line-height:1;pointer-events:none;white-space:nowrap;}
+.hero-inner{max-width:1000px;margin:0 auto;position:relative;z-index:2;}
+.bc{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:24px;flex-wrap:wrap;}
+.bc a{color:rgba(255,255,255,.28);text-decoration:none;transition:color .2s;}
+.bc a:hover{color:var(--cyan);}
+.bc .sep{color:rgba(255,255,255,.12);}
+.bc .here{color:var(--crimson);}
+.cat-badge{display:inline-flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#ef5350;background:rgba(229,57,53,.12);border:1px solid rgba(229,57,53,.3);padding:6px 14px;border-radius:20px;margin-bottom:20px;}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(42px,6vw,76px);line-height:.95;letter-spacing:-.5px;color:#fff;margin-bottom:14px;}
+.hero-tagline{font-family:'Instrument Serif',serif;font-style:italic;font-size:19px;color:rgba(255,255,255,.45);max-width:680px;line-height:1.5;margin-bottom:28px;}
+.hero-meta-row{display:flex;gap:32px;padding-top:22px;border-top:1px solid rgba(255,255,255,.07);flex-wrap:wrap;}
+.hm-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);}
+.hm-val{font-family:'Bebas Neue',sans-serif;font-size:18px;color:#fff;margin-top:2px;}
+
+.ticker-wrap{background:rgba(8,9,12,1);overflow:hidden;padding:11px 0;border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);}
+.ticker-track{display:flex;gap:0;animation:ticker 24s linear infinite;white-space:nowrap;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;gap:12px;padding:0 26px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);}
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--crimson);}
+
+.body-section{max-width:1000px;margin:0 auto;padding:64px 64px 0;}
+.body-section:last-of-type{padding-bottom:64px;}
+.block-label{display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
+.block-label::before{content:'';display:block;width:22px;height:1px;background:var(--crimson);}
+.block-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:.3px;color:var(--coal);margin-bottom:18px;}
+.block-text{font-size:15px;color:var(--text);line-height:1.85;max-width:820px;}
+.block-text + .block-text{margin-top:14px;}
+
+.cmd-block{background:var(--coal);border-radius:6px;overflow:hidden;margin-bottom:14px;}
+.cmd-bar{padding:9px 16px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:6px;}
+.cmd-dot{width:8px;height:8px;border-radius:50%;}
+.cmd-dot.r{background:#ff5f57;} .cmd-dot.y{background:#ffbd2e;} .cmd-dot.g{background:#28c840;}
+.cmd-label{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);letter-spacing:1px;margin-left:4px;}
+.cmd-lines{padding:14px 18px;display:flex;flex-direction:column;gap:5px;}
+.cmd-line{font-family:'DM Mono',monospace;font-size:13px;line-height:1.65;display:flex;gap:8px;white-space:pre-wrap;}
+.cmd-prompt{color:var(--cyan);} .cmd-text{color:#e2e8f0;} .cmd-comment{color:rgba(255,255,255,.25);}
+
+.mistakes-list{display:flex;flex-direction:column;gap:10px;}
+.mistake-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--smoke);border-radius:6px;border-left:3px solid var(--amber);}
+.mistake-icon{flex-shrink:0;font-size:16px;}
+.mistake-text{font-size:13.5px;color:var(--text);line-height:1.6;}
+.mistake-text strong{color:var(--coal);}
+.mistake-text code{background:rgba(0,0,0,.07);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:12px;}
+
+.related-section{background:var(--coal);padding:0;}
+.related-inner{max-width:1000px;margin:0 auto;padding:56px 64px;}
+.related-inner .block-label{color:rgba(255,255,255,.3);}
+.related-inner .block-title{color:#fff;}
+.related-grid{display:flex;flex-wrap:wrap;gap:10px;}
+.related-pill{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.5px;padding:10px 20px;border-radius:22px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.08);}
+.related-pill:hover{background:rgba(229,57,53,.15);color:#fff;border-color:var(--crimson);}
+.related-pill.ext{opacity:.7;}
+
+.author-strip{background:var(--smoke);padding:56px 64px;}
+.author-strip-inner{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.author-info{display:flex;align-items:center;gap:24px;}
+.author-avatar{width:60px;height:60px;background:linear-gradient(135deg,var(--crimson),#ff6b35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;flex-shrink:0;}
+.author-name{font-weight:700;font-size:16px;color:var(--coal);margin-bottom:4px;}
+.author-role{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.author-actions{display:flex;gap:12px;}
+.btn-sm{padding:10px 22px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;text-decoration:none;transition:background .2s,color .2s,border-color .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-sm.primary{background:var(--coal);color:var(--paper);}
+.btn-sm.primary:hover{background:var(--crimson);}
+.btn-sm.ghost{background:transparent;color:var(--coal);border:1.5px solid var(--coal);}
+.btn-sm.ghost:hover{border-color:var(--crimson);color:var(--crimson);}
+
+footer{background:var(--ink);color:rgba(255,255,255,.3);padding:44px 64px;}
+.footer-inner{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:rgba(255,255,255,.6);}
+.footer-links{display:flex;gap:22px;flex-wrap:wrap;}
+.footer-links a{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--cyan);}
+.footer-note{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:900px){
+  nav{padding:14px 20px;} .nav-breadcrumb{display:none;}
+  .hero{padding:96px 24px 44px;} .body-section{padding:48px 24px 0;} .related-inner{padding:44px 24px;}
+  .author-strip{padding:40px 24px;} .author-strip-inner{flex-direction:column;align-items:flex-start;}
+  footer{padding:32px 24px;} .footer-inner{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="../../../../../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="nav-breadcrumb">
+    <a href="../../../../../../index.html">Home</a><span class="sep">/</span>
+    <a href="../../../../index.html">OS</a><span class="sep">/</span>
+    <a href="../../linux-unix-glossary.html">Glossary</a><span class="sep">/</span>
+    <span class="current">Bash</span>
+  </div>
+  <a href="../../linux-unix-glossary.html" class="nav-back">← Glossary</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-ghost">BASH</div>
+  <div class="hero-inner">
+    <div class="bc">
+      <a href="../../../../../../index.html">Platform Ops</a><span class="sep">›</span>
+      <a href="../../linux-unix-glossary.html">Glossary</a><span class="sep">›</span>
+      <span class="here">Bash</span>
+    </div>
+    <div class="cat-badge">Fundamentals, Kernel & Shell · Term #5</div>
+    <h1 class="hero-title">Bash</h1>
+    <p class="hero-tagline">The Bourne Again SHell — the default interactive shell and scripting language on most Linux distros.</p>
+    <div class="hero-meta-row">
+      <div><div class="hm-label">Category</div><div class="hm-val">Fundamentals, Kernel & Shell</div></div>
+      <div><div class="hm-label">Complexity</div><div class="hm-val">Beginner</div></div>
+      <div><div class="hm-label">Glossary Entry</div><div class="hm-val">#5 of 190</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker-wrap"><div class="ticker-track"><span class="ticker-item"><span class="ticker-dot"></span>Shell</span><span class="ticker-item"><span class="ticker-dot"></span>Environment Variables</span><span class="ticker-item"><span class="ticker-dot"></span>Shell Scripting</span><span class="ticker-item"><span class="ticker-dot"></span>Shell</span><span class="ticker-item"><span class="ticker-dot"></span>Environment Variables</span><span class="ticker-item"><span class="ticker-dot"></span>Shell Scripting</span></div></div>
+
+<section class="body-section reveal">
+  <div class="block-label">What Is It</div>
+  <h2 class="block-title">The Short Answer</h2>
+  <p class="block-text">Bash (Bourne Again SHell) is GNU's rewrite and superset of the original Unix Bourne shell (<code>sh</code>). It's been the default shell on most Linux distributions for decades, and adds features the original Bourne shell lacked: arrays, better string manipulation, command history, and tab completion.</p>
+<p class="block-text">Being a "superset" matters: scripts written for plain POSIX <code>sh</code> generally run fine under bash, but bash-specific syntax (double bracket tests, arrays, <code>[[ ]]</code>) won't run under stricter POSIX shells like <code>dash</code>.</p>
+</section>
+
+<section class="body-section reveal">
+  <div class="block-label">How It Works</div>
+  <h2 class="block-title">Under The Hood</h2>
+  <p class="block-text">Bash reads different startup files depending on how it's invoked. A login shell (like an SSH session) reads <code>/etc/profile</code> then <code>~/.bash_profile</code>. An interactive non-login shell (opening a new terminal tab) reads <code>~/.bashrc</code>. A non-interactive shell (running a script) reads neither by default — which is exactly why aliases defined in <code>.bashrc</code> don't work inside scripts.</p>
+<p class="block-text">This distinction trips up almost everyone at least once: editing <code>.bashrc</code> and wondering why a new SSH login doesn't see the change (because SSH logins are login shells, which read <code>.bash_profile</code>, not <code>.bashrc</code> — though most distros' default <code>.bash_profile</code> sources <code>.bashrc</code> for you).</p>
+</section>
+
+<section class="body-section reveal">
+  <div class="block-label">In Practice</div>
+  <h2 class="block-title">Example Commands</h2>
+  <div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">bash basics</span></div><div class="cmd-lines">
+<div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">bash --version</span></div>
+<div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">source ~/.bashrc</span></div>
+<div class="cmd-line"><span class="cmd-comment"># reload rc file into current session without logging out</span></div>
+<div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">echo $BASH_VERSION</span></div>
+</div></div>
+</section>
+
+<section class="body-section reveal">
+  <div class="block-label">Watch Out For</div>
+  <h2 class="block-title">Common Mistakes</h2>
+  <div class="mistakes-list">
+  <div class="mistake-item"><span class="mistake-icon">⚠️</span><span class="mistake-text">Editing <code>.bashrc</code> and expecting a cron job or systemd service (both non-interactive) to see the new environment variables or aliases.</span></div>
+  <div class="mistake-item"><span class="mistake-icon">⚠️</span><span class="mistake-text">Using <code>==</code> for string comparison in a POSIX <code>[ ]</code> test — that's a bash extension; POSIX-strict scripts need <code>=</code>.</span></div>
+  </div>
+</section>
+
+<div class="related-section"><div class="related-inner reveal">
+  <div class="block-label">Keep Exploring</div>
+  <h2 class="block-title">Related Terms</h2>
+  <div class="related-grid">
+  <a href="shell.html" class="related-pill">Shell</a>
+  <a href="../../linux-unix-glossary.html?q=Environment%20Variables" class="related-pill ext">Environment Variables</a>
+  <a href="../../linux-unix-glossary.html?q=Shell%20Scripting" class="related-pill ext">Shell Scripting</a>
+    <a href="../../linux-unix-glossary.html" class="related-pill">📖 Full Glossary (190 terms) →</a>
+  </div>
+</div></div>
+
+<div class="author-strip">
+  <div class="author-strip-inner">
+    <div class="author-info"><div class="author-avatar">VA</div><div><div class="author-name">Vishal Abhinav</div><div class="author-role">Platform Ops Engineer · Linux & Unix Glossary</div></div></div>
+    <div class="author-actions">
+      <a href="../../../../../../index.html#subscribe" class="btn-sm primary">Subscribe Free <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank" class="btn-sm ghost">GitHub ↗</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PLATFORM OPS</div>
+    <div class="footer-links">
+      <a href="../../linux-unix-glossary.html">← Glossary</a>
+      <a href="../../../../index.html">OS Series</a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
+      <a href="../../../../../../index.html#subscribe">Subscribe</a>
+    </div>
+    <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
+  </div>
+</footer>
+
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+document.querySelectorAll('a,button,.related-pill').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='56px';ring.style.height='56px';ring.style.borderColor='var(--crimson)';cursor.style.transform='translate(-50%,-50%) scale(1.5)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='';cursor.style.transform='translate(-50%,-50%) scale(1)';});
+});
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>

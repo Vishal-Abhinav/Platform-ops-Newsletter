@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operating Systems Series · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="Operating Systems field guide — Linux fundamentals, advanced administration, and troubleshooting, plus what's coming for Windows Server and Unix/BSD.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:    #08090c;
+  --paper:  #f2f0eb;
+  --smoke:  #e4e0d8;
+  --ash:    #b8b2a7;
+  --coal:   #1c1f26;
+  --cyan:   #00c2d4;
+  --amber:  #f59e0b;
+  --crimson:#e53935;
+  --lime:   #84cc16;
+  --text:   #1c1f26;
+  --muted:  #6b6860;
+  --purple: #7c3aed;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--text);font-family:'Manrope',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden;cursor:none;}
+
+.cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--crimson);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .15s ease,background .2s;transform:translate(-50%,-50%);}
+.cursor-ring{position:fixed;top:0;left:0;width:36px;height:36px;border:1.5px solid var(--coal);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .35s cubic-bezier(.25,.46,.45,.94),width .3s,height .3s,border-color .2s;transform:translate(-50%,-50%);}
+body:hover .cursor-ring{border-color:var(--crimson);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.6;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(242,240,235,0.9);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,0.08);transition:padding .3s,box-shadow .3s;}
+nav.scrolled{padding:12px 48px;box-shadow:0 4px 32px rgba(0,0,0,0.08);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--coal);display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo span{display:inline-block;width:8px;height:8px;background:var(--crimson);border-radius:50%;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:.6;}}
+.nav-breadcrumb{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+.nav-breadcrumb a{color:var(--muted);text-decoration:none;transition:color .2s;}
+.nav-breadcrumb a:hover{color:var(--crimson);}
+.nav-breadcrumb .sep{color:var(--ash);}
+.nav-breadcrumb .current{color:var(--coal);font-weight:600;}
+.nav-back{background:var(--coal);color:var(--paper);padding:8px 20px;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;}
+.nav-back:hover{background:var(--crimson);}
+
+.page-hero{min-height:70vh;background:var(--coal);display:grid;grid-template-columns:1fr 1fr;padding-top:74px;overflow:hidden;position:relative;}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 12% 50%,rgba(0,194,212,.12) 0%,transparent 55%),radial-gradient(circle at 88% 30%,rgba(229,57,53,.1) 0%,transparent 50%),radial-gradient(circle at 50% 100%,rgba(124,58,237,.07) 0%,transparent 50%);pointer-events:none;}
+.hero-ghost{position:absolute;bottom:-20px;left:-8px;font-family:'Bebas Neue',sans-serif;font-size:clamp(130px,18vw,240px);color:rgba(255,255,255,.022);letter-spacing:-4px;line-height:1;pointer-events:none;white-space:nowrap;}
+
+.hero-left{padding:80px 48px 80px 64px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;}
+.bc{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:28px;}
+.bc a{color:rgba(255,255,255,.28);text-decoration:none;transition:color .2s;}
+.bc a:hover{color:var(--cyan);}
+.bc .sep{color:rgba(255,255,255,.12);}
+.bc .here{color:var(--cyan);}
+.eyebrow{display:flex;align-items:center;gap:12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:20px;opacity:0;animation:fadeUp .7s ease .2s forwards;}
+.eyebrow-line{display:block;width:40px;height:1px;background:var(--crimson);}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,6.5vw,96px);line-height:.9;letter-spacing:-.5px;color:#fff;margin-bottom:12px;opacity:0;animation:fadeUp .8s ease .35s forwards;}
+.hero-title .hl{color:var(--cyan);}
+.hero-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:rgba(255,255,255,.38);margin-bottom:28px;line-height:1.4;opacity:0;animation:fadeUp .7s ease .5s forwards;}
+.hero-desc{font-size:14px;color:rgba(255,255,255,.32);max-width:440px;margin-bottom:36px;line-height:1.85;opacity:0;animation:fadeUp .7s ease .65s forwards;}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}from{opacity:0;transform:translateY(24px);}}
+.hero-meta-row{display:flex;gap:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.08);opacity:0;animation:fadeUp .7s ease .8s forwards;}
+.hm-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;color:#fff;}
+.hm-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:3px;}
+
+/* ── HERO RIGHT: OS family directory ── */
+.hero-right{display:flex;align-items:center;justify-content:center;padding:60px 48px;position:relative;z-index:2;opacity:0;animation:fadeUp .8s ease .4s forwards;}
+.os-diagram{width:100%;max-width:380px;display:flex;flex-direction:column;gap:10px;}
+.os-family{border-radius:8px;padding:16px;position:relative;transition:all .25s;}
+.os-family.live{border:1px solid rgba(132,204,22,.35);background:rgba(132,204,22,.05);}
+.os-family.soon{border:1px dashed rgba(255,255,255,.14);background:rgba(255,255,255,.02);}
+.os-family-label{position:absolute;top:-9px;left:16px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;background:var(--coal);padding:0 8px;}
+.os-family.live .os-family-label{color:var(--lime);}
+.os-family.soon .os-family-label{color:rgba(255,255,255,.25);}
+.os-family-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;line-height:1;margin-bottom:9px;}
+.os-family.live .os-family-name{color:#fff;}
+.os-family.soon .os-family-name{color:rgba(255,255,255,.3);}
+.os-family-pills{display:flex;flex-wrap:wrap;gap:5px;}
+.os-pill{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.5px;padding:4px 9px;border-radius:20px;}
+.os-family.live .os-pill{background:rgba(132,204,22,.14);color:var(--lime);}
+.os-family.soon .os-pill{background:rgba(255,255,255,.05);color:rgba(255,255,255,.25);}
+.os-family:hover{transform:translateX(4px);}
+
+/* ── TICKER ── */
+.ticker-wrap{background:var(--ink);overflow:hidden;padding:11px 0;border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);}
+.ticker-wrap:hover .ticker-track{animation-play-state:paused;}
+.ticker-track{display:flex;gap:0;animation:ticker 26s linear infinite;white-space:nowrap;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;gap:12px;padding:0 28px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);transition:color .2s;}
+.ticker-item:hover{color:var(--cyan);}
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--crimson);}
+
+.section-tag{display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+.section-tag::before{content:'';display:block;width:24px;height:1px;background:var(--crimson);}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,4.5vw,60px);line-height:1;letter-spacing:-.5px;color:var(--coal);margin-bottom:12px;}
+.section-lead{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--muted);max-width:620px;margin-bottom:56px;}
+
+.articles-section{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.articles-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;}
+.article-card{background:var(--smoke);text-decoration:none;color:inherit;display:flex;flex-direction:column;overflow:hidden;position:relative;transition:background .3s,transform .3s;opacity:0;transform:translateY(20px);}
+.article-card.visible{opacity:1;transform:translateY(0);}
+.article-card:hover{background:var(--coal);transform:translateY(-4px);}
+.ac-top-bar{height:3px;width:0;transition:width .4s ease;}
+.article-card:hover .ac-top-bar{width:100%;}
+.article-card:nth-child(1) .ac-top-bar{background:linear-gradient(90deg,var(--lime),var(--cyan));}
+.article-card:nth-child(2) .ac-top-bar{background:linear-gradient(90deg,var(--amber),var(--purple));}
+.article-card:nth-child(3) .ac-top-bar{background:linear-gradient(90deg,var(--crimson),var(--amber));}
+.ac-body{padding:36px 32px 28px;flex:1;display:flex;flex-direction:column;}
+.ac-issue-meta{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:10px;transition:color .3s;}
+.article-card:hover .ac-issue-meta{color:rgba(255,255,255,.3);}
+.ac-issue-num{font-family:'Bebas Neue',sans-serif;font-size:13px;background:var(--coal);color:var(--paper);padding:3px 10px;border-radius:2px;transition:background .3s,color .3s;}
+.article-card:hover .ac-issue-num{background:var(--crimson);color:#fff;}
+.ac-icon{font-size:32px;margin-bottom:16px;}
+.ac-title{font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:.95;letter-spacing:.5px;color:var(--coal);margin-bottom:14px;transition:color .3s;}
+.article-card:hover .ac-title{color:var(--paper);}
+.ac-desc{font-size:13px;line-height:1.75;color:var(--muted);margin-bottom:24px;flex:1;transition:color .3s;}
+.article-card:hover .ac-desc{color:rgba(255,255,255,.4);}
+.ac-topics{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:28px;}
+.ac-topic{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:20px;}
+.ac-topic.c{background:rgba(0,194,212,.12);color:var(--cyan);}
+.ac-topic.r{background:rgba(229,57,53,.12);color:#ef5350;}
+.ac-topic.l{background:rgba(132,204,22,.12);color:var(--lime);}
+.ac-topic.a{background:rgba(245,158,11,.12);color:var(--amber);}
+.ac-topic.p{background:rgba(124,58,237,.12);color:#a78bfa;}
+.article-card:hover .ac-topic.c{background:rgba(0,194,212,.2);}
+.article-card:hover .ac-topic.r{background:rgba(229,57,53,.2);}
+.article-card:hover .ac-topic.l{background:rgba(132,204,22,.2);}
+.article-card:hover .ac-topic.a{background:rgba(245,158,11,.2);}
+.article-card:hover .ac-topic.p{background:rgba(124,58,237,.2);}
+.ac-footer{display:flex;align-items:center;justify-content:space-between;padding-top:18px;border-top:1px solid rgba(0,0,0,.08);transition:border-color .3s;}
+.article-card:hover .ac-footer{border-color:rgba(255,255,255,.08);}
+.ac-read-time{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ash);display:flex;align-items:center;gap:6px;transition:color .3s;}
+.article-card:hover .ac-read-time{color:rgba(255,255,255,.25);}
+.ac-cta{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--crimson);display:flex;align-items:center;gap:6px;transition:gap .2s,color .2s;}
+.article-card:hover .ac-cta{gap:10px;color:var(--cyan);}
+.ac-ghost-num{position:absolute;bottom:-8px;right:12px;font-family:'Bebas Neue',sans-serif;font-size:120px;line-height:1;color:rgba(0,0,0,.05);pointer-events:none;transition:color .3s;}
+.article-card:hover .ac-ghost-num{color:rgba(255,255,255,.04);}
+
+/* ── OTHER OS FAMILIES ── */
+.other-os-section{max-width:1200px;margin:0 auto;padding:0 64px 100px;}
+.other-os-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;}
+.other-os-card{background:var(--smoke);border:1px dashed rgba(0,0,0,.12);padding:32px;position:relative;}
+.other-os-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.5px;color:var(--coal);margin-bottom:8px;}
+.other-os-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;}
+.other-os-badge{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ash);padding:4px 12px;border:1.5px dashed var(--ash);border-radius:20px;}
+
+.inside-section{background:var(--coal);padding:0;}
+.inside-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.inside-inner .section-title{color:#fff;}
+.inside-inner .section-tag{color:rgba(255,255,255,.3);}
+.inside-inner .section-lead{color:rgba(255,255,255,.4);}
+.inside-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.inside-col{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);padding:28px 24px;transition:background .2s,border-color .2s;}
+.inside-col:hover{background:rgba(255,255,255,.06);border-color:rgba(0,194,212,.25);}
+.ic-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ic-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+.ic-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:#fff;margin-bottom:14px;line-height:1;}
+.ic-topics{display:flex;flex-direction:column;gap:7px;}
+.ic-topic-item{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;color:rgba(255,255,255,.4);}
+.ic-topic-item::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--crimson);flex-shrink:0;}
+
+.path-section{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.path-track{display:flex;flex-direction:column;gap:0;position:relative;}
+.path-track::before{content:'';position:absolute;left:21px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--lime),var(--amber),var(--crimson));}
+.path-item{display:flex;gap:32px;align-items:flex-start;padding:0 0 40px;position:relative;opacity:0;transform:translateX(-20px);transition:opacity .5s ease,transform .5s ease;}
+.path-item.visible{opacity:1;transform:translateX(0);}
+.path-dot{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;flex-shrink:0;position:relative;z-index:1;border:2px solid transparent;transition:transform .2s,box-shadow .2s;}
+.path-item:hover .path-dot{transform:scale(1.1);}
+.path-dot.d1{background:var(--coal);color:var(--lime);border-color:var(--lime);}
+.path-dot.d2{background:var(--coal);color:var(--amber);border-color:var(--amber);}
+.path-dot.d3{background:var(--coal);color:var(--crimson);border-color:var(--crimson);}
+.path-dot.d4{background:var(--coal);color:#a78bfa;border-color:#a78bfa;}
+.path-dot.d5{background:var(--coal);color:rgba(255,255,255,.3);border-color:rgba(255,255,255,.2);border-style:dashed;}
+.path-content{padding-top:6px;}
+.path-step-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.path-step-title{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--coal);letter-spacing:.5px;margin-bottom:6px;}
+.path-step-desc{font-size:13px;color:var(--muted);line-height:1.6;max-width:480px;}
+.path-step-link{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--crimson);text-decoration:none;transition:gap .2s,color .2s;}
+.path-step-link:hover{gap:10px;color:var(--cyan);}
+
+.author-strip{background:var(--smoke);padding:60px 64px;}
+.author-strip-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.author-info{display:flex;align-items:center;gap:24px;}
+.author-avatar{width:64px;height:64px;background:linear-gradient(135deg,var(--crimson),#ff6b35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;color:#fff;flex-shrink:0;}
+.author-name{font-weight:700;font-size:17px;color:var(--coal);margin-bottom:4px;}
+.author-role{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.author-actions{display:flex;gap:12px;}
+.btn-sm{padding:10px 24px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;text-decoration:none;transition:background .2s,color .2s,border-color .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-sm.primary{background:var(--coal);color:var(--paper);}
+.btn-sm.primary:hover{background:var(--crimson);}
+.btn-sm.ghost{background:transparent;color:var(--coal);border:1.5px solid var(--coal);}
+.btn-sm.ghost:hover{border-color:var(--crimson);color:var(--crimson);}
+
+footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:rgba(255,255,255,.6);}
+.footer-links{display:flex;gap:24px;flex-wrap:wrap;}
+.footer-links a{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--cyan);}
+.footer-note{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;}
+
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:900px){
+  nav{padding:14px 20px;}
+  .nav-breadcrumb{display:none;}
+  .page-hero{grid-template-columns:1fr;}
+  .hero-right{min-height:260px;padding:32px 24px;}
+  .hero-left{padding:56px 28px;}
+  .articles-section{padding:64px 28px;}
+  .articles-grid{grid-template-columns:1fr;}
+  .other-os-section{padding:0 28px 64px;}
+  .other-os-grid{grid-template-columns:1fr;}
+  .inside-inner{padding:64px 28px;}
+  .inside-grid{grid-template-columns:1fr;}
+  .path-section{padding:64px 28px;}
+  .author-strip{padding:48px 28px;}
+  .author-strip-inner{flex-direction:column;align-items:flex-start;}
+  footer{padding:36px 28px;}
+  .footer-inner{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ═══ NAV ═══ -->
+<!-- File location: /Infrastructure/OS/index.html → root is ../../ -->
+<nav id="mainNav">
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="nav-breadcrumb">
+    <a href="../../index.html">Home</a>
+    <span class="sep">/</span>
+    <a href="../../index.html#topics">Infrastructure</a>
+    <span class="sep">/</span>
+    <span class="current">Operating Systems</span>
+  </div>
+  <a href="../../index.html" class="nav-back">← Newsletter</a>
+</nav>
+
+<!-- ═══ PAGE HERO ═══ -->
+<section class="page-hero">
+  <div class="hero-ghost">OS</div>
+
+  <div class="hero-left">
+    <div class="bc">
+      <a href="../../index.html">Platform Ops</a>
+      <span class="sep">›</span>
+      <a href="../../index.html#topics">Infrastructure</a>
+      <span class="sep">›</span>
+      <span class="here">Operating Systems</span>
+    </div>
+    <div class="eyebrow"><span class="eyebrow-line"></span>Field Guide Series</div>
+    <h1 class="hero-title">OPERATING<br><span class="hl">SYSTEMS</span></h1>
+    <p class="hero-sub">Linux · Windows Server · Unix/BSD</p>
+    <p class="hero-desc">A directory of every OS family this newsletter covers — starting with Linux, top to bottom: fundamentals, advanced administration, and a dedicated troubleshooting runbook for the 3am pages.</p>
+    <div class="hero-meta-row">
+      <div><div class="hm-num">4</div><div class="hm-label">Deep Dives</div></div>
+      <div><div class="hm-num">1</div><div class="hm-label">of 3 OS Families Live</div></div>
+      <div><div class="hm-num">RHEL</div><div class="hm-label">/ Ubuntu / Debian</div></div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="os-diagram">
+      <div class="os-family live">
+        <span class="os-family-label">Live</span>
+        <div class="os-family-name">🐧 Linux</div>
+        <div class="os-family-pills">
+          <span class="os-pill">Fundamentals</span>
+          <span class="os-pill">Advanced</span>
+          <span class="os-pill">Troubleshooting</span>
+        </div>
+      </div>
+      <div class="os-family soon">
+        <span class="os-family-label">Coming Soon</span>
+        <div class="os-family-name">🪟 Windows Server</div>
+        <div class="os-family-pills">
+          <span class="os-pill">Active Directory</span>
+          <span class="os-pill">PowerShell</span>
+          <span class="os-pill">IIS</span>
+        </div>
+      </div>
+      <div class="os-family soon">
+        <span class="os-family-label">Coming Soon</span>
+        <div class="os-family-name">😈 Unix / BSD</div>
+        <div class="os-family-pills">
+          <span class="os-pill">FreeBSD</span>
+          <span class="os-pill">Jails</span>
+          <span class="os-pill">ZFS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TICKER ─── -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="ticker-dot"></span>Filesystem Hierarchy</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>systemd</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Users & Permissions</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Package Management</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Namespaces & Cgroups</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Kernel & Sysctl</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Load Average</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>OOM Killer</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Disk & I/O</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Boot Failures</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>LVM</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Shell Scripting</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Filesystem Hierarchy</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>systemd</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Users & Permissions</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Package Management</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Namespaces & Cgroups</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Kernel & Sysctl</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Load Average</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>OOM Killer</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Disk & I/O</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Boot Failures</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>LVM</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Shell Scripting</span>
+  </div>
+</div>
+
+<!-- ═══ ARTICLES ═══ -->
+<section class="articles-section reveal" id="linux">
+  <div class="section-tag">Live Now</div>
+  <h2 class="section-title">LINUX DEEP DIVES</h2>
+  <p class="section-lead">Three deep-dives covering Linux from first principles to production incident response.</p>
+
+  <div class="articles-grid">
+
+    <!-- #054 Fundamentals -->
+    <a href="LINUX/FUNDAMENTALS/linux-fundamentals.html" class="article-card">
+      <div class="ac-top-bar"></div>
+      <div class="ac-body">
+        <div class="ac-issue-meta"><span class="ac-issue-num">#054</span>September 2026</div>
+        <div class="ac-icon">🐧</div>
+        <div class="ac-title">Linux Fundamentals</div>
+        <p class="ac-desc">Filesystem hierarchy, users & permissions, package management, process basics, and shell/scripting — the ground floor every other Linux topic stands on.</p>
+        <div class="ac-topics">
+          <span class="ac-topic l">Filesystem</span>
+          <span class="ac-topic c">Permissions</span>
+          <span class="ac-topic a">Packages</span>
+          <span class="ac-topic r">Processes</span>
+          <span class="ac-topic p">Shell</span>
+        </div>
+        <div class="ac-footer">
+          <span class="ac-read-time">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            16 min read
+          </span>
+          <span class="ac-cta">Read Article <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+      <div class="ac-ghost-num">54</div>
+    </a>
+
+    <!-- #055 Advanced -->
+    <a href="LINUX/ADVANCED/linux-advanced.html" class="article-card">
+      <div class="ac-top-bar"></div>
+      <div class="ac-body">
+        <div class="ac-issue-meta"><span class="ac-issue-num">#055</span>September 2026</div>
+        <div class="ac-icon">⚙️</div>
+        <div class="ac-title">Linux Advanced</div>
+        <p class="ac-desc">systemd internals, kernel & sysctl tuning, namespaces & cgroups (the primitives containers are built on), performance profiling, and LVM/advanced storage.</p>
+        <div class="ac-topics">
+          <span class="ac-topic a">systemd</span>
+          <span class="ac-topic c">Sysctl</span>
+          <span class="ac-topic l">Cgroups</span>
+          <span class="ac-topic r">Profiling</span>
+          <span class="ac-topic p">LVM</span>
+        </div>
+        <div class="ac-footer">
+          <span class="ac-read-time">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            18 min read
+          </span>
+          <span class="ac-cta">Read Article <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+      <div class="ac-ghost-num">55</div>
+    </a>
+
+    <!-- #056 Troubleshooting — NEW -->
+    <a href="LINUX/TROUBLESHOOTING/linux-troubleshooting.html" class="article-card">
+      <div class="ac-top-bar"></div>
+      <div class="ac-body">
+        <div class="ac-issue-meta"><span class="ac-issue-num">#056</span>September 2026</div>
+        <div class="ac-icon">🚨</div>
+        <div class="ac-title">Linux Troubleshooting</div>
+        <p class="ac-desc">A runbook, not a tutorial — high load & CPU, memory & OOM, disk & I/O, network issues, and boot/service failures, each with diagnostic commands and root causes.</p>
+        <div class="ac-topics">
+          <span class="ac-topic r">High Load</span>
+          <span class="ac-topic a">OOM</span>
+          <span class="ac-topic c">Disk / I/O</span>
+          <span class="ac-topic l">Network</span>
+          <span class="ac-topic p">Boot Failures</span>
+        </div>
+        <div class="ac-footer">
+          <span class="ac-read-time">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            19 min read
+          </span>
+          <span class="ac-cta">Read Article <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+      <div class="ac-ghost-num">56</div>
+    </a>
+
+    <!-- #057 Glossary — NEW -->
+    <a href="LINUX/GLOSSARY/linux-unix-glossary.html" class="article-card">
+      <div class="ac-top-bar"></div>
+      <div class="ac-body">
+        <div class="ac-issue-meta">
+          <span class="ac-issue-num" style="background:var(--crimson)">#057</span>
+          September 2026 &nbsp;
+          <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(229,57,53,.15);color:var(--crimson);padding:2px 8px;border-radius:20px;letter-spacing:1px;">NEW</span>
+        </div>
+        <div class="ac-icon">📖</div>
+        <div class="ac-title">Linux & Unix Glossary</div>
+        <p class="ac-desc">190 terms across 15 categories, searchable in one place — fundamentals through troubleshooting, plus standalone deep-dive pages for the terms that need one.</p>
+        <div class="ac-topics">
+          <span class="ac-topic r">190 Terms</span>
+          <span class="ac-topic a">15 Categories</span>
+          <span class="ac-topic c">Searchable</span>
+          <span class="ac-topic l">Reference</span>
+        </div>
+        <div class="ac-footer">
+          <span class="ac-read-time">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            Browse or search
+          </span>
+          <span class="ac-cta">Open Glossary <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+      <div class="ac-ghost-num">57</div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ═══ OTHER OS FAMILIES ═══ -->
+<section class="other-os-section reveal">
+  <div class="section-tag">Roadmap</div>
+  <h2 class="section-title">MORE OS FAMILIES COMING</h2>
+  <p class="section-lead">Linux is first because it's what most of the Platform Ops stack runs on. These are next.</p>
+  <div class="other-os-grid">
+    <div class="other-os-card">
+      <div class="other-os-title">🪟 Windows Server</div>
+      <div class="other-os-desc">Active Directory, Group Policy, PowerShell administration, IIS, and hybrid AD/Entra environments.</div>
+      <span class="other-os-badge">🔜 Planned</span>
+    </div>
+    <div class="other-os-card">
+      <div class="other-os-title">😈 Unix / BSD</div>
+      <div class="other-os-desc">FreeBSD fundamentals, jails vs containers, ZFS, and where Unix philosophy still shapes modern tooling.</div>
+      <span class="other-os-badge">🔜 Planned</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WHAT'S INSIDE ═══ -->
+<div class="inside-section">
+  <div class="inside-inner reveal">
+    <div class="section-tag">Content Map</div>
+    <h2 class="section-title">WHAT'S INSIDE EACH ISSUE</h2>
+    <p class="section-lead">A quick preview before you click through.</p>
+    <div class="inside-grid">
+
+      <div class="inside-col">
+        <div class="ic-label" style="color:var(--lime)">Issue #054 · Fundamentals</div>
+        <div class="ic-title">THE GROUND FLOOR</div>
+        <div class="ic-topics">
+          <div class="ic-topic-item">Filesystem Hierarchy Standard (FHS)</div>
+          <div class="ic-topic-item">Users, groups & permission bits</div>
+          <div class="ic-topic-item">Package managers (apt/yum/dnf)</div>
+          <div class="ic-topic-item">Process basics & job control</div>
+          <div class="ic-topic-item">Shell scripting & text processing</div>
+        </div>
+      </div>
+
+      <div class="inside-col">
+        <div class="ic-label" style="color:var(--amber)">Issue #055 · Advanced</div>
+        <div class="ic-title">UNDER THE HOOD</div>
+        <div class="ic-topics">
+          <div class="ic-topic-item">systemd units, targets & journald</div>
+          <div class="ic-topic-item">Kernel parameters & sysctl tuning</div>
+          <div class="ic-topic-item">Namespaces & cgroups (v2)</div>
+          <div class="ic-topic-item">perf, strace & performance profiling</div>
+          <div class="ic-topic-item">LVM & advanced filesystems</div>
+        </div>
+      </div>
+
+      <div class="inside-col">
+        <div class="ic-label" style="color:var(--crimson)">Issue #056 · Troubleshooting</div>
+        <div class="ic-title">THE RUNBOOK</div>
+        <div class="ic-topics">
+          <div class="ic-topic-item">High load average & CPU saturation</div>
+          <div class="ic-topic-item">Memory pressure & the OOM killer</div>
+          <div class="ic-topic-item">Disk full, slow I/O, inode exhaustion</div>
+          <div class="ic-topic-item">DNS, routing & connectivity failures</div>
+          <div class="ic-topic-item">Boot failures & systemd unit debugging</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LEARNING PATH ═══ -->
+<section class="path-section reveal">
+  <div class="section-tag">Suggested Order</div>
+  <h2 class="section-title">LEARNING PATH</h2>
+  <p class="section-lead">New to Linux administration? Follow this sequence — each issue assumes the one before it.</p>
+
+  <div class="path-track">
+
+    <div class="path-item">
+      <div class="path-dot d1">1</div>
+      <div class="path-content">
+        <div class="path-step-label">Foundation</div>
+        <div class="path-step-title">Linux Fundamentals</div>
+        <p class="path-step-desc">Start here even if you've used Linux for years — filesystem hierarchy, permissions, and package management are where sloppy mental models usually hide.</p>
+        <a href="LINUX/FUNDAMENTALS/linux-fundamentals.html" class="path-step-link">Read Issue #054 → Linux Fundamentals <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+
+    <div class="path-item">
+      <div class="path-dot d2">2</div>
+      <div class="path-content">
+        <div class="path-step-label">Depth</div>
+        <div class="path-step-title">Linux Advanced</div>
+        <p class="path-step-desc">Once the basics are solid, go under the hood — systemd, kernel tuning, and namespaces/cgroups are the exact primitives Kubernetes and Docker are built on.</p>
+        <a href="LINUX/ADVANCED/linux-advanced.html" class="path-step-link">Read Issue #055 → Linux Advanced <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+
+    <div class="path-item">
+      <div class="path-dot d3">3</div>
+      <div class="path-content">
+        <div class="path-step-label">Production</div>
+        <div class="path-step-title">Linux Troubleshooting</div>
+        <p class="path-step-desc">Now that you understand how the system is built, learn how to diagnose it under fire — high load, OOM, disk exhaustion, network failures, and boot problems.</p>
+        <a href="LINUX/TROUBLESHOOTING/linux-troubleshooting.html" class="path-step-link">Read Issue #056 → Linux Troubleshooting <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+
+    <div class="path-item">
+      <div class="path-dot d4">📖</div>
+      <div class="path-content">
+        <div class="path-step-label">Reference · Anytime</div>
+        <div class="path-step-title">Linux & Unix Glossary</div>
+        <p class="path-step-desc">Keep this open in a tab. 190 terms across all three issues above (plus more), searchable in one place instead of hunting across articles.</p>
+        <a href="LINUX/GLOSSARY/linux-unix-glossary.html" class="path-step-link">Open Issue #057 → Glossary <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+
+    <div class="path-item">
+      <div class="path-dot d5">→</div>
+      <div class="path-content">
+        <div class="path-step-label">Coming Soon</div>
+        <div class="path-step-title">Windows Server & Unix/BSD</div>
+        <p class="path-step-desc">Once the Linux series is complete, the same three-part structure (fundamentals → advanced → troubleshooting) repeats for Windows Server and Unix/BSD.</p>
+        <a href="../../index.html#topics" class="path-step-link">Browse All Topics <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ AUTHOR STRIP ═══ -->
+<div class="author-strip reveal">
+  <div class="author-strip-inner">
+    <div class="author-info">
+      <div class="author-avatar">VA</div>
+      <div>
+        <div class="author-name">Vishal Abhinav</div>
+        <div class="author-role">Platform Ops Engineer · Ops Newsletter</div>
+      </div>
+    </div>
+    <div class="author-actions">
+      <a href="../../index.html#subscribe" class="btn-sm primary">Subscribe Free <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank" class="btn-sm ghost">GitHub ↗</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PLATFORM OPS</div>
+    <div class="footer-links">
+      <a href="../../index.html">Home</a>
+      <a href="LINUX/FUNDAMENTALS/linux-fundamentals.html">Fundamentals</a>
+      <a href="LINUX/ADVANCED/linux-advanced.html">Advanced</a>
+      <a href="LINUX/TROUBLESHOOTING/linux-troubleshooting.html">Troubleshooting</a>
+      <a href="LINUX/GLOSSARY/linux-unix-glossary.html">Glossary</a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
+      <a href="../../index.html#subscribe">Subscribe</a>
+    </div>
+    <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
+  </div>
+</footer>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+document.querySelectorAll('a,button,.article-card,.inside-col,.os-family,.other-os-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='56px';ring.style.height='56px';ring.style.borderColor='var(--crimson)';cursor.style.transform='translate(-50%,-50%) scale(1.5)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='';cursor.style.transform='translate(-50%,-50%) scale(1)';});
+});
+
+window.addEventListener('scroll',()=>document.getElementById('mainNav').classList.toggle('scrolled',window.scrollY>60));
+
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+const pathObs=new IntersectionObserver(entries=>entries.forEach(e=>{
+  if(e.isIntersecting){e.target.classList.add('visible');}
+}),{threshold:.2});
+document.querySelectorAll('.path-item').forEach((item,i)=>{
+  item.style.transitionDelay=`${i*0.12}s`;
+  pathObs.observe(item);
+});
+
+const cardObs=new IntersectionObserver(entries=>entries.forEach(e=>{
+  if(e.isIntersecting){e.target.classList.add('visible');}
+}),{threshold:.15});
+document.querySelectorAll('.article-card').forEach((c,i)=>{
+  c.style.transitionDelay=`${i*0.08}s`;
+  cardObs.observe(c);
+});
+
+document.querySelectorAll('.os-family').forEach(n=>{
+  n.addEventListener('mouseenter',()=>{cursor.style.background='var(--cyan)';});
+  n.addEventListener('mouseleave',()=>{cursor.style.background='var(--crimson)';});
+});
+</script>
+</body>
+</html>

@@ -764,7 +764,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
     </div>
     <div class="hero-stats">
       <div class="stat-item">
-        <div class="stat-num"><span class="count-up" data-target="53">0</span></div>
+        <div class="stat-num"><span class="count-up" data-target="57">0</span></div>
         <div class="stat-label">Issues Published</div>
       </div>
       <div class="stat-item">
@@ -779,34 +779,34 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
   </div>
 
   <div class="hero-right">
-    <a href="SRE/INCIDENT-MANAGEMENT/incident-management.html" class="hero-new-badge">🚨 New — Issue #053</a>
+    <a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html" class="hero-new-badge">📖 New — Issue #057</a>
     <div class="terminal">
       <div class="terminal-bar">
         <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
-        <div class="t-title">platform-ops ~ issue #053</div>
+        <div class="t-title">platform-ops ~ issue #057</div>
       </div>
       <div class="terminal-body">
-        <span class="tl"><span class="tl-prompt">/</span> <span class="tl-cmd">incident declare "Billing API 5xx spike" --sev2</span></span>
-        <span class="tl tl-out">#inc-2026-09-14-billing-api created</span>
-        <span class="tl"><span class="tl-k">IC assigned</span>   <span class="tl-out">T+5m</span></span>
+        <span class="tl"><span class="tl-prompt">/</span> <span class="tl-cmd">glossary search "systemd"</span></span>
+        <span class="tl tl-out">3 matches across 190 terms</span>
+        <span class="tl"><span class="tl-k">category</span>   <span class="tl-out">services-systemd-boot</span></span>
         <span class="tl"> </span>
-        <span class="tl"><span class="tl-prompt">/</span> <span class="tl-cmd">incident timeline "root cause: bad config push"</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">mitigated T+32m · resolved T+40m</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">postmortem published T+72h</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Issue #053 — Incident Management 🚨</span></span>
+        <span class="tl"><span class="tl-prompt">/</span> <span class="tl-cmd">glossary open --term "Init"</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">standalone page found — full deep-dive</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">15 categories · 190 terms indexed</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Issue #057 — Linux & Unix Glossary 📖</span></span>
         <span class="tl"> </span>
         <span class="tl"><span class="tl-prompt">❯</span> <span class="cursor-blink"></span></span>
       </div>
     </div>
     <div class="badge-strip">
-      <span class="t-badge">SEV1-4</span>
-      <span class="t-badge">Incident Commander</span>
-      <span class="t-badge">Blameless</span>
-      <span class="t-badge">War Room</span>
-      <span class="t-badge">Root Cause</span>
-      <span class="t-badge">MTTR</span>
-      <span class="t-badge">Action Items</span>
-      <span class="t-badge">Postmortem</span>
+      <span class="t-badge">190 Terms</span>
+      <span class="t-badge">15 Categories</span>
+      <span class="t-badge">Searchable</span>
+      <span class="t-badge">chmod</span>
+      <span class="t-badge">systemd</span>
+      <span class="t-badge">LVM</span>
+      <span class="t-badge">grep</span>
+      <span class="t-badge">DNS</span>
     </div>
   </div>
 </section>
@@ -885,7 +885,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
       <div class="terminal-body kmap-body">
         <span class="tl kt-row"><span class="tl-prompt">❯</span> <span class="tl-cmd">tree platform-ops/ --content-map --road-map</span></span>
         <span class="tl kt-row">platform-ops/</span>
-        <span class="tl kt-row"><span class="tl-branch">├── </span><span class="tl-dir">content-map/</span>                    <span class="tl-count-live">[ 8 LIVE ]</span></span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><span class="tl-dir">content-map/</span>                    <span class="tl-count-live">[ 12 LIVE ]</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   ├── </span><span class="tl-dir">devops/</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="tl-live">k8-architecture.html</a> <span class="tl-out">· issue #048</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/Networking/k8-networking.html" class="tl-live">k8-networking.html</a> <span class="tl-out">· issue #047</span></span>
@@ -895,15 +895,21 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
         <span class="tl kt-row"><span class="tl-branch">│   │   └── </span><a href="DevOps/CICD/cicd-pipelines.html" class="tl-live">cicd-gitops.html</a> <span class="tl-out">· issue #052</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   ├── </span><span class="tl-dir">networking/</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   │   └── </span><a href="DevOps/K8/Networking/k8-networking.html" class="tl-live">k8-networking-decoded.html</a> <span class="tl-out">· issue #047</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   └── </span><span class="tl-dir">sre/</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│       └── </span><a href="SRE/INCIDENT-MANAGEMENT/incident-management.html" class="tl-live">incident-management.html</a> <span class="tl-out">· issue #053</span></span>
-        <span class="tl kt-row"><span class="tl-branch">└── </span><span class="tl-dir">road-map/</span>                      <span class="tl-count-soon">[ 18 PLANNED ]</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   ├── </span><span class="tl-dir">sre/</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   │   └── </span><a href="SRE/INCIDENT-MANAGEMENT/incident-management.html" class="tl-live">incident-management.html</a> <span class="tl-out">· issue #053</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   └── </span><span class="tl-dir">infrastructure/</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│       └── </span><span class="tl-dir">os/linux/</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│           ├── </span><a href="Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html" class="tl-live">linux-fundamentals.html</a> <span class="tl-out">· issue #054</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│           ├── </span><a href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html" class="tl-live">linux-advanced.html</a> <span class="tl-out">· issue #055</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│           ├── </span><a href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html" class="tl-live">linux-troubleshooting.html</a> <span class="tl-out">· issue #056</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│           └── </span><a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html" class="tl-live">linux-unix-glossary.html</a> <span class="tl-out">· issue #057 (190 terms)</span></span>
+        <span class="tl kt-row"><span class="tl-branch">└── </span><span class="tl-dir">road-map/</span>                      <span class="tl-count-soon">[ 14 PLANNED ]</span></span>
         <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">devops/</span>          <span class="tl-soon">rbac · admission-controllers · multi-cluster-federation</span></span>
         <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">sre/</span>              <span class="tl-soon">slis-slos-slas · error-budgets · reliability-eng · chaos-eng · on-call-design</span></span>
-        <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">infrastructure/</span>   <span class="tl-soon">linux(rhel·centos·ubuntu·systemd) · virtualization · aws · azure · gcp</span></span>
+        <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">infrastructure/</span>   <span class="tl-soon">windows-server · unix-bsd · virtualization · aws · azure · gcp</span></span>
         <span class="tl kt-row"><span class="tl-branch">    └── </span><span class="tl-dir">networking/</span>       <span class="tl-soon">osi · tcp-ip · load-balancing · gateway-api · service-mesh · ebpf</span></span>
         <span class="tl kt-row"> </span>
-        <span class="tl kt-row"><span class="tl-ok">✓</span> <span class="tl-out">9 directories, 8 live articles, 18 planned topics</span></span>
+        <span class="tl kt-row"><span class="tl-ok">✓</span> <span class="tl-out">10 directories, 12 live articles, 14 planned topics</span></span>
         <span class="tl kt-row"><span class="tl-prompt">❯</span> <span class="cursor-blink"></span></span>
       </div>
     </div>
@@ -983,19 +989,26 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
           <div class="tc-icon-wrap">🏗️</div>
           <div class="tc-meta">
             <div class="tc-title">Infrastructure</div>
-            <div class="tc-status"><span class="tc-status-dot soon"></span><span class="tc-status-text">Coming Soon</span></div>
+            <div class="tc-status"><span class="tc-status-dot live"></span><span class="tc-status-text"><span class="n">4</span> Live · 6 Planned</span></div>
           </div>
           <span class="tc-arrow">↓</span>
         </div>
         <div class="tc-body">
           <div class="tc-items">
-            <div class="tc-zone-label soon">🔜 On the Roadmap</div>
+            <div class="tc-zone-label live">✅ Live Now</div>
             <div class="tc-sub-group">
               <div class="tc-sub-title">Linux</div>
-              <span class="tc-badge soon">RHEL</span>
-              <span class="tc-badge soon">CentOS</span>
-              <span class="tc-badge soon">Ubuntu</span>
-              <span class="tc-badge soon">Systemd</span>
+              <a href="Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html" class="tc-badge-link"><span class="dot"></span>Fundamentals ↗</a>
+              <a href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html" class="tc-badge-link"><span class="dot"></span>Advanced ↗</a>
+              <a href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html" class="tc-badge-link"><span class="dot"></span>Troubleshooting ↗</a>
+              <a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html" class="tc-badge-link" style="background:rgba(229,57,53,0.15);border-color:rgba(229,57,53,0.35);"><span class="dot"></span>Glossary (190 terms) ↗</a>
+            </div>
+
+            <div class="tc-zone-label soon">🔜 On the Roadmap</div>
+            <div class="tc-sub-group">
+              <div class="tc-sub-title">More OS Families</div>
+              <span class="tc-badge soon">Windows Server</span>
+              <span class="tc-badge soon">Unix / BSD</span>
             </div>
             <span class="tc-badge soon">Virtualization</span>
             <div class="tc-sub-group">
@@ -1167,52 +1180,97 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
     <h2 class="section-title" style="color:var(--paper)">LATEST ISSUES</h2>
     <p class="section-lead">Every issue is a deep-dive with architecture diagrams, code samples, and battle-tested insights.</p>
 
-    <!-- ── NEW FEATURED: Issue #053 Incident Management & Postmortems ── -->
-    <a href="SRE/INCIDENT-MANAGEMENT/incident-management.html" class="issue-featured-new">
+    <!-- ── NEW FEATURED: Issue #057 Linux & Unix Glossary ── -->
+    <a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html" class="issue-featured-new">
       <div>
         <div class="ifn-new-badge"><span class="ifn-dot"></span> New Issue</div>
-        <div class="ifn-issue-meta">September 2026 · #053</div>
-        <div class="ifn-title">Incident Management & Postmortems</div>
+        <div class="ifn-issue-meta">September 2026 · #057</div>
+        <div class="ifn-title">Linux & Unix Glossary</div>
         <div class="ifn-desc">
-          First issue in the new SRE series — severity classification (SEV1–4), the Incident Commander role and war-room practice, blameless postmortem writing with a full copy-paste template, action-item follow-through, and the culture/metrics that make it stick.
+          190 terms across 15 categories — fundamentals, permissions, processes, networking, storage, security, monitoring, and troubleshooting — searchable in one place, with standalone deep-dive pages for the terms that need one.
         </div>
         <div class="ifn-tags">
-          <span class="ifn-tag r">Severity</span>
-          <span class="ifn-tag a">Incident Commander</span>
-          <span class="ifn-tag c">Postmortems</span>
-          <span class="ifn-tag c">Blameless</span>
-          <span class="ifn-tag l">Action Items</span>
-          <span class="ifn-tag l">MTTR</span>
-          <span class="ifn-tag p">SRE</span>
-          <span class="ifn-tag p">Culture</span>
+          <span class="ifn-tag r">190 Terms</span>
+          <span class="ifn-tag a">15 Categories</span>
+          <span class="ifn-tag c">Searchable</span>
+          <span class="ifn-tag c">Reference</span>
+          <span class="ifn-tag l">Linux</span>
+          <span class="ifn-tag l">Unix</span>
         </div>
       </div>
-      <div class="ifn-cta">Read Deep-Dive →</div>
-      <div class="ifn-num">53</div>
+      <div class="ifn-cta">Open Glossary →</div>
+      <div class="ifn-num">57</div>
     </a>
 
-    <!-- ── PREVIOUS FEATURED: Issue #052 CI/CD & GitOps ── -->
-    <a href="DevOps/CICD/cicd-pipelines.html" class="issue-featured">
+    <!-- ── PREVIOUS FEATURED: Issue #056 Linux Troubleshooting ── -->
+    <a href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html" class="issue-featured">
       <div>
         <div class="if-new-badge"><span class="if-new-badge-dot"></span> Previous Issue</div>
-        <div class="if-issue-meta">August 2026 · #052</div>
-        <div class="if-title">CI/CD & GitOps Deep-Dive</div>
-        <div class="if-desc">Jenkins & GitLab CI pipeline design, GitOps reconciliation with ArgoCD/Flux, pipeline security gates (SAST/SBOM/signing), canary & blue-green deployment strategy, and secrets/artifact management.</div>
+        <div class="if-issue-meta">September 2026 · #056</div>
+        <div class="if-title">Linux Troubleshooting</div>
+        <div class="if-desc">A runbook, not a tutorial — high load & CPU, memory & OOM, disk & I/O, network issues, and boot/service failures, each with diagnostic commands and root causes.</div>
         <div class="if-tags">
-          <span class="if-tag r">CI Pipelines</span>
-          <span class="if-tag a">GitOps</span>
-          <span class="if-tag c">ArgoCD</span>
-          <span class="if-tag c">Flux</span>
-          <span class="if-tag l">Canary</span>
-          <span class="if-tag p">Secrets</span>
+          <span class="if-tag r">High Load</span>
+          <span class="if-tag a">OOM</span>
+          <span class="if-tag c">Disk / I/O</span>
+          <span class="if-tag l">Network</span>
+          <span class="if-tag p">Boot Failures</span>
         </div>
       </div>
       <div class="if-cta">Read Now →</div>
-      <div class="if-num">52</div>
+      <div class="if-num">56</div>
     </a>
 
     <!-- ── GRID: Previous issues ── -->
     <div class="issues-grid">
+
+      <a href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html" class="issue-card">
+        <div class="ic-issue">September 2026 · #055</div>
+        <div class="ic-title">Linux Advanced</div>
+        <div class="ic-desc">systemd internals, kernel & sysctl tuning, namespaces & cgroups, performance profiling, and LVM/advanced storage.</div>
+        <div class="ic-tags">
+          <span class="ic-tag a">systemd</span>
+          <span class="ic-tag c">Cgroups</span>
+          <span class="ic-tag l">LVM</span>
+        </div>
+        <div class="ic-num">55</div>
+      </a>
+
+      <a href="Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html" class="issue-card">
+        <div class="ic-issue">September 2026 · #054</div>
+        <div class="ic-title">Linux Fundamentals</div>
+        <div class="ic-desc">Filesystem hierarchy, users & permissions, package management, process basics, and shell/scripting.</div>
+        <div class="ic-tags">
+          <span class="ic-tag l">Filesystem</span>
+          <span class="ic-tag c">Permissions</span>
+          <span class="ic-tag a">Packages</span>
+        </div>
+        <div class="ic-num">54</div>
+      </a>
+
+      <a href="SRE/INCIDENT-MANAGEMENT/incident-management.html" class="issue-card">
+        <div class="ic-issue">September 2026 · #053</div>
+        <div class="ic-title">Incident Management & Postmortems</div>
+        <div class="ic-desc">Severity classification, Incident Commander role, blameless postmortem writing, and action-item follow-through.</div>
+        <div class="ic-tags">
+          <span class="ic-tag r">Severity</span>
+          <span class="ic-tag a">Postmortems</span>
+          <span class="ic-tag c">SRE</span>
+        </div>
+        <div class="ic-num">53</div>
+      </a>
+
+      <a href="DevOps/CICD/cicd-pipelines.html" class="issue-card">
+        <div class="ic-issue">August 2026 · #052</div>
+        <div class="ic-title">CI/CD & GitOps Deep-Dive</div>
+        <div class="ic-desc">Jenkins & GitLab CI, GitOps with ArgoCD/Flux, security gates, canary/blue-green strategy, secrets management.</div>
+        <div class="ic-tags">
+          <span class="ic-tag r">CI Pipelines</span>
+          <span class="ic-tag a">GitOps</span>
+          <span class="ic-tag c">ArgoCD</span>
+        </div>
+        <div class="ic-num">52</div>
+      </a>
 
       <a href="DevOps/K8/OBSERVABILITY/k8-observability.html" class="issue-card">
         <div class="ic-issue">July 2026 · #051</div>
@@ -1384,8 +1442,9 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
     <div class="footer-links">
       <a href="#topics">Topics</a>
       <a href="#issues">Archive</a>
+      <a href="Infrastructure/OS/index.html">OS / Linux Series</a>
       <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
-      <a href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Latest Issue</a>
+      <a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Latest Issue</a>
       <a href="#subscribe">Subscribe</a>
     </div>
     <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
