@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux Fundamentals · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="Linux Fundamentals — filesystem hierarchy, users & permissions, package management, process basics, and shell scripting. The ground floor for every other Linux topic.">
+<meta name="author" content="Vishal Abhinav">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Linux Fundamentals — Filesystem, Permissions, Packages, Processes, Shell">
+<meta property="og:description" content="The ground floor every other Linux topic stands on — with commands, not just theory.">
+<meta property="article:author" content="Vishal Abhinav">
+<meta property="article:published_time" content="2026-09-07">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:     #08090c; --paper:   #f2f0eb; --smoke:   #e4e0d8; --ash:     #b8b2a7;
+  --coal:    #1c1f26; --cyan:    #00c2d4; --amber:   #f59e0b; --crimson: #e53935;
+  --lime:    #84cc16; --text:    #1c1f26; --muted:   #6b6860; --purple:  #7c3aed;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--text);font-family:'Manrope',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden;cursor:none;}
+.cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--crimson);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .15s ease,background .2s;transform:translate(-50%,-50%);}
+.cursor-ring{position:fixed;top:0;left:0;width:36px;height:36px;border:1.5px solid var(--coal);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .35s cubic-bezier(.25,.46,.45,.94),width .3s,height .3s,border-color .2s;transform:translate(-50%,-50%);}
+body:hover .cursor-ring{border-color:var(--crimson);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.6;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(8,9,12,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.06);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;color:#fff;display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo span{display:inline-block;width:8px;height:8px;background:var(--crimson);border-radius:50%;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:.6;}}
+.nav-breadcrumb{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+.nav-breadcrumb a{color:rgba(255,255,255,0.3);text-decoration:none;transition:color .2s;}
+.nav-breadcrumb a:hover{color:var(--cyan);}
+.nav-breadcrumb .sep{color:rgba(255,255,255,0.12);}
+.nav-breadcrumb .current{color:var(--cyan);}
+.nav-back{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);padding:8px 20px;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s,color .2s;border:1px solid rgba(255,255,255,0.1);}
+.nav-back:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);}
+
+.hero{min-height:72vh;background:var(--ink);display:grid;grid-template-columns:1fr 1fr;padding-top:72px;overflow:hidden;position:relative;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 10% 40%,rgba(132,204,22,.1) 0%,transparent 55%),radial-gradient(circle at 90% 60%,rgba(229,57,53,.1) 0%,transparent 50%),radial-gradient(circle at 50% 100%,rgba(124,58,237,.08) 0%,transparent 50%);pointer-events:none;}
+.hero-ghost{position:absolute;bottom:-20px;left:-10px;font-family:'Bebas Neue',sans-serif;font-size:clamp(120px,18vw,240px);color:rgba(255,255,255,.022);letter-spacing:-4px;line-height:1;pointer-events:none;white-space:nowrap;}
+.hero-left{padding:80px 48px 80px 64px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;}
+.bc{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:28px;}
+.bc a{color:rgba(255,255,255,.28);text-decoration:none;transition:color .2s;}
+.bc a:hover{color:var(--cyan);}
+.bc .sep{color:rgba(255,255,255,.12);}
+.bc .here{color:var(--crimson);}
+.eyebrow{display:flex;align-items:center;gap:12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:20px;}
+.eyebrow-line{display:block;width:40px;height:1px;background:var(--crimson);}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,6vw,88px);line-height:.92;letter-spacing:-.5px;color:#fff;margin-bottom:12px;}
+.hero-title .hl-red{color:var(--crimson);}
+.hero-title .hl-cyan{color:var(--cyan);}
+.hero-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:rgba(255,255,255,.38);margin-bottom:28px;line-height:1.4;}
+.hero-desc{font-size:14px;color:rgba(255,255,255,.32);max-width:440px;margin-bottom:36px;line-height:1.85;}
+.level-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px;}
+.lp{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;border-radius:20px;cursor:pointer;transition:all .2s;border:none;}
+.lp.fs    {background:rgba(229,57,53,.15);color:#ef5350;border:1px solid rgba(229,57,53,.3);}
+.lp.perm  {background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);}
+.lp.pkg   {background:rgba(0,194,212,.15);color:var(--cyan);border:1px solid rgba(0,194,212,.3);}
+.lp.proc  {background:rgba(132,204,22,.15);color:var(--lime);border:1px solid rgba(132,204,22,.3);}
+.lp.shell {background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);}
+.lp:hover{transform:translateY(-2px);filter:brightness(1.3);}
+.hero-meta-row{display:flex;gap:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.07);}
+.hm-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;color:#fff;}
+.hm-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:3px;}
+
+.hero-right{display:flex;align-items:center;justify-content:center;padding:60px 48px;position:relative;z-index:2;}
+.err-matrix{display:flex;flex-direction:column;gap:10px;width:100%;max-width:400px;}
+.err-layer{border:1px solid rgba(255,255,255,.07);border-radius:8px;overflow:hidden;transition:border-color .3s;}
+.err-layer:hover{border-color:rgba(255,255,255,.2);}
+.el-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.el-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;}
+.el-count{font-family:'Bebas Neue',sans-serif;font-size:20px;}
+.el-bar{height:3px;background:rgba(255,255,255,.06);}
+.el-fill{height:100%;border-radius:1px;transition:width 1.4s cubic-bezier(.25,.46,.45,.94);width:0;}
+.el-errors{padding:10px 20px 14px;display:flex;flex-wrap:wrap;gap:5px;}
+.ee{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.5px;padding:3px 9px;border-radius:12px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.35);}
+.err-layer.fs    .el-header{background:rgba(229,57,53,.08);} .err-layer.fs .el-label{color:#ef5350;} .err-layer.fs .el-count{color:#ef5350;} .err-layer.fs .el-fill{background:linear-gradient(90deg,var(--crimson),#ff6b35);}
+.err-layer.perm  .el-header{background:rgba(245,158,11,.08);} .err-layer.perm .el-label{color:var(--amber);} .err-layer.perm .el-count{color:var(--amber);} .err-layer.perm .el-fill{background:linear-gradient(90deg,var(--amber),#fbbf24);}
+.err-layer.pkg   .el-header{background:rgba(0,194,212,.08);} .err-layer.pkg .el-label{color:var(--cyan);} .err-layer.pkg .el-count{color:var(--cyan);} .err-layer.pkg .el-fill{background:linear-gradient(90deg,var(--cyan),#38bdf8);}
+.err-layer.proc  .el-header{background:rgba(132,204,22,.08);} .err-layer.proc .el-label{color:var(--lime);} .err-layer.proc .el-count{color:var(--lime);} .err-layer.proc .el-fill{background:linear-gradient(90deg,var(--lime),#4ade80);}
+.err-layer.shell .el-header{background:rgba(124,58,237,.08);} .err-layer.shell .el-label{color:#a78bfa;} .err-layer.shell .el-count{color:#a78bfa;} .err-layer.shell .el-fill{background:linear-gradient(90deg,var(--purple),#8b5cf6);}
+
+.ticker-wrap{background:rgba(8,9,12,1);overflow:hidden;padding:11px 0;border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);}
+.ticker-track{display:flex;gap:0;animation:ticker 32s linear infinite;white-space:nowrap;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;gap:12px;padding:0 28px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);}
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--crimson);}
+
+.arch-section{background:var(--coal);padding:0;}
+.arch-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.arch-inner .section-tag{color:rgba(255,255,255,.3);} .arch-inner .section-title{color:#fff;} .arch-inner .section-lead{color:rgba(255,255,255,.4);}
+.section-tag{display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+.section-tag::before{content:'';display:block;width:24px;height:1px;background:var(--crimson);}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,4.2vw,58px);line-height:1;letter-spacing:-.5px;color:var(--coal);margin-bottom:12px;}
+.section-lead{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--muted);max-width:640px;margin-bottom:56px;}
+.arch-diagram{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:48px;}
+.arch-layer{display:flex;flex-direction:column;align-items:stretch;}
+.arch-layer-header{padding:14px 16px;font-family:'Bebas Neue',sans-serif;font-size:14.5px;letter-spacing:.5px;text-align:center;}
+.arch-layer-body{flex:1;padding:16px;border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px;}
+.arch-comp{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.8px;color:rgba(255,255,255,.5);text-align:center;transition:all .2s;cursor:default;}
+.arch-comp:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);}
+.arch-layer.fs    .arch-layer-header{background:rgba(229,57,53,.15);color:#ef5350;} .arch-layer.fs .arch-comp:hover{border-color:rgba(229,57,53,.4);}
+.arch-layer.perm  .arch-layer-header{background:rgba(245,158,11,.15);color:var(--amber);} .arch-layer.perm .arch-comp:hover{border-color:rgba(245,158,11,.4);}
+.arch-layer.pkg   .arch-layer-header{background:rgba(0,194,212,.15);color:var(--cyan);} .arch-layer.pkg .arch-comp:hover{border-color:rgba(0,194,212,.4);}
+.arch-layer.proc  .arch-layer-header{background:rgba(132,204,22,.15);color:var(--lime);} .arch-layer.proc .arch-comp:hover{border-color:rgba(132,204,22,.4);}
+.arch-layer.shell .arch-layer-header{background:rgba(124,58,237,.15);color:#a78bfa;} .arch-layer.shell .arch-comp:hover{border-color:rgba(124,58,237,.4);}
+
+.content-section{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.level-tabs{display:flex;gap:2px;margin-bottom:2px;overflow-x:auto;}
+.level-tab{flex:1;min-width:140px;padding:16px 20px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s;background:var(--smoke);color:var(--muted);text-align:left;position:relative;overflow:hidden;}
+.level-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:transparent;transition:background .2s;}
+.level-tab:hover{background:var(--coal);color:#fff;}
+.level-tab.active{background:var(--coal);color:#fff;}
+.level-tab.active.fs    ::after,.level-tab.fs:hover::after{background:var(--crimson);}
+.level-tab.active.perm  ::after,.level-tab.perm:hover::after{background:var(--amber);}
+.level-tab.active.pkg   ::after,.level-tab.pkg:hover::after{background:var(--cyan);}
+.level-tab.active.proc  ::after,.level-tab.proc:hover::after{background:var(--lime);}
+.level-tab.active.shell ::after,.level-tab.shell:hover::after{background:var(--purple);}
+.tab-icon{font-size:16px;display:block;margin-bottom:4px;}
+.tab-label{display:block;font-size:10px;}
+.tab-count{display:block;font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;margin-top:2px;}
+
+.level-panel{display:none;}
+.level-panel.active{display:block;}
+.level-banner{padding:28px 40px;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.lb-title{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:.95;letter-spacing:.5px;color:#fff;}
+.lb-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:16px;margin-top:6px;}
+.lb-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:20px;white-space:nowrap;}
+
+.errors-list{display:flex;flex-direction:column;gap:2px;}
+.error-card{background:var(--smoke);overflow:hidden;transition:background .2s;}
+.error-card.open{background:#fff;}
+.ec-header{padding:24px 28px;display:flex;align-items:center;gap:20px;cursor:pointer;user-select:none;}
+.ec-header:hover{background:rgba(0,0,0,.03);}
+.ec-severity{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sev-critical{background:rgba(229,57,53,.15);border:1.5px solid rgba(229,57,53,.4);}
+.sev-high    {background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.4);}
+.sev-medium  {background:rgba(0,194,212,.15);border:1.5px solid rgba(0,194,212,.4);}
+.sev-low     {background:rgba(132,204,22,.15);border:1.5px solid rgba(132,204,22,.4);}
+.ec-main{flex:1;}
+.ec-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;color:var(--coal);line-height:1;}
+.ec-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.5;}
+.ec-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.ec-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+.ec-tag.c{background:rgba(0,194,212,.12);color:var(--cyan);}
+.ec-tag.r{background:rgba(229,57,53,.12);color:var(--crimson);}
+.ec-tag.l{background:rgba(132,204,22,.12);color:var(--lime);}
+.ec-tag.a{background:rgba(245,158,11,.12);color:var(--amber);}
+.ec-tag.p{background:rgba(124,58,237,.12);color:#a78bfa;}
+.ec-right{display:flex;align-items:center;gap:16px;}
+.ec-sev-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:20px;}
+.sev-badge-critical{background:rgba(229,57,53,.15);color:var(--crimson);}
+.sev-badge-high    {background:rgba(245,158,11,.15);color:var(--amber);}
+.sev-badge-medium  {background:rgba(0,194,212,.15);color:var(--cyan);}
+.sev-badge-low     {background:rgba(132,204,22,.15);color:var(--lime);}
+.ec-chevron{color:var(--muted);transition:transform .3s;font-size:18px;}
+.error-card.open .ec-chevron{transform:rotate(180deg);}
+.ec-body{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.25,.46,.45,.94);}
+.error-card.open .ec-body{max-height:1500px;}
+.ec-inner{padding:0 28px 32px;display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+.ec-block{background:var(--paper);border-radius:4px;padding:20px 22px;}
+.ec-block.full{grid-column:1/-1;}
+.ec-block-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ec-block-title.diag  {color:var(--cyan);}
+.ec-block-title.causes{color:var(--amber);}
+.ec-block-title.fix   {color:var(--lime);}
+.ec-block-title.cmd   {color:var(--crimson);}
+.ec-block-title::after{content:'';flex:1;height:1px;background:rgba(0,0,0,.08);}
+.cmd-block{background:var(--coal);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+.cmd-bar{padding:8px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:6px;}
+.cmd-dot{width:8px;height:8px;border-radius:50%;}
+.cmd-dot.r{background:#ff5f57;} .cmd-dot.y{background:#ffbd2e;} .cmd-dot.g{background:#28c840;}
+.cmd-label{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);letter-spacing:1px;margin-left:4px;}
+.cmd-lines{padding:12px 16px;display:flex;flex-direction:column;gap:4px;}
+.cmd-line{font-family:'DM Mono',monospace;font-size:12px;line-height:1.6;display:flex;gap:8px;white-space:pre-wrap;}
+.cmd-prompt{color:var(--cyan);} .cmd-text{color:#e2e8f0;} .cmd-comment{color:rgba(255,255,255,.25);}
+.causes-list{display:flex;flex-direction:column;gap:8px;}
+.cause-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(0,0,0,.03);border-radius:4px;border-left:3px solid transparent;font-size:13px;line-height:1.5;}
+.cause-item.c-critical{border-color:var(--crimson);} .cause-item.c-high{border-color:var(--amber);} .cause-item.c-medium{border-color:var(--cyan);} .cause-item.c-low{border-color:var(--lime);}
+.cause-icon{flex-shrink:0;font-size:14px;}
+.cause-text{color:var(--text);}
+.cause-text strong{color:var(--coal);font-weight:700;}
+.fix-steps{display:flex;flex-direction:column;gap:6px;}
+.fix-step{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:4px;transition:background .2s;}
+.fix-step:hover{background:rgba(0,0,0,.03);}
+.fix-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;flex-shrink:0;margin-top:1px;}
+.fix-num.fs{background:rgba(229,57,53,.15);color:var(--crimson);}
+.fix-num.perm{background:rgba(245,158,11,.15);color:var(--amber);}
+.fix-num.pkg{background:rgba(0,194,212,.15);color:var(--cyan);}
+.fix-num.proc{background:rgba(132,204,22,.15);color:var(--lime);}
+.fix-num.shell{background:rgba(124,58,237,.15);color:#a78bfa;}
+.fix-text{font-size:13px;color:var(--text);line-height:1.55;}
+.fix-text strong{color:var(--coal);}
+.fix-text code{background:rgba(0,0,0,.07);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;}
+.exit-table{width:100%;border-collapse:collapse;}
+.exit-table th{background:var(--coal);color:#fff;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 14px;text-align:left;}
+.exit-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.06);}
+.exit-table tr:last-child td{border-bottom:none;}
+.exit-table tr:hover td{background:rgba(0,0,0,.03);}
+
+.cheat-section{background:var(--coal);padding:0;}
+.cheat-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.cheat-inner .section-title{color:#fff;} .cheat-inner .section-tag{color:rgba(255,255,255,.3);} .cheat-inner .section-lead{color:rgba(255,255,255,.4);}
+.cheat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.cheat-block{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);padding:28px 24px;transition:background .2s,border-color .2s;}
+.cheat-block:hover{background:rgba(255,255,255,.06);border-color:rgba(0,194,212,.2);}
+.cheat-block-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.cheat-block-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+.cheat-cmd{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.5;display:flex;align-items:flex-start;gap:6px;}
+.cheat-cmd:last-child{border-bottom:none;}
+.cheat-cmd .prompt{color:var(--cyan);flex-shrink:0;}
+
+.decision-wrap{margin-bottom:56px;overflow-x:auto;}
+.decision-table{width:100%;border-collapse:collapse;background:var(--smoke);min-width:760px;}
+.decision-table th{background:var(--coal);color:#fff;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 16px;text-align:left;}
+.decision-table td{padding:14px 16px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.08);vertical-align:top;}
+.decision-table tr:last-child td{border-bottom:none;}
+.decision-table tr:hover td{background:rgba(0,0,0,.03);}
+.decision-table td strong{color:var(--coal);}
+.pill-mini{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 9px;border-radius:12px;background:rgba(0,194,212,.12);color:var(--cyan);margin:2px 4px 2px 0;}
+
+.author-strip{background:var(--smoke);padding:60px 64px;}
+.author-strip-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.author-info{display:flex;align-items:center;gap:24px;}
+.author-avatar{width:64px;height:64px;background:linear-gradient(135deg,var(--crimson),#ff6b35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;color:#fff;flex-shrink:0;}
+.author-name{font-weight:700;font-size:17px;color:var(--coal);margin-bottom:4px;}
+.author-role{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.author-actions{display:flex;gap:12px;}
+.btn-sm{padding:10px 24px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;text-decoration:none;transition:background .2s,color .2s,border-color .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-sm.primary{background:var(--coal);color:var(--paper);}
+.btn-sm.primary:hover{background:var(--crimson);}
+.btn-sm.ghost{background:transparent;color:var(--coal);border:1.5px solid var(--coal);}
+.btn-sm.ghost:hover{border-color:var(--crimson);color:var(--crimson);}
+
+footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:rgba(255,255,255,.6);}
+.footer-links{display:flex;gap:24px;flex-wrap:wrap;}
+.footer-links a{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--cyan);}
+.footer-note{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:900px){
+  nav{padding:14px 20px;} .nav-breadcrumb{display:none;}
+  .hero{grid-template-columns:1fr;} .hero-right{min-height:280px;padding:32px 24px;} .hero-left{padding:60px 28px;}
+  .arch-inner{padding:64px 28px;} .arch-diagram{grid-template-columns:1fr;gap:8px;}
+  .content-section{padding:64px 28px;} .level-tabs{flex-wrap:wrap;} .ec-inner{grid-template-columns:1fr;}
+  .cheat-inner{padding:64px 28px;} .cheat-grid{grid-template-columns:1fr;}
+  .author-strip{padding:48px 28px;} .author-strip-inner{flex-direction:column;align-items:flex-start;}
+  footer{padding:36px 28px;} .footer-inner{flex-direction:column;align-items:flex-start;}
+  .decision-table{min-width:640px;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="../../../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="nav-breadcrumb">
+    <a href="../../../../index.html">Home</a><span class="sep">/</span>
+    <a href="../../index.html">OS</a><span class="sep">/</span>
+    <a href="../../index.html#linux">Linux</a><span class="sep">/</span>
+    <span class="current">Fundamentals</span>
+  </div>
+  <a href="../../index.html" class="nav-back">← OS Series</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-ghost">BASH</div>
+  <div class="hero-left">
+    <div class="bc">
+      <a href="../../../../index.html">Platform Ops</a><span class="sep">›</span>
+      <a href="../../index.html">OS</a><span class="sep">›</span>
+      <span class="here">Linux Fundamentals</span>
+    </div>
+    <div class="eyebrow"><span class="eyebrow-line"></span>Issue #054 · September 2026</div>
+    <h1 class="hero-title">LINUX <span class="hl-red">FUNDAMENTALS</span></h1>
+    <p class="hero-sub">Filesystem · Permissions · Packages · Processes · Shell</p>
+    <p class="hero-desc">The ground floor every other Linux topic stands on. If you've been copy-pasting <code>chmod 777</code> for years without knowing why it works, start here.</p>
+    <div class="level-pills">
+      <button class="lp fs"    onclick="switchLevel('fs')">🔴 Filesystem</button>
+      <button class="lp perm"  onclick="switchLevel('perm')">🟠 Permissions</button>
+      <button class="lp pkg"   onclick="switchLevel('pkg')">🔵 Packages</button>
+      <button class="lp proc"  onclick="switchLevel('proc')">🟢 Processes</button>
+      <button class="lp shell" onclick="switchLevel('shell')">🟣 Shell</button>
+    </div>
+    <div class="hero-meta-row">
+      <div><div class="hm-num">15</div><div class="hm-label">Concepts Covered</div></div>
+      <div><div class="hm-num">1</div><div class="hm-label">of 4 Linux Resources</div></div>
+      <div><div class="hm-num">RHEL</div><div class="hm-label">/ Debian Family</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="err-matrix">
+      <div class="err-layer fs"><div class="el-header"><span class="el-label">Filesystem</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="80%"></div></div><div class="el-errors"><span class="ee">FHS</span><span class="ee">fstab</span><span class="ee">Symlinks</span></div></div>
+      <div class="err-layer perm"><div class="el-header"><span class="el-label">Permissions</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="75%"></div></div><div class="el-errors"><span class="ee">chmod/chown</span><span class="ee">sudo</span><span class="ee">SetUID</span></div></div>
+      <div class="err-layer pkg"><div class="el-header"><span class="el-label">Packages</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="70%"></div></div><div class="el-errors"><span class="ee">apt/dnf</span><span class="ee">Repos</span><span class="ee">Source Builds</span></div></div>
+      <div class="err-layer proc"><div class="el-header"><span class="el-label">Processes</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="65%"></div></div><div class="el-errors"><span class="ee">ps/top</span><span class="ee">Signals</span><span class="ee">systemctl</span></div></div>
+      <div class="err-layer shell"><div class="el-header"><span class="el-label">Shell</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="60%"></div></div><div class="el-errors"><span class="ee">Bash Scripts</span><span class="ee">grep/sed/awk</span><span class="ee">Pipes</span></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker-wrap"><div class="ticker-track">
+<span class="ticker-item"><span class="ticker-dot"></span>/etc /var /usr /opt</span><span class="ticker-item"><span class="ticker-dot"></span>chmod / chown</span><span class="ticker-item"><span class="ticker-dot"></span>sudoers</span><span class="ticker-item"><span class="ticker-dot"></span>apt / dnf / yum</span><span class="ticker-item"><span class="ticker-dot"></span>ps aux</span><span class="ticker-item"><span class="ticker-dot"></span>SIGTERM / SIGKILL</span><span class="ticker-item"><span class="ticker-dot"></span>systemctl</span><span class="ticker-item"><span class="ticker-dot"></span>grep / sed / awk</span><span class="ticker-item"><span class="ticker-dot"></span>Bash Scripting</span><span class="ticker-item"><span class="ticker-dot"></span>Symbolic Links</span>
+<span class="ticker-item"><span class="ticker-dot"></span>/etc /var /usr /opt</span><span class="ticker-item"><span class="ticker-dot"></span>chmod / chown</span><span class="ticker-item"><span class="ticker-dot"></span>sudoers</span><span class="ticker-item"><span class="ticker-dot"></span>apt / dnf / yum</span><span class="ticker-item"><span class="ticker-dot"></span>ps aux</span><span class="ticker-item"><span class="ticker-dot"></span>SIGTERM / SIGKILL</span><span class="ticker-item"><span class="ticker-dot"></span>systemctl</span><span class="ticker-item"><span class="ticker-dot"></span>grep / sed / awk</span><span class="ticker-item"><span class="ticker-dot"></span>Bash Scripting</span><span class="ticker-item"><span class="ticker-dot"></span>Symbolic Links</span>
+</div></div>
+
+<div class="arch-section"><div class="arch-inner reveal">
+  <div class="section-tag" style="color:rgba(255,255,255,.3)">Architecture Map</div>
+  <h2 class="section-title" style="color:#fff">FIVE LAYERS OF A LINUX BOX</h2>
+  <p class="section-lead">From the directory tree to the shell you type into — the five layers that make up everything else in this series.</p>
+  <div class="arch-diagram">
+    <div class="arch-layer fs"><div class="arch-layer-header">🔴 Filesystem</div><div class="arch-layer-body"><div class="arch-comp">FHS Layout</div><div class="arch-comp">Mount Points</div><div class="arch-comp">/etc/fstab</div><div class="arch-comp">Hard/Symlinks</div><div class="arch-comp">/proc /sys</div></div></div>
+    <div class="arch-layer perm"><div class="arch-layer-header">🟠 Permissions</div><div class="arch-layer-body"><div class="arch-comp">rwx Bits</div><div class="arch-comp">Users & Groups</div><div class="arch-comp">sudo / sudoers</div><div class="arch-comp">SetUID/GID</div><div class="arch-comp">Sticky Bit</div></div></div>
+    <div class="arch-layer pkg"><div class="arch-layer-header">🔵 Packages</div><div class="arch-layer-body"><div class="arch-comp">apt (Debian)</div><div class="arch-comp">dnf/yum (RHEL)</div><div class="arch-comp">Repositories</div><div class="arch-comp">GPG Signing</div><div class="arch-comp">Source Builds</div></div></div>
+    <div class="arch-layer proc"><div class="arch-layer-header">🟢 Processes</div><div class="arch-layer-body"><div class="arch-comp">ps / top / htop</div><div class="arch-comp">Process Tree</div><div class="arch-comp">Signals</div><div class="arch-comp">Job Control</div><div class="arch-comp">systemctl Basics</div></div></div>
+    <div class="arch-layer shell"><div class="arch-layer-header">🟣 Shell</div><div class="arch-layer-body"><div class="arch-comp">Bash Scripting</div><div class="arch-comp">grep/sed/awk</div><div class="arch-comp">Pipes & Redirects</div><div class="arch-comp">Env Variables</div><div class="arch-comp">Cron Basics</div></div></div>
+  </div>
+</div></div>
+
+<section class="content-section reveal" id="topics">
+  <div class="section-tag">Deep-Dive</div>
+  <h2 class="section-title">FUNDAMENTALS REFERENCE</h2>
+  <p class="section-lead">Click any layer to explore concepts, commands, and production-tested guidance.</p>
+
+  <div class="level-tabs">
+    <button class="level-tab fs active" onclick="switchLevel('fs')"><span class="tab-icon">🔴</span><span class="tab-label">Filesystem</span><span class="tab-count">3</span></button>
+    <button class="level-tab perm" onclick="switchLevel('perm')"><span class="tab-icon">🟠</span><span class="tab-label">Permissions</span><span class="tab-count">3</span></button>
+    <button class="level-tab pkg" onclick="switchLevel('pkg')"><span class="tab-icon">🔵</span><span class="tab-label">Packages</span><span class="tab-count">3</span></button>
+    <button class="level-tab proc" onclick="switchLevel('proc')"><span class="tab-icon">🟢</span><span class="tab-label">Processes</span><span class="tab-count">3</span></button>
+    <button class="level-tab shell" onclick="switchLevel('shell')"><span class="tab-icon">🟣</span><span class="tab-label">Shell</span><span class="tab-count">3</span></button>
+  </div>
+
+  <!-- FILESYSTEM -->
+  <div class="level-panel active" id="panel-fs">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(229,57,53,.2),rgba(229,57,53,.05));border:1px solid rgba(229,57,53,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:#ef5350;">FILESYSTEM HIERARCHY</div><div class="lb-sub" style="color:rgba(229,57,53,.6);">Where everything lives, and why it's not arbitrary</div></div>
+      <span class="lb-badge" style="background:rgba(229,57,53,.15);color:var(--crimson);border:1px solid rgba(229,57,53,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">📁</div><div class="ec-main"><div class="ec-name">The FHS Standard</div><div class="ec-desc">The Filesystem Hierarchy Standard defines what belongs where — so any two Linux distros are navigable the same way.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><table class="exit-table"><tr><th>Path</th><th>Contains</th></tr>
+            <tr><td><code>/etc</code></td><td>System-wide configuration files</td></tr>
+            <tr><td><code>/var</code></td><td>Variable data — logs, spool files, caches</td></tr>
+            <tr><td><code>/usr</code></td><td>User-installed software & libraries (most of the OS actually lives here)</td></tr>
+            <tr><td><code>/opt</code></td><td>Third-party/manually installed applications</td></tr>
+            <tr><td><code>/proc, /sys</code></td><td>Virtual filesystems — kernel & process state, not real files on disk</td></tr>
+          </table></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">🔗</div><div class="ec-main"><div class="ec-name">Mounting & /etc/fstab</div><div class="ec-desc">A filesystem isn't accessible until it's mounted somewhere in the tree — fstab is what makes that happen automatically at boot.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="ec-block-title cmd">/etc/fstab entry</div><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">fstab</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-comment"># device        mountpoint  fstype  options       dump pass</span></div>
+            <div class="cmd-line"><span class="cmd-text">UUID=a1b2c3   /data       ext4    defaults      0    2</span></div>
+          </div></div></div>
+          <div class="ec-block full"><div class="ec-block-title diag">Commands</div><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">mount</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">mount -a</span><span class="cmd-comment"> # mount everything in fstab</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">df -hT</span><span class="cmd-comment"> # what's mounted where, with type</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">findmnt /data</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">🔀</div><div class="ec-main"><div class="ec-name">Symbolic vs Hard Links</div><div class="ec-desc">Two ways to make one file answer to two names — with very different behavior when the original is deleted.</div><div class="ec-tags"><span class="ec-tag c">Concept</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block"><div class="ec-block-title causes">Symbolic (soft) link</div><div class="causes-list"><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">A pointer to a path — <code>ln -s target link</code></span></div><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">Breaks ("dangling") if the target is deleted or moved</span></div><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">Can cross filesystems, can link to directories</span></div></div></div>
+          <div class="ec-block"><div class="ec-block-title fix">Hard link</div><div class="fix-steps"><div class="fix-step"><div class="fix-num fs">1</div><div class="fix-text"><code>ln target link</code> — both names point to the same inode</div></div><div class="fix-step"><div class="fix-num fs">2</div><div class="fix-text">File data isn't freed until <strong>every</strong> hard link is removed</div></div><div class="fix-step"><div class="fix-num fs">3</div><div class="fix-text">Cannot cross filesystems, cannot link to directories</div></div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERMISSIONS -->
+  <div class="level-panel" id="panel-perm">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.05));border:1px solid rgba(245,158,11,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:var(--amber);">USERS, GROUPS & PERMISSIONS</div><div class="lb-sub" style="color:rgba(245,158,11,.7);">rwx isn't complicated — it's just rarely explained properly</div></div>
+      <span class="lb-badge" style="background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">🔐</div><div class="ec-main"><div class="ec-name">rwx Permission Bits & chmod/chown</div><div class="ec-desc">Three permission triplets — owner, group, other — each with read/write/execute. Everything else is built on this.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">permissions</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">ls -l app.sh</span></div>
+            <div class="cmd-line"><span class="cmd-text">-rwxr-xr--  1 vishal devs  842  app.sh</span></div>
+            <div class="cmd-line"><span class="cmd-comment"># owner: rwx  group: r-x  other: r--</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">chmod 750 app.sh</span><span class="cmd-comment"> # same thing, numeric form</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">chown vishal:devs app.sh</span></div>
+          </div></div></div>
+          <div class="ec-block full"><div class="ec-block-title causes">Never chmod 777</div><div class="causes-list"><div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><code>777</code> means anyone, anywhere, can read/write/execute — it "fixes" a permission error by removing the security model entirely</span></div><div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">The real fix is almost always the correct <strong>owner</strong> or <strong>group</strong>, not wider permissions</span></div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">🛡️</div><div class="ec-main"><div class="ec-name">sudo & the sudoers File</div><div class="ec-desc">Controlled privilege escalation — who can run what as root, logged and auditable.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="ec-block-title cmd">/etc/sudoers (edit via visudo only)</div><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">sudoers</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-text">%devs ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart billing-api</span></div>
+            <div class="cmd-line"><span class="cmd-comment"># group "devs" can restart exactly this service, no password</span></div>
+          </div></div></div>
+          <div class="ec-block full"><div class="fix-steps"><div class="fix-step"><div class="fix-num perm">1</div><div class="fix-text">Always edit with <code>visudo</code> — it syntax-checks before saving, a broken sudoers file can lock everyone out</div></div><div class="fix-step"><div class="fix-num perm">2</div><div class="fix-text">Scope rules to specific commands, not blanket <code>ALL=(ALL) ALL</code>, wherever possible</div></div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">⚡</div><div class="ec-main"><div class="ec-name">SetUID, SetGID & Sticky Bit</div><div class="ec-desc">The three special permission bits that change how a file or directory behaves beyond plain rwx.</div><div class="ec-tags"><span class="ec-tag c">Advanced</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block"><div class="ec-block-title causes">The Three Bits</div><div class="causes-list"><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>SetUID</strong> — executable runs as the file's owner, not the caller (e.g. <code>passwd</code>)</span></div><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>SetGID</strong> — new files in a directory inherit the directory's group</span></div><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Sticky bit</strong> — only the file owner can delete, even with group write (e.g. <code>/tmp</code>)</span></div></div></div>
+          <div class="ec-block"><div class="ec-block-title fix">Audit Command</div><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">find</span></div><div class="cmd-lines"><div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">find / -perm -4000 -type f 2>/dev/null</span></div><div class="cmd-line"><span class="cmd-comment"># list every SetUID binary — audit regularly</span></div></div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PACKAGES -->
+  <div class="level-panel" id="panel-pkg">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(0,194,212,.2),rgba(0,194,212,.05));border:1px solid rgba(0,194,212,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:var(--cyan);">PACKAGE MANAGEMENT</div><div class="lb-sub" style="color:rgba(0,194,212,.7);">How software actually gets onto a Linux box, and stays trustworthy</div></div>
+      <span class="lb-badge" style="background:rgba(0,194,212,.15);color:var(--cyan);border:1px solid rgba(0,194,212,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">📦</div><div class="ec-main"><div class="ec-name">apt vs yum/dnf</div><div class="ec-desc">The two package-manager families — Debian/Ubuntu vs RHEL/CentOS/Fedora — same job, different commands and package formats.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><table class="exit-table"><tr><th>Task</th><th>Debian / Ubuntu (apt, .deb)</th><th>RHEL / Fedora (dnf, .rpm)</th></tr>
+            <tr><td>Install</td><td><code>apt install nginx</code></td><td><code>dnf install nginx</code></td></tr>
+            <tr><td>Update index</td><td><code>apt update</code></td><td><code>dnf check-update</code></td></tr>
+            <tr><td>Upgrade all</td><td><code>apt upgrade</code></td><td><code>dnf upgrade</code></td></tr>
+            <tr><td>Search</td><td><code>apt search nginx</code></td><td><code>dnf search nginx</code></td></tr>
+            <tr><td>Remove</td><td><code>apt remove nginx</code></td><td><code>dnf remove nginx</code></td></tr>
+          </table></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">🔑</div><div class="ec-main"><div class="ec-name">Repository Management & GPG Keys</div><div class="ec-desc">A repo tells the package manager where to look; a GPG key proves what it finds there hasn't been tampered with.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="ec-block-title cmd">Adding a third-party repo safely</div><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">apt</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">curl -fsSL https://repo.example.com/key.gpg | gpg --dearmor -o /etc/apt/keyrings/example.gpg</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">echo "deb [signed-by=/etc/apt/keyrings/example.gpg] https://repo.example.com stable main" | tee /etc/apt/sources.list.d/example.list</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">apt update</span></div>
+          </div></div></div>
+          <div class="ec-block full"><div class="causes-list"><div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">Never <code>apt-get install --allow-unauthenticated</code> in production — that's disabling the exact check that stops supply-chain attacks</span></div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">🔨</div><div class="ec-main"><div class="ec-name">Building from Source vs Packages</div><div class="ec-desc">Sometimes the package repo doesn't have the version you need — knowing when compiling from source is actually the right call.</div><div class="ec-tags"><span class="ec-tag c">Decision</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block"><div class="ec-block-title causes">Use Packages When</div><div class="causes-list"><div class="cause-item c-low"><span class="cause-icon">🟢</span><span class="cause-text">A stable version exists in the repo — packages get security patches automatically</span></div></div></div>
+          <div class="ec-block"><div class="ec-block-title fix">Build From Source When</div><div class="fix-steps"><div class="fix-step"><div class="fix-num pkg">1</div><div class="fix-text">You need a specific patch/version not yet packaged</div></div><div class="fix-step"><div class="fix-num pkg">2</div><div class="fix-text">Custom compile flags are required (e.g. hardware-specific optimizations)</div></div><div class="fix-step"><div class="fix-num pkg">3</div><div class="fix-text">Track it in config management — a hand-built binary nobody remembers building is a liability</div></div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROCESSES -->
+  <div class="level-panel" id="panel-proc">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(132,204,22,.2),rgba(132,204,22,.05));border:1px solid rgba(132,204,22,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:var(--lime);">PROCESS & SERVICE BASICS</div><div class="lb-sub" style="color:rgba(132,204,22,.7);">Every running program is a process — here's how to see and control them</div></div>
+      <span class="lb-badge" style="background:rgba(132,204,22,.15);color:var(--lime);border:1px solid rgba(132,204,22,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">📋</div><div class="ec-main"><div class="ec-name">ps, top, and the Process Tree</div><div class="ec-desc">Every process has a parent — understanding the tree is how you find what actually spawned that runaway job.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">process inspection</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">ps aux --sort=-%cpu | head</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">ps -ef --forest</span><span class="cmd-comment"> # process tree view</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">pstree -p 1</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">top</span><span class="cmd-comment"> # or htop for the friendlier version</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">📡</div><div class="ec-main"><div class="ec-name">Foreground/Background Jobs & Signals</div><div class="ec-desc">Ctrl+C sends SIGINT. kill -9 sends SIGKILL. They are not the same thing, and using the wrong one has consequences.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block"><div class="ec-block-title causes">Common Signals</div><div class="causes-list"><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>SIGTERM (15)</strong> — polite "please shut down," process can clean up</span></div><div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text"><strong>SIGKILL (9)</strong> — immediate termination, no cleanup, last resort</span></div><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>SIGHUP (1)</strong> — often used to tell a daemon "reload your config"</span></div></div></div>
+          <div class="ec-block"><div class="ec-block-title fix">Job Control</div><div class="fix-steps"><div class="fix-step"><div class="fix-num proc">1</div><div class="fix-text"><code>ctrl+z</code> suspends, <code>bg</code> resumes in background, <code>fg</code> brings back to foreground</div></div><div class="fix-step"><div class="fix-num proc">2</div><div class="fix-text"><code>nohup cmd &</code> keeps a job alive after you log out</div></div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">🔧</div><div class="ec-main"><div class="ec-name">Starting Services (Intro to systemctl)</div><div class="ec-desc">A first taste of systemd service control — the full deep-dive is in the Advanced issue, but you need this much on day one.</div><div class="ec-tags"><span class="ec-tag c">Basics</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">systemctl</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemctl status nginx</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemctl restart nginx</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemctl enable nginx</span><span class="cmd-comment"> # start on boot</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHELL -->
+  <div class="level-panel" id="panel-shell">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:#a78bfa;">SHELL, SCRIPTING & TEXT PROCESSING</div><div class="lb-sub" style="color:rgba(124,58,237,.7);">The tools that turn one-off commands into repeatable automation</div></div>
+      <span class="lb-badge" style="background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">📜</div><div class="ec-main"><div class="ec-name">Bash Scripting Basics</div><div class="ec-desc">Variables, loops, and conditionals — the four constructs that turn a list of commands into an actual script.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="ec-block-title cmd">backup.sh</div><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">bash</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-text">#!/usr/bin/env bash</span></div>
+            <div class="cmd-line"><span class="cmd-text">set -euo pipefail</span></div>
+            <div class="cmd-line"><span class="cmd-text">for f in /data/*.log; do</span></div>
+            <div class="cmd-line"><span class="cmd-text">&#160;&#160;if [[ -s "$f" ]]; then</span></div>
+            <div class="cmd-line"><span class="cmd-text">&#160;&#160;&#160;&#160;gzip "$f"</span></div>
+            <div class="cmd-line"><span class="cmd-text">&#160;&#160;fi</span></div>
+            <div class="cmd-line"><span class="cmd-text">done</span></div>
+          </div></div></div>
+          <div class="ec-block full"><div class="causes-list"><div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><code>set -euo pipefail</code> at the top of every script — exit on error, undefined variable, or failed pipe. This alone prevents most silent script failures.</span></div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">🔍</div><div class="ec-main"><div class="ec-name">grep/sed/awk Essentials</div><div class="ec-desc">The classic Unix text-processing trio — find it, transform it, extract it. Still the fastest way to slice a log file.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">text processing</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-comment"># grep — find lines matching a pattern</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">grep -i "error" /var/log/app.log</span></div>
+            <div class="cmd-line"><span class="cmd-comment"># sed — find & replace in place</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">sed -i 's/staging/production/g' config.yaml</span></div>
+            <div class="cmd-line"><span class="cmd-comment"># awk — extract & compute on columns</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">awk '{sum+=$5} END {print sum}' access.log</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">🔗</div><div class="ec-main"><div class="ec-name">Pipes, Redirection & Environment Variables</div><div class="ec-desc">How to chain commands together and control where their output goes — the connective tissue of everything above.</div><div class="ec-tags"><span class="ec-tag c">Fundamentals</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block"><div class="ec-block-title causes">Redirection</div><div class="causes-list"><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><code>&gt;</code> overwrites, <code>&gt;&gt;</code> appends, <code>2&gt;&amp;1</code> merges stderr into stdout</span></div><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><code>cmd1 | cmd2</code> — stdout of cmd1 becomes stdin of cmd2</span></div></div></div>
+          <div class="ec-block"><div class="ec-block-title fix">Environment Variables</div><div class="fix-steps"><div class="fix-step"><div class="fix-num shell">1</div><div class="fix-text"><code>export VAR=value</code> — makes it visible to child processes</div></div><div class="fix-step"><div class="fix-num shell">2</div><div class="fix-text"><code>.bashrc</code> / <code>.bash_profile</code> — where persistent exports belong</div></div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<section class="content-section reveal">
+  <div class="section-tag">Decision Guide</div>
+  <h2 class="section-title">WHICH PACKAGE MANAGER AM I ON?</h2>
+  <p class="section-lead">A quick lookup for jumping between distro families.</p>
+  <div class="decision-wrap"><table class="decision-table">
+    <tr><th>Distro</th><th>Family</th><th>Package Manager</th></tr>
+    <tr><td><strong>Ubuntu / Debian</strong></td><td>Debian</td><td><span class="pill-mini">apt</span> (.deb packages)</td></tr>
+    <tr><td><strong>RHEL / CentOS / Rocky / Alma</strong></td><td>Red Hat</td><td><span class="pill-mini">dnf</span> / yum (.rpm packages)</td></tr>
+    <tr><td><strong>Fedora</strong></td><td>Red Hat</td><td><span class="pill-mini">dnf</span> (.rpm packages)</td></tr>
+    <tr><td><strong>Amazon Linux 2023</strong></td><td>Red Hat-based</td><td><span class="pill-mini">dnf</span></td></tr>
+    <tr><td><strong>Alpine</strong></td><td>Independent</td><td><span class="pill-mini">apk</span></td></tr>
+  </table></div>
+</section>
+
+<div class="cheat-section"><div class="cheat-inner reveal">
+  <div class="section-tag" style="color:rgba(255,255,255,.3)">Quick Reference</div>
+  <h2 class="section-title" style="color:#fff;margin-bottom:40px">COMMAND CHEATSHEET</h2>
+  <div class="cheat-grid">
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--crimson)">Filesystem</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>df -hT</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>du -sh * | sort -rh | head</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>findmnt</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>ln -s target link</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--amber)">Permissions</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>chmod 750 file</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>chown user:group file</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>visudo</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>id vishal</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--cyan)">Packages</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>apt list --installed | grep nginx</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>dnf history</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>apt-cache policy nginx</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--lime)">Processes</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>ps aux --sort=-%mem | head</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>kill -15 PID</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>systemctl list-units --failed</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:#a78bfa">Shell</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>grep -rn "TODO" .</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>history | grep ssh</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>chmod +x script.sh</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--amber)">General</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>man command</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>uname -a</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>uptime</span></div>
+    </div>
+  </div>
+</div></div>
+
+<div class="author-strip">
+  <div class="author-strip-inner">
+    <div class="author-info"><div class="author-avatar">VA</div><div><div class="author-name">Vishal Abhinav</div><div class="author-role">Platform Ops Engineer · Ops Newsletter — Issue #054</div></div></div>
+    <div class="author-actions">
+      <a href="../../../../index.html#subscribe" class="btn-sm primary">Subscribe Free <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank" class="btn-sm ghost">GitHub ↗</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PLATFORM OPS</div>
+    <div class="footer-links">
+      <a href="../../index.html">← OS Series</a>
+      <a href="../ADVANCED/linux-advanced.html">Advanced</a>
+      <a href="../TROUBLESHOOTING/linux-troubleshooting.html">Troubleshooting</a>
+      <a href="../GLOSSARY/linux-unix-glossary.html">Glossary</a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
+      <a href="../../../../index.html#subscribe">Subscribe</a>
+    </div>
+    <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
+  </div>
+</footer>
+
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+document.querySelectorAll('a,button,.error-card,.arch-comp,.cheat-block').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='56px';ring.style.height='56px';ring.style.borderColor='var(--crimson)';cursor.style.transform='translate(-50%,-50%) scale(1.5)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='';cursor.style.transform='translate(-50%,-50%) scale(1)';});
+});
+function switchLevel(level){
+  document.querySelectorAll('.level-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.level-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.level-tab.'+level).forEach(t=>t.classList.add('active'));
+  const panel=document.getElementById('panel-'+level);
+  if(panel){panel.classList.add('active');}
+  document.getElementById('topics').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function toggleCard(card){
+  const isOpen=card.classList.contains('open');
+  card.parentElement.querySelectorAll('.error-card').forEach(c=>c.classList.remove('open'));
+  if(!isOpen) card.classList.add('open');
+}
+document.querySelectorAll('.lp').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const level=Array.from(btn.classList).find(c=>['fs','perm','pkg','proc','shell'].includes(c));
+    if(level) switchLevel(level);
+  });
+});
+window.addEventListener('load',()=>{
+  setTimeout(()=>{document.querySelectorAll('.el-fill').forEach(el=>{el.style.width=el.dataset.width;});},600);
+});
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux Troubleshooting · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="Linux Troubleshooting runbook — high load & CPU, memory & OOM, disk & I/O, network issues, and boot/service failures, with diagnostic commands and root causes.">
+<meta name="author" content="Vishal Abhinav">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Linux Troubleshooting — High Load, OOM, Disk, Network, Boot Failures">
+<meta property="og:description" content="A runbook, not a tutorial — diagnostic commands and root causes for the 3am pages.">
+<meta property="article:author" content="Vishal Abhinav">
+<meta property="article:published_time" content="2026-09-21">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:     #08090c; --paper:   #f2f0eb; --smoke:   #e4e0d8; --ash:     #b8b2a7;
+  --coal:    #1c1f26; --cyan:    #00c2d4; --amber:   #f59e0b; --crimson: #e53935;
+  --lime:    #84cc16; --text:    #1c1f26; --muted:   #6b6860; --purple:  #7c3aed;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--text);font-family:'Manrope',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden;cursor:none;}
+.cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--crimson);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .15s ease,background .2s;transform:translate(-50%,-50%);}
+.cursor-ring{position:fixed;top:0;left:0;width:36px;height:36px;border:1.5px solid var(--coal);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .35s cubic-bezier(.25,.46,.45,.94),width .3s,height .3s,border-color .2s;transform:translate(-50%,-50%);}
+body:hover .cursor-ring{border-color:var(--crimson);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.6;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(8,9,12,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.06);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;color:#fff;display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo span{display:inline-block;width:8px;height:8px;background:var(--crimson);border-radius:50%;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:.6;}}
+.nav-breadcrumb{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+.nav-breadcrumb a{color:rgba(255,255,255,0.3);text-decoration:none;transition:color .2s;}
+.nav-breadcrumb a:hover{color:var(--cyan);}
+.nav-breadcrumb .sep{color:rgba(255,255,255,0.12);}
+.nav-breadcrumb .current{color:var(--cyan);}
+.nav-back{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);padding:8px 20px;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s,color .2s;border:1px solid rgba(255,255,255,0.1);}
+.nav-back:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);}
+
+.hero{min-height:72vh;background:var(--ink);display:grid;grid-template-columns:1fr 1fr;padding-top:72px;overflow:hidden;position:relative;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 10% 40%,rgba(0,194,212,.1) 0%,transparent 55%),radial-gradient(circle at 90% 60%,rgba(229,57,53,.1) 0%,transparent 50%),radial-gradient(circle at 50% 100%,rgba(124,58,237,.08) 0%,transparent 50%);pointer-events:none;}
+.hero-ghost{position:absolute;bottom:-20px;left:-10px;font-family:'Bebas Neue',sans-serif;font-size:clamp(120px,18vw,240px);color:rgba(255,255,255,.022);letter-spacing:-4px;line-height:1;pointer-events:none;white-space:nowrap;}
+.hero-left{padding:80px 48px 80px 64px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;}
+.bc{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:28px;}
+.bc a{color:rgba(255,255,255,.28);text-decoration:none;transition:color .2s;}
+.bc a:hover{color:var(--cyan);}
+.bc .sep{color:rgba(255,255,255,.12);}
+.bc .here{color:var(--crimson);}
+.eyebrow{display:flex;align-items:center;gap:12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:20px;}
+.eyebrow-line{display:block;width:40px;height:1px;background:var(--crimson);}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,5.6vw,82px);line-height:.94;letter-spacing:-.5px;color:#fff;margin-bottom:12px;}
+.hero-title .hl-red{color:var(--crimson);}
+.hero-title .hl-cyan{color:var(--cyan);}
+.hero-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:rgba(255,255,255,.38);margin-bottom:28px;line-height:1.4;}
+.hero-desc{font-size:14px;color:rgba(255,255,255,.32);max-width:440px;margin-bottom:36px;line-height:1.85;}
+.level-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px;}
+.lp{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;border-radius:20px;cursor:pointer;transition:all .2s;border:none;}
+.lp.cpu {background:rgba(229,57,53,.15);color:#ef5350;border:1px solid rgba(229,57,53,.3);}
+.lp.mem {background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);}
+.lp.disk{background:rgba(0,194,212,.15);color:var(--cyan);border:1px solid rgba(0,194,212,.3);}
+.lp.net {background:rgba(132,204,22,.15);color:var(--lime);border:1px solid rgba(132,204,22,.3);}
+.lp.boot{background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);}
+.lp:hover{transform:translateY(-2px);filter:brightness(1.3);}
+.hero-meta-row{display:flex;gap:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.07);}
+.hm-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;color:#fff;}
+.hm-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:3px;}
+
+.hero-right{display:flex;align-items:center;justify-content:center;padding:60px 48px;position:relative;z-index:2;}
+.err-matrix{display:flex;flex-direction:column;gap:10px;width:100%;max-width:400px;}
+.err-layer{border:1px solid rgba(255,255,255,.07);border-radius:8px;overflow:hidden;transition:border-color .3s;}
+.err-layer:hover{border-color:rgba(255,255,255,.2);}
+.el-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.el-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;}
+.el-count{font-family:'Bebas Neue',sans-serif;font-size:20px;}
+.el-bar{height:3px;background:rgba(255,255,255,.06);}
+.el-fill{height:100%;border-radius:1px;transition:width 1.4s cubic-bezier(.25,.46,.45,.94);width:0;}
+.el-errors{padding:10px 20px 14px;display:flex;flex-wrap:wrap;gap:5px;}
+.ee{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.5px;padding:3px 9px;border-radius:12px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.35);}
+.err-layer.cpu  .el-header{background:rgba(229,57,53,.08);} .err-layer.cpu .el-label{color:#ef5350;} .err-layer.cpu .el-count{color:#ef5350;} .err-layer.cpu .el-fill{background:linear-gradient(90deg,var(--crimson),#ff6b35);}
+.err-layer.mem  .el-header{background:rgba(245,158,11,.08);} .err-layer.mem .el-label{color:var(--amber);} .err-layer.mem .el-count{color:var(--amber);} .err-layer.mem .el-fill{background:linear-gradient(90deg,var(--amber),#fbbf24);}
+.err-layer.disk .el-header{background:rgba(0,194,212,.08);} .err-layer.disk .el-label{color:var(--cyan);} .err-layer.disk .el-count{color:var(--cyan);} .err-layer.disk .el-fill{background:linear-gradient(90deg,var(--cyan),#38bdf8);}
+.err-layer.net  .el-header{background:rgba(132,204,22,.08);} .err-layer.net .el-label{color:var(--lime);} .err-layer.net .el-count{color:var(--lime);} .err-layer.net .el-fill{background:linear-gradient(90deg,var(--lime),#4ade80);}
+.err-layer.boot .el-header{background:rgba(124,58,237,.08);} .err-layer.boot .el-label{color:#a78bfa;} .err-layer.boot .el-count{color:#a78bfa;} .err-layer.boot .el-fill{background:linear-gradient(90deg,var(--purple),#8b5cf6);}
+
+.ticker-wrap{background:rgba(8,9,12,1);overflow:hidden;padding:11px 0;border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);}
+.ticker-track{display:flex;gap:0;animation:ticker 32s linear infinite;white-space:nowrap;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;gap:12px;padding:0 28px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);}
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--crimson);}
+
+.arch-section{background:var(--coal);padding:0;}
+.arch-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.arch-inner .section-tag{color:rgba(255,255,255,.3);} .arch-inner .section-title{color:#fff;} .arch-inner .section-lead{color:rgba(255,255,255,.4);}
+.section-tag{display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+.section-tag::before{content:'';display:block;width:24px;height:1px;background:var(--crimson);}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,4.2vw,58px);line-height:1;letter-spacing:-.5px;color:var(--coal);margin-bottom:12px;}
+.section-lead{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--muted);max-width:640px;margin-bottom:56px;}
+.arch-diagram{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:48px;}
+.arch-layer{display:flex;flex-direction:column;align-items:stretch;}
+.arch-layer-header{padding:14px 16px;font-family:'Bebas Neue',sans-serif;font-size:14.5px;letter-spacing:.5px;text-align:center;}
+.arch-layer-body{flex:1;padding:16px;border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px;}
+.arch-comp{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.8px;color:rgba(255,255,255,.5);text-align:center;transition:all .2s;cursor:default;}
+.arch-comp:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);}
+.arch-layer.cpu  .arch-layer-header{background:rgba(229,57,53,.15);color:#ef5350;} .arch-layer.cpu .arch-comp:hover{border-color:rgba(229,57,53,.4);}
+.arch-layer.mem  .arch-layer-header{background:rgba(245,158,11,.15);color:var(--amber);} .arch-layer.mem .arch-comp:hover{border-color:rgba(245,158,11,.4);}
+.arch-layer.disk .arch-layer-header{background:rgba(0,194,212,.15);color:var(--cyan);} .arch-layer.disk .arch-comp:hover{border-color:rgba(0,194,212,.4);}
+.arch-layer.net  .arch-layer-header{background:rgba(132,204,22,.15);color:var(--lime);} .arch-layer.net .arch-comp:hover{border-color:rgba(132,204,22,.4);}
+.arch-layer.boot .arch-layer-header{background:rgba(124,58,237,.15);color:#a78bfa;} .arch-layer.boot .arch-comp:hover{border-color:rgba(124,58,237,.4);}
+
+.content-section{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.level-tabs{display:flex;gap:2px;margin-bottom:2px;overflow-x:auto;}
+.level-tab{flex:1;min-width:140px;padding:16px 20px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s;background:var(--smoke);color:var(--muted);text-align:left;position:relative;overflow:hidden;}
+.level-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:transparent;transition:background .2s;}
+.level-tab:hover{background:var(--coal);color:#fff;}
+.level-tab.active{background:var(--coal);color:#fff;}
+.level-tab.active.cpu  ::after,.level-tab.cpu:hover::after{background:var(--crimson);}
+.level-tab.active.mem  ::after,.level-tab.mem:hover::after{background:var(--amber);}
+.level-tab.active.disk ::after,.level-tab.disk:hover::after{background:var(--cyan);}
+.level-tab.active.net  ::after,.level-tab.net:hover::after{background:var(--lime);}
+.level-tab.active.boot ::after,.level-tab.boot:hover::after{background:var(--purple);}
+.tab-icon{font-size:16px;display:block;margin-bottom:4px;}
+.tab-label{display:block;font-size:10px;}
+.tab-count{display:block;font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;margin-top:2px;}
+
+.level-panel{display:none;}
+.level-panel.active{display:block;}
+.level-banner{padding:28px 40px;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.lb-title{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:.95;letter-spacing:.5px;color:#fff;}
+.lb-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:16px;margin-top:6px;}
+.lb-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:20px;white-space:nowrap;}
+
+.errors-list{display:flex;flex-direction:column;gap:2px;}
+.error-card{background:var(--smoke);overflow:hidden;transition:background .2s;}
+.error-card.open{background:#fff;}
+.ec-header{padding:24px 28px;display:flex;align-items:center;gap:20px;cursor:pointer;user-select:none;}
+.ec-header:hover{background:rgba(0,0,0,.03);}
+.ec-severity{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sev-critical{background:rgba(229,57,53,.15);border:1.5px solid rgba(229,57,53,.4);}
+.sev-high    {background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.4);}
+.sev-medium  {background:rgba(0,194,212,.15);border:1.5px solid rgba(0,194,212,.4);}
+.sev-low     {background:rgba(132,204,22,.15);border:1.5px solid rgba(132,204,22,.4);}
+.ec-main{flex:1;}
+.ec-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;color:var(--coal);line-height:1;}
+.ec-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.5;}
+.ec-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.ec-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+.ec-tag.c{background:rgba(0,194,212,.12);color:var(--cyan);}
+.ec-tag.r{background:rgba(229,57,53,.12);color:var(--crimson);}
+.ec-tag.l{background:rgba(132,204,22,.12);color:var(--lime);}
+.ec-tag.a{background:rgba(245,158,11,.12);color:var(--amber);}
+.ec-tag.p{background:rgba(124,58,237,.12);color:#a78bfa;}
+.ec-right{display:flex;align-items:center;gap:16px;}
+.ec-sev-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:20px;}
+.sev-badge-critical{background:rgba(229,57,53,.15);color:var(--crimson);}
+.sev-badge-high    {background:rgba(245,158,11,.15);color:var(--amber);}
+.sev-badge-medium  {background:rgba(0,194,212,.15);color:var(--cyan);}
+.sev-badge-low     {background:rgba(132,204,22,.15);color:var(--lime);}
+.ec-chevron{color:var(--muted);transition:transform .3s;font-size:18px;}
+.error-card.open .ec-chevron{transform:rotate(180deg);}
+.ec-body{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.25,.46,.45,.94);}
+.error-card.open .ec-body{max-height:1500px;}
+.ec-inner{padding:0 28px 32px;display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+.ec-block{background:var(--paper);border-radius:4px;padding:20px 22px;}
+.ec-block.full{grid-column:1/-1;}
+.ec-block-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ec-block-title.diag  {color:var(--cyan);}
+.ec-block-title.causes{color:var(--amber);}
+.ec-block-title.fix   {color:var(--lime);}
+.ec-block-title.cmd   {color:var(--crimson);}
+.ec-block-title::after{content:'';flex:1;height:1px;background:rgba(0,0,0,.08);}
+.cmd-block{background:var(--coal);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+.cmd-bar{padding:8px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:6px;}
+.cmd-dot{width:8px;height:8px;border-radius:50%;}
+.cmd-dot.r{background:#ff5f57;} .cmd-dot.y{background:#ffbd2e;} .cmd-dot.g{background:#28c840;}
+.cmd-label{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);letter-spacing:1px;margin-left:4px;}
+.cmd-lines{padding:12px 16px;display:flex;flex-direction:column;gap:4px;}
+.cmd-line{font-family:'DM Mono',monospace;font-size:12px;line-height:1.6;display:flex;gap:8px;white-space:pre-wrap;}
+.cmd-prompt{color:var(--cyan);} .cmd-text{color:#e2e8f0;} .cmd-comment{color:rgba(255,255,255,.25);}
+.causes-list{display:flex;flex-direction:column;gap:8px;}
+.cause-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(0,0,0,.03);border-radius:4px;border-left:3px solid transparent;font-size:13px;line-height:1.5;}
+.cause-item.c-critical{border-color:var(--crimson);} .cause-item.c-high{border-color:var(--amber);} .cause-item.c-medium{border-color:var(--cyan);} .cause-item.c-low{border-color:var(--lime);}
+.cause-icon{flex-shrink:0;font-size:14px;}
+.cause-text{color:var(--text);}
+.cause-text strong{color:var(--coal);font-weight:700;}
+.fix-steps{display:flex;flex-direction:column;gap:6px;}
+.fix-step{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:4px;transition:background .2s;}
+.fix-step:hover{background:rgba(0,0,0,.03);}
+.fix-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;flex-shrink:0;margin-top:1px;}
+.fix-num.cpu{background:rgba(229,57,53,.15);color:var(--crimson);}
+.fix-num.mem{background:rgba(245,158,11,.15);color:var(--amber);}
+.fix-num.disk{background:rgba(0,194,212,.15);color:var(--cyan);}
+.fix-num.net{background:rgba(132,204,22,.15);color:var(--lime);}
+.fix-num.boot{background:rgba(124,58,237,.15);color:#a78bfa;}
+.fix-text{font-size:13px;color:var(--text);line-height:1.55;}
+.fix-text strong{color:var(--coal);}
+.fix-text code{background:rgba(0,0,0,.07);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;}
+.exit-table{width:100%;border-collapse:collapse;}
+.exit-table th{background:var(--coal);color:#fff;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 14px;text-align:left;}
+.exit-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.06);}
+.exit-table tr:last-child td{border-bottom:none;}
+.exit-table tr:hover td{background:rgba(0,0,0,.03);}
+
+.cheat-section{background:var(--coal);padding:0;}
+.cheat-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.cheat-inner .section-title{color:#fff;} .cheat-inner .section-tag{color:rgba(255,255,255,.3);} .cheat-inner .section-lead{color:rgba(255,255,255,.4);}
+.cheat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.cheat-block{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);padding:28px 24px;transition:background .2s,border-color .2s;}
+.cheat-block:hover{background:rgba(255,255,255,.06);border-color:rgba(0,194,212,.2);}
+.cheat-block-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.cheat-block-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+.cheat-cmd{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.5;display:flex;align-items:flex-start;gap:6px;}
+.cheat-cmd:last-child{border-bottom:none;}
+.cheat-cmd .prompt{color:var(--cyan);flex-shrink:0;}
+
+.decision-wrap{margin-bottom:56px;overflow-x:auto;}
+.decision-table{width:100%;border-collapse:collapse;background:var(--smoke);min-width:760px;}
+.decision-table th{background:var(--coal);color:#fff;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 16px;text-align:left;}
+.decision-table td{padding:14px 16px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.08);vertical-align:top;}
+.decision-table tr:last-child td{border-bottom:none;}
+.decision-table tr:hover td{background:rgba(0,0,0,.03);}
+.decision-table td strong{color:var(--coal);}
+.pill-mini{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 9px;border-radius:12px;background:rgba(0,194,212,.12);color:var(--cyan);margin:2px 4px 2px 0;}
+
+.author-strip{background:var(--smoke);padding:60px 64px;}
+.author-strip-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.author-info{display:flex;align-items:center;gap:24px;}
+.author-avatar{width:64px;height:64px;background:linear-gradient(135deg,var(--crimson),#ff6b35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;color:#fff;flex-shrink:0;}
+.author-name{font-weight:700;font-size:17px;color:var(--coal);margin-bottom:4px;}
+.author-role{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.author-actions{display:flex;gap:12px;}
+.btn-sm{padding:10px 24px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;text-decoration:none;transition:background .2s,color .2s,border-color .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-sm.primary{background:var(--coal);color:var(--paper);}
+.btn-sm.primary:hover{background:var(--crimson);}
+.btn-sm.ghost{background:transparent;color:var(--coal);border:1.5px solid var(--coal);}
+.btn-sm.ghost:hover{border-color:var(--crimson);color:var(--crimson);}
+
+footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:rgba(255,255,255,.6);}
+.footer-links{display:flex;gap:24px;flex-wrap:wrap;}
+.footer-links a{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--cyan);}
+.footer-note{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:900px){
+  nav{padding:14px 20px;} .nav-breadcrumb{display:none;}
+  .hero{grid-template-columns:1fr;} .hero-right{min-height:280px;padding:32px 24px;} .hero-left{padding:60px 28px;}
+  .arch-inner{padding:64px 28px;} .arch-diagram{grid-template-columns:1fr;gap:8px;}
+  .content-section{padding:64px 28px;} .level-tabs{flex-wrap:wrap;} .ec-inner{grid-template-columns:1fr;}
+  .cheat-inner{padding:64px 28px;} .cheat-grid{grid-template-columns:1fr;}
+  .author-strip{padding:48px 28px;} .author-strip-inner{flex-direction:column;align-items:flex-start;}
+  footer{padding:36px 28px;} .footer-inner{flex-direction:column;align-items:flex-start;}
+  .decision-table{min-width:640px;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="../../../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="nav-breadcrumb">
+    <a href="../../../../index.html">Home</a><span class="sep">/</span>
+    <a href="../../index.html">OS</a><span class="sep">/</span>
+    <a href="../../index.html#linux">Linux</a><span class="sep">/</span>
+    <span class="current">Troubleshooting</span>
+  </div>
+  <a href="../../index.html" class="nav-back">← OS Series</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-ghost">OOM</div>
+  <div class="hero-left">
+    <div class="bc">
+      <a href="../../../../index.html">Platform Ops</a><span class="sep">›</span>
+      <a href="../../index.html">OS</a><span class="sep">›</span>
+      <span class="here">Linux Troubleshooting</span>
+    </div>
+    <div class="eyebrow"><span class="eyebrow-line"></span>Issue #056 · September 2026</div>
+    <h1 class="hero-title">LINUX <span class="hl-red">TROUBLESHOOTING</span></h1>
+    <p class="hero-sub">High Load · Memory & OOM · Disk & I/O · Network · Boot Failures</p>
+    <p class="hero-desc">A runbook, not a tutorial. Box is on fire, load average is climbing, and you have maybe five minutes before someone asks for an update. Start here.</p>
+    <div class="level-pills">
+      <button class="lp cpu"  onclick="switchLevel('cpu')">🔴 High Load & CPU</button>
+      <button class="lp mem"  onclick="switchLevel('mem')">🟠 Memory & OOM</button>
+      <button class="lp disk" onclick="switchLevel('disk')">🔵 Disk & I/O</button>
+      <button class="lp net"  onclick="switchLevel('net')">🟢 Network</button>
+      <button class="lp boot" onclick="switchLevel('boot')">🟣 Boot Failures</button>
+    </div>
+    <div class="hero-meta-row">
+      <div><div class="hm-num">15</div><div class="hm-label">Concepts Covered</div></div>
+      <div><div class="hm-num">3</div><div class="hm-label">of 4 Linux Resources</div></div>
+      <div><div class="hm-num">🚨</div><div class="hm-label">Runbook Format</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="err-matrix">
+      <div class="err-layer cpu"><div class="el-header"><span class="el-label">High Load & CPU</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="80%"></div></div><div class="el-errors"><span class="ee">Load Average</span><span class="ee">CPU Hog</span><span class="ee">Zombies</span></div></div>
+      <div class="err-layer mem"><div class="el-header"><span class="el-label">Memory & OOM</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="75%"></div></div><div class="el-errors"><span class="ee">free/vmstat</span><span class="ee">OOM Killer</span><span class="ee">Leaks vs Cache</span></div></div>
+      <div class="err-layer disk"><div class="el-header"><span class="el-label">Disk & I/O</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="70%"></div></div><div class="el-errors"><span class="ee">Disk Full</span><span class="ee">Inodes</span><span class="ee">Slow I/O</span></div></div>
+      <div class="err-layer net"><div class="el-header"><span class="el-label">Network</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="65%"></div></div><div class="el-errors"><span class="ee">DNS</span><span class="ee">Routing</span><span class="ee">Firewall</span></div></div>
+      <div class="err-layer boot"><div class="el-header"><span class="el-label">Boot Failures</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="60%"></div></div><div class="el-errors"><span class="ee">GRUB</span><span class="ee">systemd Units</span><span class="ee">Rescue Mode</span></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker-wrap"><div class="ticker-track">
+<span class="ticker-item"><span class="ticker-dot"></span>Load Average</span><span class="ticker-item"><span class="ticker-dot"></span>OOM Killer</span><span class="ticker-item"><span class="ticker-dot"></span>dmesg</span><span class="ticker-item"><span class="ticker-dot"></span>Disk Full</span><span class="ticker-item"><span class="ticker-dot"></span>Inode Exhaustion</span><span class="ticker-item"><span class="ticker-dot"></span>DNS Resolution</span><span class="ticker-item"><span class="ticker-dot"></span>iptables/nftables</span><span class="ticker-item"><span class="ticker-dot"></span>GRUB Rescue</span><span class="ticker-item"><span class="ticker-dot"></span>systemd-analyze</span><span class="ticker-item"><span class="ticker-dot"></span>Emergency Mode</span>
+<span class="ticker-item"><span class="ticker-dot"></span>Load Average</span><span class="ticker-item"><span class="ticker-dot"></span>OOM Killer</span><span class="ticker-item"><span class="ticker-dot"></span>dmesg</span><span class="ticker-item"><span class="ticker-dot"></span>Disk Full</span><span class="ticker-item"><span class="ticker-dot"></span>Inode Exhaustion</span><span class="ticker-item"><span class="ticker-dot"></span>DNS Resolution</span><span class="ticker-item"><span class="ticker-dot"></span>iptables/nftables</span><span class="ticker-item"><span class="ticker-dot"></span>GRUB Rescue</span><span class="ticker-item"><span class="ticker-dot"></span>systemd-analyze</span><span class="ticker-item"><span class="ticker-dot"></span>Emergency Mode</span>
+</div></div>
+
+<div class="arch-section"><div class="arch-inner reveal">
+  <div class="section-tag" style="color:rgba(255,255,255,.3)">Architecture Map</div>
+  <h2 class="section-title" style="color:#fff">FIVE WAYS A BOX GOES DOWN</h2>
+  <p class="section-lead">Five failure domains that cover almost every Linux incident — check them in roughly this order.</p>
+  <div class="arch-diagram">
+    <div class="arch-layer cpu"><div class="arch-layer-header">🔴 CPU / Load</div><div class="arch-layer-body"><div class="arch-comp">Load Average</div><div class="arch-comp">Run Queue</div><div class="arch-comp">CPU Steal</div><div class="arch-comp">Runaway Process</div><div class="arch-comp">Zombie States</div></div></div>
+    <div class="arch-layer mem"><div class="arch-layer-header">🟠 Memory</div><div class="arch-layer-body"><div class="arch-comp">free / vmstat</div><div class="arch-comp">OOM Killer</div><div class="arch-comp">dmesg Trace</div><div class="arch-comp">Page Cache</div><div class="arch-comp">Memory Leaks</div></div></div>
+    <div class="arch-layer disk"><div class="arch-layer-header">🔵 Disk / I/O</div><div class="arch-layer-body"><div class="arch-comp">df -h</div><div class="arch-comp">Inode Usage</div><div class="arch-comp">iostat Latency</div><div class="arch-comp">Deleted-but-Open</div><div class="arch-comp">iowait</div></div></div>
+    <div class="arch-layer net"><div class="arch-layer-header">🟢 Network</div><div class="arch-layer-body"><div class="arch-comp">DNS Resolution</div><div class="arch-comp">Routing Table</div><div class="arch-comp">Firewall Rules</div><div class="arch-comp">Port Binding</div><div class="arch-comp">MTU/Packet Loss</div></div></div>
+    <div class="arch-layer boot"><div class="arch-layer-header">🟣 Boot</div><div class="arch-layer-body"><div class="arch-comp">GRUB</div><div class="arch-comp">Initramfs</div><div class="arch-comp">fstab Errors</div><div class="arch-comp">Failed Units</div><div class="arch-comp">Rescue/Emergency</div></div></div>
+  </div>
+</div></div>
+
+<section class="content-section reveal" id="topics">
+  <div class="section-tag">Deep-Dive</div>
+  <h2 class="section-title">TROUBLESHOOTING REFERENCE</h2>
+  <p class="section-lead">Click any failure domain to explore diagnostic commands, root causes, and fixes.</p>
+
+  <div class="level-tabs">
+    <button class="level-tab cpu active" onclick="switchLevel('cpu')"><span class="tab-icon">🔴</span><span class="tab-label">CPU/Load</span><span class="tab-count">3</span></button>
+    <button class="level-tab mem" onclick="switchLevel('mem')"><span class="tab-icon">🟠</span><span class="tab-label">Memory</span><span class="tab-count">3</span></button>
+    <button class="level-tab disk" onclick="switchLevel('disk')"><span class="tab-icon">🔵</span><span class="tab-label">Disk/I-O</span><span class="tab-count">3</span></button>
+    <button class="level-tab net" onclick="switchLevel('net')"><span class="tab-icon">🟢</span><span class="tab-label">Network</span><span class="tab-count">3</span></button>
+    <button class="level-tab boot" onclick="switchLevel('boot')"><span class="tab-icon">🟣</span><span class="tab-label">Boot</span><span class="tab-count">3</span></button>
+  </div>
+
+  <!-- CPU -->
+  <div class="level-panel active" id="panel-cpu">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(229,57,53,.2),rgba(229,57,53,.05));border:1px solid rgba(229,57,53,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:#ef5350;">HIGH LOAD & CPU</div><div class="lb-sub" style="color:rgba(229,57,53,.6);">The load average number everyone misreads under pressure</div></div>
+      <span class="lb-badge" style="background:rgba(229,57,53,.15);color:var(--crimson);border:1px solid rgba(229,57,53,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">📊</div><div class="ec-main"><div class="ec-name">Reading Load Average Correctly</div><div class="ec-desc">"Load 8.0" means nothing without knowing your core count — and on Linux, load includes processes waiting on I/O, not just CPU.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">uptime</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">uptime</span></div>
+            <div class="cmd-line"><span class="cmd-text">load average: 8.42, 6.10, 4.05</span></div>
+            <div class="cmd-line"><span class="cmd-comment"># 1min, 5min, 15min — rising trend = getting worse, not better</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">nproc</span><span class="cmd-comment"> # if this says 4, load 8.42 means real trouble</span></div>
+          </div></div></div>
+          <div class="ec-block full"><div class="causes-list"><div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">Load average &gt; core count sustained over 5-15 min = the box is genuinely saturated, not a blip</span></div><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">High load with low CPU% usually means processes stuck in <strong>D state</strong> (uninterruptible I/O wait) — check disk, not CPU</span></div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">🎯</div><div class="ec-main"><div class="ec-name">Finding the CPU Hog</div><div class="ec-desc">From "load is high" to "this exact process" in under a minute.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">triage</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">top -o %CPU</span><span class="cmd-comment"> # sort by CPU, sanity check in 2 seconds</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">ps aux --sort=-%cpu | head -10</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">pidstat 2 5</span><span class="cmd-comment"> # per-process CPU over 5 samples</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">🧟</div><div class="ec-main"><div class="ec-name">Runaway Processes & Zombie States</div><div class="ec-desc">A zombie process isn't using resources — but a pile of them means something's not reaping its children.</div><div class="ec-tags"><span class="ec-tag c">Diagnosis</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block"><div class="ec-block-title causes">Process States</div><div class="causes-list"><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>Z (zombie)</strong> — finished but parent hasn't called wait() to reap it</span></div><div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text"><strong>D (uninterruptible sleep)</strong> — usually stuck on disk/network I/O, can't even be killed with -9</span></div></div></div>
+          <div class="ec-block"><div class="ec-block-title fix">Fix</div><div class="fix-steps"><div class="fix-step"><div class="fix-num cpu">1</div><div class="fix-text">Zombies can't be killed directly — restart or fix the <strong>parent</strong> process</div></div><div class="fix-step"><div class="fix-num cpu">2</div><div class="fix-text">Many zombies + one parent PID = that parent has a reaping bug — file it as a real bug, not a one-off restart</div></div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEMORY -->
+  <div class="level-panel" id="panel-mem">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.05));border:1px solid rgba(245,158,11,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:var(--amber);">MEMORY & THE OOM KILLER</div><div class="lb-sub" style="color:rgba(245,158,11,.7);">"Available" memory almost never means what you think it means</div></div>
+      <span class="lb-badge" style="background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">💾</div><div class="ec-main"><div class="ec-name">Reading free/vmstat Correctly</div><div class="ec-desc">"Used" memory looks alarming until you understand that Linux uses spare RAM for disk cache on purpose — it gives it back instantly when needed.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">free -h</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-text">              total   used   free  shared  buff/cache  available</span></div>
+            <div class="cmd-line"><span class="cmd-text">Mem:           15Gi   9.2Gi  512Mi  128Mi   5.3Gi       5.8Gi</span></div>
+            <div class="cmd-line"><span class="cmd-comment"># "available" is the real number — buff/cache is reclaimable on demand</span></div>
+          </div></div></div>
+          <div class="ec-block full"><div class="causes-list"><div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">Don't panic at low "free" — look at "available." A box with 500MB free and 5.8GB available is fine.</span></div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">💀</div><div class="ec-main"><div class="ec-name">The OOM Killer & dmesg</div><div class="ec-desc">When memory truly runs out, the kernel picks a process to sacrifice — dmesg tells you exactly which one and why.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">dmesg</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">dmesg -T | grep -i "out of memory"</span></div>
+            <div class="cmd-line"><span class="cmd-text">Out of memory: Killed process 8821 (java) total-vm:4200000kB</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">journalctl -k | grep -i oom</span></div>
+          </div></div></div>
+          <div class="ec-block full"><div class="fix-steps"><div class="fix-step"><div class="fix-num mem">1</div><div class="fix-text">The killed process usually isn't the <strong>cause</strong> — it's just whatever the kernel's OOM-score heuristic picked</div></div><div class="fix-step"><div class="fix-num mem">2</div><div class="fix-text">Check <code>/var/log/messages</code> or journal around the same timestamp for what was actually consuming memory beforehand</div></div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">📉</div><div class="ec-main"><div class="ec-name">Memory Leaks vs Cache Pressure</div><div class="ec-desc">Steadily climbing RSS on one process over days is a leak. Overall memory pressure that resolves on its own is usually just cache doing its job.</div><div class="ec-tags"><span class="ec-tag c">Diagnosis</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">leak hunt</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">watch -n 60 'ps -o pid,rss,cmd -p 8821'</span><span class="cmd-comment"> # RSS trend over an hour</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">smem -tk</span><span class="cmd-comment"> # per-process real vs shared memory</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISK -->
+  <div class="level-panel" id="panel-disk">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(0,194,212,.2),rgba(0,194,212,.05));border:1px solid rgba(0,194,212,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:var(--cyan);">DISK & I/O</div><div class="lb-sub" style="color:rgba(0,194,212,.7);">"No space left on device" when df says there's plenty free — yes, that's real</div></div>
+      <span class="lb-badge" style="background:rgba(0,194,212,.15);color:var(--cyan);border:1px solid rgba(0,194,212,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">💽</div><div class="ec-main"><div class="ec-name">Disk Full: Finding What's Eating Space</div><div class="ec-desc">The classic — and the classic trap of deleted-but-still-open files that don't free space until the process holding them exits.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">find the space</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">df -h</span><span class="cmd-comment"> # which mount is full</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">du -sh /var/* | sort -rh | head</span><span class="cmd-comment"> # biggest offenders</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">lsof +L1</span><span class="cmd-comment"> # deleted files still held open — the hidden trap</span></div>
+          </div></div></div>
+          <div class="ec-block full"><div class="causes-list"><div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">If <code>du</code> and <code>df</code> disagree wildly, a process is holding a deleted file open — <code>lsof +L1</code> finds it, restarting that process frees the space</span></div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">🔢</div><div class="ec-main"><div class="ec-name">Inode Exhaustion</div><div class="ec-desc">You can run out of inodes with disk space to spare — millions of tiny files (session files, cache fragments) are the usual culprit.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">inodes</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">df -i</span><span class="cmd-comment"> # IUse% at 100% = the real problem, even with disk space free</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">find /var/spool -xdev -printf '%h\n' | sort | uniq -c | sort -rn | head</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">🐌</div><div class="ec-main"><div class="ec-name">Slow I/O Diagnosis</div><div class="ec-desc">High iowait and climbing disk latency — the difference between "the app is slow" and "the disk is slow" matters for where you look next.</div><div class="ec-tags"><span class="ec-tag c">Diagnosis</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">iostat</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">iostat -xz 2</span></div>
+            <div class="cmd-line"><span class="cmd-comment"># %util near 100% + high await = disk is the bottleneck, not the app</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">iotop -oPa</span><span class="cmd-comment"> # which process is doing the I/O</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NETWORK -->
+  <div class="level-panel" id="panel-net">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(132,204,22,.2),rgba(132,204,22,.05));border:1px solid rgba(132,204,22,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:var(--lime);">NETWORK ISSUES</div><div class="lb-sub" style="color:rgba(132,204,22,.7);">DNS, routing, and firewalls — in that order, almost every time</div></div>
+      <span class="lb-badge" style="background:rgba(132,204,22,.15);color:var(--lime);border:1px solid rgba(132,204,22,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">🔤</div><div class="ec-main"><div class="ec-name">DNS Resolution Failures</div><div class="ec-desc">"Can't connect" is very often "can't resolve the name at all" — check this before assuming a routing or firewall problem.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">DNS triage</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">dig billing-api.internal +short</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">cat /etc/resolv.conf</span><span class="cmd-comment"> # is it even pointing at the right resolver?</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemd-resolve --status</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">🗺️</div><div class="ec-main"><div class="ec-name">Connectivity & Routing</div><div class="ec-desc">DNS resolves, but the packets still can't get there — time to walk the route hop by hop.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">routing</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">ip route get 10.20.4.5</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">traceroute -T -p 443 billing-api.internal</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">ss -tulpn | grep 8080</span><span class="cmd-comment"> # is anything even listening?</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">🧱</div><div class="ec-main"><div class="ec-name">Port/Firewall Issues</div><div class="ec-desc">The service is listening, the route is fine — and a firewall rule is still silently dropping the packet.</div><div class="ec-tags"><span class="ec-tag c">Diagnosis</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">firewall</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">nft list ruleset</span><span class="cmd-comment"> # modern nftables</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">iptables -L -n -v --line-numbers</span><span class="cmd-comment"> # legacy iptables</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">firewall-cmd --list-all</span><span class="cmd-comment"> # firewalld (RHEL family)</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOT -->
+  <div class="level-panel" id="panel-boot">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:#a78bfa;">BOOT & SERVICE FAILURES</div><div class="lb-sub" style="color:rgba(124,58,237,.7);">When the box won't come back up after a reboot — the scariest category, and usually the most methodical to fix</div></div>
+      <span class="lb-badge" style="background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">🥾</div><div class="ec-main"><div class="ec-name">GRUB & Boot Failures</div><div class="ec-desc">Nothing past the GRUB prompt, or it drops straight to a rescue shell — the earliest possible failure point.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="causes-list"><div class="cause-item c-critical"><span class="cause-icon">🔴</span><span class="cause-text">Bad <code>/etc/fstab</code> entry (typo'd UUID, missing device) is the #1 cause of "boots to emergency shell"</span></div><div class="cause-item c-high"><span class="cause-icon">🟠</span><span class="cause-text">Corrupt initramfs after a kernel update that didn't rebuild it properly</span></div></div></div>
+          <div class="ec-block full"><div class="ec-block-title fix">From Emergency Shell</div><div class="fix-steps"><div class="fix-step"><div class="fix-num boot">1</div><div class="fix-text">Mount root read-write: <code>mount -o remount,rw /</code></div></div><div class="fix-step"><div class="fix-num boot">2</div><div class="fix-text">Fix the offending line in <code>/etc/fstab</code>, or comment it out temporarily</div></div><div class="fix-step"><div class="fix-num boot">3</div><div class="fix-text"><code>systemctl reboot</code> and confirm it comes up clean this time</div></div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">❌</div><div class="ec-main"><div class="ec-name">systemd Unit Failures</div><div class="ec-desc">The box boots, but a critical service didn't start — systemd tells you exactly why if you ask it correctly.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">failed units</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemctl --failed</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemctl status billing-worker -l</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">journalctl -u billing-worker -b</span><span class="cmd-comment"> # this boot's logs for that unit</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemd-analyze blame</span><span class="cmd-comment"> # what's slow at boot</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">🚑</div><div class="ec-main"><div class="ec-name">Emergency/Rescue Mode Recovery</div><div class="ec-desc">Two similar-sounding modes with different scopes — knowing which one you're in changes what's actually available to you.</div><div class="ec-tags"><span class="ec-tag c">Recovery</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block"><div class="ec-block-title causes">Rescue vs Emergency</div><div class="causes-list"><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>rescue.target</strong> — most local filesystems mounted, base system running</span></div><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>emergency.target</strong> — bare minimum, root filesystem often read-only, use when rescue itself won't boot</span></div></div></div>
+          <div class="ec-block"><div class="ec-block-title fix">Boot Into One</div><div class="fix-steps"><div class="fix-step"><div class="fix-num boot">1</div><div class="fix-text">At GRUB, press <code>e</code> to edit, append <code>systemd.unit=rescue.target</code> to the kernel line</div></div><div class="fix-step"><div class="fix-num boot">2</div><div class="fix-text"><code>Ctrl+X</code> or F10 to boot with that one-time change</div></div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<section class="content-section reveal">
+  <div class="section-tag">Decision Guide</div>
+  <h2 class="section-title">WHERE DO I LOOK FIRST?</h2>
+  <p class="section-lead">A quick lookup for the first 60 seconds of any "the server is having issues" page.</p>
+  <div class="decision-wrap"><table class="decision-table">
+    <tr><th>Symptom</th><th>Check First</th><th>Command</th></tr>
+    <tr><td><strong>Everything feels slow</strong></td><td>Load average vs core count</td><td><span class="pill-mini">uptime + nproc</span></td></tr>
+    <tr><td><strong>App crashed unexpectedly</strong></td><td>OOM killer</td><td><span class="pill-mini">dmesg -T | grep -i oom</span></td></tr>
+    <tr><td><strong>Writes failing</strong></td><td>Disk space and inodes</td><td><span class="pill-mini">df -h && df -i</span></td></tr>
+    <tr><td><strong>Can't reach another service</strong></td><td>DNS resolution first</td><td><span class="pill-mini">dig +short</span></td></tr>
+    <tr><td><strong>Box won't come back after reboot</strong></td><td>fstab and failed units</td><td><span class="pill-mini">systemctl --failed</span></td></tr>
+  </table></div>
+</section>
+
+<div class="cheat-section"><div class="cheat-inner reveal">
+  <div class="section-tag" style="color:rgba(255,255,255,.3)">Quick Reference</div>
+  <h2 class="section-title" style="color:#fff;margin-bottom:40px">FIRST-RESPONSE CHEATSHEET</h2>
+  <div class="cheat-grid">
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--crimson)">CPU / Load</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>uptime</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>top -o %CPU</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>pidstat 2 5</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--amber)">Memory</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>free -h</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>dmesg -T | grep -i oom</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>smem -tk</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--cyan)">Disk / I-O</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>df -hT && df -i</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>iostat -xz 2</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>lsof +L1</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--lime)">Network</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>dig +short host</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>ss -tulpn</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>traceroute -T -p 443 host</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:#a78bfa">Boot / Services</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>systemctl --failed</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>journalctl -b -p err</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>systemd-analyze blame</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--amber)">General</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>dmesg -T | tail -50</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>journalctl -xe</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>last -x | head</span></div>
+    </div>
+  </div>
+</div></div>
+
+<div class="author-strip">
+  <div class="author-strip-inner">
+    <div class="author-info"><div class="author-avatar">VA</div><div><div class="author-name">Vishal Abhinav</div><div class="author-role">Platform Ops Engineer · Ops Newsletter — Issue #056</div></div></div>
+    <div class="author-actions">
+      <a href="../../../../index.html#subscribe" class="btn-sm primary">Subscribe Free <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank" class="btn-sm ghost">GitHub ↗</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PLATFORM OPS</div>
+    <div class="footer-links">
+      <a href="../../index.html">← OS Series</a>
+      <a href="../FUNDAMENTALS/linux-fundamentals.html">Fundamentals</a>
+      <a href="../ADVANCED/linux-advanced.html">Advanced</a>
+      <a href="../GLOSSARY/linux-unix-glossary.html">Glossary</a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
+      <a href="../../../../index.html#subscribe">Subscribe</a>
+    </div>
+    <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
+  </div>
+</footer>
+
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+document.querySelectorAll('a,button,.error-card,.arch-comp,.cheat-block').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='56px';ring.style.height='56px';ring.style.borderColor='var(--crimson)';cursor.style.transform='translate(-50%,-50%) scale(1.5)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='';cursor.style.transform='translate(-50%,-50%) scale(1)';});
+});
+function switchLevel(level){
+  document.querySelectorAll('.level-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.level-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.level-tab.'+level).forEach(t=>t.classList.add('active'));
+  const panel=document.getElementById('panel-'+level);
+  if(panel){panel.classList.add('active');}
+  document.getElementById('topics').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function toggleCard(card){
+  const isOpen=card.classList.contains('open');
+  card.parentElement.querySelectorAll('.error-card').forEach(c=>c.classList.remove('open'));
+  if(!isOpen) card.classList.add('open');
+}
+document.querySelectorAll('.lp').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const level=Array.from(btn.classList).find(c=>['cpu','mem','disk','net','boot'].includes(c));
+    if(level) switchLevel(level);
+  });
+});
+window.addEventListener('load',()=>{
+  setTimeout(()=>{document.querySelectorAll('.el-fill').forEach(el=>{el.style.width=el.dataset.width;});},600);
+});
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>

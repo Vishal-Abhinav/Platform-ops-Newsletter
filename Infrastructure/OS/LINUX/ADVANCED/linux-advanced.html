@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux Advanced · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="Linux Advanced — systemd internals, kernel & sysctl tuning, namespaces & cgroups, performance profiling, and LVM/advanced filesystems.">
+<meta name="author" content="Vishal Abhinav">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Linux Advanced — systemd, Kernel Tuning, Namespaces/Cgroups, Profiling, LVM">
+<meta property="og:description" content="The exact primitives Kubernetes and Docker are built on — systemd, cgroups, namespaces, kernel tuning.">
+<meta property="article:author" content="Vishal Abhinav">
+<meta property="article:published_time" content="2026-09-14">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:     #08090c; --paper:   #f2f0eb; --smoke:   #e4e0d8; --ash:     #b8b2a7;
+  --coal:    #1c1f26; --cyan:    #00c2d4; --amber:   #f59e0b; --crimson: #e53935;
+  --lime:    #84cc16; --text:    #1c1f26; --muted:   #6b6860; --purple:  #7c3aed;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--text);font-family:'Manrope',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden;cursor:none;}
+.cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--crimson);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .15s ease,background .2s;transform:translate(-50%,-50%);}
+.cursor-ring{position:fixed;top:0;left:0;width:36px;height:36px;border:1.5px solid var(--coal);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .35s cubic-bezier(.25,.46,.45,.94),width .3s,height .3s,border-color .2s;transform:translate(-50%,-50%);}
+body:hover .cursor-ring{border-color:var(--crimson);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.6;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(8,9,12,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.06);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;color:#fff;display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo span{display:inline-block;width:8px;height:8px;background:var(--crimson);border-radius:50%;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:.6;}}
+.nav-breadcrumb{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+.nav-breadcrumb a{color:rgba(255,255,255,0.3);text-decoration:none;transition:color .2s;}
+.nav-breadcrumb a:hover{color:var(--cyan);}
+.nav-breadcrumb .sep{color:rgba(255,255,255,0.12);}
+.nav-breadcrumb .current{color:var(--cyan);}
+.nav-back{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);padding:8px 20px;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s,color .2s;border:1px solid rgba(255,255,255,0.1);}
+.nav-back:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);}
+
+.hero{min-height:72vh;background:var(--ink);display:grid;grid-template-columns:1fr 1fr;padding-top:72px;overflow:hidden;position:relative;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 10% 40%,rgba(0,194,212,.1) 0%,transparent 55%),radial-gradient(circle at 90% 60%,rgba(229,57,53,.1) 0%,transparent 50%),radial-gradient(circle at 50% 100%,rgba(124,58,237,.08) 0%,transparent 50%);pointer-events:none;}
+.hero-ghost{position:absolute;bottom:-20px;left:-10px;font-family:'Bebas Neue',sans-serif;font-size:clamp(120px,18vw,240px);color:rgba(255,255,255,.022);letter-spacing:-4px;line-height:1;pointer-events:none;white-space:nowrap;}
+.hero-left{padding:80px 48px 80px 64px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;}
+.bc{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:28px;}
+.bc a{color:rgba(255,255,255,.28);text-decoration:none;transition:color .2s;}
+.bc a:hover{color:var(--cyan);}
+.bc .sep{color:rgba(255,255,255,.12);}
+.bc .here{color:var(--crimson);}
+.eyebrow{display:flex;align-items:center;gap:12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:20px;}
+.eyebrow-line{display:block;width:40px;height:1px;background:var(--crimson);}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,6vw,88px);line-height:.92;letter-spacing:-.5px;color:#fff;margin-bottom:12px;}
+.hero-title .hl-red{color:var(--crimson);}
+.hero-title .hl-cyan{color:var(--cyan);}
+.hero-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:rgba(255,255,255,.38);margin-bottom:28px;line-height:1.4;}
+.hero-desc{font-size:14px;color:rgba(255,255,255,.32);max-width:440px;margin-bottom:36px;line-height:1.85;}
+.level-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px;}
+.lp{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;border-radius:20px;cursor:pointer;transition:all .2s;border:none;}
+.lp.systemd{background:rgba(229,57,53,.15);color:#ef5350;border:1px solid rgba(229,57,53,.3);}
+.lp.kernel {background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);}
+.lp.ns     {background:rgba(0,194,212,.15);color:var(--cyan);border:1px solid rgba(0,194,212,.3);}
+.lp.perf   {background:rgba(132,204,22,.15);color:var(--lime);border:1px solid rgba(132,204,22,.3);}
+.lp.lvm    {background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);}
+.lp:hover{transform:translateY(-2px);filter:brightness(1.3);}
+.hero-meta-row{display:flex;gap:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.07);}
+.hm-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;color:#fff;}
+.hm-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:3px;}
+
+.hero-right{display:flex;align-items:center;justify-content:center;padding:60px 48px;position:relative;z-index:2;}
+.err-matrix{display:flex;flex-direction:column;gap:10px;width:100%;max-width:400px;}
+.err-layer{border:1px solid rgba(255,255,255,.07);border-radius:8px;overflow:hidden;transition:border-color .3s;}
+.err-layer:hover{border-color:rgba(255,255,255,.2);}
+.el-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.el-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;}
+.el-count{font-family:'Bebas Neue',sans-serif;font-size:20px;}
+.el-bar{height:3px;background:rgba(255,255,255,.06);}
+.el-fill{height:100%;border-radius:1px;transition:width 1.4s cubic-bezier(.25,.46,.45,.94);width:0;}
+.el-errors{padding:10px 20px 14px;display:flex;flex-wrap:wrap;gap:5px;}
+.ee{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.5px;padding:3px 9px;border-radius:12px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.35);}
+.err-layer.systemd .el-header{background:rgba(229,57,53,.08);} .err-layer.systemd .el-label{color:#ef5350;} .err-layer.systemd .el-count{color:#ef5350;} .err-layer.systemd .el-fill{background:linear-gradient(90deg,var(--crimson),#ff6b35);}
+.err-layer.kernel  .el-header{background:rgba(245,158,11,.08);} .err-layer.kernel .el-label{color:var(--amber);} .err-layer.kernel .el-count{color:var(--amber);} .err-layer.kernel .el-fill{background:linear-gradient(90deg,var(--amber),#fbbf24);}
+.err-layer.ns      .el-header{background:rgba(0,194,212,.08);} .err-layer.ns .el-label{color:var(--cyan);} .err-layer.ns .el-count{color:var(--cyan);} .err-layer.ns .el-fill{background:linear-gradient(90deg,var(--cyan),#38bdf8);}
+.err-layer.perf    .el-header{background:rgba(132,204,22,.08);} .err-layer.perf .el-label{color:var(--lime);} .err-layer.perf .el-count{color:var(--lime);} .err-layer.perf .el-fill{background:linear-gradient(90deg,var(--lime),#4ade80);}
+.err-layer.lvm     .el-header{background:rgba(124,58,237,.08);} .err-layer.lvm .el-label{color:#a78bfa;} .err-layer.lvm .el-count{color:#a78bfa;} .err-layer.lvm .el-fill{background:linear-gradient(90deg,var(--purple),#8b5cf6);}
+
+.ticker-wrap{background:rgba(8,9,12,1);overflow:hidden;padding:11px 0;border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);}
+.ticker-track{display:flex;gap:0;animation:ticker 32s linear infinite;white-space:nowrap;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;gap:12px;padding:0 28px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);}
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--crimson);}
+
+.arch-section{background:var(--coal);padding:0;}
+.arch-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.arch-inner .section-tag{color:rgba(255,255,255,.3);} .arch-inner .section-title{color:#fff;} .arch-inner .section-lead{color:rgba(255,255,255,.4);}
+.section-tag{display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+.section-tag::before{content:'';display:block;width:24px;height:1px;background:var(--crimson);}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,4.2vw,58px);line-height:1;letter-spacing:-.5px;color:var(--coal);margin-bottom:12px;}
+.section-lead{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--muted);max-width:640px;margin-bottom:56px;}
+.arch-diagram{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:48px;}
+.arch-layer{display:flex;flex-direction:column;align-items:stretch;}
+.arch-layer-header{padding:14px 16px;font-family:'Bebas Neue',sans-serif;font-size:14.5px;letter-spacing:.5px;text-align:center;}
+.arch-layer-body{flex:1;padding:16px;border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px;}
+.arch-comp{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.8px;color:rgba(255,255,255,.5);text-align:center;transition:all .2s;cursor:default;}
+.arch-comp:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);}
+.arch-layer.systemd .arch-layer-header{background:rgba(229,57,53,.15);color:#ef5350;} .arch-layer.systemd .arch-comp:hover{border-color:rgba(229,57,53,.4);}
+.arch-layer.kernel  .arch-layer-header{background:rgba(245,158,11,.15);color:var(--amber);} .arch-layer.kernel .arch-comp:hover{border-color:rgba(245,158,11,.4);}
+.arch-layer.ns      .arch-layer-header{background:rgba(0,194,212,.15);color:var(--cyan);} .arch-layer.ns .arch-comp:hover{border-color:rgba(0,194,212,.4);}
+.arch-layer.perf    .arch-layer-header{background:rgba(132,204,22,.15);color:var(--lime);} .arch-layer.perf .arch-comp:hover{border-color:rgba(132,204,22,.4);}
+.arch-layer.lvm     .arch-layer-header{background:rgba(124,58,237,.15);color:#a78bfa;} .arch-layer.lvm .arch-comp:hover{border-color:rgba(124,58,237,.4);}
+
+.content-section{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.level-tabs{display:flex;gap:2px;margin-bottom:2px;overflow-x:auto;}
+.level-tab{flex:1;min-width:140px;padding:16px 20px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s;background:var(--smoke);color:var(--muted);text-align:left;position:relative;overflow:hidden;}
+.level-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:transparent;transition:background .2s;}
+.level-tab:hover{background:var(--coal);color:#fff;}
+.level-tab.active{background:var(--coal);color:#fff;}
+.level-tab.active.systemd ::after,.level-tab.systemd:hover::after{background:var(--crimson);}
+.level-tab.active.kernel  ::after,.level-tab.kernel:hover::after{background:var(--amber);}
+.level-tab.active.ns      ::after,.level-tab.ns:hover::after{background:var(--cyan);}
+.level-tab.active.perf    ::after,.level-tab.perf:hover::after{background:var(--lime);}
+.level-tab.active.lvm     ::after,.level-tab.lvm:hover::after{background:var(--purple);}
+.tab-icon{font-size:16px;display:block;margin-bottom:4px;}
+.tab-label{display:block;font-size:10px;}
+.tab-count{display:block;font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;margin-top:2px;}
+
+.level-panel{display:none;}
+.level-panel.active{display:block;}
+.level-banner{padding:28px 40px;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.lb-title{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:.95;letter-spacing:.5px;color:#fff;}
+.lb-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:16px;margin-top:6px;}
+.lb-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:20px;white-space:nowrap;}
+
+.errors-list{display:flex;flex-direction:column;gap:2px;}
+.error-card{background:var(--smoke);overflow:hidden;transition:background .2s;}
+.error-card.open{background:#fff;}
+.ec-header{padding:24px 28px;display:flex;align-items:center;gap:20px;cursor:pointer;user-select:none;}
+.ec-header:hover{background:rgba(0,0,0,.03);}
+.ec-severity{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sev-critical{background:rgba(229,57,53,.15);border:1.5px solid rgba(229,57,53,.4);}
+.sev-high    {background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.4);}
+.sev-medium  {background:rgba(0,194,212,.15);border:1.5px solid rgba(0,194,212,.4);}
+.sev-low     {background:rgba(132,204,22,.15);border:1.5px solid rgba(132,204,22,.4);}
+.ec-main{flex:1;}
+.ec-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;color:var(--coal);line-height:1;}
+.ec-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.5;}
+.ec-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.ec-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+.ec-tag.c{background:rgba(0,194,212,.12);color:var(--cyan);}
+.ec-tag.r{background:rgba(229,57,53,.12);color:var(--crimson);}
+.ec-tag.l{background:rgba(132,204,22,.12);color:var(--lime);}
+.ec-tag.a{background:rgba(245,158,11,.12);color:var(--amber);}
+.ec-tag.p{background:rgba(124,58,237,.12);color:#a78bfa;}
+.ec-right{display:flex;align-items:center;gap:16px;}
+.ec-sev-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:20px;}
+.sev-badge-critical{background:rgba(229,57,53,.15);color:var(--crimson);}
+.sev-badge-high    {background:rgba(245,158,11,.15);color:var(--amber);}
+.sev-badge-medium  {background:rgba(0,194,212,.15);color:var(--cyan);}
+.sev-badge-low     {background:rgba(132,204,22,.15);color:var(--lime);}
+.ec-chevron{color:var(--muted);transition:transform .3s;font-size:18px;}
+.error-card.open .ec-chevron{transform:rotate(180deg);}
+.ec-body{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.25,.46,.45,.94);}
+.error-card.open .ec-body{max-height:1500px;}
+.ec-inner{padding:0 28px 32px;display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+.ec-block{background:var(--paper);border-radius:4px;padding:20px 22px;}
+.ec-block.full{grid-column:1/-1;}
+.ec-block-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ec-block-title.diag  {color:var(--cyan);}
+.ec-block-title.causes{color:var(--amber);}
+.ec-block-title.fix   {color:var(--lime);}
+.ec-block-title.cmd   {color:var(--crimson);}
+.ec-block-title::after{content:'';flex:1;height:1px;background:rgba(0,0,0,.08);}
+.cmd-block{background:var(--coal);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+.cmd-bar{padding:8px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:6px;}
+.cmd-dot{width:8px;height:8px;border-radius:50%;}
+.cmd-dot.r{background:#ff5f57;} .cmd-dot.y{background:#ffbd2e;} .cmd-dot.g{background:#28c840;}
+.cmd-label{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);letter-spacing:1px;margin-left:4px;}
+.cmd-lines{padding:12px 16px;display:flex;flex-direction:column;gap:4px;}
+.cmd-line{font-family:'DM Mono',monospace;font-size:12px;line-height:1.6;display:flex;gap:8px;white-space:pre-wrap;}
+.cmd-prompt{color:var(--cyan);} .cmd-text{color:#e2e8f0;} .cmd-comment{color:rgba(255,255,255,.25);}
+.causes-list{display:flex;flex-direction:column;gap:8px;}
+.cause-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(0,0,0,.03);border-radius:4px;border-left:3px solid transparent;font-size:13px;line-height:1.5;}
+.cause-item.c-critical{border-color:var(--crimson);} .cause-item.c-high{border-color:var(--amber);} .cause-item.c-medium{border-color:var(--cyan);} .cause-item.c-low{border-color:var(--lime);}
+.cause-icon{flex-shrink:0;font-size:14px;}
+.cause-text{color:var(--text);}
+.cause-text strong{color:var(--coal);font-weight:700;}
+.fix-steps{display:flex;flex-direction:column;gap:6px;}
+.fix-step{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:4px;transition:background .2s;}
+.fix-step:hover{background:rgba(0,0,0,.03);}
+.fix-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;flex-shrink:0;margin-top:1px;}
+.fix-num.systemd{background:rgba(229,57,53,.15);color:var(--crimson);}
+.fix-num.kernel{background:rgba(245,158,11,.15);color:var(--amber);}
+.fix-num.ns{background:rgba(0,194,212,.15);color:var(--cyan);}
+.fix-num.perf{background:rgba(132,204,22,.15);color:var(--lime);}
+.fix-num.lvm{background:rgba(124,58,237,.15);color:#a78bfa;}
+.fix-text{font-size:13px;color:var(--text);line-height:1.55;}
+.fix-text strong{color:var(--coal);}
+.fix-text code{background:rgba(0,0,0,.07);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;}
+.exit-table{width:100%;border-collapse:collapse;}
+.exit-table th{background:var(--coal);color:#fff;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 14px;text-align:left;}
+.exit-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.06);}
+.exit-table tr:last-child td{border-bottom:none;}
+.exit-table tr:hover td{background:rgba(0,0,0,.03);}
+
+.cheat-section{background:var(--coal);padding:0;}
+.cheat-inner{max-width:1200px;margin:0 auto;padding:100px 64px;}
+.cheat-inner .section-title{color:#fff;} .cheat-inner .section-tag{color:rgba(255,255,255,.3);} .cheat-inner .section-lead{color:rgba(255,255,255,.4);}
+.cheat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.cheat-block{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);padding:28px 24px;transition:background .2s,border-color .2s;}
+.cheat-block:hover{background:rgba(255,255,255,.06);border-color:rgba(0,194,212,.2);}
+.cheat-block-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.cheat-block-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+.cheat-cmd{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.5;display:flex;align-items:flex-start;gap:6px;}
+.cheat-cmd:last-child{border-bottom:none;}
+.cheat-cmd .prompt{color:var(--cyan);flex-shrink:0;}
+
+.decision-wrap{margin-bottom:56px;overflow-x:auto;}
+.decision-table{width:100%;border-collapse:collapse;background:var(--smoke);min-width:760px;}
+.decision-table th{background:var(--coal);color:#fff;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 16px;text-align:left;}
+.decision-table td{padding:14px 16px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.08);vertical-align:top;}
+.decision-table tr:last-child td{border-bottom:none;}
+.decision-table tr:hover td{background:rgba(0,0,0,.03);}
+.decision-table td strong{color:var(--coal);}
+.pill-mini{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 9px;border-radius:12px;background:rgba(0,194,212,.12);color:var(--cyan);margin:2px 4px 2px 0;}
+
+.author-strip{background:var(--smoke);padding:60px 64px;}
+.author-strip-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.author-info{display:flex;align-items:center;gap:24px;}
+.author-avatar{width:64px;height:64px;background:linear-gradient(135deg,var(--crimson),#ff6b35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;color:#fff;flex-shrink:0;}
+.author-name{font-weight:700;font-size:17px;color:var(--coal);margin-bottom:4px;}
+.author-role{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.author-actions{display:flex;gap:12px;}
+.btn-sm{padding:10px 24px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;text-decoration:none;transition:background .2s,color .2s,border-color .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-sm.primary{background:var(--coal);color:var(--paper);}
+.btn-sm.primary:hover{background:var(--crimson);}
+.btn-sm.ghost{background:transparent;color:var(--coal);border:1.5px solid var(--coal);}
+.btn-sm.ghost:hover{border-color:var(--crimson);color:var(--crimson);}
+
+footer{background:var(--ink);color:rgba(255,255,255,.3);padding:48px 64px;}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:rgba(255,255,255,.6);}
+.footer-links{display:flex;gap:24px;flex-wrap:wrap;}
+.footer-links a{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--cyan);}
+.footer-note{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:900px){
+  nav{padding:14px 20px;} .nav-breadcrumb{display:none;}
+  .hero{grid-template-columns:1fr;} .hero-right{min-height:280px;padding:32px 24px;} .hero-left{padding:60px 28px;}
+  .arch-inner{padding:64px 28px;} .arch-diagram{grid-template-columns:1fr;gap:8px;}
+  .content-section{padding:64px 28px;} .level-tabs{flex-wrap:wrap;} .ec-inner{grid-template-columns:1fr;}
+  .cheat-inner{padding:64px 28px;} .cheat-grid{grid-template-columns:1fr;}
+  .author-strip{padding:48px 28px;} .author-strip-inner{flex-direction:column;align-items:flex-start;}
+  footer{padding:36px 28px;} .footer-inner{flex-direction:column;align-items:flex-start;}
+  .decision-table{min-width:640px;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="../../../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="nav-breadcrumb">
+    <a href="../../../../index.html">Home</a><span class="sep">/</span>
+    <a href="../../index.html">OS</a><span class="sep">/</span>
+    <a href="../../index.html#linux">Linux</a><span class="sep">/</span>
+    <span class="current">Advanced</span>
+  </div>
+  <a href="../../index.html" class="nav-back">← OS Series</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-ghost">CGROUP</div>
+  <div class="hero-left">
+    <div class="bc">
+      <a href="../../../../index.html">Platform Ops</a><span class="sep">›</span>
+      <a href="../../index.html">OS</a><span class="sep">›</span>
+      <span class="here">Linux Advanced</span>
+    </div>
+    <div class="eyebrow"><span class="eyebrow-line"></span>Issue #055 · September 2026</div>
+    <h1 class="hero-title">LINUX <span class="hl-red">ADVANCED</span></h1>
+    <p class="hero-sub">systemd · Kernel Tuning · Namespaces & Cgroups · Profiling · LVM</p>
+    <p class="hero-desc">The exact primitives Kubernetes and Docker are built on top of. Understand namespaces and cgroups here, and "how does a container actually work" stops being magic.</p>
+    <div class="level-pills">
+      <button class="lp systemd" onclick="switchLevel('systemd')">🔴 systemd</button>
+      <button class="lp kernel" onclick="switchLevel('kernel')">🟠 Kernel & Sysctl</button>
+      <button class="lp ns" onclick="switchLevel('ns')">🔵 Namespaces & Cgroups</button>
+      <button class="lp perf" onclick="switchLevel('perf')">🟢 Profiling</button>
+      <button class="lp lvm" onclick="switchLevel('lvm')">🟣 LVM & Storage</button>
+    </div>
+    <div class="hero-meta-row">
+      <div><div class="hm-num">15</div><div class="hm-label">Concepts Covered</div></div>
+      <div><div class="hm-num">2</div><div class="hm-label">of 4 Linux Resources</div></div>
+      <div><div class="hm-num">v2</div><div class="hm-label">Cgroups</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="err-matrix">
+      <div class="err-layer systemd"><div class="el-header"><span class="el-label">systemd</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="80%"></div></div><div class="el-errors"><span class="ee">Units</span><span class="ee">journald</span><span class="ee">Custom Services</span></div></div>
+      <div class="err-layer kernel"><div class="el-header"><span class="el-label">Kernel & Sysctl</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="75%"></div></div><div class="el-errors"><span class="ee">/proc/sys</span><span class="ee">Net Tuning</span><span class="ee">VM Tuning</span></div></div>
+      <div class="err-layer ns"><div class="el-header"><span class="el-label">Namespaces & Cgroups</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="70%"></div></div><div class="el-errors"><span class="ee">7 Namespaces</span><span class="ee">Cgroups v2</span><span class="ee">Containers</span></div></div>
+      <div class="err-layer perf"><div class="el-header"><span class="el-label">Profiling</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="65%"></div></div><div class="el-errors"><span class="ee">strace</span><span class="ee">perf</span><span class="ee">iostat/vmstat</span></div></div>
+      <div class="err-layer lvm"><div class="el-header"><span class="el-label">LVM & Storage</span><span class="el-count">3</span></div><div class="el-bar"><div class="el-fill" data-width="60%"></div></div><div class="el-errors"><span class="ee">PV/VG/LV</span><span class="ee">Snapshots</span><span class="ee">ext4/XFS/Btrfs</span></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker-wrap"><div class="ticker-track">
+<span class="ticker-item"><span class="ticker-dot"></span>systemd Units</span><span class="ticker-item"><span class="ticker-dot"></span>journalctl</span><span class="ticker-item"><span class="ticker-dot"></span>sysctl</span><span class="ticker-item"><span class="ticker-dot"></span>net.core.somaxconn</span><span class="ticker-item"><span class="ticker-dot"></span>PID Namespace</span><span class="ticker-item"><span class="ticker-dot"></span>Cgroups v2</span><span class="ticker-item"><span class="ticker-dot"></span>strace / perf</span><span class="ticker-item"><span class="ticker-dot"></span>Flame Graphs</span><span class="ticker-item"><span class="ticker-dot"></span>LVM Snapshots</span><span class="ticker-item"><span class="ticker-dot"></span>XFS / Btrfs</span>
+<span class="ticker-item"><span class="ticker-dot"></span>systemd Units</span><span class="ticker-item"><span class="ticker-dot"></span>journalctl</span><span class="ticker-item"><span class="ticker-dot"></span>sysctl</span><span class="ticker-item"><span class="ticker-dot"></span>net.core.somaxconn</span><span class="ticker-item"><span class="ticker-dot"></span>PID Namespace</span><span class="ticker-item"><span class="ticker-dot"></span>Cgroups v2</span><span class="ticker-item"><span class="ticker-dot"></span>strace / perf</span><span class="ticker-item"><span class="ticker-dot"></span>Flame Graphs</span><span class="ticker-item"><span class="ticker-dot"></span>LVM Snapshots</span><span class="ticker-item"><span class="ticker-dot"></span>XFS / Btrfs</span>
+</div></div>
+
+<div class="arch-section"><div class="arch-inner reveal">
+  <div class="section-tag" style="color:rgba(255,255,255,.3)">Architecture Map</div>
+  <h2 class="section-title" style="color:#fff">FROM INIT TO CONTAINER PRIMITIVES</h2>
+  <p class="section-lead">Five layers under the hood — where systemd manages the machine, and namespaces/cgroups quietly became the foundation of every container runtime.</p>
+  <div class="arch-diagram">
+    <div class="arch-layer systemd"><div class="arch-layer-header">🔴 systemd</div><div class="arch-layer-body"><div class="arch-comp">Unit Files</div><div class="arch-comp">Targets</div><div class="arch-comp">journald</div><div class="arch-comp">Dependencies</div><div class="arch-comp">Timers</div></div></div>
+    <div class="arch-layer kernel"><div class="arch-layer-header">🟠 Kernel/Sysctl</div><div class="arch-layer-body"><div class="arch-comp">/proc/sys</div><div class="arch-comp">Net Params</div><div class="arch-comp">VM Params</div><div class="arch-comp">sysctl.conf</div><div class="arch-comp">Swappiness</div></div></div>
+    <div class="arch-layer ns"><div class="arch-layer-header">🔵 Namespaces</div><div class="arch-layer-body"><div class="arch-comp">PID / NET / MNT</div><div class="arch-comp">UTS / IPC</div><div class="arch-comp">User / Cgroup</div><div class="arch-comp">Cgroups v2</div><div class="arch-comp">unshare/chroot</div></div></div>
+    <div class="arch-layer perf"><div class="arch-layer-header">🟢 Profiling</div><div class="arch-layer-body"><div class="arch-comp">strace/ltrace</div><div class="arch-comp">perf</div><div class="arch-comp">Flame Graphs</div><div class="arch-comp">iostat/vmstat</div><div class="arch-comp">sar</div></div></div>
+    <div class="arch-layer lvm"><div class="arch-layer-header">🟣 LVM/Storage</div><div class="arch-layer-body"><div class="arch-comp">PV / VG / LV</div><div class="arch-comp">Resize Online</div><div class="arch-comp">Snapshots</div><div class="arch-comp">ext4/XFS</div><div class="arch-comp">Btrfs</div></div></div>
+  </div>
+</div></div>
+
+<section class="content-section reveal" id="topics">
+  <div class="section-tag">Deep-Dive</div>
+  <h2 class="section-title">ADVANCED REFERENCE</h2>
+  <p class="section-lead">Click any layer to explore concepts, commands, and production-tested guidance.</p>
+
+  <div class="level-tabs">
+    <button class="level-tab systemd active" onclick="switchLevel('systemd')"><span class="tab-icon">🔴</span><span class="tab-label">systemd</span><span class="tab-count">3</span></button>
+    <button class="level-tab kernel" onclick="switchLevel('kernel')"><span class="tab-icon">🟠</span><span class="tab-label">Kernel</span><span class="tab-count">3</span></button>
+    <button class="level-tab ns" onclick="switchLevel('ns')"><span class="tab-icon">🔵</span><span class="tab-label">Namespaces</span><span class="tab-count">3</span></button>
+    <button class="level-tab perf" onclick="switchLevel('perf')"><span class="tab-icon">🟢</span><span class="tab-label">Profiling</span><span class="tab-count">3</span></button>
+    <button class="level-tab lvm" onclick="switchLevel('lvm')"><span class="tab-icon">🟣</span><span class="tab-label">LVM</span><span class="tab-count">3</span></button>
+  </div>
+
+  <!-- SYSTEMD -->
+  <div class="level-panel active" id="panel-systemd">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(229,57,53,.2),rgba(229,57,53,.05));border:1px solid rgba(229,57,53,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:#ef5350;">SYSTEMD DEEP-DIVE</div><div class="lb-sub" style="color:rgba(229,57,53,.6);">The init system that boots, supervises, and logs almost everything on the box</div></div>
+      <span class="lb-badge" style="background:rgba(229,57,53,.15);color:var(--crimson);border:1px solid rgba(229,57,53,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">⚙️</div><div class="ec-main"><div class="ec-name">Units, Targets & Dependencies</div><div class="ec-desc">Everything systemd manages — services, mounts, sockets, timers — is a "unit." Targets group units, like old-school runlevels but composable.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><table class="exit-table"><tr><th>Unit Type</th><th>Manages</th></tr>
+            <tr><td><code>.service</code></td><td>A long-running process (nginx, sshd)</td></tr>
+            <tr><td><code>.socket</code></td><td>A network/Unix socket, can lazily start its service</td></tr>
+            <tr><td><code>.timer</code></td><td>Scheduled activation — systemd's answer to cron</td></tr>
+            <tr><td><code>.mount</code></td><td>A filesystem mount point</td></tr>
+            <tr><td><code>.target</code></td><td>A synchronization point / group of units (e.g. <code>multi-user.target</code>)</td></tr>
+          </table></div>
+          <div class="ec-block full"><div class="ec-block-title diag">Commands</div><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">systemctl</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemctl list-dependencies nginx</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemctl get-default</span><span class="cmd-comment"> # current default target</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">📓</div><div class="ec-main"><div class="ec-name">journalctl & Log Management</div><div class="ec-desc">systemd's binary log store — structured, indexed, and queryable in ways plain text files in /var/log never were.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">journalctl</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">journalctl -u nginx --since "1 hour ago"</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">journalctl -f</span><span class="cmd-comment"> # follow, like tail -f</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">journalctl -p err -b</span><span class="cmd-comment"> # errors since last boot</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">journalctl --disk-usage</span></div>
+          </div></div></div>
+          <div class="ec-block full"><div class="causes-list"><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">Set <code>SystemMaxUse=500M</code> in <code>/etc/systemd/journald.conf</code> — unbounded journals can fill the root disk</span></div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">✍️</div><div class="ec-main"><div class="ec-name">Writing Custom systemd Services</div><div class="ec-desc">Turning any script or binary into a properly supervised, restartable, boot-enabled service.</div><div class="ec-tags"><span class="ec-tag c">Practical</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="ec-block-title cmd">/etc/systemd/system/billing-worker.service</div><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">unit file</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-text">[Unit]</span></div>
+            <div class="cmd-line"><span class="cmd-text">Description=Billing background worker</span></div>
+            <div class="cmd-line"><span class="cmd-text">After=network.target</span></div>
+            <div class="cmd-line"><span class="cmd-text">[Service]</span></div>
+            <div class="cmd-line"><span class="cmd-text">ExecStart=/usr/local/bin/billing-worker</span></div>
+            <div class="cmd-line"><span class="cmd-text">Restart=on-failure</span></div>
+            <div class="cmd-line"><span class="cmd-text">User=billing</span></div>
+            <div class="cmd-line"><span class="cmd-text">[Install]</span></div>
+            <div class="cmd-line"><span class="cmd-text">WantedBy=multi-user.target</span></div>
+          </div></div></div>
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">activate</span></div><div class="cmd-lines"><div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemctl daemon-reload && systemctl enable --now billing-worker</span></div></div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KERNEL -->
+  <div class="level-panel" id="panel-kernel">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.05));border:1px solid rgba(245,158,11,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:var(--amber);">KERNEL PARAMETERS & SYSCTL</div><div class="lb-sub" style="color:rgba(245,158,11,.7);">Tuning the kernel's behavior without recompiling anything</div></div>
+      <span class="lb-badge" style="background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">🎛️</div><div class="ec-main"><div class="ec-name">/proc/sys and sysctl Basics</div><div class="ec-desc">The kernel exposes thousands of tunable parameters as virtual files — sysctl is just a friendlier way to read and write them.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">sysctl</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">sysctl vm.swappiness</span><span class="cmd-comment"> # read one value</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">sysctl -w vm.swappiness=10</span><span class="cmd-comment"> # set, until reboot</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">echo "vm.swappiness=10" >> /etc/sysctl.d/99-tuning.conf</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">sysctl --system</span><span class="cmd-comment"> # apply all files, persists across reboots</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">🌐</div><div class="ec-main"><div class="ec-name">Network Kernel Tuning</div><div class="ec-desc">The parameters that matter under real load — connection backlog, TIME_WAIT reuse, and ephemeral port range.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><table class="exit-table"><tr><th>Parameter</th><th>Effect</th></tr>
+            <tr><td><code>net.core.somaxconn</code></td><td>Max queued connections per listening socket — raise for high-throughput services</td></tr>
+            <tr><td><code>net.ipv4.tcp_tw_reuse</code></td><td>Allows reusing TIME_WAIT sockets for new connections</td></tr>
+            <tr><td><code>net.ipv4.ip_local_port_range</code></td><td>Widens the ephemeral port pool — matters for high-connection-count services</td></tr>
+            <tr><td><code>net.core.rmem_max / wmem_max</code></td><td>Max socket buffer sizes — affects throughput on fast networks</td></tr>
+          </table></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">🧠</div><div class="ec-main"><div class="ec-name">Memory & VM Tuning</div><div class="ec-desc">Swappiness and overcommit behavior — two settings that quietly decide how a memory-pressured box behaves.</div><div class="ec-tags"><span class="ec-tag c">Tuning</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block"><div class="ec-block-title causes">Key Parameters</div><div class="causes-list"><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><code>vm.swappiness</code> (0-100) — lower means the kernel prefers dropping caches over swapping; on DB servers, set low (1-10)</span></div><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><code>vm.overcommit_memory</code> — controls whether the kernel allows allocating more memory than physically exists</span></div></div></div>
+          <div class="ec-block"><div class="ec-block-title fix">Rule of Thumb</div><div class="fix-steps"><div class="fix-step"><div class="fix-num kernel">1</div><div class="fix-text">Database/cache workloads: low swappiness, they'd rather OOM than swap and stall</div></div><div class="fix-step"><div class="fix-num kernel">2</div><div class="fix-text">General app servers: default (60) is usually fine — don't tune without a measured reason</div></div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAMESPACES -->
+  <div class="level-panel" id="panel-ns">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(0,194,212,.2),rgba(0,194,212,.05));border:1px solid rgba(0,194,212,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:var(--cyan);">NAMESPACES & CGROUPS</div><div class="lb-sub" style="color:rgba(0,194,212,.7);">The two kernel features that make "container" a meaningful word</div></div>
+      <span class="lb-badge" style="background:rgba(0,194,212,.15);color:var(--cyan);border:1px solid rgba(0,194,212,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">🧩</div><div class="ec-main"><div class="ec-name">The Seven Linux Namespaces</div><div class="ec-desc">Namespaces give a process its own isolated <em>view</em> of a global resource — PIDs, network interfaces, mounts, and more.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><table class="exit-table"><tr><th>Namespace</th><th>Isolates</th></tr>
+            <tr><td>PID</td><td>Process IDs — a container's PID 1 isn't the host's PID 1</td></tr>
+            <tr><td>NET</td><td>Network interfaces, routing tables, ports</td></tr>
+            <tr><td>MNT</td><td>Mount points — a container's filesystem view</td></tr>
+            <tr><td>UTS</td><td>Hostname and domain name</td></tr>
+            <tr><td>IPC</td><td>Inter-process communication (shared memory, semaphores)</td></tr>
+            <tr><td>USER</td><td>User/group ID mapping — root in a container ≠ root on host</td></tr>
+            <tr><td>CGROUP</td><td>Cgroup root directory view</td></tr>
+          </table></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">📊</div><div class="ec-main"><div class="ec-name">Cgroups v2 & Resource Limits</div><div class="ec-desc">If namespaces control what a process can <em>see</em>, cgroups control what it can <em>use</em> — CPU, memory, I/O bandwidth, all metered and capped.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">cgroups v2</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">cat /sys/fs/cgroup/cgroup.controllers</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">systemd-cgtop</span><span class="cmd-comment"> # live resource usage per cgroup, like top</span></div>
+            <div class="cmd-line"><span class="cmd-comment"># memory.max, cpu.max, io.max — the limits that Docker's --memory/--cpus set under the hood</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">📦</div><div class="ec-main"><div class="ec-name">How Containers Actually Work</div><div class="ec-desc">A "container" is namespaces + cgroups + a chroot'd filesystem, wrapped in tooling. Prove it to yourself with the raw primitives.</div><div class="ec-tags"><span class="ec-tag c">Demo</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="ec-block-title cmd">Build a "container" by hand</div><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">unshare</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">unshare --pid --net --mount --uts --fork --mount-proc bash</span></div>
+            <div class="cmd-line"><span class="cmd-comment"># new PID/network/mount/hostname namespace, PID 1 inside</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">hostname sandbox && ps aux</span><span class="cmd-comment"> # only sees its own processes</span></div>
+          </div></div></div>
+          <div class="ec-block full"><div class="causes-list"><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text">This is, roughly, what <code>containerd</code>/<code>runc</code> does under Docker/Kubernetes — plus image layers and a lot of tooling</span></div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILING -->
+  <div class="level-panel" id="panel-perf">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(132,204,22,.2),rgba(132,204,22,.05));border:1px solid rgba(132,204,22,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:var(--lime);">PERFORMANCE PROFILING</div><div class="lb-sub" style="color:rgba(132,204,22,.7);">Stop guessing what's slow — measure it</div></div>
+      <span class="lb-badge" style="background:rgba(132,204,22,.15);color:var(--lime);border:1px solid rgba(132,204,22,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">🔬</div><div class="ec-main"><div class="ec-name">strace & ltrace</div><div class="ec-desc">See exactly which syscalls (strace) or library calls (ltrace) a process makes — the ground truth when "it's slow" needs an actual answer.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">strace</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">strace -c -p 4821</span><span class="cmd-comment"> # summary of syscall time, attach to running PID</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">strace -T -e trace=network myapp</span><span class="cmd-comment"> # time each network syscall</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">🔥</div><div class="ec-main"><div class="ec-name">perf & Flame Graphs</div><div class="ec-desc">Sampling profiler built into the kernel — turns "which function is burning CPU" into a picture instead of a guess.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">perf</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">perf top</span><span class="cmd-comment"> # live, like top but for CPU-hot functions</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">perf record -F 99 -p 4821 -g -- sleep 30</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">perf script | stackcollapse-perf.pl | flamegraph.pl > out.svg</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">📈</div><div class="ec-main"><div class="ec-name">iostat/vmstat/sar — the Classic Toolkit</div><div class="ec-desc">Before reaching for perf, these three answer 80% of "what's the bottleneck" questions in seconds.</div><div class="ec-tags"><span class="ec-tag c">Toolkit</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">the classics</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">vmstat 2</span><span class="cmd-comment"> # CPU, memory, swap, every 2s</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">iostat -xz 2</span><span class="cmd-comment"> # per-disk utilization & latency</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">sar -n DEV 2</span><span class="cmd-comment"> # network throughput per interface</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LVM -->
+  <div class="level-panel" id="panel-lvm">
+    <div class="level-banner" style="background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.2);">
+      <div class="lb-left"><div class="lb-title" style="color:#a78bfa;">STORAGE: LVM & ADVANCED FILESYSTEMS</div><div class="lb-sub" style="color:rgba(124,58,237,.7);">Resizing a live disk without downtime — and the filesystems built for it</div></div>
+      <span class="lb-badge" style="background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);">3 Concepts</span>
+    </div>
+    <div class="errors-list">
+      <div class="error-card open" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-critical">🧱</div><div class="ec-main"><div class="ec-name">LVM Concepts (PV/VG/LV)</div><div class="ec-desc">A flexible layer between raw disks and filesystems — resize, extend, and snapshot without unmounting anything.</div><div class="ec-tags"><span class="ec-tag r">Must Know</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-critical">Must Know</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block"><div class="ec-block-title causes">The Three Layers</div><div class="causes-list"><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>PV</strong> (Physical Volume) — a raw disk or partition</span></div><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>VG</strong> (Volume Group) — a pool combining one or more PVs</span></div><div class="cause-item c-medium"><span class="cause-icon">🔵</span><span class="cause-text"><strong>LV</strong> (Logical Volume) — the resizable "partition" carved from a VG, this is what gets formatted</span></div></div></div>
+          <div class="ec-block"><div class="ec-block-title cmd">Setup</div><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">lvm</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">pvcreate /dev/sdb</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">vgcreate data-vg /dev/sdb</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">lvcreate -L 100G -n data-lv data-vg</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-high">📐</div><div class="ec-main"><div class="ec-name">Resizing & Snapshots</div><div class="ec-desc">The two operations that make LVM worth the extra layer of abstraction — grow a volume live, or freeze a point-in-time copy.</div><div class="ec-tags"><span class="ec-tag a">Important</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-high">Important</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><div class="cmd-block"><div class="cmd-bar"><div class="cmd-dot r"></div><div class="cmd-dot y"></div><div class="cmd-dot g"></div><span class="cmd-label">resize + snapshot</span></div><div class="cmd-lines">
+            <div class="cmd-line"><span class="cmd-comment"># grow the LV, then the filesystem on top, no downtime</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">lvextend -L +50G /dev/data-vg/data-lv</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">resize2fs /dev/data-vg/data-lv</span><span class="cmd-comment"> # ext4</span></div>
+            <div class="cmd-line"><span class="cmd-comment"># point-in-time snapshot before a risky migration</span></div>
+            <div class="cmd-line"><span class="cmd-prompt">❯</span><span class="cmd-text">lvcreate -L 10G -s -n data-snap /dev/data-vg/data-lv</span></div>
+          </div></div></div>
+        </div></div>
+      </div>
+      <div class="error-card" onclick="toggleCard(this)">
+        <div class="ec-header"><div class="ec-severity sev-medium">🗄️</div><div class="ec-main"><div class="ec-name">ext4 vs XFS vs Btrfs</div><div class="ec-desc">The filesystem layered on top of the LV — each with a different sweet spot.</div><div class="ec-tags"><span class="ec-tag c">Decision</span></div></div><div class="ec-right"><span class="ec-sev-badge sev-badge-medium">Recommended</span><span class="ec-chevron">▾</span></div></div>
+        <div class="ec-body"><div class="ec-inner">
+          <div class="ec-block full"><table class="exit-table"><tr><th>Filesystem</th><th>Best For</th><th>Notes</th></tr>
+            <tr><td>ext4</td><td>General purpose, default on most distros</td><td>Mature, predictable, well-understood failure modes</td></tr>
+            <tr><td>XFS</td><td>Large files, high-throughput workloads</td><td>Default on RHEL; excellent parallel I/O; can't shrink</td></tr>
+            <tr><td>Btrfs</td><td>Snapshots, checksums, built-in RAID-like features</td><td>More moving parts; used by default on some SUSE/Fedora setups</td></tr>
+          </table></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<section class="content-section reveal">
+  <div class="section-tag">Decision Guide</div>
+  <h2 class="section-title">strace, perf, OR THE CLASSICS?</h2>
+  <p class="section-lead">A quick lookup for which profiling tool actually answers your question.</p>
+  <div class="decision-wrap"><table class="decision-table">
+    <tr><th>Question</th><th>Tool</th><th>Why</th></tr>
+    <tr><td><strong>"Which syscall is this process stuck on?"</strong></td><td><span class="pill-mini">strace</span></td><td>Shows every syscall in real time, including blocking ones</td></tr>
+    <tr><td><strong>"Which function is burning CPU?"</strong></td><td><span class="pill-mini">perf</span></td><td>Sampling profiler, low overhead, gives you a flame graph</td></tr>
+    <tr><td><strong>"Is this a CPU, memory, or disk problem?"</strong></td><td><span class="pill-mini">vmstat / iostat</span></td><td>Fastest first-pass triage before reaching for heavier tools</td></tr>
+    <tr><td><strong>"Is the network the bottleneck?"</strong></td><td><span class="pill-mini">sar -n DEV</span></td><td>Per-interface throughput over time</td></tr>
+  </table></div>
+</section>
+
+<div class="cheat-section"><div class="cheat-inner reveal">
+  <div class="section-tag" style="color:rgba(255,255,255,.3)">Quick Reference</div>
+  <h2 class="section-title" style="color:#fff;margin-bottom:40px">COMMAND CHEATSHEET</h2>
+  <div class="cheat-grid">
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--crimson)">systemd</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>systemctl daemon-reload</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>systemctl list-units --failed</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>journalctl -xe</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--amber)">Kernel / Sysctl</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>sysctl -a | grep net.core</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>sysctl --system</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--cyan)">Namespaces / Cgroups</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>lsns</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>systemd-cgtop</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>unshare --pid --fork bash</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--lime)">Profiling</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>perf top</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>strace -c -p PID</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>vmstat 2</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:#a78bfa">LVM</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>lvs / vgs / pvs</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>lvextend -L +10G /dev/vg/lv</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>resize2fs /dev/vg/lv</span></div>
+    </div>
+    <div class="cheat-block"><div class="cheat-block-title" style="color:var(--amber)">General</div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>lscpu</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>free -h</span></div>
+      <div class="cheat-cmd"><span class="prompt">❯</span><span>uptime</span></div>
+    </div>
+  </div>
+</div></div>
+
+<div class="author-strip">
+  <div class="author-strip-inner">
+    <div class="author-info"><div class="author-avatar">VA</div><div><div class="author-name">Vishal Abhinav</div><div class="author-role">Platform Ops Engineer · Ops Newsletter — Issue #055</div></div></div>
+    <div class="author-actions">
+      <a href="../../../../index.html#subscribe" class="btn-sm primary">Subscribe Free <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank" class="btn-sm ghost">GitHub ↗</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PLATFORM OPS</div>
+    <div class="footer-links">
+      <a href="../../index.html">← OS Series</a>
+      <a href="../FUNDAMENTALS/linux-fundamentals.html">Fundamentals</a>
+      <a href="../TROUBLESHOOTING/linux-troubleshooting.html">Troubleshooting</a>
+      <a href="../GLOSSARY/linux-unix-glossary.html">Glossary</a>
+      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
+      <a href="../../../../index.html#subscribe">Subscribe</a>
+    </div>
+    <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
+  </div>
+</footer>
+
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+document.querySelectorAll('a,button,.error-card,.arch-comp,.cheat-block').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='56px';ring.style.height='56px';ring.style.borderColor='var(--crimson)';cursor.style.transform='translate(-50%,-50%) scale(1.5)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='';cursor.style.transform='translate(-50%,-50%) scale(1)';});
+});
+function switchLevel(level){
+  document.querySelectorAll('.level-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.level-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.level-tab.'+level).forEach(t=>t.classList.add('active'));
+  const panel=document.getElementById('panel-'+level);
+  if(panel){panel.classList.add('active');}
+  document.getElementById('topics').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function toggleCard(card){
+  const isOpen=card.classList.contains('open');
+  card.parentElement.querySelectorAll('.error-card').forEach(c=>c.classList.remove('open'));
+  if(!isOpen) card.classList.add('open');
+}
+document.querySelectorAll('.lp').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const level=Array.from(btn.classList).find(c=>['systemd','kernel','ns','perf','lvm'].includes(c));
+    if(level) switchLevel(level);
+  });
+});
+window.addEventListener('load',()=>{
+  setTimeout(()=>{document.querySelectorAll('.el-fill').forEach(el=>{el.style.width=el.dataset.width;});},600);
+});
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
