@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Platform Ops · Tech with Vishal Abhinav</title>
+<script>
+/* Apply saved theme before first paint to avoid a light/dark flash */
+(function(){
+  try {
+    var saved = localStorage.getItem('po-theme');
+    if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  } catch(e) {}
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ─── TOKENS ─── */
@@ -20,15 +29,61 @@
   --text:   #1c1f26;
   --muted:  #6b6860;
   --r: 6px;
+
+  /* Theme-aware semantic tokens (light defaults) */
+  --page-bg: var(--paper);
+  --panel-bg: var(--smoke);
+  --card-bg: var(--paper);
+  --page-fg: var(--text);
+  --heading-fg: var(--coal);
+  --cta-bg: var(--coal);
+  --cta-fg: var(--paper);
+  --nav-bg: rgba(242,240,235,0.88);
+  --nav-shadow: rgba(0,0,0,0.08);
+  --hairline-1: rgba(0,0,0,0.05);
+  --hairline-2: rgba(0,0,0,0.08);
+  --hairline-3: rgba(0,0,0,0.1);
+  --hairline-4: rgba(0,0,0,0.15);
+  --hairline-5: rgba(0,0,0,0.2);
+  --wash-1: rgba(0,0,0,0.03);
+  --wash-2: rgba(0,0,0,0.06);
+  --wash-faint: rgba(0,0,0,0.035);
 }
+html[data-theme="dark"] {
+  --page-bg: #0c0e12;
+  --panel-bg: #14161c;
+  --card-bg: #181b22;
+  --page-fg: #e7e5df;
+  --heading-fg: #eeece6;
+  --cta-bg: #eeece6;
+  --cta-fg: #0c0e12;
+  --nav-bg: rgba(12,14,18,0.88);
+  --nav-shadow: rgba(0,0,0,0.4);
+  --muted: #9a978e;
+  --hairline-1: rgba(255,255,255,0.07);
+  --hairline-2: rgba(255,255,255,0.09);
+  --hairline-3: rgba(255,255,255,0.12);
+  --hairline-4: rgba(255,255,255,0.18);
+  --hairline-5: rgba(255,255,255,0.22);
+  --wash-1: rgba(255,255,255,0.04);
+  --wash-2: rgba(255,255,255,0.08);
+  --wash-faint: rgba(255,255,255,0.04);
+}
+html[data-theme="dark"] body::before { opacity: 0.35; }
+html[data-theme="dark"] .hpg-path,
+html[data-theme="dark"] .hpg-text { stroke: rgba(255,255,255,0.1); fill: rgba(255,255,255,0.14); }
+html[data-theme="dark"] .subscribe-bg-text { color: rgba(255,255,255,0.035); }
+html[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+html[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+html:not([data-theme="dark"]) .theme-toggle .icon-moon { display: none; }
 
 /* ─── RESET ─── */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior: smooth; }
 
 body {
-  background: var(--paper);
-  color: var(--text);
+  background: var(--page-bg);
+  color: var(--page-fg);
   font-family: 'Manrope', sans-serif;
   font-size: 15px;
   line-height: 1.6;
@@ -50,7 +105,7 @@ body {
 .cursor-ring {
   position: fixed; top:0; left:0;
   width: 36px; height: 36px;
-  border: 1.5px solid var(--coal);
+  border: 1.5px solid var(--heading-fg);
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
@@ -72,18 +127,18 @@ nav {
   position: fixed; top:0; left:0; right:0; z-index:1000;
   display: flex; align-items: center; justify-content: space-between;
   padding: 18px 48px;
-  background: rgba(242,240,235,0.88);
+  background: var(--nav-bg);
   backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid var(--hairline-2);
   transition: padding 0.3s, box-shadow 0.3s;
 }
 nav.scrolled {
   padding: 12px 48px;
-  box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 32px var(--nav-shadow);
 }
 .nav-logo {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; letter-spacing: 2px; color: var(--coal);
+  font-size: 22px; letter-spacing: 2px; color: var(--heading-fg);
   display: flex; align-items: center; gap: 10px;
 }
 .nav-logo span {
@@ -109,10 +164,18 @@ nav.scrolled {
   width:0; height:1px; background:var(--crimson);
   transition: width 0.3s;
 }
-.nav-links a:hover { color: var(--coal); }
+.nav-links a:hover { color: var(--heading-fg); }
 .nav-links a:hover::after { width: 100%; }
+.theme-toggle {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; margin-left: 20px; flex-shrink: 0;
+  background: var(--wash-2); border: 1px solid var(--hairline-3); border-radius: 50%;
+  color: var(--heading-fg); cursor: pointer; transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.theme-toggle:hover { background: var(--hairline-3); transform: rotate(-12deg); }
+.theme-toggle svg { display: block; }
 .nav-cta {
-  background: var(--coal); color: var(--paper) !important;
+  background: var(--cta-bg); color: var(--cta-fg) !important;
   padding: 8px 20px !important; border-radius: 2px;
   font-family: 'DM Mono', monospace; font-size: 11px !important;
   text-transform: uppercase; letter-spacing: 2px;
@@ -136,6 +199,17 @@ nav.scrolled {
   pointer-events: none; z-index: 0;
 }
 @keyframes bg-drift { from{background-position:0 0;} to{background-position:640px 320px;} }
+
+/* ─── HERO PIPELINE BACKGROUND (large, subtle, homepage-only) ─── */
+.hero-pipeline-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.hero-pipeline-bg svg { width: min(1300px, 118%); height: auto; }
+.hpg-path { fill: none; stroke: rgba(28,31,38,0.07); stroke-width: 1.5; stroke-dasharray: 10 14; animation: dash-flow 46s linear infinite; }
+.hpg-text { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 4px; fill: rgba(28,31,38,0.09); text-transform: uppercase; }
+.hpg-node-dot { animation: hpg-pulse 3.6s ease-in-out infinite; }
+.hpg-flow-dot { filter: drop-shadow(0 0 5px currentColor); opacity: 0.35; }
+@keyframes hpg-pulse { 0%,100%{opacity:0.25;} 50%{opacity:0.55;} }
+@media (max-width: 900px) { .hero-pipeline-bg { display: none; } }
+
 .hero-left {
   padding: 80px 48px 80px 64px;
   display: flex; flex-direction: column; justify-content: center;
@@ -153,7 +227,7 @@ nav.scrolled {
 .hero-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(64px, 7vw, 102px);
-  line-height: 0.92; letter-spacing: -1px; color: var(--coal);
+  line-height: 0.92; letter-spacing: -1px; color: var(--heading-fg);
   margin-bottom: 12px;
   opacity: 0; transform: translateY(30px);
   animation: fadeUp 0.8s ease 0.35s forwards;
@@ -180,7 +254,7 @@ nav.scrolled {
   to { opacity: 1; transform: translateY(0); }
 }
 .btn-primary {
-  background: var(--coal); color: var(--paper);
+  background: var(--cta-bg); color: var(--cta-fg);
   padding: 14px 32px; font-family: 'DM Mono', monospace;
   font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
   text-decoration: none; border-radius: 2px;
@@ -198,22 +272,22 @@ nav.scrolled {
 .btn-primary:hover { transform: translateY(-2px); }
 .btn-primary span, .btn-primary svg { position: relative; z-index: 1; }
 .btn-ghost {
-  background: transparent; color: var(--coal);
+  background: transparent; color: var(--heading-fg);
   padding: 13px 32px; font-family: 'DM Mono', monospace;
   font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
-  text-decoration: none; border-radius: 2px; border: 1.5px solid var(--coal);
+  text-decoration: none; border-radius: 2px; border: 1.5px solid var(--heading-fg);
   transition: border-color 0.2s, color 0.2s, transform 0.2s;
   display: inline-flex; align-items: center; gap: 10px;
 }
 .btn-ghost:hover { border-color: var(--crimson); color: var(--crimson); transform: translateY(-2px); }
 .hero-stats {
   margin-top: 60px; display: flex; gap: 40px;
-  padding-top: 40px; border-top: 1px solid rgba(0,0,0,0.1);
+  padding-top: 40px; border-top: 1px solid var(--hairline-3);
   opacity: 0; transform: translateY(20px);
   animation: fadeUp 0.7s ease 1s forwards;
 }
 .stat-num {
-  font-family: 'Bebas Neue', sans-serif; font-size: 42px; line-height: 1; color: var(--coal);
+  font-family: 'Bebas Neue', sans-serif; font-size: 42px; line-height: 1; color: var(--heading-fg);
   transition: color 0.3s;
 }
 .stat-item:hover .stat-num { color: var(--crimson); }
@@ -224,7 +298,7 @@ nav.scrolled {
 
 /* ─── HERO RIGHT ─── */
 .hero-right {
-  background: var(--coal); position: relative; overflow: hidden;
+  background: var(--coal); position: relative; overflow: hidden; z-index: 2;
   display: flex; flex-direction: column; justify-content: center;
   align-items: center; padding: 60px 40px;
 }
@@ -360,6 +434,33 @@ nav.scrolled {
 .kr-topics .topics-grid { grid-template-columns: 1fr; }
 .kr-issues .issues-grid { grid-template-columns: 1fr; }
 .kr-issues .issue-featured, .kr-issues .issue-featured-new { padding: 28px; }
+.kr-issues .issues-inner { display: flex; flex-direction: column; }
+.kr-issues .issues-scroll-wrap { position: relative; margin-top: 4px; }
+.kr-issues .issues-scroll {
+  max-height: 640px; overflow-y: auto; overflow-x: hidden;
+  padding-right: 10px; margin-right: -10px;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.22) rgba(255,255,255,0.04);
+}
+.kr-issues .issues-scroll::-webkit-scrollbar { width: 6px; }
+.kr-issues .issues-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 3px; }
+.kr-issues .issues-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+.kr-issues .issues-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
+.kr-issues .issues-scroll-wrap::after {
+  content: ''; position: absolute; left: 0; right: 10px; bottom: 0; height: 44px;
+  background: linear-gradient(transparent, var(--coal));
+  pointer-events: none;
+}
+.issues-scroll-hint {
+  display: flex; align-items: center; gap: 6px; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: rgba(255,255,255,0.3);
+  padding-top: 12px; flex-shrink: 0;
+}
+.issues-scroll-hint svg { animation: scroll-hint-bounce 1.6s ease-in-out infinite; }
+@keyframes scroll-hint-bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(4px);} }
+@media (max-width: 1100px) {
+  .kr-issues .issues-scroll { max-height: 520px; }
+}
 @media (max-width: 1100px) {
   .knowledge-row { grid-template-columns: 1fr; }
   .kr-topics.section { padding: 80px 32px 56px; }
@@ -374,7 +475,7 @@ nav.scrolled {
 .section-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(40px, 5vw, 64px); line-height: 1;
-  letter-spacing: -0.5px; color: var(--coal); margin-bottom: 16px;
+  letter-spacing: -0.5px; color: var(--heading-fg); margin-bottom: 16px;
 }
 .section-lead {
   font-family: 'Instrument Serif', serif; font-style: italic;
@@ -384,7 +485,7 @@ nav.scrolled {
 /* ─── TOPIC CARDS ─── */
 .topics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; }
 .topic-card {
-  background: var(--smoke); padding: 0; overflow: hidden;
+  background: var(--panel-bg); padding: 0; overflow: hidden;
   cursor: pointer; position: relative; transition: background 0.25s;
 }
 .topic-card:hover { background: var(--coal); }
@@ -399,13 +500,13 @@ nav.scrolled {
 }
 .tc-icon-wrap {
   width:44px; height:44px; display:flex; align-items:center; justify-content:center;
-  font-size:22px; background:rgba(0,0,0,0.06); border-radius:4px; flex-shrink:0;
+  font-size:22px; background:var(--wash-2); border-radius:4px; flex-shrink:0;
 }
 .topic-card:hover .tc-icon-wrap { background: rgba(255,255,255,0.08); }
 .tc-meta { flex:1; padding-left:16px; }
 .tc-title {
   font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: 1px;
-  color: var(--coal); line-height: 1; margin-bottom: 4px; transition: color 0.25s;
+  color: var(--heading-fg); line-height: 1; margin-bottom: 4px; transition: color 0.25s;
 }
 .tc-count {
   font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px;
@@ -422,11 +523,11 @@ nav.scrolled {
 .topic-card.open .tc-arrow { transform: rotate(-90deg); }
 .topic-card.open .tc-indicator { background: var(--crimson); }
 .tc-items {
-  border-top: 1px solid rgba(0,0,0,0.08); padding: 20px 0 28px;
+  border-top: 1px solid var(--hairline-2); padding: 20px 0 28px;
   display: flex; flex-wrap: wrap; gap: 6px;
 }
 .tc-badge {
-  display: inline-block; background: rgba(0,0,0,0.05); color: var(--muted);
+  display: inline-block; background: var(--hairline-1); color: var(--muted);
   font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px;
   padding: 5px 12px; border-radius: 20px; text-transform: uppercase;
   transition: background 0.25s, color 0.25s;
@@ -483,7 +584,7 @@ nav.scrolled {
 
 .tc-zone-label{width:100%;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;margin:14px 0 8px;display:flex;align-items:center;gap:8px;}
 .tc-zone-label:first-child{margin-top:0;}
-.tc-zone-label::after{content:'';flex:1;height:1px;background:rgba(0,0,0,0.08);}
+.tc-zone-label::after{content:'';flex:1;height:1px;background:var(--hairline-2);}
 .topic-card:hover .tc-zone-label::after{background:rgba(255,255,255,0.1);}
 .tc-zone-label.live{color:#5a9c1a;}
 .topic-card:hover .tc-zone-label.live{color:var(--lime);}
@@ -491,7 +592,7 @@ nav.scrolled {
 .topic-card:hover .tc-zone-label.soon{color:rgba(255,255,255,0.35);}
 
 .tc-badge-link .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--lime);margin-right:6px;vertical-align:middle;box-shadow:0 0 0 2px rgba(132,204,22,0.2);}
-.tc-badge.soon{background:transparent;border:1.5px dashed rgba(0,0,0,0.15);color:var(--ash);}
+.tc-badge.soon{background:transparent;border:1.5px dashed var(--hairline-4);color:var(--ash);}
 .topic-card:hover .tc-badge.soon{border-color:rgba(255,255,255,0.18);background:transparent;color:rgba(255,255,255,0.3);}
 
 .ic-soon-flag{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-top:8px;}
@@ -673,7 +774,7 @@ nav.scrolled {
 .ic-tag.a{background:rgba(245,158,11,0.15);color:var(--amber);}
 
 /* ─── SUBSCRIBE ─── */
-.subscribe-section { background: var(--paper); position: relative; overflow: hidden; }
+.subscribe-section { background: var(--page-bg); position: relative; overflow: hidden; }
 .subscribe-inner {
   max-width: 760px; margin: 0 auto; padding: 120px 64px;
   text-align: center; position: relative; z-index: 2;
@@ -681,22 +782,22 @@ nav.scrolled {
 .subscribe-bg-text {
   position: absolute; top:50%; left:50%; transform: translate(-50%,-50%);
   font-family: 'Bebas Neue', sans-serif; font-size: 220px;
-  color: rgba(0,0,0,0.035); white-space: nowrap;
+  color: var(--wash-faint); white-space: nowrap;
   letter-spacing: -5px; pointer-events: none; line-height: 1; z-index: 1;
 }
 .subscribe-inner .section-title { margin-bottom: 16px; }
 .subscribe-inner .section-lead { max-width: 480px; margin: 0 auto 48px; }
 .sub-form {
   display: flex; gap: 0; max-width: 480px; margin: 0 auto 20px;
-  border: 1.5px solid var(--coal); border-radius: 3px; overflow: hidden;
+  border: 1.5px solid var(--heading-fg); border-radius: 3px; overflow: hidden;
 }
 .sub-input {
   flex:1; background:transparent; border:none; outline:none;
-  padding: 14px 20px; font-family: 'DM Mono', monospace; font-size: 13px; color: var(--coal);
+  padding: 14px 20px; font-family: 'DM Mono', monospace; font-size: 13px; color: var(--heading-fg);
 }
 .sub-input::placeholder { color: var(--ash); }
 .sub-btn {
-  background: var(--coal); color: var(--paper); border: none;
+  background: var(--cta-bg); color: var(--cta-fg); border: none;
   padding: 14px 28px; font-family: 'DM Mono', monospace;
   font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
   cursor: pointer; transition: background 0.2s;
@@ -705,14 +806,14 @@ nav.scrolled {
 .sub-note { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ash); }
 
 /* ─── AUTHORS ─── */
-.authors-section { background: var(--smoke); padding: 80px 64px; }
+.authors-section { background: var(--panel-bg); padding: 80px 64px; }
 .authors-inner {
   max-width: 1200px; margin: 0 auto;
   display: grid; grid-template-columns: 1fr 2fr; gap: 80px; align-items: center;
 }
 .author-cards { display: flex; flex-direction: column; gap: 16px; }
 .author-card {
-  background: var(--paper); padding: 24px;
+  background: var(--card-bg); padding: 24px;
   display: flex; align-items: flex-start; gap: 20px;
   border-radius: 4px; box-shadow: 0 2px 20px rgba(0,0,0,0.06);
   transition: box-shadow 0.2s, transform 0.2s;
@@ -724,21 +825,21 @@ nav.scrolled {
   font-family:'Bebas Neue',sans-serif; font-size:22px; flex-shrink:0;
 }
 .author-avatar.v { background: linear-gradient(135deg, var(--crimson), #ff6b35); color: #fff; }
-.author-name { font-weight: 700; font-size: 16px; color: var(--coal); }
+.author-name { font-weight: 700; font-size: 16px; color: var(--heading-fg); }
 .author-role { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
-.author-bio { font-size: 14px; line-height: 1.6; color: var(--coal); margin-top: 12px; max-width: 560px; }
+.author-bio { font-size: 14px; line-height: 1.6; color: var(--heading-fg); margin-top: 12px; max-width: 560px; }
 .author-certs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .cert-badge {
   display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1);
-  color: var(--coal); font-family: 'DM Mono', monospace; font-size: 10.5px;
+  background: var(--wash-1); border: 1px solid var(--hairline-3);
+  color: var(--heading-fg); font-family: 'DM Mono', monospace; font-size: 10.5px;
   letter-spacing: 0.5px; padding: 6px 12px; border-radius: 20px;
   transition: all 0.2s;
 }
 .cert-badge .cert-icon { font-size: 13px; line-height: 1; }
 .cert-badge:hover { background: var(--crimson); border-color: var(--crimson); color: #fff; }
-.cert-badge.progress { background: transparent; border: 1.5px dashed rgba(0,0,0,0.2); color: var(--muted); }
-.author-specialties { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(0,0,0,0.08); }
+.cert-badge.progress { background: transparent; border: 1.5px dashed var(--hairline-5); color: var(--muted); }
+.author-specialties { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--hairline-2); }
 .author-specialties .as-label { font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 .spec-badge {
   display: inline-flex; align-items: center; background: rgba(0,194,212,0.08);
@@ -748,20 +849,47 @@ nav.scrolled {
 }
 
 /* ─── FOOTER ─── */
-footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64px; }
-.footer-inner {
-  max-width: 1200px; margin: 0 auto;
+footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 64px 64px 32px; }
+.footer-inner { max-width: 1200px; margin: 0 auto; }
+.footer-top {
+  display: grid; grid-template-columns: 1.2fr 2fr; gap: 60px;
+  padding-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; color: rgba(255,255,255,0.7); margin-bottom: 14px; }
+.footer-tagline {
+  font-family: 'Instrument Serif', serif; font-style: italic; font-size: 15px;
+  line-height: 1.6; color: rgba(255,255,255,0.4); max-width: 360px; margin-bottom: 18px;
+}
+.footer-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--lime); background: rgba(132,204,22,0.1); border: 1px solid rgba(132,204,22,0.25);
+  padding: 6px 14px; border-radius: 20px;
+}
+.fb-dot { width:5px; height:5px; border-radius:50%; background:var(--lime); animation: legend-pulse 2s ease-in-out infinite; flex-shrink:0; }
+.footer-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.footer-col { display: flex; flex-direction: column; gap: 10px; }
+.footer-col-title {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(255,255,255,0.32); margin-bottom: 6px;
+}
+.footer-col a {
+  font-family: 'DM Mono', monospace; font-size: 12.5px; letter-spacing: 0.3px;
+  color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.2s;
+}
+.footer-col a:hover { color: var(--cyan); }
+.footer-bottom {
   display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 20px;
+  flex-wrap: wrap; gap: 12px; padding-top: 24px;
 }
-.footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; color: rgba(255,255,255,0.6); }
-.footer-links { display: flex; gap: 24px; }
-.footer-links a {
-  font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px;
-  text-transform: uppercase; color: rgba(255,255,255,0.25); text-decoration: none; transition: color 0.2s;
-}
-.footer-links a:hover { color: var(--cyan); }
 .footer-note { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; }
+.footer-meta { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: rgba(255,255,255,0.2); }
+@media (max-width: 900px) {
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+}
+@media (max-width: 600px) {
+  .footer-cols { grid-template-columns: 1fr 1fr; }
+}
 
 /* ─── SCROLL REVEAL ─── */
 .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
@@ -808,10 +936,42 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
     <li><a href="#authors">Authors</a></li>
     <li><a href="#subscribe" class="nav-cta">Subscribe →</a></li>
   </ul>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark / light mode">
+    <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    <svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+  </button>
 </nav>
 
 <!-- ═══════════ HERO ═══════════ -->
 <section class="hero">
+  <div class="hero-pipeline-bg" aria-hidden="true">
+    <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <path id="hpgLoop" class="hpg-path" d="M120,350 C120,195.4 290.1,70 500,70 C709.9,70 880,195.4 880,350 C880,504.6 709.9,630 500,630 C290.1,630 120,504.6 120,350 Z"/>
+      </defs>
+      <use href="#hpgLoop"/>
+      <text class="hpg-text" dy="5">
+        <textPath href="#hpgLoop" startOffset="0%">PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • </textPath>
+      </text>
+
+      <circle class="hpg-flow-dot" r="4" fill="var(--cyan)" style="color:var(--cyan)">
+        <animateMotion dur="14s" repeatCount="indefinite" rotate="auto"><mpath href="#hpgLoop"/></animateMotion>
+      </circle>
+      <circle class="hpg-flow-dot" r="4" fill="var(--amber)" style="color:var(--amber)">
+        <animateMotion dur="14s" begin="-7s" repeatCount="indefinite" rotate="auto"><mpath href="#hpgLoop"/></animateMotion>
+      </circle>
+
+      <!-- 8 pipeline stage nodes, evenly spaced around the loop — small & muted so they read as background texture -->
+      <circle class="hpg-node-dot" cx="880" cy="350" r="5" fill="rgba(229,57,53,0.3)"/>
+      <circle class="hpg-node-dot" cx="768.7" cy="548" r="5" fill="rgba(245,158,11,0.3)" style="animation-delay:.3s"/>
+      <circle class="hpg-node-dot" cx="500" cy="630" r="5" fill="rgba(0,194,212,0.3)" style="animation-delay:.6s"/>
+      <circle class="hpg-node-dot" cx="231.3" cy="548" r="5" fill="rgba(132,204,22,0.3)" style="animation-delay:.9s"/>
+      <circle class="hpg-node-dot" cx="120" cy="350" r="5" fill="rgba(229,57,53,0.3)" style="animation-delay:1.2s"/>
+      <circle class="hpg-node-dot" cx="231.3" cy="152" r="5" fill="rgba(245,158,11,0.3)" style="animation-delay:1.5s"/>
+      <circle class="hpg-node-dot" cx="500" cy="70" r="5" fill="rgba(0,194,212,0.3)" style="animation-delay:1.8s"/>
+      <circle class="hpg-node-dot" cx="768.7" cy="152" r="5" fill="rgba(132,204,22,0.3)" style="animation-delay:2.1s"/>
+    </svg>
+  </div>
   <div class="hero-left">
     <div class="hero-eyebrow">
       <span class="hero-eyebrow-line"></span>
@@ -1184,7 +1344,9 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
       <div class="if-num">56</div>
     </a>
 
-    <!-- ── GRID: Previous issues ── -->
+    <!-- ── GRID: Previous issues (scrollable) ── -->
+    <div class="issues-scroll-wrap">
+    <div class="issues-scroll" id="issuesScroll">
     <div class="issues-grid">
 
       <a href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html" class="issue-card">
@@ -1347,6 +1509,12 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
       </div>
 
     </div>
+    </div>
+    </div>
+    <div class="issues-scroll-hint">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      Scroll for older issues
+    </div>
   </div>
 </div>
 </div>
@@ -1402,16 +1570,36 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
 <!-- ═══════════ FOOTER ═══════════ -->
 <footer>
   <div class="footer-inner">
-    <div class="footer-logo">PLATFORM OPS</div>
-    <div class="footer-links">
-      <a href="#topics">Topics</a>
-      <a href="#issues">Archive</a>
-      <a href="Infrastructure/OS/index.html">OS / Linux Series</a>
-      <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
-      <a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Latest Issue</a>
-      <a href="#subscribe">Subscribe</a>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">PLATFORM OPS</div>
+        <p class="footer-tagline">Field notes on Kubernetes, SRE, and Platform Engineering — written from production, not slideware.</p>
+        <div class="footer-badge"><span class="fb-dot"></span> Published monthly · Free forever</div>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <div class="footer-col-title">Newsletter</div>
+          <a href="#issues">Latest Issues</a>
+          <a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Newest — Issue #057</a>
+          <a href="#subscribe">Subscribe</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Explore</div>
+          <a href="#topics">Knowledge Map</a>
+          <a href="Infrastructure/OS/index.html">OS / Linux Series</a>
+          <a href="#authors">About the Author</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Connect</div>
+          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="#">Back to Top ↑</a>
+        </div>
+      </div>
     </div>
-    <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
+    <div class="footer-bottom">
+      <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
+      <div class="footer-meta">Built for engineers, by an engineer.</div>
+    </div>
   </div>
 </footer>
 
@@ -1447,15 +1635,49 @@ window.addEventListener('scroll', () => {
   document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 60);
 });
 
+/* ── Dark / light theme toggle ── */
+(function(){
+  const toggle = document.getElementById('themeToggle');
+  if (!toggle) return;
+  toggle.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    try { localStorage.setItem('po-theme', isDark ? 'light' : 'dark'); } catch(e) {}
+  });
+})();
+
 /* ── Accordion ── */
 function toggleTopic(card){
   const isOpen = card.classList.contains('open');
   document.querySelectorAll('.topic-card').forEach(c=>c.classList.remove('open'));
   if(!isOpen) card.classList.add('open');
+  setTimeout(syncIssuesScrollHeight, 520);
 }
 document.querySelectorAll('.tc-badge-link').forEach(link=>{
   link.addEventListener('click', e=>e.stopPropagation());
 });
+
+/* ── Keep the Latest Issues scroll panel flush with the Topics column height ── */
+function syncIssuesScrollHeight(){
+  const topics = document.querySelector('.kr-topics');
+  const issuesInner = document.querySelector('.kr-issues .issues-inner');
+  const scrollWrap = document.querySelector('.kr-issues .issues-scroll-wrap');
+  const scrollBox = document.getElementById('issuesScroll');
+  if (!topics || !issuesInner || !scrollWrap || !scrollBox) return;
+  if (window.innerWidth <= 1100) { scrollBox.style.maxHeight = ''; return; }
+  const topicsH = topics.getBoundingClientRect().height;
+  const innerH = issuesInner.getBoundingClientRect().height;
+  const wrapH = scrollWrap.getBoundingClientRect().height;
+  const target = Math.max(320, Math.round(topicsH - (innerH - wrapH)));
+  scrollBox.style.maxHeight = target + 'px';
+}
+window.addEventListener('load', syncIssuesScrollHeight);
+window.addEventListener('resize', syncIssuesScrollHeight);
+syncIssuesScrollHeight();
 
 /* ── Scroll reveal ── */
 const observer = new IntersectionObserver(entries=>{
