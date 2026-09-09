@@ -764,7 +764,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
     </div>
     <div class="hero-stats">
       <div class="stat-item">
-        <div class="stat-num"><span class="count-up" data-target="52">0</span></div>
+        <div class="stat-num"><span class="count-up" data-target="53">0</span></div>
         <div class="stat-label">Issues Published</div>
       </div>
       <div class="stat-item">
@@ -779,34 +779,34 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
   </div>
 
   <div class="hero-right">
-    <a href="DevOps/CICD/cicd-pipelines.html" class="hero-new-badge">🚀 New — Issue #052</a>
+    <a href="SRE/INCIDENT-MANAGEMENT/incident-management.html" class="hero-new-badge">🚨 New — Issue #053</a>
     <div class="terminal">
       <div class="terminal-bar">
         <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
-        <div class="t-title">platform-ops ~ issue #052</div>
+        <div class="t-title">platform-ops ~ issue #053</div>
       </div>
       <div class="terminal-body">
-        <span class="tl"><span class="tl-prompt">❯</span> <span class="tl-cmd">argocd app diff billing-api --revision HEAD</span></span>
-        <span class="tl tl-out">NAME          SYNC STATUS   HEALTH</span>
-        <span class="tl"><span class="tl-k">billing-api</span>   <span class="tl-err">OutOfSync</span>     <span class="tl-out">Healthy</span></span>
+        <span class="tl"><span class="tl-prompt">/</span> <span class="tl-cmd">incident declare "Billing API 5xx spike" --sev2</span></span>
+        <span class="tl tl-out">#inc-2026-09-14-billing-api created</span>
+        <span class="tl"><span class="tl-k">IC assigned</span>   <span class="tl-out">T+5m</span></span>
         <span class="tl"> </span>
-        <span class="tl"><span class="tl-prompt">❯</span> <span class="tl-cmd">argocd app sync billing-api</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">canary weight 10% → 50% → 100%</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Synced · Healthy</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Issue #052 — CI/CD & GitOps 🚀</span></span>
+        <span class="tl"><span class="tl-prompt">/</span> <span class="tl-cmd">incident timeline "root cause: bad config push"</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">mitigated T+32m · resolved T+40m</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">postmortem published T+72h</span></span>
+        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Issue #053 — Incident Management 🚨</span></span>
         <span class="tl"> </span>
         <span class="tl"><span class="tl-prompt">❯</span> <span class="cursor-blink"></span></span>
       </div>
     </div>
     <div class="badge-strip">
-      <span class="t-badge">ArgoCD</span>
-      <span class="t-badge">Canary</span>
-      <span class="t-badge">StatefulSet</span>
-      <span class="t-badge">PVC</span>
-      <span class="t-badge">Prometheus</span>
-      <span class="t-badge">Loki</span>
-      <span class="t-badge">Vault</span>
-      <span class="t-badge">SBOM</span>
+      <span class="t-badge">SEV1-4</span>
+      <span class="t-badge">Incident Commander</span>
+      <span class="t-badge">Blameless</span>
+      <span class="t-badge">War Room</span>
+      <span class="t-badge">Root Cause</span>
+      <span class="t-badge">MTTR</span>
+      <span class="t-badge">Action Items</span>
+      <span class="t-badge">Postmortem</span>
     </div>
   </div>
 </section>
@@ -885,7 +885,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
       <div class="terminal-body kmap-body">
         <span class="tl kt-row"><span class="tl-prompt">❯</span> <span class="tl-cmd">tree platform-ops/ --content-map --road-map</span></span>
         <span class="tl kt-row">platform-ops/</span>
-        <span class="tl kt-row"><span class="tl-branch">├── </span><span class="tl-dir">content-map/</span>                    <span class="tl-count-live">[ 7 LIVE ]</span></span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><span class="tl-dir">content-map/</span>                    <span class="tl-count-live">[ 8 LIVE ]</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   ├── </span><span class="tl-dir">devops/</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="tl-live">k8-architecture.html</a> <span class="tl-out">· issue #048</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/Networking/k8-networking.html" class="tl-live">k8-networking.html</a> <span class="tl-out">· issue #047</span></span>
@@ -893,15 +893,17 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
         <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/STORAGE/k8-storage.html" class="tl-live">k8-storage.html</a> <span class="tl-out">· issue #050</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/OBSERVABILITY/k8-observability.html" class="tl-live">k8-observability.html</a> <span class="tl-out">· issue #051</span></span>
         <span class="tl kt-row"><span class="tl-branch">│   │   └── </span><a href="DevOps/CICD/cicd-pipelines.html" class="tl-live">cicd-gitops.html</a> <span class="tl-out">· issue #052</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   └── </span><span class="tl-dir">networking/</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│       └── </span><a href="DevOps/K8/Networking/k8-networking.html" class="tl-live">k8-networking-decoded.html</a> <span class="tl-out">· issue #047</span></span>
-        <span class="tl kt-row"><span class="tl-branch">└── </span><span class="tl-dir">road-map/</span>                      <span class="tl-count-soon">[ 19 PLANNED ]</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   ├── </span><span class="tl-dir">networking/</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   │   └── </span><a href="DevOps/K8/Networking/k8-networking.html" class="tl-live">k8-networking-decoded.html</a> <span class="tl-out">· issue #047</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│   └── </span><span class="tl-dir">sre/</span></span>
+        <span class="tl kt-row"><span class="tl-branch">│       └── </span><a href="SRE/INCIDENT-MANAGEMENT/incident-management.html" class="tl-live">incident-management.html</a> <span class="tl-out">· issue #053</span></span>
+        <span class="tl kt-row"><span class="tl-branch">└── </span><span class="tl-dir">road-map/</span>                      <span class="tl-count-soon">[ 18 PLANNED ]</span></span>
         <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">devops/</span>          <span class="tl-soon">rbac · admission-controllers · multi-cluster-federation</span></span>
-        <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">sre/</span>              <span class="tl-soon">slis-slos-slas · incident-mgmt · error-budgets · reliability-eng · postmortems · chaos-eng</span></span>
+        <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">sre/</span>              <span class="tl-soon">slis-slos-slas · error-budgets · reliability-eng · chaos-eng · on-call-design</span></span>
         <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">infrastructure/</span>   <span class="tl-soon">linux(rhel·centos·ubuntu·systemd) · virtualization · aws · azure · gcp</span></span>
         <span class="tl kt-row"><span class="tl-branch">    └── </span><span class="tl-dir">networking/</span>       <span class="tl-soon">osi · tcp-ip · load-balancing · gateway-api · service-mesh · ebpf</span></span>
         <span class="tl kt-row"> </span>
-        <span class="tl kt-row"><span class="tl-ok">✓</span> <span class="tl-out">7 directories, 7 live articles, 19 planned topics</span></span>
+        <span class="tl kt-row"><span class="tl-ok">✓</span> <span class="tl-out">9 directories, 8 live articles, 18 planned topics</span></span>
         <span class="tl kt-row"><span class="tl-prompt">❯</span> <span class="cursor-blink"></span></span>
       </div>
     </div>
@@ -955,19 +957,21 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
           <div class="tc-icon-wrap">📡</div>
           <div class="tc-meta">
             <div class="tc-title">SRE</div>
-            <div class="tc-status"><span class="tc-status-dot soon"></span><span class="tc-status-text">Coming Soon</span></div>
+            <div class="tc-status"><span class="tc-status-dot live"></span><span class="tc-status-text"><span class="n">1</span> Live · 5 Planned</span></div>
           </div>
           <span class="tc-arrow">↓</span>
         </div>
         <div class="tc-body">
           <div class="tc-items">
+            <div class="tc-zone-label live">✅ Live Now</div>
+            <a href="SRE/INCIDENT-MANAGEMENT/incident-management.html" class="tc-badge-link" style="background:rgba(229,57,53,0.15);border-color:rgba(229,57,53,0.35);"><span class="dot"></span>Incident Management & Postmortems ↗</a>
+
             <div class="tc-zone-label soon">🔜 On the Roadmap</div>
             <span class="tc-badge soon">SLIs / SLOs / SLAs</span>
-            <span class="tc-badge soon">Incident Management</span>
             <span class="tc-badge soon">Error Budgets</span>
             <span class="tc-badge soon">Reliability Engineering</span>
-            <span class="tc-badge soon">Postmortems</span>
             <span class="tc-badge soon">Chaos Engineering</span>
+            <span class="tc-badge soon">On-Call Design</span>
           </div>
         </div>
       </div>
@@ -1163,53 +1167,64 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
     <h2 class="section-title" style="color:var(--paper)">LATEST ISSUES</h2>
     <p class="section-lead">Every issue is a deep-dive with architecture diagrams, code samples, and battle-tested insights.</p>
 
-    <!-- ── NEW FEATURED: Issue #052 CI/CD & GitOps ── -->
-    <a href="DevOps/CICD/cicd-pipelines.html" class="issue-featured-new">
+    <!-- ── NEW FEATURED: Issue #053 Incident Management & Postmortems ── -->
+    <a href="SRE/INCIDENT-MANAGEMENT/incident-management.html" class="issue-featured-new">
       <div>
         <div class="ifn-new-badge"><span class="ifn-dot"></span> New Issue</div>
-        <div class="ifn-issue-meta">August 2026 · #052</div>
-        <div class="ifn-title">CI/CD & GitOps Deep-Dive</div>
+        <div class="ifn-issue-meta">September 2026 · #053</div>
+        <div class="ifn-title">Incident Management & Postmortems</div>
         <div class="ifn-desc">
-          Commit to production, five stages at a time — Jenkins & GitLab CI pipeline design, GitOps reconciliation with ArgoCD/Flux, pipeline security gates (SAST/SBOM/signing), canary & blue-green deployment strategy, and secrets/artifact management.
+          First issue in the new SRE series — severity classification (SEV1–4), the Incident Commander role and war-room practice, blameless postmortem writing with a full copy-paste template, action-item follow-through, and the culture/metrics that make it stick.
         </div>
         <div class="ifn-tags">
-          <span class="ifn-tag r">CI Pipelines</span>
-          <span class="ifn-tag a">GitOps</span>
-          <span class="ifn-tag c">ArgoCD</span>
-          <span class="ifn-tag c">Flux</span>
-          <span class="ifn-tag l">Canary</span>
-          <span class="ifn-tag l">Blue-Green</span>
-          <span class="ifn-tag p">Secrets</span>
-          <span class="ifn-tag p">Supply Chain</span>
+          <span class="ifn-tag r">Severity</span>
+          <span class="ifn-tag a">Incident Commander</span>
+          <span class="ifn-tag c">Postmortems</span>
+          <span class="ifn-tag c">Blameless</span>
+          <span class="ifn-tag l">Action Items</span>
+          <span class="ifn-tag l">MTTR</span>
+          <span class="ifn-tag p">SRE</span>
+          <span class="ifn-tag p">Culture</span>
         </div>
       </div>
       <div class="ifn-cta">Read Deep-Dive →</div>
-      <div class="ifn-num">52</div>
+      <div class="ifn-num">53</div>
     </a>
 
-    <!-- ── PREVIOUS FEATURED: Issue #051 Observability ── -->
-    <a href="DevOps/K8/OBSERVABILITY/k8-observability.html" class="issue-featured">
+    <!-- ── PREVIOUS FEATURED: Issue #052 CI/CD & GitOps ── -->
+    <a href="DevOps/CICD/cicd-pipelines.html" class="issue-featured">
       <div>
         <div class="if-new-badge"><span class="if-new-badge-dot"></span> Previous Issue</div>
-        <div class="if-issue-meta">July 2026 · #051</div>
-        <div class="if-title">Observability Stack Deep-Dive</div>
-        <div class="if-desc">Metrics, logs, and traces — Prometheus + Grafana, Loki/ELK, Jaeger/OpenTelemetry, SLO burn-rate alerting, and how an internal platform like OpsCore ties every signal together into one pane of glass.</div>
+        <div class="if-issue-meta">August 2026 · #052</div>
+        <div class="if-title">CI/CD & GitOps Deep-Dive</div>
+        <div class="if-desc">Jenkins & GitLab CI pipeline design, GitOps reconciliation with ArgoCD/Flux, pipeline security gates (SAST/SBOM/signing), canary & blue-green deployment strategy, and secrets/artifact management.</div>
         <div class="if-tags">
-          <span class="if-tag c">Prometheus</span>
-          <span class="if-tag c">Grafana</span>
-          <span class="if-tag r">Loki</span>
-          <span class="if-tag r">ELK</span>
-          <span class="if-tag l">Jaeger</span>
-          <span class="if-tag a">OpenTelemetry</span>
-          <span class="if-tag l">OpsCore</span>
+          <span class="if-tag r">CI Pipelines</span>
+          <span class="if-tag a">GitOps</span>
+          <span class="if-tag c">ArgoCD</span>
+          <span class="if-tag c">Flux</span>
+          <span class="if-tag l">Canary</span>
+          <span class="if-tag p">Secrets</span>
         </div>
       </div>
       <div class="if-cta">Read Now →</div>
-      <div class="if-num">51</div>
+      <div class="if-num">52</div>
     </a>
 
     <!-- ── GRID: Previous issues ── -->
     <div class="issues-grid">
+
+      <a href="DevOps/K8/OBSERVABILITY/k8-observability.html" class="issue-card">
+        <div class="ic-issue">July 2026 · #051</div>
+        <div class="ic-title">Observability Stack Deep-Dive</div>
+        <div class="ic-desc">Prometheus + Grafana, Loki/ELK, Jaeger/OpenTelemetry, SLO burn-rate alerting, and the OpsCore correlation layer.</div>
+        <div class="ic-tags">
+          <span class="ic-tag c">Prometheus</span>
+          <span class="ic-tag r">Loki</span>
+          <span class="ic-tag l">Jaeger</span>
+        </div>
+        <div class="ic-num">51</div>
+      </a>
 
       <a href="DevOps/K8/STORAGE/k8-storage.html" class="issue-card">
         <div class="ic-issue">June 2026 · #050</div>
@@ -1370,7 +1385,7 @@ footer { background: var(--ink); color: rgba(255,255,255,0.3); padding: 48px 64p
       <a href="#topics">Topics</a>
       <a href="#issues">Archive</a>
       <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub</a>
-      <a href="DevOps/CICD/cicd-pipelines.html">Latest Issue</a>
+      <a href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Latest Issue</a>
       <a href="#subscribe">Subscribe</a>
     </div>
     <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
