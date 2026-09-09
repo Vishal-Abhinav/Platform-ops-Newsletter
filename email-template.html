@@ -1,0 +1,211 @@
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  PLATFORM OPS — reusable broadcast template
+  ──────────────────────────────────────────────────────────────────────
+  Built for email, not the web: table layout, inline styles, web-safe
+  font stacks, 600px wide, one image (none, in fact). It will render in
+  Gmail, Outlook, Apple Mail and mobile without falling apart.
+
+  EACH MONTH, CHANGE ONLY THESE FIVE THINGS. Each one is tagged with a
+  "SWAP" comment in the markup below:
+     1. Issue number + date        (appears twice: header pill + meta line)
+     2. Issue title
+     3. The intro paragraph
+     4. "What's inside" lines
+     5. The Read button URL + the three archive links
+
+  Do NOT add more images or more links than this. A text-forward email
+  with one clear call to action is what gets you into the inbox while
+  your sending reputation is still new.
+  ══════════════════════════════════════════════════════════════════════
+-->
+<div style="margin:0;padding:0;background-color:#e8e6e1;">
+
+  <!-- preheader: shows next to the subject line in the inbox, invisible in the email -->
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#e8e6e1;">
+    <!-- SWAP 3 (short version) -->
+    Fundamentals, permissions, processes, networking, storage, security, monitoring, troubleshooting — 190 terms in one place.
+  </div>
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#e8e6e1;">
+    <tr>
+      <td align="center" style="padding:24px 10px;">
+
+        <!--[if mso]>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td>
+        <![endif]-->
+        <!-- width:100% + max-width keeps it fluid on phones; the ghost table above
+             gives Outlook the fixed 600px it needs, since it ignores max-width -->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;max-width:600px;background-color:#f2f0eb;">
+
+          <!-- ─── HEADER ─── -->
+          <tr>
+            <td bgcolor="#0c0e12" style="background-color:#0c0e12;padding:24px 28px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="left" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:17px;font-weight:bold;letter-spacing:2px;color:#ffffff;text-transform:uppercase;white-space:nowrap;">
+                    <span style="color:#e53935;">&#9679;</span>&nbsp; Platform Ops
+                  </td>
+                  <td align="right" style="font-family:'DM Mono','SF Mono',Consolas,'Courier New',monospace;font-size:11px;letter-spacing:1.5px;color:#84cc16;text-transform:uppercase;white-space:nowrap;">
+                    <!-- SWAP 1 -->Issue #057
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ─── ISSUE META + TITLE ─── -->
+          <tr>
+            <td style="padding:38px 28px 0 28px;">
+              <div style="font-family:'DM Mono','SF Mono',Consolas,'Courier New',monospace;font-size:11px;letter-spacing:2.5px;color:#6b6860;text-transform:uppercase;padding-bottom:14px;">
+                <!-- SWAP 1 -->September 2026 &middot; Issue #057
+              </div>
+              <h1 style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:32px;line-height:1.15;font-weight:bold;letter-spacing:-0.4px;color:#12151b;">
+                <!-- SWAP 2 -->Linux &amp; Unix Glossary
+              </h1>
+            </td>
+          </tr>
+
+          <!-- ─── INTRO ─── -->
+          <tr>
+            <td style="padding:22px 28px 0 28px;">
+              <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:17px;line-height:1.6;color:#4a4740;">
+                <!-- SWAP 3 -->
+                Every Linux term I kept re-Googling at 2 AM, written down once and properly.
+              </p>
+              <p style="margin:18px 0 0 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#3a3833;">
+                <!-- SWAP 3 -->
+                190 terms across 15 categories — searchable in one place, with standalone
+                deep-dive pages for the ones that deserve more than a definition. It's the
+                reference I wanted when I started, not a tutorial you read once and forget.
+              </p>
+            </td>
+          </tr>
+
+          <!-- ─── WHAT'S INSIDE ─── -->
+          <tr>
+            <td style="padding:30px 28px 0 28px;">
+              <div style="font-family:'DM Mono','SF Mono',Consolas,'Courier New',monospace;font-size:10px;letter-spacing:2.5px;color:#6b6860;text-transform:uppercase;padding-bottom:14px;border-bottom:1px solid #dcd8d0;">
+                What&rsquo;s inside
+              </div>
+
+              <!-- SWAP 4 — keep to 4 lines; more than that and people skim past all of them -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:16px;">
+                <tr>
+                  <td width="14" valign="top" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#00c2d4;">&#9656;</td>
+                  <td style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#3a3833;padding-bottom:8px;">
+                    Permissions, processes and the filesystem hierarchy
+                  </td>
+                </tr>
+                <tr>
+                  <td width="14" valign="top" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#84cc16;">&#9656;</td>
+                  <td style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#3a3833;padding-bottom:8px;">
+                    systemd, boot order and what actually starts your services
+                  </td>
+                </tr>
+                <tr>
+                  <td width="14" valign="top" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#f59e0b;">&#9656;</td>
+                  <td style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#3a3833;padding-bottom:8px;">
+                    Storage, LVM and the networking terms that come up in incidents
+                  </td>
+                </tr>
+                <tr>
+                  <td width="14" valign="top" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#e53935;">&#9656;</td>
+                  <td style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#3a3833;">
+                    Monitoring and troubleshooting vocabulary, defined in context
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ─── CTA BUTTON ─── -->
+          <tr>
+            <td align="left" style="padding:32px 28px 0 28px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td bgcolor="#e53935" style="background-color:#e53935;">
+                    <!-- SWAP 5 -->
+                    <a href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html"
+                       style="display:inline-block;padding:15px 34px;font-family:'DM Mono','SF Mono',Consolas,'Courier New',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#ffffff;text-decoration:none;font-weight:bold;">
+                      Read Issue #057 &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <div style="font-family:'DM Mono','SF Mono',Consolas,'Courier New',monospace;font-size:11px;color:#6b6860;padding-top:12px;">
+                Free to read &middot; No signup wall
+              </div>
+            </td>
+          </tr>
+
+          <!-- ─── ARCHIVE ─── -->
+          <tr>
+            <td style="padding:34px 28px 0 28px;">
+              <div style="border-top:1px solid #dcd8d0;padding-top:24px;">
+                <div style="font-family:'DM Mono','SF Mono',Consolas,'Courier New',monospace;font-size:10px;letter-spacing:2.5px;color:#6b6860;text-transform:uppercase;padding-bottom:14px;">
+                  Recently published
+                </div>
+                <!-- SWAP 5 — roll these forward each month -->
+                <p style="margin:0 0 9px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;">
+                  <a href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html" style="color:#1c1f26;text-decoration:underline;">#056 &mdash; Linux Troubleshooting</a>
+                  <span style="color:#8a867d;">&nbsp;high load, OOM, disk &amp; I/O, boot failures</span>
+                </p>
+                <p style="margin:0 0 9px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;">
+                  <a href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html" style="color:#1c1f26;text-decoration:underline;">#055 &mdash; Linux Advanced</a>
+                  <span style="color:#8a867d;">&nbsp;systemd internals, namespaces, cgroups, LVM</span>
+                </p>
+                <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;">
+                  <a href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html" style="color:#1c1f26;text-decoration:underline;">#054 &mdash; Linux Fundamentals</a>
+                  <span style="color:#8a867d;">&nbsp;filesystem hierarchy, permissions, packages</span>
+                </p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ─── SIGN-OFF ─── -->
+          <tr>
+            <td style="padding:30px 28px 34px 28px;">
+              <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#3a3833;">
+                Hit reply if something in here is wrong, or if there's a topic you want
+                covered next — replies come straight to me.
+              </p>
+              <p style="margin:16px 0 0 0;font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#12151b;">
+                &mdash; Vishal
+              </p>
+            </td>
+          </tr>
+
+          <!-- ─── FOOTER ─── -->
+          <tr>
+            <td bgcolor="#0c0e12" style="background-color:#0c0e12;padding:26px 28px;">
+              <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;letter-spacing:2.5px;color:#ffffff;text-transform:uppercase;padding-bottom:10px;">
+                Platform Ops
+              </div>
+              <div style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:13px;line-height:1.6;color:#8b8880;padding-bottom:16px;">
+                Field notes on Kubernetes, SRE and Platform Engineering —<br>written from production, not slideware.
+              </div>
+              <div style="font-family:'DM Mono','SF Mono',Consolas,'Courier New',monospace;font-size:11px;line-height:1.9;">
+                <a href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/" style="color:#00c2d4;text-decoration:none;">Read online</a>
+                <span style="color:#4a4740;">&nbsp;&middot;&nbsp;</span>
+                <a href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/#issues" style="color:#00c2d4;text-decoration:none;">Archive</a>
+                <span style="color:#4a4740;">&nbsp;&middot;&nbsp;</span>
+                <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" style="color:#00c2d4;text-decoration:none;">GitHub</a>
+              </div>
+              <div style="font-family:'DM Mono','SF Mono',Consolas,'Courier New',monospace;font-size:10px;color:#5a574f;padding-top:18px;border-top:1px solid #23262e;margin-top:18px;">
+                You're receiving this because you subscribed to Platform Ops.
+                <!-- Kit appends the unsubscribe link and postal address automatically.
+                     Do not add your own — a duplicate looks broken and can trip spam filters. -->
+              </div>
+            </td>
+          </tr>
+
+        </table>
+        <!--[if mso]>
+        </td></tr></table>
+        <![endif]-->
+
+      </td>
+    </tr>
+  </table>
+</div>
