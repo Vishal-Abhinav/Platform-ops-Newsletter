@@ -1,0 +1,14 @@
+# Python bytecode from the tools/ builders. Nine of these were committed and
+# churned on every build; the whole repo deploys to Pages, so they were also
+# nine public URLs serving compiled bytecode.
+__pycache__/
+*.py[cod]
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Local scratch — anything staged for inspection rather than publication
+*.bak
