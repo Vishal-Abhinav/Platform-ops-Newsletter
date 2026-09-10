@@ -156,6 +156,18 @@ a.footer-logo:hover{color:#fff;}
 @media (max-width:900px){footer{padding:56px 32px 28px;}.footer-top{grid-template-columns:1fr;gap:32px;}}
 @media (max-width:600px){footer{padding:48px 22px 24px;}.footer-cols{grid-template-columns:1fr 1fr;}}
 </style>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="alternate" type="application/rss+xml" title="Platform Ops - new issues" href="../../../../../../feed.xml">
 </head>
 <body>
 <div class="cursor" id="cursor"></div>
@@ -203,7 +215,7 @@ a.footer-logo:hover{color:#fff;}
 <section class="body-section reveal">
   <div class="block-label">How It Works</div>
   <h2 class="block-title">Under The Hood</h2>
-  <p class="block-text">System-wide files sit directly under <code>/proc</code>: <code>/proc/cpuinfo</code>, <code>/proc/meminfo</code>, <code>/proc/loadavg</code>. Per-process files sit under <code>/proc/<pid>/</code>, and the special path <code>/proc/self/</code> always refers to whichever process is currently reading it — useful in scripts that need their own PID without calling <code>$$</code>.</p>
+  <p class="block-text">System-wide files sit directly under <code>/proc</code>: <code>/proc/cpuinfo</code>, <code>/proc/meminfo</code>, <code>/proc/loadavg</code>. Per-process files sit under <code>/proc/&lt;pid&gt;/</code>, and the special path <code>/proc/self/</code> always refers to whichever process is currently reading it — useful in scripts that need their own PID without calling <code>$$</code>.</p>
 <p class="block-text">Because these files are generated on read rather than stored, tools like <code>ls -l</code> or <code>du</code> report meaningless sizes (often 0 bytes) for most of them — the content only exists at the moment of the read() syscall.</p>
 </section>
 
@@ -224,7 +236,7 @@ a.footer-logo:hover{color:#fff;}
   <h2 class="block-title">Common Mistakes</h2>
   <div class="mistakes-list">
   <div class="mistake-item"><span class="mistake-icon">⚠️</span><span class="mistake-text">Trying to back up or <code>tar</code> a directory that includes <code>/proc</code> — it isn't real data and will hang or produce garbage; always exclude it explicitly.</span></div>
-  <div class="mistake-item"><span class="mistake-icon">⚠️</span><span class="mistake-text">Reading a <code>/proc/<pid>/</code> file just as that process exits — the directory can disappear mid-read, causing a "No such file or directory" error that looks like a bug but isn't.</span></div>
+  <div class="mistake-item"><span class="mistake-icon">⚠️</span><span class="mistake-text">Reading a <code>/proc/&lt;pid&gt;/</code> file just as that process exits — the directory can disappear mid-read, causing a "No such file or directory" error that looks like a bug but isn't.</span></div>
   </div>
 </section>
 
@@ -273,6 +285,7 @@ a.footer-logo:hover{color:#fff;}
         <div class="footer-col">
           <div class="footer-col-title">Connect</div>
           <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="../../../../../../feed.xml">RSS Feed</a>
           <a href="#">Back to Top ↑</a>
         </div>
       </div>

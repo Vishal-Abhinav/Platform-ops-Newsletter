@@ -812,9 +812,59 @@ The homepage is a single hand-written HTML file with no framework behind it:
 | ♾️ **Animated DevOps loop** | SVG infinity loop with the eight lifecycle stages and a light pulse racing the path |
 | 🗺️ **Knowledge map** | All 521 topics, grouped into 33 categories under 10 pillars — search by name, filter by status, expand a pillar to see what's shipped and what's queued |
 | 🖥️ **Coverage terminal** | Terminal-style `tree` view of the ten pillars with live-vs-total counts, and a `ls published/` listing that links straight into every issue |
+| 🔔 **Topic requests** | Clicking a pipeline or planned topic queues it; the signup then tells Kit which topics that reader is waiting for |
+| 📡 **RSS** | `feed.xml` carries all 11 issues, and every page advertises it in its `<head>` |
 | 📜 **Scrollable archive** | Latest Issues is an internal scroll panel that stays height-matched to the topics column |
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
 | 🦶 **Shared footer** | One footer across all 26 pages, with links rebuilt per directory depth |
+
+---
+
+## 🔔 Topic Requests
+
+456 of the 521 topics have no page yet, so a reader who finds one has nowhere to go.
+Clicking a pipeline or planned topic queues it instead. The queue rides along with
+the signup as a Kit custom field, which turns the backlog into a ranked list of what
+people are actually waiting for.
+
+**One-time Kit setup:** create a custom field named `topic_request`
+(Grow → Subscribers → the gear icon → Custom fields). Without it Kit silently drops
+the value — signups still work, you just don't see the topics. Sort your subscriber
+list by that column to see which topics come up most.
+
+---
+
+## 📊 Analytics
+
+Every page carries a [GoatCounter](https://www.goatcounter.com/) loader — cookieless,
+open-source, free for personal sites, and no consent banner. It is **inert until you
+set a site code**, so the repo ships sending nothing.
+
+```bash
+# after signing up, from the repo root — sets the code in all 26 pages
+git grep -l "var PO_GC" | xargs sed -i "s/var PO_GC='[^']*'/var PO_GC='yourcode'/"
+```
+
+Beyond page views, the homepage reports four events, so you can see intent and not
+just traffic:
+
+| Event path | Fires when |
+|:--|:--|
+| `kmap-search/<query>` | someone searches the knowledge map (3+ characters, once they stop typing) |
+| `topic-request/<topic>` | someone queues a topic for notification |
+| `kmap-filter/<status>` | someone filters to live / pipeline / planned |
+| `subscribe/success` | a signup completes |
+
+`kmap-search` is the useful one: it is a live list of what people came looking for
+and, when it names a topic that isn't live yet, what to write next.
+
+---
+
+## 📡 RSS
+
+`feed.xml` is RSS 2.0 with all 11 published issues, newest first, and every page
+advertises it via `<link rel="alternate">`. It regenerates from the issue list — add
+a new item at the top when you publish, and bump `<lastBuildDate>`.
 
 ---
 
@@ -906,9 +956,13 @@ $EDITOR Networking/GATEWAY-API/gateway-api.html
 # 4. Add an .issue-card entry in the Latest Issues archive, then update this
 #    README's Knowledge Map table and the matching <details> block.
 
-# 5. Verify, commit, push
+# 5. Add the issue to feed.xml as the newest <item> and bump <lastBuildDate>.
+#    Add the GoatCounter loader + RSS <link> to the new page's <head>, with
+#    the right number of ../ for its depth (copy them from a sibling page).
+
+# 6. Verify, commit, push
 #    (run the link checker above — it catches wrong ../ depth immediately)
-git add Networking/ index.html README.md
+git add Networking/ index.html README.md feed.xml
 git commit -m "Issue #058: Gateway API — the future of Ingress"
 git push origin issue/058-gateway-api
 ```

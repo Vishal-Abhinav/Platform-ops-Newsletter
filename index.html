@@ -612,6 +612,7 @@ html[data-theme="dark"] .km-zone.pipe{color:var(--amber);}
 .km-t{display:inline-block;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.7px;
   padding:4px 10px;border-radius:20px;text-transform:uppercase;text-decoration:none;
   border:1px solid transparent;transition:background .2s,color .2s,border-color .2s;}
+button.km-t{font-family:'DM Mono',monospace;cursor:pointer;line-height:1.5;}
 .km-t.live{background:rgba(132,204,22,0.14);border-color:rgba(132,204,22,0.4);color:#4c840f;}
 .km-t.live:hover{background:var(--lime);color:#0c0e12;border-color:var(--lime);}
 .km-t.live::before{content:'●';font-size:7px;vertical-align:middle;margin-right:5px;color:var(--lime);}
@@ -692,6 +693,49 @@ html[data-theme="dark"] .km-search input::placeholder{color:#6e6b64;}
 .tl-count-soon{color:rgba(255,255,255,.32);white-space:pre;}
 .tl-ok{color:var(--lime);}
 @media(max-width:900px){ .kmap-body{font-size:10px;padding:20px 14px;} }
+
+/* ─── TOPIC REQUESTS ─── */
+.km-hint{display:flex;align-items:center;gap:7px;font-family:'DM Mono',monospace;font-size:9.5px;
+  letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:-14px 0 22px;}
+.km-hint svg{width:12px;height:12px;stroke:var(--crimson);fill:none;stroke-width:2;flex-shrink:0;}
+.km-t.req{background:var(--crimson)!important;border-color:var(--crimson)!important;color:#fff!important;}
+.km-t.req::before{content:'✓';margin-right:5px;font-size:9px;}
+button.km-t.pipe:hover,button.km-t.plan:hover{border-color:var(--crimson);color:var(--crimson);}
+button.km-t.req:hover{opacity:.85;}
+
+.req-pill{position:fixed;right:22px;bottom:22px;z-index:60;display:none;align-items:center;gap:12px;
+  background:var(--coal);color:var(--paper);border:0;border-radius:40px;padding:13px 15px 13px 20px;
+  box-shadow:0 18px 44px rgba(0,0,0,.32);cursor:pointer;font-family:'DM Mono',monospace;
+  font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;
+  animation:req-pop .3s cubic-bezier(.34,1.56,.64,1);}
+.req-pill.show{display:flex;}
+html[data-theme="dark"] .req-pill{background:var(--paper);color:var(--coal);}
+.req-pill b{color:var(--lime);font-weight:400;}
+html[data-theme="dark"] .req-pill b{color:#4c840f;}
+.req-pill .go{background:var(--crimson);color:#fff;border-radius:30px;padding:6px 12px;}
+@keyframes req-pop{from{transform:translateY(14px) scale(.94);opacity:0;}to{transform:none;opacity:1;}}
+@media(max-width:600px){.req-pill{right:12px;bottom:12px;left:12px;justify-content:space-between;}}
+
+/* The subscribe band follows the page background, so these use theme tokens —
+   hardcoded whites vanished against it in light mode. */
+.sub-requests{max-width:520px;margin:0 auto 20px;display:none;}
+.sub-requests.show{display:block;}
+.sub-req-title{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.sub-req-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
+.sub-req-chip{display:inline-flex;align-items:center;gap:7px;background:var(--wash-2);
+  border:1px solid var(--hairline-4);color:var(--heading-fg);border-radius:20px;
+  padding:5px 8px 5px 12px;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.8px;
+  text-transform:uppercase;}
+.sub-req-chip button{background:none;border:0;color:var(--muted);cursor:pointer;
+  font:inherit;font-size:12px;line-height:1;padding:0 2px;transition:color .2s;}
+.sub-req-chip button:hover{color:var(--crimson);}
+.sub-rss{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin-top:14px;}
+.sub-rss a{color:#b97309;text-decoration:none;border-bottom:1px dashed rgba(185,115,9,.45);}
+.sub-rss a:hover{color:var(--crimson);border-color:var(--crimson);}
+html[data-theme="dark"] .sub-rss a{color:var(--amber);border-color:rgba(245,158,11,.45);}
+html[data-theme="dark"] .sub-rss a:hover{color:#fff;border-color:#fff;}
 
 /* ─── TOOLCHAIN DIAGRAM ─── */
 .toolchain-section{background:var(--ink);padding:0;position:relative;overflow:hidden;}
@@ -1044,6 +1088,19 @@ a.footer-logo:hover{color:#fff;}
 @media (max-width:900px){footer{padding:56px 32px 28px;}.footer-top{grid-template-columns:1fr;gap:32px;}}
 @media (max-width:600px){footer{padding:48px 22px 24px;}.footer-cols{grid-template-columns:1fr 1fr;}}
 </style>
+
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="feed.xml">
 </head>
 <body>
 
@@ -1317,6 +1374,10 @@ a.footer-logo:hover{color:#fff;}
       </div>
     </div>
     <div class="km-result" id="kmResult" aria-live="polite"></div>
+    <div class="km-hint">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+      Click any pipeline or planned topic to be told when it lands
+    </div>
 
     <div class="kmap-terminal">
       <div class="terminal-bar">
@@ -1381,14 +1442,14 @@ a.footer-logo:hover{color:#fff;}
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Unix</a>
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Shell &amp; Bash</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Operating Systems</span>
-          <span class="km-t pipe" data-s="pipe">Python</span>
-          <span class="km-t pipe" data-s="pipe">Git &amp; Version Control</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Operating Systems</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Python</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Git &amp; Version Control</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Computer Fundamentals</span>
-          <span class="km-t plan" data-s="plan">Windows Server</span>
-          <span class="km-t plan" data-s="plan">Programming Fundamentals</span>
-          <span class="km-t plan" data-s="plan">Data Structures &amp; Algorithms</span>
+          <button type="button" class="km-t plan" data-s="plan">Computer Fundamentals</button>
+          <button type="button" class="km-t plan" data-s="plan">Windows Server</button>
+          <button type="button" class="km-t plan" data-s="plan">Programming Fundamentals</button>
+          <button type="button" class="km-t plan" data-s="plan">Data Structures &amp; Algorithms</button>
           </div></div></div>
         </div>
         </div></div></div>
@@ -1413,19 +1474,19 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">IT Infrastructure</span>
-          <span class="km-t pipe" data-s="pipe">Server Administration</span>
-          <span class="km-t pipe" data-s="pipe">Capacity Planning</span>
-          <span class="km-t pipe" data-s="pipe">High Availability</span>
-          <span class="km-t pipe" data-s="pipe">Disaster Recovery</span>
+          <button type="button" class="km-t pipe" data-s="pipe">IT Infrastructure</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Server Administration</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Capacity Planning</button>
+          <button type="button" class="km-t pipe" data-s="pipe">High Availability</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Disaster Recovery</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Hardware</span>
-          <span class="km-t plan" data-s="plan">Data Center</span>
-          <span class="km-t plan" data-s="plan">Rack / Power / Cooling</span>
-          <span class="km-t plan" data-s="plan">Fault Tolerance</span>
-          <span class="km-t plan" data-s="plan">Business Continuity</span>
-          <span class="km-t plan" data-s="plan">Infrastructure Architecture</span>
-          <span class="km-t plan" data-s="plan">Enterprise Infrastructure</span>
+          <button type="button" class="km-t plan" data-s="plan">Hardware</button>
+          <button type="button" class="km-t plan" data-s="plan">Data Center</button>
+          <button type="button" class="km-t plan" data-s="plan">Rack / Power / Cooling</button>
+          <button type="button" class="km-t plan" data-s="plan">Fault Tolerance</button>
+          <button type="button" class="km-t plan" data-s="plan">Business Continuity</button>
+          <button type="button" class="km-t plan" data-s="plan">Infrastructure Architecture</button>
+          <button type="button" class="km-t plan" data-s="plan">Enterprise Infrastructure</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -1441,21 +1502,21 @@ a.footer-logo:hover{color:#fff;}
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html">LVM</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Storage Fundamentals</span>
-          <span class="km-t pipe" data-s="pipe">Storage Troubleshooting</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Storage Fundamentals</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Storage Troubleshooting</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Local Storage</span>
-          <span class="km-t plan" data-s="plan">RAID</span>
-          <span class="km-t plan" data-s="plan">SAN</span>
-          <span class="km-t plan" data-s="plan">NAS</span>
-          <span class="km-t plan" data-s="plan">NFS</span>
-          <span class="km-t plan" data-s="plan">SMB / CIFS</span>
-          <span class="km-t plan" data-s="plan">Object Storage</span>
-          <span class="km-t plan" data-s="plan">Block Storage</span>
-          <span class="km-t plan" data-s="plan">File Storage</span>
-          <span class="km-t plan" data-s="plan">Storage Replication</span>
-          <span class="km-t plan" data-s="plan">Storage Performance</span>
-          <span class="km-t plan" data-s="plan">Storage Backup</span>
+          <button type="button" class="km-t plan" data-s="plan">Local Storage</button>
+          <button type="button" class="km-t plan" data-s="plan">RAID</button>
+          <button type="button" class="km-t plan" data-s="plan">SAN</button>
+          <button type="button" class="km-t plan" data-s="plan">NAS</button>
+          <button type="button" class="km-t plan" data-s="plan">NFS</button>
+          <button type="button" class="km-t plan" data-s="plan">SMB / CIFS</button>
+          <button type="button" class="km-t plan" data-s="plan">Object Storage</button>
+          <button type="button" class="km-t plan" data-s="plan">Block Storage</button>
+          <button type="button" class="km-t plan" data-s="plan">File Storage</button>
+          <button type="button" class="km-t plan" data-s="plan">Storage Replication</button>
+          <button type="button" class="km-t plan" data-s="plan">Storage Performance</button>
+          <button type="button" class="km-t plan" data-s="plan">Storage Backup</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -1469,18 +1530,18 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Virtualization Fundamentals</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Virtualization Fundamentals</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">VMware</span>
-          <span class="km-t plan" data-s="plan">ESXi</span>
-          <span class="km-t plan" data-s="plan">vCenter</span>
-          <span class="km-t plan" data-s="plan">KVM</span>
-          <span class="km-t plan" data-s="plan">QEMU</span>
-          <span class="km-t plan" data-s="plan">Hyper-V</span>
-          <span class="km-t plan" data-s="plan">Virtual Networking</span>
-          <span class="km-t plan" data-s="plan">Virtual Storage</span>
-          <span class="km-t plan" data-s="plan">VM Lifecycle</span>
-          <span class="km-t plan" data-s="plan">VM HA / DR</span>
+          <button type="button" class="km-t plan" data-s="plan">VMware</button>
+          <button type="button" class="km-t plan" data-s="plan">ESXi</button>
+          <button type="button" class="km-t plan" data-s="plan">vCenter</button>
+          <button type="button" class="km-t plan" data-s="plan">KVM</button>
+          <button type="button" class="km-t plan" data-s="plan">QEMU</button>
+          <button type="button" class="km-t plan" data-s="plan">Hyper-V</button>
+          <button type="button" class="km-t plan" data-s="plan">Virtual Networking</button>
+          <button type="button" class="km-t plan" data-s="plan">Virtual Storage</button>
+          <button type="button" class="km-t plan" data-s="plan">VM Lifecycle</button>
+          <button type="button" class="km-t plan" data-s="plan">VM HA / DR</button>
           </div></div></div>
         </div>
         </div></div></div>
@@ -1507,37 +1568,37 @@ a.footer-logo:hover{color:#fff;}
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="DevOps/K8/Networking/k8-networking.html">DNS</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Networking Fundamentals</span>
-          <span class="km-t pipe" data-s="pipe">OSI Model</span>
-          <span class="km-t pipe" data-s="pipe">TCP/IP</span>
-          <span class="km-t pipe" data-s="pipe">Load Balancing</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Networking Fundamentals</button>
+          <button type="button" class="km-t pipe" data-s="pipe">OSI Model</button>
+          <button type="button" class="km-t pipe" data-s="pipe">TCP/IP</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Load Balancing</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">IPv4</span>
-          <span class="km-t plan" data-s="plan">IPv6</span>
-          <span class="km-t plan" data-s="plan">Subnetting</span>
-          <span class="km-t plan" data-s="plan">VLAN</span>
-          <span class="km-t plan" data-s="plan">Switching</span>
-          <span class="km-t plan" data-s="plan">Routing</span>
-          <span class="km-t plan" data-s="plan">BGP</span>
-          <span class="km-t plan" data-s="plan">OSPF</span>
-          <span class="km-t plan" data-s="plan">EIGRP</span>
-          <span class="km-t plan" data-s="plan">MPLS</span>
-          <span class="km-t plan" data-s="plan">ARP</span>
-          <span class="km-t plan" data-s="plan">ICMP</span>
-          <span class="km-t plan" data-s="plan">TCP</span>
-          <span class="km-t plan" data-s="plan">UDP</span>
-          <span class="km-t plan" data-s="plan">DHCP</span>
-          <span class="km-t plan" data-s="plan">NAT</span>
-          <span class="km-t plan" data-s="plan">Proxy</span>
-          <span class="km-t plan" data-s="plan">VPN</span>
-          <span class="km-t plan" data-s="plan">IPSec</span>
-          <span class="km-t plan" data-s="plan">Network Security</span>
-          <span class="km-t plan" data-s="plan">Firewall</span>
-          <span class="km-t plan" data-s="plan">WAF</span>
-          <span class="km-t plan" data-s="plan">SDN</span>
-          <span class="km-t plan" data-s="plan">SD-WAN</span>
-          <span class="km-t plan" data-s="plan">Network Automation</span>
-          <span class="km-t plan" data-s="plan">Network Monitoring</span>
+          <button type="button" class="km-t plan" data-s="plan">IPv4</button>
+          <button type="button" class="km-t plan" data-s="plan">IPv6</button>
+          <button type="button" class="km-t plan" data-s="plan">Subnetting</button>
+          <button type="button" class="km-t plan" data-s="plan">VLAN</button>
+          <button type="button" class="km-t plan" data-s="plan">Switching</button>
+          <button type="button" class="km-t plan" data-s="plan">Routing</button>
+          <button type="button" class="km-t plan" data-s="plan">BGP</button>
+          <button type="button" class="km-t plan" data-s="plan">OSPF</button>
+          <button type="button" class="km-t plan" data-s="plan">EIGRP</button>
+          <button type="button" class="km-t plan" data-s="plan">MPLS</button>
+          <button type="button" class="km-t plan" data-s="plan">ARP</button>
+          <button type="button" class="km-t plan" data-s="plan">ICMP</button>
+          <button type="button" class="km-t plan" data-s="plan">TCP</button>
+          <button type="button" class="km-t plan" data-s="plan">UDP</button>
+          <button type="button" class="km-t plan" data-s="plan">DHCP</button>
+          <button type="button" class="km-t plan" data-s="plan">NAT</button>
+          <button type="button" class="km-t plan" data-s="plan">Proxy</button>
+          <button type="button" class="km-t plan" data-s="plan">VPN</button>
+          <button type="button" class="km-t plan" data-s="plan">IPSec</button>
+          <button type="button" class="km-t plan" data-s="plan">Network Security</button>
+          <button type="button" class="km-t plan" data-s="plan">Firewall</button>
+          <button type="button" class="km-t plan" data-s="plan">WAF</button>
+          <button type="button" class="km-t plan" data-s="plan">SDN</button>
+          <button type="button" class="km-t plan" data-s="plan">SD-WAN</button>
+          <button type="button" class="km-t plan" data-s="plan">Network Automation</button>
+          <button type="button" class="km-t plan" data-s="plan">Network Monitoring</button>
           </div></div></div>
         </div>
         </div></div></div>
@@ -1562,24 +1623,24 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Cloud Fundamentals</span>
-          <span class="km-t pipe" data-s="pipe">AWS</span>
-          <span class="km-t pipe" data-s="pipe">Microsoft Azure</span>
-          <span class="km-t pipe" data-s="pipe">Hybrid Cloud</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Cloud Fundamentals</button>
+          <button type="button" class="km-t pipe" data-s="pipe">AWS</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Microsoft Azure</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Hybrid Cloud</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Google Cloud</span>
-          <span class="km-t plan" data-s="plan">Cloud Networking</span>
-          <span class="km-t plan" data-s="plan">Cloud Compute</span>
-          <span class="km-t plan" data-s="plan">Cloud Storage</span>
-          <span class="km-t plan" data-s="plan">Cloud Databases</span>
-          <span class="km-t plan" data-s="plan">Cloud IAM</span>
-          <span class="km-t plan" data-s="plan">Cloud Security</span>
-          <span class="km-t plan" data-s="plan">Cloud Monitoring</span>
-          <span class="km-t plan" data-s="plan">Cloud Backup</span>
-          <span class="km-t plan" data-s="plan">Cloud DR</span>
-          <span class="km-t plan" data-s="plan">Multi-Cloud</span>
-          <span class="km-t plan" data-s="plan">Cloud Migration</span>
-          <span class="km-t plan" data-s="plan">Cloud Architecture</span>
+          <button type="button" class="km-t plan" data-s="plan">Google Cloud</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Networking</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Compute</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Storage</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Databases</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud IAM</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Security</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Monitoring</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Backup</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud DR</button>
+          <button type="button" class="km-t plan" data-s="plan">Multi-Cloud</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Migration</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Architecture</button>
           </div></div></div>
         </div>
         </div></div></div>
@@ -1614,19 +1675,19 @@ a.footer-logo:hover{color:#fff;}
           <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Blue/Green Deployment</a>
           <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Canary Deployment</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">DevOps Fundamentals</span>
-          <span class="km-t pipe" data-s="pipe">GitHub Actions</span>
-          <span class="km-t pipe" data-s="pipe">Rolling Deployment</span>
-          <span class="km-t pipe" data-s="pipe">Rollback</span>
-          <span class="km-t pipe" data-s="pipe">Pipeline Security</span>
+          <button type="button" class="km-t pipe" data-s="pipe">DevOps Fundamentals</button>
+          <button type="button" class="km-t pipe" data-s="pipe">GitHub Actions</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Rolling Deployment</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Rollback</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Pipeline Security</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">DevOps Culture</span>
-          <span class="km-t plan" data-s="plan">Azure DevOps</span>
-          <span class="km-t plan" data-s="plan">Build Automation</span>
-          <span class="km-t plan" data-s="plan">Artifact Management</span>
-          <span class="km-t plan" data-s="plan">Release Automation</span>
-          <span class="km-t plan" data-s="plan">Feature Flags</span>
-          <span class="km-t plan" data-s="plan">Pipeline Optimization</span>
+          <button type="button" class="km-t plan" data-s="plan">DevOps Culture</button>
+          <button type="button" class="km-t plan" data-s="plan">Azure DevOps</button>
+          <button type="button" class="km-t plan" data-s="plan">Build Automation</button>
+          <button type="button" class="km-t plan" data-s="plan">Artifact Management</button>
+          <button type="button" class="km-t plan" data-s="plan">Release Automation</button>
+          <button type="button" class="km-t plan" data-s="plan">Feature Flags</button>
+          <button type="button" class="km-t plan" data-s="plan">Pipeline Optimization</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -1640,19 +1701,19 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Containers</span>
-          <span class="km-t pipe" data-s="pipe">Docker</span>
-          <span class="km-t pipe" data-s="pipe">Container Images</span>
-          <span class="km-t pipe" data-s="pipe">Container Networking</span>
-          <span class="km-t pipe" data-s="pipe">Container Security</span>
-          <span class="km-t pipe" data-s="pipe">Container Troubleshooting</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Containers</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Docker</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Container Images</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Container Networking</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Container Security</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Container Troubleshooting</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Podman</span>
-          <span class="km-t plan" data-s="plan">Containerd</span>
-          <span class="km-t plan" data-s="plan">CRI</span>
-          <span class="km-t plan" data-s="plan">OCI</span>
-          <span class="km-t plan" data-s="plan">Container Registries</span>
-          <span class="km-t plan" data-s="plan">Container Storage</span>
+          <button type="button" class="km-t plan" data-s="plan">Podman</button>
+          <button type="button" class="km-t plan" data-s="plan">Containerd</button>
+          <button type="button" class="km-t plan" data-s="plan">CRI</button>
+          <button type="button" class="km-t plan" data-s="plan">OCI</button>
+          <button type="button" class="km-t plan" data-s="plan">Container Registries</button>
+          <button type="button" class="km-t plan" data-s="plan">Container Storage</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -1666,18 +1727,18 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Infrastructure as Code</span>
-          <span class="km-t pipe" data-s="pipe">Terraform</span>
-          <span class="km-t pipe" data-s="pipe">Terraform State</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Infrastructure as Code</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Terraform</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Terraform State</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">OpenTofu</span>
-          <span class="km-t plan" data-s="plan">Pulumi</span>
-          <span class="km-t plan" data-s="plan">Terraform Modules</span>
-          <span class="km-t plan" data-s="plan">Remote State</span>
-          <span class="km-t plan" data-s="plan">Terraform Providers</span>
-          <span class="km-t plan" data-s="plan">IaC Security</span>
-          <span class="km-t plan" data-s="plan">IaC Testing</span>
-          <span class="km-t plan" data-s="plan">IaC Drift Management</span>
+          <button type="button" class="km-t plan" data-s="plan">OpenTofu</button>
+          <button type="button" class="km-t plan" data-s="plan">Pulumi</button>
+          <button type="button" class="km-t plan" data-s="plan">Terraform Modules</button>
+          <button type="button" class="km-t plan" data-s="plan">Remote State</button>
+          <button type="button" class="km-t plan" data-s="plan">Terraform Providers</button>
+          <button type="button" class="km-t plan" data-s="plan">IaC Security</button>
+          <button type="button" class="km-t plan" data-s="plan">IaC Testing</button>
+          <button type="button" class="km-t plan" data-s="plan">IaC Drift Management</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -1691,19 +1752,19 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Configuration Management</span>
-          <span class="km-t pipe" data-s="pipe">Ansible</span>
-          <span class="km-t pipe" data-s="pipe">Ansible Playbooks</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Configuration Management</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Ansible</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Ansible Playbooks</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Roles</span>
-          <span class="km-t plan" data-s="plan">Inventories</span>
-          <span class="km-t plan" data-s="plan">Variables</span>
-          <span class="km-t plan" data-s="plan">Templates</span>
-          <span class="km-t plan" data-s="plan">Ansible Vault</span>
-          <span class="km-t plan" data-s="plan">AWX / Automation Platform</span>
-          <span class="km-t plan" data-s="plan">Puppet</span>
-          <span class="km-t plan" data-s="plan">Chef</span>
-          <span class="km-t plan" data-s="plan">Salt</span>
+          <button type="button" class="km-t plan" data-s="plan">Roles</button>
+          <button type="button" class="km-t plan" data-s="plan">Inventories</button>
+          <button type="button" class="km-t plan" data-s="plan">Variables</button>
+          <button type="button" class="km-t plan" data-s="plan">Templates</button>
+          <button type="button" class="km-t plan" data-s="plan">Ansible Vault</button>
+          <button type="button" class="km-t plan" data-s="plan">AWX / Automation Platform</button>
+          <button type="button" class="km-t plan" data-s="plan">Puppet</button>
+          <button type="button" class="km-t plan" data-s="plan">Chef</button>
+          <button type="button" class="km-t plan" data-s="plan">Salt</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -1721,12 +1782,12 @@ a.footer-logo:hover{color:#fff;}
           <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Argo CD</a>
           <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Flux</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Git-based Infrastructure</span>
-          <span class="km-t pipe" data-s="pipe">Declarative Deployment</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Git-based Infrastructure</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Declarative Deployment</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Drift Detection</span>
-          <span class="km-t plan" data-s="plan">Progressive Delivery</span>
-          <span class="km-t plan" data-s="plan">GitOps Security</span>
+          <button type="button" class="km-t plan" data-s="plan">Drift Detection</button>
+          <button type="button" class="km-t plan" data-s="plan">Progressive Delivery</button>
+          <button type="button" class="km-t plan" data-s="plan">GitOps Security</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -1740,19 +1801,19 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Platform Engineering</span>
-          <span class="km-t pipe" data-s="pipe">Internal Developer Platform</span>
-          <span class="km-t pipe" data-s="pipe">Backstage</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Platform Engineering</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Internal Developer Platform</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Backstage</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Developer Experience</span>
-          <span class="km-t plan" data-s="plan">Self-Service Infrastructure</span>
-          <span class="km-t plan" data-s="plan">Golden Paths</span>
-          <span class="km-t plan" data-s="plan">Platform-as-a-Product</span>
-          <span class="km-t plan" data-s="plan">Developer Portals</span>
-          <span class="km-t plan" data-s="plan">Platform APIs</span>
-          <span class="km-t plan" data-s="plan">Platform Governance</span>
-          <span class="km-t plan" data-s="plan">Platform Automation</span>
-          <span class="km-t plan" data-s="plan">Platform Security</span>
+          <button type="button" class="km-t plan" data-s="plan">Developer Experience</button>
+          <button type="button" class="km-t plan" data-s="plan">Self-Service Infrastructure</button>
+          <button type="button" class="km-t plan" data-s="plan">Golden Paths</button>
+          <button type="button" class="km-t plan" data-s="plan">Platform-as-a-Product</button>
+          <button type="button" class="km-t plan" data-s="plan">Developer Portals</button>
+          <button type="button" class="km-t plan" data-s="plan">Platform APIs</button>
+          <button type="button" class="km-t plan" data-s="plan">Platform Governance</button>
+          <button type="button" class="km-t plan" data-s="plan">Platform Automation</button>
+          <button type="button" class="km-t plan" data-s="plan">Platform Security</button>
           </div></div></div>
         </div>
         </div></div></div>
@@ -1794,26 +1855,26 @@ a.footer-logo:hover{color:#fff;}
           <a class="km-t live" data-s="live" href="DevOps/K8/STORAGE/k8-storage.html">CSI</a>
           <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">Kubernetes Troubleshooting</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">ReplicaSets</span>
-          <span class="km-t pipe" data-s="pipe">DaemonSets</span>
-          <span class="km-t pipe" data-s="pipe">ConfigMaps</span>
-          <span class="km-t pipe" data-s="pipe">Secrets</span>
-          <span class="km-t pipe" data-s="pipe">RBAC</span>
-          <span class="km-t pipe" data-s="pipe">Namespaces</span>
-          <span class="km-t pipe" data-s="pipe">Probes</span>
-          <span class="km-t pipe" data-s="pipe">Taints / Tolerations</span>
-          <span class="km-t pipe" data-s="pipe">Affinity / Anti-Affinity</span>
-          <span class="km-t pipe" data-s="pipe">Autoscaling</span>
-          <span class="km-t pipe" data-s="pipe">HPA</span>
-          <span class="km-t pipe" data-s="pipe">VPA</span>
-          <span class="km-t pipe" data-s="pipe">Kubernetes Security</span>
+          <button type="button" class="km-t pipe" data-s="pipe">ReplicaSets</button>
+          <button type="button" class="km-t pipe" data-s="pipe">DaemonSets</button>
+          <button type="button" class="km-t pipe" data-s="pipe">ConfigMaps</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Secrets</button>
+          <button type="button" class="km-t pipe" data-s="pipe">RBAC</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Namespaces</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Probes</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Taints / Tolerations</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Affinity / Anti-Affinity</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Autoscaling</button>
+          <button type="button" class="km-t pipe" data-s="pipe">HPA</button>
+          <button type="button" class="km-t pipe" data-s="pipe">VPA</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Kubernetes Security</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Jobs / CronJobs</span>
-          <span class="km-t plan" data-s="plan">Cluster Autoscaling</span>
-          <span class="km-t plan" data-s="plan">Kubernetes Upgrade</span>
-          <span class="km-t plan" data-s="plan">Kubernetes Backup</span>
-          <span class="km-t plan" data-s="plan">Multi-Cluster Kubernetes</span>
-          <span class="km-t plan" data-s="plan">Kubernetes Disaster Recovery</span>
+          <button type="button" class="km-t plan" data-s="plan">Jobs / CronJobs</button>
+          <button type="button" class="km-t plan" data-s="plan">Cluster Autoscaling</button>
+          <button type="button" class="km-t plan" data-s="plan">Kubernetes Upgrade</button>
+          <button type="button" class="km-t plan" data-s="plan">Kubernetes Backup</button>
+          <button type="button" class="km-t plan" data-s="plan">Multi-Cluster Kubernetes</button>
+          <button type="button" class="km-t plan" data-s="plan">Kubernetes Disaster Recovery</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -1830,18 +1891,18 @@ a.footer-logo:hover{color:#fff;}
           <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">SCC</a>
           <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">OpenShift Troubleshooting</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">OpenShift Fundamentals</span>
-          <span class="km-t pipe" data-s="pipe">OpenShift Architecture</span>
+          <button type="button" class="km-t pipe" data-s="pipe">OpenShift Fundamentals</button>
+          <button type="button" class="km-t pipe" data-s="pipe">OpenShift Architecture</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Projects</span>
-          <span class="km-t plan" data-s="plan">Routes</span>
-          <span class="km-t plan" data-s="plan">Operators</span>
-          <span class="km-t plan" data-s="plan">OpenShift Networking</span>
-          <span class="km-t plan" data-s="plan">OpenShift Storage</span>
-          <span class="km-t plan" data-s="plan">OpenShift Monitoring</span>
-          <span class="km-t plan" data-s="plan">OpenShift Logging</span>
-          <span class="km-t plan" data-s="plan">OpenShift Security</span>
-          <span class="km-t plan" data-s="plan">OpenShift Upgrades</span>
+          <button type="button" class="km-t plan" data-s="plan">Projects</button>
+          <button type="button" class="km-t plan" data-s="plan">Routes</button>
+          <button type="button" class="km-t plan" data-s="plan">Operators</button>
+          <button type="button" class="km-t plan" data-s="plan">OpenShift Networking</button>
+          <button type="button" class="km-t plan" data-s="plan">OpenShift Storage</button>
+          <button type="button" class="km-t plan" data-s="plan">OpenShift Monitoring</button>
+          <button type="button" class="km-t plan" data-s="plan">OpenShift Logging</button>
+          <button type="button" class="km-t plan" data-s="plan">OpenShift Security</button>
+          <button type="button" class="km-t plan" data-s="plan">OpenShift Upgrades</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -1855,17 +1916,17 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Service Mesh</span>
-          <span class="km-t pipe" data-s="pipe">Istio</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Service Mesh</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Istio</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Envoy</span>
-          <span class="km-t plan" data-s="plan">Linkerd</span>
-          <span class="km-t plan" data-s="plan">Traffic Management</span>
-          <span class="km-t plan" data-s="plan">mTLS</span>
-          <span class="km-t plan" data-s="plan">Service-to-Service Security</span>
-          <span class="km-t plan" data-s="plan">Service Discovery</span>
-          <span class="km-t plan" data-s="plan">Observability in Service Mesh</span>
-          <span class="km-t plan" data-s="plan">Multi-Cluster Service Mesh</span>
+          <button type="button" class="km-t plan" data-s="plan">Envoy</button>
+          <button type="button" class="km-t plan" data-s="plan">Linkerd</button>
+          <button type="button" class="km-t plan" data-s="plan">Traffic Management</button>
+          <button type="button" class="km-t plan" data-s="plan">mTLS</button>
+          <button type="button" class="km-t plan" data-s="plan">Service-to-Service Security</button>
+          <button type="button" class="km-t plan" data-s="plan">Service Discovery</button>
+          <button type="button" class="km-t plan" data-s="plan">Observability in Service Mesh</button>
+          <button type="button" class="km-t plan" data-s="plan">Multi-Cluster Service Mesh</button>
           </div></div></div>
         </div>
         </div></div></div>
@@ -1895,28 +1956,28 @@ a.footer-logo:hover{color:#fff;}
           <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">RCA</a>
           <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Postmortem</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">SRE Fundamentals</span>
-          <span class="km-t pipe" data-s="pipe">SLI</span>
-          <span class="km-t pipe" data-s="pipe">SLO</span>
-          <span class="km-t pipe" data-s="pipe">SLA</span>
-          <span class="km-t pipe" data-s="pipe">Error Budget</span>
-          <span class="km-t pipe" data-s="pipe">Reliability Engineering</span>
-          <span class="km-t pipe" data-s="pipe">Problem Management</span>
-          <span class="km-t pipe" data-s="pipe">Chaos Engineering</span>
+          <button type="button" class="km-t pipe" data-s="pipe">SRE Fundamentals</button>
+          <button type="button" class="km-t pipe" data-s="pipe">SLI</button>
+          <button type="button" class="km-t pipe" data-s="pipe">SLO</button>
+          <button type="button" class="km-t pipe" data-s="pipe">SLA</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Error Budget</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Reliability Engineering</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Problem Management</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Chaos Engineering</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Availability</span>
-          <span class="km-t plan" data-s="plan">Reliability</span>
-          <span class="km-t plan" data-s="plan">Scalability</span>
-          <span class="km-t plan" data-s="plan">Latency</span>
-          <span class="km-t plan" data-s="plan">MTBF</span>
-          <span class="km-t plan" data-s="plan">Toil Reduction</span>
-          <span class="km-t plan" data-s="plan">Capacity Planning</span>
-          <span class="km-t plan" data-s="plan">Reliability Testing</span>
-          <span class="km-t plan" data-s="plan">Resilience Engineering</span>
-          <span class="km-t plan" data-s="plan">Service Health</span>
-          <span class="km-t plan" data-s="plan">Production Readiness</span>
-          <span class="km-t plan" data-s="plan">Operational Readiness</span>
-          <span class="km-t plan" data-s="plan">SRE Automation</span>
+          <button type="button" class="km-t plan" data-s="plan">Availability</button>
+          <button type="button" class="km-t plan" data-s="plan">Reliability</button>
+          <button type="button" class="km-t plan" data-s="plan">Scalability</button>
+          <button type="button" class="km-t plan" data-s="plan">Latency</button>
+          <button type="button" class="km-t plan" data-s="plan">MTBF</button>
+          <button type="button" class="km-t plan" data-s="plan">Toil Reduction</button>
+          <button type="button" class="km-t plan" data-s="plan">Capacity Planning</button>
+          <button type="button" class="km-t plan" data-s="plan">Reliability Testing</button>
+          <button type="button" class="km-t plan" data-s="plan">Resilience Engineering</button>
+          <button type="button" class="km-t plan" data-s="plan">Service Health</button>
+          <button type="button" class="km-t plan" data-s="plan">Production Readiness</button>
+          <button type="button" class="km-t plan" data-s="plan">Operational Readiness</button>
+          <button type="button" class="km-t plan" data-s="plan">SRE Automation</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -1942,18 +2003,18 @@ a.footer-logo:hover{color:#fff;}
           <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Jaeger</a>
           <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Distributed Tracing</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">OpenTelemetry</span>
-          <span class="km-t pipe" data-s="pipe">Tempo</span>
-          <span class="km-t pipe" data-s="pipe">ELK</span>
-          <span class="km-t pipe" data-s="pipe">Alert Engineering</span>
+          <button type="button" class="km-t pipe" data-s="pipe">OpenTelemetry</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Tempo</button>
+          <button type="button" class="km-t pipe" data-s="pipe">ELK</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Alert Engineering</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Profiles</span>
-          <span class="km-t plan" data-s="plan">OpenSearch</span>
-          <span class="km-t plan" data-s="plan">Application Performance Monitoring</span>
-          <span class="km-t plan" data-s="plan">Synthetic Monitoring</span>
-          <span class="km-t plan" data-s="plan">Real User Monitoring</span>
-          <span class="km-t plan" data-s="plan">Telemetry Pipelines</span>
-          <span class="km-t plan" data-s="plan">Observability Architecture</span>
+          <button type="button" class="km-t plan" data-s="plan">Profiles</button>
+          <button type="button" class="km-t plan" data-s="plan">OpenSearch</button>
+          <button type="button" class="km-t plan" data-s="plan">Application Performance Monitoring</button>
+          <button type="button" class="km-t plan" data-s="plan">Synthetic Monitoring</button>
+          <button type="button" class="km-t plan" data-s="plan">Real User Monitoring</button>
+          <button type="button" class="km-t plan" data-s="plan">Telemetry Pipelines</button>
+          <button type="button" class="km-t plan" data-s="plan">Observability Architecture</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -1970,19 +2031,19 @@ a.footer-logo:hover{color:#fff;}
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html">Linux Logging</a>
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html">Journald</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Syslog</span>
-          <span class="km-t pipe" data-s="pipe">Log Rotation</span>
-          <span class="km-t pipe" data-s="pipe">Centralized Logging</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Syslog</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Log Rotation</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Centralized Logging</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Logstash</span>
-          <span class="km-t plan" data-s="plan">Fluent Bit</span>
-          <span class="km-t plan" data-s="plan">Fluentd</span>
-          <span class="km-t plan" data-s="plan">Elasticsearch</span>
-          <span class="km-t plan" data-s="plan">OpenSearch</span>
-          <span class="km-t plan" data-s="plan">Kibana</span>
-          <span class="km-t plan" data-s="plan">Log Correlation</span>
-          <span class="km-t plan" data-s="plan">Log Retention</span>
-          <span class="km-t plan" data-s="plan">Log Security</span>
+          <button type="button" class="km-t plan" data-s="plan">Logstash</button>
+          <button type="button" class="km-t plan" data-s="plan">Fluent Bit</button>
+          <button type="button" class="km-t plan" data-s="plan">Fluentd</button>
+          <button type="button" class="km-t plan" data-s="plan">Elasticsearch</button>
+          <button type="button" class="km-t plan" data-s="plan">OpenSearch</button>
+          <button type="button" class="km-t plan" data-s="plan">Kibana</button>
+          <button type="button" class="km-t plan" data-s="plan">Log Correlation</button>
+          <button type="button" class="km-t plan" data-s="plan">Log Retention</button>
+          <button type="button" class="km-t plan" data-s="plan">Log Security</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -2001,15 +2062,15 @@ a.footer-logo:hover{color:#fff;}
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html">Disk I/O</a>
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html">Performance Troubleshooting</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Network Performance</span>
-          <span class="km-t pipe" data-s="pipe">Profiling</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Network Performance</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Profiling</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Application Performance</span>
-          <span class="km-t plan" data-s="plan">Database Performance</span>
-          <span class="km-t plan" data-s="plan">Load Testing</span>
-          <span class="km-t plan" data-s="plan">Stress Testing</span>
-          <span class="km-t plan" data-s="plan">Benchmarking</span>
-          <span class="km-t plan" data-s="plan">Capacity Modeling</span>
+          <button type="button" class="km-t plan" data-s="plan">Application Performance</button>
+          <button type="button" class="km-t plan" data-s="plan">Database Performance</button>
+          <button type="button" class="km-t plan" data-s="plan">Load Testing</button>
+          <button type="button" class="km-t plan" data-s="plan">Stress Testing</button>
+          <button type="button" class="km-t plan" data-s="plan">Benchmarking</button>
+          <button type="button" class="km-t plan" data-s="plan">Capacity Modeling</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -2029,14 +2090,14 @@ a.footer-logo:hover{color:#fff;}
           <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Production Incident Troubleshooting</a>
           <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Root Cause Analysis</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Network Troubleshooting</span>
-          <span class="km-t pipe" data-s="pipe">Storage Troubleshooting</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Network Troubleshooting</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Storage Troubleshooting</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Database Troubleshooting</span>
-          <span class="km-t plan" data-s="plan">Application Troubleshooting</span>
-          <span class="km-t plan" data-s="plan">Cloud Troubleshooting</span>
-          <span class="km-t plan" data-s="plan">Security Troubleshooting</span>
-          <span class="km-t plan" data-s="plan">Failure Analysis</span>
+          <button type="button" class="km-t plan" data-s="plan">Database Troubleshooting</button>
+          <button type="button" class="km-t plan" data-s="plan">Application Troubleshooting</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Troubleshooting</button>
+          <button type="button" class="km-t plan" data-s="plan">Security Troubleshooting</button>
+          <button type="button" class="km-t plan" data-s="plan">Failure Analysis</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -2050,23 +2111,23 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Backup Fundamentals</span>
-          <span class="km-t pipe" data-s="pipe">RPO</span>
-          <span class="km-t pipe" data-s="pipe">RTO</span>
-          <span class="km-t pipe" data-s="pipe">DR Architecture</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Backup Fundamentals</button>
+          <button type="button" class="km-t pipe" data-s="pipe">RPO</button>
+          <button type="button" class="km-t pipe" data-s="pipe">RTO</button>
+          <button type="button" class="km-t pipe" data-s="pipe">DR Architecture</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Full Backup</span>
-          <span class="km-t plan" data-s="plan">Incremental Backup</span>
-          <span class="km-t plan" data-s="plan">Differential Backup</span>
-          <span class="km-t plan" data-s="plan">Snapshot</span>
-          <span class="km-t plan" data-s="plan">Replication</span>
-          <span class="km-t plan" data-s="plan">Active/Active</span>
-          <span class="km-t plan" data-s="plan">Active/Passive</span>
-          <span class="km-t plan" data-s="plan">Backup Validation</span>
-          <span class="km-t plan" data-s="plan">Restore Testing</span>
-          <span class="km-t plan" data-s="plan">DR Drill</span>
-          <span class="km-t plan" data-s="plan">Failover</span>
-          <span class="km-t plan" data-s="plan">Failback</span>
+          <button type="button" class="km-t plan" data-s="plan">Full Backup</button>
+          <button type="button" class="km-t plan" data-s="plan">Incremental Backup</button>
+          <button type="button" class="km-t plan" data-s="plan">Differential Backup</button>
+          <button type="button" class="km-t plan" data-s="plan">Snapshot</button>
+          <button type="button" class="km-t plan" data-s="plan">Replication</button>
+          <button type="button" class="km-t plan" data-s="plan">Active/Active</button>
+          <button type="button" class="km-t plan" data-s="plan">Active/Passive</button>
+          <button type="button" class="km-t plan" data-s="plan">Backup Validation</button>
+          <button type="button" class="km-t plan" data-s="plan">Restore Testing</button>
+          <button type="button" class="km-t plan" data-s="plan">DR Drill</button>
+          <button type="button" class="km-t plan" data-s="plan">Failover</button>
+          <button type="button" class="km-t plan" data-s="plan">Failback</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -2082,21 +2143,21 @@ a.footer-logo:hover{color:#fff;}
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Incident Management</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Problem Management</span>
-          <span class="km-t pipe" data-s="pipe">Change Management</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Problem Management</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Change Management</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">ITIL</span>
-          <span class="km-t plan" data-s="plan">Release Management</span>
-          <span class="km-t plan" data-s="plan">Service Request</span>
-          <span class="km-t plan" data-s="plan">Event Management</span>
-          <span class="km-t plan" data-s="plan">CMDB</span>
-          <span class="km-t plan" data-s="plan">Asset Management</span>
-          <span class="km-t plan" data-s="plan">Configuration Management</span>
-          <span class="km-t plan" data-s="plan">ServiceNow</span>
-          <span class="km-t plan" data-s="plan">Remedy</span>
-          <span class="km-t plan" data-s="plan">CAB</span>
-          <span class="km-t plan" data-s="plan">Change Windows</span>
-          <span class="km-t plan" data-s="plan">Operational Documentation</span>
+          <button type="button" class="km-t plan" data-s="plan">ITIL</button>
+          <button type="button" class="km-t plan" data-s="plan">Release Management</button>
+          <button type="button" class="km-t plan" data-s="plan">Service Request</button>
+          <button type="button" class="km-t plan" data-s="plan">Event Management</button>
+          <button type="button" class="km-t plan" data-s="plan">CMDB</button>
+          <button type="button" class="km-t plan" data-s="plan">Asset Management</button>
+          <button type="button" class="km-t plan" data-s="plan">Configuration Management</button>
+          <button type="button" class="km-t plan" data-s="plan">ServiceNow</button>
+          <button type="button" class="km-t plan" data-s="plan">Remedy</button>
+          <button type="button" class="km-t plan" data-s="plan">CAB</button>
+          <button type="button" class="km-t plan" data-s="plan">Change Windows</button>
+          <button type="button" class="km-t plan" data-s="plan">Operational Documentation</button>
           </div></div></div>
         </div>
         </div></div></div>
@@ -2121,38 +2182,38 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Cybersecurity Fundamentals</span>
-          <span class="km-t pipe" data-s="pipe">Infrastructure Security</span>
-          <span class="km-t pipe" data-s="pipe">Linux Security</span>
-          <span class="km-t pipe" data-s="pipe">Container Security</span>
-          <span class="km-t pipe" data-s="pipe">Kubernetes Security</span>
-          <span class="km-t pipe" data-s="pipe">DevSecOps</span>
-          <span class="km-t pipe" data-s="pipe">RBAC</span>
-          <span class="km-t pipe" data-s="pipe">TLS/SSL</span>
-          <span class="km-t pipe" data-s="pipe">Certificates</span>
-          <span class="km-t pipe" data-s="pipe">Secrets Management</span>
-          <span class="km-t pipe" data-s="pipe">HashiCorp Vault</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Cybersecurity Fundamentals</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Infrastructure Security</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Linux Security</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Container Security</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Kubernetes Security</button>
+          <button type="button" class="km-t pipe" data-s="pipe">DevSecOps</button>
+          <button type="button" class="km-t pipe" data-s="pipe">RBAC</button>
+          <button type="button" class="km-t pipe" data-s="pipe">TLS/SSL</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Certificates</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Secrets Management</button>
+          <button type="button" class="km-t pipe" data-s="pipe">HashiCorp Vault</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Network Security</span>
-          <span class="km-t plan" data-s="plan">Cloud Security</span>
-          <span class="km-t plan" data-s="plan">Application Security</span>
-          <span class="km-t plan" data-s="plan">Zero Trust</span>
-          <span class="km-t plan" data-s="plan">IAM</span>
-          <span class="km-t plan" data-s="plan">PAM</span>
-          <span class="km-t plan" data-s="plan">LDAP</span>
-          <span class="km-t plan" data-s="plan">Active Directory</span>
-          <span class="km-t plan" data-s="plan">SSO</span>
-          <span class="km-t plan" data-s="plan">OAuth</span>
-          <span class="km-t plan" data-s="plan">OIDC</span>
-          <span class="km-t plan" data-s="plan">SAML</span>
-          <span class="km-t plan" data-s="plan">PKI</span>
-          <span class="km-t plan" data-s="plan">Vulnerability Management</span>
-          <span class="km-t plan" data-s="plan">Security Scanning</span>
-          <span class="km-t plan" data-s="plan">SIEM</span>
-          <span class="km-t plan" data-s="plan">SOC</span>
-          <span class="km-t plan" data-s="plan">Threat Detection</span>
-          <span class="km-t plan" data-s="plan">Compliance</span>
-          <span class="km-t plan" data-s="plan">Security Auditing</span>
+          <button type="button" class="km-t plan" data-s="plan">Network Security</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Security</button>
+          <button type="button" class="km-t plan" data-s="plan">Application Security</button>
+          <button type="button" class="km-t plan" data-s="plan">Zero Trust</button>
+          <button type="button" class="km-t plan" data-s="plan">IAM</button>
+          <button type="button" class="km-t plan" data-s="plan">PAM</button>
+          <button type="button" class="km-t plan" data-s="plan">LDAP</button>
+          <button type="button" class="km-t plan" data-s="plan">Active Directory</button>
+          <button type="button" class="km-t plan" data-s="plan">SSO</button>
+          <button type="button" class="km-t plan" data-s="plan">OAuth</button>
+          <button type="button" class="km-t plan" data-s="plan">OIDC</button>
+          <button type="button" class="km-t plan" data-s="plan">SAML</button>
+          <button type="button" class="km-t plan" data-s="plan">PKI</button>
+          <button type="button" class="km-t plan" data-s="plan">Vulnerability Management</button>
+          <button type="button" class="km-t plan" data-s="plan">Security Scanning</button>
+          <button type="button" class="km-t plan" data-s="plan">SIEM</button>
+          <button type="button" class="km-t plan" data-s="plan">SOC</button>
+          <button type="button" class="km-t plan" data-s="plan">Threat Detection</button>
+          <button type="button" class="km-t plan" data-s="plan">Compliance</button>
+          <button type="button" class="km-t plan" data-s="plan">Security Auditing</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -2166,22 +2227,22 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Software Supply Chain Security</span>
-          <span class="km-t pipe" data-s="pipe">SBOM</span>
-          <span class="km-t pipe" data-s="pipe">Image Signing</span>
-          <span class="km-t pipe" data-s="pipe">Admission Control</span>
-          <span class="km-t pipe" data-s="pipe">Policy as Code</span>
-          <span class="km-t pipe" data-s="pipe">Container Image Scanning</span>
-          <span class="km-t pipe" data-s="pipe">CI/CD Security</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Software Supply Chain Security</button>
+          <button type="button" class="km-t pipe" data-s="pipe">SBOM</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Image Signing</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Admission Control</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Policy as Code</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Container Image Scanning</button>
+          <button type="button" class="km-t pipe" data-s="pipe">CI/CD Security</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">SLSA</span>
-          <span class="km-t plan" data-s="plan">Artifact Signing</span>
-          <span class="km-t plan" data-s="plan">Cosign</span>
-          <span class="km-t plan" data-s="plan">OPA</span>
-          <span class="km-t plan" data-s="plan">Gatekeeper</span>
-          <span class="km-t plan" data-s="plan">Kyverno</span>
-          <span class="km-t plan" data-s="plan">Dependency Security</span>
-          <span class="km-t plan" data-s="plan">Secrets Scanning</span>
+          <button type="button" class="km-t plan" data-s="plan">SLSA</button>
+          <button type="button" class="km-t plan" data-s="plan">Artifact Signing</button>
+          <button type="button" class="km-t plan" data-s="plan">Cosign</button>
+          <button type="button" class="km-t plan" data-s="plan">OPA</button>
+          <button type="button" class="km-t plan" data-s="plan">Gatekeeper</button>
+          <button type="button" class="km-t plan" data-s="plan">Kyverno</button>
+          <button type="button" class="km-t plan" data-s="plan">Dependency Security</button>
+          <button type="button" class="km-t plan" data-s="plan">Secrets Scanning</button>
           </div></div></div>
         </div>
         </div></div></div>
@@ -2206,23 +2267,23 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Database Fundamentals</span>
-          <span class="km-t pipe" data-s="pipe">PostgreSQL</span>
-          <span class="km-t pipe" data-s="pipe">Database HA</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Database Fundamentals</button>
+          <button type="button" class="km-t pipe" data-s="pipe">PostgreSQL</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Database HA</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">MySQL</span>
-          <span class="km-t plan" data-s="plan">Oracle</span>
-          <span class="km-t plan" data-s="plan">SQL Server</span>
-          <span class="km-t plan" data-s="plan">MongoDB</span>
-          <span class="km-t plan" data-s="plan">Redis</span>
-          <span class="km-t plan" data-s="plan">Database Replication</span>
-          <span class="km-t plan" data-s="plan">Database Backup</span>
-          <span class="km-t plan" data-s="plan">Database Recovery</span>
-          <span class="km-t plan" data-s="plan">Database Performance</span>
-          <span class="km-t plan" data-s="plan">Connection Management</span>
-          <span class="km-t plan" data-s="plan">Query Optimization</span>
-          <span class="km-t plan" data-s="plan">Database Monitoring</span>
-          <span class="km-t plan" data-s="plan">Database Security</span>
+          <button type="button" class="km-t plan" data-s="plan">MySQL</button>
+          <button type="button" class="km-t plan" data-s="plan">Oracle</button>
+          <button type="button" class="km-t plan" data-s="plan">SQL Server</button>
+          <button type="button" class="km-t plan" data-s="plan">MongoDB</button>
+          <button type="button" class="km-t plan" data-s="plan">Redis</button>
+          <button type="button" class="km-t plan" data-s="plan">Database Replication</button>
+          <button type="button" class="km-t plan" data-s="plan">Database Backup</button>
+          <button type="button" class="km-t plan" data-s="plan">Database Recovery</button>
+          <button type="button" class="km-t plan" data-s="plan">Database Performance</button>
+          <button type="button" class="km-t plan" data-s="plan">Connection Management</button>
+          <button type="button" class="km-t plan" data-s="plan">Query Optimization</button>
+          <button type="button" class="km-t plan" data-s="plan">Database Monitoring</button>
+          <button type="button" class="km-t plan" data-s="plan">Database Security</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -2236,21 +2297,21 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Nginx</span>
-          <span class="km-t pipe" data-s="pipe">Apache Kafka</span>
-          <span class="km-t pipe" data-s="pipe">Message Queues</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Nginx</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Apache Kafka</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Message Queues</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Application Servers</span>
-          <span class="km-t plan" data-s="plan">Apache</span>
-          <span class="km-t plan" data-s="plan">Tomcat</span>
-          <span class="km-t plan" data-s="plan">WildFly</span>
-          <span class="km-t plan" data-s="plan">JBoss</span>
-          <span class="km-t plan" data-s="plan">RabbitMQ</span>
-          <span class="km-t plan" data-s="plan">Redis</span>
-          <span class="km-t plan" data-s="plan">Event Streaming</span>
-          <span class="km-t plan" data-s="plan">Event-Driven Architecture</span>
-          <span class="km-t plan" data-s="plan">Middleware HA</span>
-          <span class="km-t plan" data-s="plan">Middleware Troubleshooting</span>
+          <button type="button" class="km-t plan" data-s="plan">Application Servers</button>
+          <button type="button" class="km-t plan" data-s="plan">Apache</button>
+          <button type="button" class="km-t plan" data-s="plan">Tomcat</button>
+          <button type="button" class="km-t plan" data-s="plan">WildFly</button>
+          <button type="button" class="km-t plan" data-s="plan">JBoss</button>
+          <button type="button" class="km-t plan" data-s="plan">RabbitMQ</button>
+          <button type="button" class="km-t plan" data-s="plan">Redis</button>
+          <button type="button" class="km-t plan" data-s="plan">Event Streaming</button>
+          <button type="button" class="km-t plan" data-s="plan">Event-Driven Architecture</button>
+          <button type="button" class="km-t plan" data-s="plan">Middleware HA</button>
+          <button type="button" class="km-t plan" data-s="plan">Middleware Troubleshooting</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -2264,23 +2325,23 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">REST APIs</span>
-          <span class="km-t pipe" data-s="pipe">HTTP/HTTPS</span>
-          <span class="km-t pipe" data-s="pipe">API Gateway</span>
-          <span class="km-t pipe" data-s="pipe">Microservices</span>
+          <button type="button" class="km-t pipe" data-s="pipe">REST APIs</button>
+          <button type="button" class="km-t pipe" data-s="pipe">HTTP/HTTPS</button>
+          <button type="button" class="km-t pipe" data-s="pipe">API Gateway</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Microservices</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">API Management</span>
-          <span class="km-t plan" data-s="plan">API Security</span>
-          <span class="km-t plan" data-s="plan">Authentication</span>
-          <span class="km-t plan" data-s="plan">Authorization</span>
-          <span class="km-t plan" data-s="plan">Rate Limiting</span>
-          <span class="km-t plan" data-s="plan">Service Discovery</span>
-          <span class="km-t plan" data-s="plan">Circuit Breaker</span>
-          <span class="km-t plan" data-s="plan">Retry</span>
-          <span class="km-t plan" data-s="plan">Timeout</span>
-          <span class="km-t plan" data-s="plan">Bulkhead</span>
-          <span class="km-t plan" data-s="plan">Distributed Transactions</span>
-          <span class="km-t plan" data-s="plan">Event-Driven Microservices</span>
+          <button type="button" class="km-t plan" data-s="plan">API Management</button>
+          <button type="button" class="km-t plan" data-s="plan">API Security</button>
+          <button type="button" class="km-t plan" data-s="plan">Authentication</button>
+          <button type="button" class="km-t plan" data-s="plan">Authorization</button>
+          <button type="button" class="km-t plan" data-s="plan">Rate Limiting</button>
+          <button type="button" class="km-t plan" data-s="plan">Service Discovery</button>
+          <button type="button" class="km-t plan" data-s="plan">Circuit Breaker</button>
+          <button type="button" class="km-t plan" data-s="plan">Retry</button>
+          <button type="button" class="km-t plan" data-s="plan">Timeout</button>
+          <button type="button" class="km-t plan" data-s="plan">Bulkhead</button>
+          <button type="button" class="km-t plan" data-s="plan">Distributed Transactions</button>
+          <button type="button" class="km-t plan" data-s="plan">Event-Driven Microservices</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -2296,20 +2357,20 @@ a.footer-logo:hover{color:#fff;}
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">Quorum</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Distributed Systems</span>
-          <span class="km-t pipe" data-s="pipe">CAP Theorem</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Distributed Systems</button>
+          <button type="button" class="km-t pipe" data-s="pipe">CAP Theorem</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Consensus</span>
-          <span class="km-t plan" data-s="plan">Leader Election</span>
-          <span class="km-t plan" data-s="plan">Replication</span>
-          <span class="km-t plan" data-s="plan">Consistency</span>
-          <span class="km-t plan" data-s="plan">Eventual Consistency</span>
-          <span class="km-t plan" data-s="plan">Distributed Transactions</span>
-          <span class="km-t plan" data-s="plan">Caching</span>
-          <span class="km-t plan" data-s="plan">Distributed Locking</span>
-          <span class="km-t plan" data-s="plan">Partition Tolerance</span>
-          <span class="km-t plan" data-s="plan">Failure Domains</span>
-          <span class="km-t plan" data-s="plan">Distributed Coordination</span>
+          <button type="button" class="km-t plan" data-s="plan">Consensus</button>
+          <button type="button" class="km-t plan" data-s="plan">Leader Election</button>
+          <button type="button" class="km-t plan" data-s="plan">Replication</button>
+          <button type="button" class="km-t plan" data-s="plan">Consistency</button>
+          <button type="button" class="km-t plan" data-s="plan">Eventual Consistency</button>
+          <button type="button" class="km-t plan" data-s="plan">Distributed Transactions</button>
+          <button type="button" class="km-t plan" data-s="plan">Caching</button>
+          <button type="button" class="km-t plan" data-s="plan">Distributed Locking</button>
+          <button type="button" class="km-t plan" data-s="plan">Partition Tolerance</button>
+          <button type="button" class="km-t plan" data-s="plan">Failure Domains</button>
+          <button type="button" class="km-t plan" data-s="plan">Distributed Coordination</button>
           </div></div></div>
         </div>
         </div></div></div>
@@ -2334,27 +2395,27 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">AI Infrastructure</span>
-          <span class="km-t pipe" data-s="pipe">GPU Infrastructure</span>
-          <span class="km-t pipe" data-s="pipe">GPU Scheduling</span>
-          <span class="km-t pipe" data-s="pipe">GPU Kubernetes</span>
-          <span class="km-t pipe" data-s="pipe">AI Workloads on Kubernetes</span>
-          <span class="km-t pipe" data-s="pipe">Model Serving</span>
+          <button type="button" class="km-t pipe" data-s="pipe">AI Infrastructure</button>
+          <button type="button" class="km-t pipe" data-s="pipe">GPU Infrastructure</button>
+          <button type="button" class="km-t pipe" data-s="pipe">GPU Scheduling</button>
+          <button type="button" class="km-t pipe" data-s="pipe">GPU Kubernetes</button>
+          <button type="button" class="km-t pipe" data-s="pipe">AI Workloads on Kubernetes</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Model Serving</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Inference Infrastructure</span>
-          <span class="km-t plan" data-s="plan">LLMOps</span>
-          <span class="km-t plan" data-s="plan">MLOps</span>
-          <span class="km-t plan" data-s="plan">Model Monitoring</span>
-          <span class="km-t plan" data-s="plan">Model Observability</span>
-          <span class="km-t plan" data-s="plan">AI Cost Management</span>
-          <span class="km-t plan" data-s="plan">AI Reliability</span>
-          <span class="km-t plan" data-s="plan">AI Security</span>
-          <span class="km-t plan" data-s="plan">AI Governance</span>
-          <span class="km-t plan" data-s="plan">RAG Infrastructure</span>
-          <span class="km-t plan" data-s="plan">Vector Databases</span>
-          <span class="km-t plan" data-s="plan">Model Gateways</span>
-          <span class="km-t plan" data-s="plan">AI CI/CD</span>
-          <span class="km-t plan" data-s="plan">AI Infrastructure Automation</span>
+          <button type="button" class="km-t plan" data-s="plan">Inference Infrastructure</button>
+          <button type="button" class="km-t plan" data-s="plan">LLMOps</button>
+          <button type="button" class="km-t plan" data-s="plan">MLOps</button>
+          <button type="button" class="km-t plan" data-s="plan">Model Monitoring</button>
+          <button type="button" class="km-t plan" data-s="plan">Model Observability</button>
+          <button type="button" class="km-t plan" data-s="plan">AI Cost Management</button>
+          <button type="button" class="km-t plan" data-s="plan">AI Reliability</button>
+          <button type="button" class="km-t plan" data-s="plan">AI Security</button>
+          <button type="button" class="km-t plan" data-s="plan">AI Governance</button>
+          <button type="button" class="km-t plan" data-s="plan">RAG Infrastructure</button>
+          <button type="button" class="km-t plan" data-s="plan">Vector Databases</button>
+          <button type="button" class="km-t plan" data-s="plan">Model Gateways</button>
+          <button type="button" class="km-t plan" data-s="plan">AI CI/CD</button>
+          <button type="button" class="km-t plan" data-s="plan">AI Infrastructure Automation</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -2368,21 +2429,21 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">AIOps</span>
-          <span class="km-t pipe" data-s="pipe">AI Root Cause Analysis</span>
-          <span class="km-t pipe" data-s="pipe">Agentic DevOps</span>
-          <span class="km-t pipe" data-s="pipe">Agentic SRE</span>
+          <button type="button" class="km-t pipe" data-s="pipe">AIOps</button>
+          <button type="button" class="km-t pipe" data-s="pipe">AI Root Cause Analysis</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Agentic DevOps</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Agentic SRE</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">AI Incident Detection</span>
-          <span class="km-t plan" data-s="plan">AI Alert Correlation</span>
-          <span class="km-t plan" data-s="plan">AI Log Analysis</span>
-          <span class="km-t plan" data-s="plan">AI Capacity Forecasting</span>
-          <span class="km-t plan" data-s="plan">AI Remediation</span>
-          <span class="km-t plan" data-s="plan">AI-assisted Troubleshooting</span>
-          <span class="km-t plan" data-s="plan">AI Operations Agents</span>
-          <span class="km-t plan" data-s="plan">Agentic CloudOps</span>
-          <span class="km-t plan" data-s="plan">Human-in-the-loop Automation</span>
-          <span class="km-t plan" data-s="plan">AI Operational Guardrails</span>
+          <button type="button" class="km-t plan" data-s="plan">AI Incident Detection</button>
+          <button type="button" class="km-t plan" data-s="plan">AI Alert Correlation</button>
+          <button type="button" class="km-t plan" data-s="plan">AI Log Analysis</button>
+          <button type="button" class="km-t plan" data-s="plan">AI Capacity Forecasting</button>
+          <button type="button" class="km-t plan" data-s="plan">AI Remediation</button>
+          <button type="button" class="km-t plan" data-s="plan">AI-assisted Troubleshooting</button>
+          <button type="button" class="km-t plan" data-s="plan">AI Operations Agents</button>
+          <button type="button" class="km-t plan" data-s="plan">Agentic CloudOps</button>
+          <button type="button" class="km-t plan" data-s="plan">Human-in-the-loop Automation</button>
+          <button type="button" class="km-t plan" data-s="plan">AI Operational Guardrails</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -2396,18 +2457,18 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">FinOps</span>
-          <span class="km-t pipe" data-s="pipe">Cloud Cost Management</span>
-          <span class="km-t pipe" data-s="pipe">Rightsizing</span>
-          <span class="km-t pipe" data-s="pipe">Spot / Preemptible Instances</span>
-          <span class="km-t pipe" data-s="pipe">Kubernetes Cost Management</span>
+          <button type="button" class="km-t pipe" data-s="pipe">FinOps</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Cloud Cost Management</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Rightsizing</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Spot / Preemptible Instances</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Kubernetes Cost Management</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Cost Allocation</span>
-          <span class="km-t plan" data-s="plan">Tagging</span>
-          <span class="km-t plan" data-s="plan">Resource Optimization</span>
-          <span class="km-t plan" data-s="plan">Reserved Capacity</span>
-          <span class="km-t plan" data-s="plan">Cloud Waste Management</span>
-          <span class="km-t plan" data-s="plan">Cost Governance</span>
+          <button type="button" class="km-t plan" data-s="plan">Cost Allocation</button>
+          <button type="button" class="km-t plan" data-s="plan">Tagging</button>
+          <button type="button" class="km-t plan" data-s="plan">Resource Optimization</button>
+          <button type="button" class="km-t plan" data-s="plan">Reserved Capacity</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Waste Management</button>
+          <button type="button" class="km-t plan" data-s="plan">Cost Governance</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -2424,17 +2485,17 @@ a.footer-logo:hover{color:#fff;}
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html">Shell Automation</a>
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Bash Automation</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">Python Automation</span>
-          <span class="km-t pipe" data-s="pipe">Ansible Automation</span>
-          <span class="km-t pipe" data-s="pipe">Kubernetes Automation</span>
-          <span class="km-t pipe" data-s="pipe">Self-Healing Infrastructure</span>
+          <button type="button" class="km-t pipe" data-s="pipe">Python Automation</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Ansible Automation</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Kubernetes Automation</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Self-Healing Infrastructure</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Terraform Automation</span>
-          <span class="km-t plan" data-s="plan">API Automation</span>
-          <span class="km-t plan" data-s="plan">Cloud Automation</span>
-          <span class="km-t plan" data-s="plan">Network Automation</span>
-          <span class="km-t plan" data-s="plan">Database Automation</span>
-          <span class="km-t plan" data-s="plan">Monitoring Automation</span>
+          <button type="button" class="km-t plan" data-s="plan">Terraform Automation</button>
+          <button type="button" class="km-t plan" data-s="plan">API Automation</button>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Automation</button>
+          <button type="button" class="km-t plan" data-s="plan">Network Automation</button>
+          <button type="button" class="km-t plan" data-s="plan">Database Automation</button>
+          <button type="button" class="km-t plan" data-s="plan">Monitoring Automation</button>
           </div></div></div>
         </div>
         <div class="km-cat" data-cat>
@@ -2448,19 +2509,19 @@ a.footer-logo:hover{color:#fff;}
           </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
-          <span class="km-t pipe" data-s="pipe">System Architecture</span>
-          <span class="km-t pipe" data-s="pipe">Microservice Architecture</span>
-          <span class="km-t pipe" data-s="pipe">Zero-Downtime Architecture</span>
+          <button type="button" class="km-t pipe" data-s="pipe">System Architecture</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Microservice Architecture</button>
+          <button type="button" class="km-t pipe" data-s="pipe">Zero-Downtime Architecture</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
-          <span class="km-t plan" data-s="plan">Cloud Architecture</span>
-          <span class="km-t plan" data-s="plan">Distributed Architecture</span>
-          <span class="km-t plan" data-s="plan">Event-Driven Architecture</span>
-          <span class="km-t plan" data-s="plan">Multi-Tenant Architecture</span>
-          <span class="km-t plan" data-s="plan">Scalable Architecture</span>
-          <span class="km-t plan" data-s="plan">Resilient Architecture</span>
-          <span class="km-t plan" data-s="plan">Multi-Region Architecture</span>
-          <span class="km-t plan" data-s="plan">Multi-Cloud Architecture</span>
-          <span class="km-t plan" data-s="plan">Hybrid Architecture</span>
+          <button type="button" class="km-t plan" data-s="plan">Cloud Architecture</button>
+          <button type="button" class="km-t plan" data-s="plan">Distributed Architecture</button>
+          <button type="button" class="km-t plan" data-s="plan">Event-Driven Architecture</button>
+          <button type="button" class="km-t plan" data-s="plan">Multi-Tenant Architecture</button>
+          <button type="button" class="km-t plan" data-s="plan">Scalable Architecture</button>
+          <button type="button" class="km-t plan" data-s="plan">Resilient Architecture</button>
+          <button type="button" class="km-t plan" data-s="plan">Multi-Region Architecture</button>
+          <button type="button" class="km-t plan" data-s="plan">Multi-Cloud Architecture</button>
+          <button type="button" class="km-t plan" data-s="plan">Hybrid Architecture</button>
           </div></div></div>
         </div>
         </div></div></div>
@@ -2743,6 +2804,11 @@ a.footer-logo:hover{color:#fff;}
   </div>
 </div>
 
+<button class="req-pill" id="reqPill" type="button" hidden>
+  <span><b id="reqPillN">0</b> topics queued</span>
+  <span class="go">Get notified →</span>
+</button>
+
 <!-- ═══════════ SUBSCRIBE ═══════════ -->
 <div class="subscribe-section" id="subscribe">
   <div class="subscribe-bg-text">SUBSCRIBE</div>
@@ -2750,16 +2816,24 @@ a.footer-logo:hover{color:#fff;}
     <div class="section-tag" style="justify-content:center">Free Forever</div>
     <h2 class="section-title">JOIN 250+<br>ENGINEERS</h2>
     <p class="section-lead">One deep-dive every month. No fluff, no spam — just battle-tested knowledge from the Platform Engineering trenches.</p>
+    <div class="sub-requests" id="subRequests">
+      <div class="sub-req-title">Notify me when these land</div>
+      <div class="sub-req-chips" id="subReqChips"></div>
+    </div>
     <form class="sub-form" id="subscribeForm" method="post" action="" target="subscribeSink">
       <label class="sr-only" for="subEmail">Email address</label>
       <input class="sub-input" id="subEmail" type="email" name="email"
              placeholder="your@email.com" required autocomplete="email" />
       <!-- honeypot: hidden from people, irresistible to bots -->
       <input class="sub-hp" type="text" name="hp_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <!-- Kit custom field. Create a field named topic_request in Kit
+           (Grow → Subscribers → the gear → Custom fields) or Kit drops it. -->
+      <input type="hidden" name="fields[topic_request]" id="subTopicField" value="">
       <button class="sub-btn" type="submit">Subscribe →</button>
     </form>
     <div class="sub-status" id="subStatus" role="status" aria-live="polite"></div>
     <div class="sub-note">No spam · Unsubscribe anytime · Published monthly</div>
+    <div class="sub-rss">Prefer a reader? <a href="feed.xml">RSS feed</a></div>
     <iframe name="subscribeSink" id="subscribeSink" class="sr-only" title="Subscription response" aria-hidden="true"></iframe>
   </div>
 </div>
@@ -2789,6 +2863,7 @@ a.footer-logo:hover{color:#fff;}
         <div class="footer-col">
           <div class="footer-col-title">Connect</div>
           <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="feed.xml">RSS Feed</a>
           <a href="#">Back to Top ↑</a>
         </div>
       </div>
@@ -2942,11 +3017,99 @@ const NEWSLETTER = {
       btn.disabled = false;
       btn.textContent = 'Subscribe →';
       say('Almost there — check your inbox to confirm your subscription.', 'ok');
+      poTrack('subscribe/success', 'Newsletter signup');
       form.reset();
+      if (window.poClearTopics) window.poClearTopics();
     };
     if (sink) sink.addEventListener('load', finish, { once: true });
     setTimeout(finish, 4000);   // fallback if the iframe load never fires
   });
+})();
+
+/* ── Analytics events (no-ops until a GoatCounter code is set) ── */
+function poTrack(path, title){
+  try{
+    if (window.goatcounter && window.goatcounter.count)
+      window.goatcounter.count({ path: path, title: title || path, event: true });
+  }catch(e){}
+}
+
+/* ── Topic requests ──────────────────────────────────────────────────────
+   A pipeline or planned topic is a dead end otherwise: there's nothing to
+   click through to. Queuing it turns that into a signup and, in Kit, into a
+   ranked list of what people actually want written next. Kept in
+   sessionStorage so a reload mid-browse doesn't lose the queue. ---------- */
+(function(){
+  const MAX = 8;
+  const pill   = document.getElementById('reqPill');
+  const pillN  = document.getElementById('reqPillN');
+  const box    = document.getElementById('subRequests');
+  const chips  = document.getElementById('subReqChips');
+  const field  = document.getElementById('subTopicField');
+  if (!pill || !box || !chips || !field) return;
+
+  /* the ✓ on a queued chip is a CSS ::before, so it never lands in textContent */
+  const label = b => b.textContent.trim();
+
+  let queue = [];
+  try { queue = JSON.parse(sessionStorage.getItem('po-topics') || '[]'); } catch(e){ queue = []; }
+  if (!Array.isArray(queue)) queue = [];
+
+  function save(){
+    try { sessionStorage.setItem('po-topics', JSON.stringify(queue)); } catch(e){}
+  }
+
+  function render(){
+    document.querySelectorAll('button.km-t').forEach(b => {
+      b.classList.toggle('req', queue.indexOf(label(b)) !== -1);
+    });
+    pillN.textContent = queue.length;
+    pill.hidden = queue.length === 0;
+    pill.classList.toggle('show', queue.length > 0);
+    box.classList.toggle('show', queue.length > 0);
+    field.value = queue.join(', ').slice(0, 250);
+    chips.innerHTML = '';
+    queue.forEach(t => {
+      const c = document.createElement('span');
+      c.className = 'sub-req-chip';
+      c.appendChild(document.createTextNode(t));
+      const x = document.createElement('button');
+      x.type = 'button'; x.textContent = '×';
+      x.setAttribute('aria-label', 'Remove ' + t);
+      x.addEventListener('click', () => { toggle(t); });
+      c.appendChild(x);
+      chips.appendChild(c);
+    });
+  }
+
+  function toggle(topic){
+    const i = queue.indexOf(topic);
+    if (i !== -1) { queue.splice(i, 1); }
+    else {
+      if (queue.length >= MAX) return;
+      queue.push(topic);
+      poTrack('topic-request/' + topic.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+              'Topic requested: ' + topic);
+    }
+    save(); render();
+  }
+
+  document.addEventListener('click', e => {
+    const b = e.target.closest('button.km-t');
+    if (!b) return;
+    e.preventDefault(); e.stopPropagation();   /* don't fold the category shut */
+    toggle(label(b));
+  });
+
+  pill.addEventListener('click', () => {
+    const s = document.getElementById('subscribe');
+    if (s) s.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const inp = document.getElementById('subEmail');
+    if (inp) setTimeout(() => inp.focus({ preventScroll: true }), 600);
+  });
+
+  window.poClearTopics = function(){ queue = []; save(); render(); };
+  render();
 })();
 
 /* ── Knowledge map: two-level accordion + search + status filter ── */
@@ -3032,6 +3195,12 @@ const NEWSLETTER = {
       pillars.forEach((p, i) => setOpen(p, i === 0));
       result.textContent = '';
     } else {
+      if (q.length >= 3) {
+        clearTimeout(window.__kmTrack);
+        window.__kmTrack = setTimeout(() => poTrack(
+          'kmap-search/' + q.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40),
+          'Knowledge-map search: ' + q), 900);
+      }
       result.innerHTML = '<b>' + shown + '</b> of ' + TOTAL + ' topics' +
         (q ? ' matching “' + q.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '”' : '');
     }
@@ -3047,6 +3216,7 @@ const NEWSLETTER = {
       document.querySelectorAll('.km-f').forEach(b => b.classList.remove('on'));
       btn.classList.add('on');
       filter = btn.dataset.f;
+      poTrack('kmap-filter/' + filter, 'Knowledge-map filter: ' + filter);
       apply();
     });
   });

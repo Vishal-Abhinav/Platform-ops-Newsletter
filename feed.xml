@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Platform Ops — Tech with Vishal Abhinav</title>
+    <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/</link>
+    <atom:link href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/feed.xml" rel="self" type="application/rss+xml" />
+    <description>Monthly deep-dives on Kubernetes, SRE, infrastructure and platform
+      engineering — written from production, not slideware.</description>
+    <language>en</language>
+    <managingEditor>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</managingEditor>
+    <webMaster>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</webMaster>
+    <lastBuildDate>Wed, 09 Sep 2026 09:00:00 +0000</lastBuildDate>
+    <ttl>1440</ttl>
+    <image>
+      <url>https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png</url>
+      <title>Platform Ops — Tech with Vishal Abhinav</title>
+      <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/</link>
+    </image>
+    <item>
+      <title>#057 — Linux &amp; Unix Glossary</title>
+      <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html</link>
+      <guid isPermaLink="true">https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html</guid>
+      <pubDate>Wed, 09 Sep 2026 09:00:00 +0000</pubDate>
+      <description>190 terms across 15 categories — fundamentals, permissions, processes, networking, storage, security, monitoring and troubleshooting — searchable in one place, with standalone deep-dive pages for the terms that need one.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#056 — Linux Troubleshooting</title>
+      <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html</link>
+      <guid isPermaLink="true">https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html</guid>
+      <pubDate>Mon, 07 Sep 2026 09:00:00 +0000</pubDate>
+      <description>A runbook, not a tutorial — high load and CPU, memory and OOM, disk and I/O, network, and boot failures, each with the commands to run and what their output means.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#055 — Linux Advanced</title>
+      <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html</link>
+      <guid isPermaLink="true">https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html</guid>
+      <pubDate>Sat, 05 Sep 2026 09:00:00 +0000</pubDate>
+      <description>systemd internals, kernel and sysctl tuning, namespaces and cgroups, performance profiling, and LVM.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#054 — Linux Fundamentals</title>
+      <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html</link>
+      <guid isPermaLink="true">https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html</guid>
+      <pubDate>Thu, 03 Sep 2026 09:00:00 +0000</pubDate>
+      <description>Filesystem hierarchy, users and permissions, package management, process basics, and shell scripting.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#053 — Incident Management &amp; Postmortems</title>
+      <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/SRE/INCIDENT-MANAGEMENT/incident-management.html</link>
+      <guid isPermaLink="true">https://vishal-abhinav.github.io/Platform-ops-Newsletter/SRE/INCIDENT-MANAGEMENT/incident-management.html</guid>
+      <pubDate>Tue, 01 Sep 2026 09:00:00 +0000</pubDate>
+      <description>Severity classification, the Incident Commander role, blameless postmortems, and action-item follow-through that actually closes.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#052 — CI/CD &amp; GitOps Deep-Dive</title>
+      <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/CICD/cicd-pipelines.html</link>
+      <guid isPermaLink="true">https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/CICD/cicd-pipelines.html</guid>
+      <pubDate>Sat, 01 Aug 2026 09:00:00 +0000</pubDate>
+      <description>Jenkins and GitLab CI, GitOps with ArgoCD and Flux, security gates, canary and blue-green rollouts, and secrets management.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#051 — Observability Stack Deep-Dive</title>
+      <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/OBSERVABILITY/k8-observability.html</link>
+      <guid isPermaLink="true">https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/OBSERVABILITY/k8-observability.html</guid>
+      <pubDate>Wed, 01 Jul 2026 09:00:00 +0000</pubDate>
+      <description>Prometheus and Grafana, Loki and ELK, Jaeger and OpenTelemetry, and SLO burn-rate alerting that pages you for the right reasons.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#050 — Kubernetes Storage Deep-Dive</title>
+      <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/STORAGE/k8-storage.html</link>
+      <guid isPermaLink="true">https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/STORAGE/k8-storage.html</guid>
+      <pubDate>Mon, 01 Jun 2026 09:00:00 +0000</pubDate>
+      <description>PV and PVC, StorageClasses, CSI driver internals, StatefulSets, and a backup and DR strategy that's been tested.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#049 — Kubernetes &amp; OpenShift Error Runbook</title>
+      <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/ERROR/K8-error.html</link>
+      <guid isPermaLink="true">https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/ERROR/K8-error.html</guid>
+      <pubDate>Fri, 01 May 2026 09:00:00 +0000</pubDate>
+      <description>32 error types across 5 layers — Pod, Worker Node, Cluster, API Server and OpenShift — each with the production fix.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#048 — Kubernetes Architecture Deep-Dive</title>
+      <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/ARCHITECTURE/k8-architecture.html</link>
+      <guid isPermaLink="true">https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/ARCHITECTURE/k8-architecture.html</guid>
+      <pubDate>Wed, 01 Apr 2026 09:00:00 +0000</pubDate>
+      <description>Control plane, worker nodes, storage, CSI, PersistentVolumes, QoS classes and scheduling — with diagrams.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#047 — Kubernetes Networking Decoded</title>
+      <link>https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/Networking/k8-networking.html</link>
+      <guid isPermaLink="true">https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/Networking/k8-networking.html</guid>
+      <pubDate>Sun, 01 Mar 2026 09:00:00 +0000</pubDate>
+      <description>Six architecture diagrams covering Pod networking, CNI plugins, Ingress, NetworkPolicy and CoreDNS.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+  </channel>
+</rss>
