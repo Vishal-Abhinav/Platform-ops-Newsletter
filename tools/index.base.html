@@ -1901,15 +1901,30 @@ window.addEventListener('load', syncIssuesScrollHeight);
 window.addEventListener('resize', syncIssuesScrollHeight);
 syncIssuesScrollHeight();
 
-/* ── Scroll reveal ── */
+/* ── Scroll reveal ──
+   threshold:0 + a negative bottom rootMargin, NOT a fractional threshold.
+   A fraction is a share of the ELEMENT, so it is unreachable once the element
+   is taller than the window: .kr-topics is ~15,500px with every pillar open,
+   and 10% of that is 1,550px of visible area on an 800px screen. The observer
+   never fired, the column kept opacity:0, and the map rendered as a blank
+   half-page beside the archive. threshold:0 fires the moment any pixel shows;
+   the -80px margin keeps the same "just inside the viewport" feel for the
+   short sections. */
 const observer = new IntersectionObserver(entries=>{
   entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
-},{threshold:0.1});
+},{threshold:0, rootMargin:'0px 0px -80px 0px'});
 document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 
+/* Failsafe: nothing on this page is worth losing to a reveal that never
+   fires. Anything still hidden after 3s is shown regardless. */
+setTimeout(()=>{
+  document.querySelectorAll('.reveal:not(.visible)').forEach(el=>el.classList.add('visible'));
+}, 3000);
+
 /* ── Knowledge-map tree: staggered terminal-typing reveal ── */
+/* Capped, for the same reason as the typewriter stagger below. */
 document.querySelectorAll('.kt-row').forEach((row,i)=>{
-  row.style.transitionDelay = `${i*0.09}s`;
+  row.style.transitionDelay = `${Math.min(i * 0.045, 1.2)}s`;
 });
 const kmapObs = new IntersectionObserver(entries=>{
   entries.forEach(e=>{
@@ -1918,7 +1933,7 @@ const kmapObs = new IntersectionObserver(entries=>{
       kmapObs.unobserve(e.target);
     }
   });
-},{threshold:0.2});
+},{threshold:0, rootMargin:'0px 0px -60px 0px'});   /* same reason as above */
 document.querySelectorAll('.kmap-terminal').forEach(el=>kmapObs.observe(el));
 
 /* ── Counter animation ── */
@@ -1943,11 +1958,19 @@ const counterObs = new IntersectionObserver(entries=>{
 },{threshold:0.5});
 document.querySelectorAll('.hero-stats').forEach(el=>counterObs.observe(el));
 
-/* ── Typewriter terminal ── */
+/* ── Typewriter terminal ──
+   The stagger was doubled and unbounded: each line carried BOTH a
+   transition-delay of i*0.18s AND a setTimeout at 800+i*180ms, so the real
+   delay was 800 + i*360ms. Fine at a dozen lines, but the knowledge-map tree
+   pushed this to 40 and the last line landed 15 seconds in — the tree read as
+   half-empty for most of that.
+   One stagger now, and the whole run is budgeted rather than per-line, so
+   adding pillars to the tree can never stretch it again. */
 const lines = document.querySelectorAll('.tl');
+const tlStep = Math.min(180, Math.max(26, Math.round(2400 / Math.max(lines.length, 1))));
 lines.forEach((line,i)=>{
-  line.style.opacity='0'; line.style.transition=`opacity 0.3s ease ${i*0.18}s`;
-  setTimeout(()=>{ line.style.opacity='1'; }, 800+i*180);
+  line.style.opacity='0'; line.style.transition='opacity 0.3s ease';
+  setTimeout(()=>{ line.style.opacity='1'; }, 500 + i*tlStep);
 });
 
 /* ── Magnetic hover on buttons ── */

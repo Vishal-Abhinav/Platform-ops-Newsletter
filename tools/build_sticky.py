@@ -30,8 +30,13 @@ CSS = """
      scroll box instead made the flex column squash the two featured cards
      down to their badges — one scroll area, no squashing, everything
      reachable. */
-  .kr-issues .issues-inner{position:sticky;top:0;height:100vh;overflow-y:auto;
-    padding:44px 64px 40px 40px!important;display:block!important;
+  /* top:64px, not 0 — the nav is fixed and blurred, and at top:0 the pinned
+     pane slid underneath it, hiding the ARCHIVE tag and clipping the title.
+     64px clears the nav in its scrolled state, which is the only state that
+     matters here: the pane is not pinned until you have scrolled. */
+  .kr-issues .issues-inner{position:sticky;top:64px;height:calc(100vh - 64px);
+    overflow-y:auto;
+    padding:36px 64px 40px 40px!important;display:block!important;
     scrollbar-width:auto;scrollbar-gutter:stable;
     scrollbar-color:rgba(255,255,255,.34) rgba(255,255,255,.07);}
   .kr-issues .issues-inner::-webkit-scrollbar{width:10px;}
