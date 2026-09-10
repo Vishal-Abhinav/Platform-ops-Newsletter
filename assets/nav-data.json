@@ -288,6 +288,93 @@
    "pipe": 12
   },
   {
+   "name": "Commands",
+   "cats": [
+    {
+     "name": "Linux Commands",
+     "icon": "🐧",
+     "href": "categories/linux-commands/index.html",
+     "live": 10,
+     "pipe": 0,
+     "plan": 0
+    },
+    {
+     "name": "systemd Commands",
+     "icon": "⚙️",
+     "href": "categories/systemd-commands/index.html",
+     "live": 0,
+     "pipe": 6,
+     "plan": 4
+    },
+    {
+     "name": "Docker Commands",
+     "icon": "🐳",
+     "href": "categories/docker-commands/index.html",
+     "live": 6,
+     "pipe": 3,
+     "plan": 1
+    },
+    {
+     "name": "Kubernetes Commands",
+     "icon": "☸️",
+     "href": "categories/kubernetes-commands/index.html",
+     "live": 7,
+     "pipe": 2,
+     "plan": 1
+    },
+    {
+     "name": "OpenShift Commands",
+     "icon": "🔴",
+     "href": "categories/openshift-commands/index.html",
+     "live": 0,
+     "pipe": 7,
+     "plan": 3
+    },
+    {
+     "name": "Ansible Commands",
+     "icon": "🔧",
+     "href": "categories/ansible-commands/index.html",
+     "live": 0,
+     "pipe": 6,
+     "plan": 4
+    },
+    {
+     "name": "Terraform Commands",
+     "icon": "📐",
+     "href": "categories/terraform-commands/index.html",
+     "live": 0,
+     "pipe": 6,
+     "plan": 4
+    },
+    {
+     "name": "Networking Commands",
+     "icon": "🌐",
+     "href": "categories/networking-commands/index.html",
+     "live": 6,
+     "pipe": 3,
+     "plan": 1
+    },
+    {
+     "name": "Performance Commands",
+     "icon": "⚡",
+     "href": "categories/performance-commands/index.html",
+     "live": 0,
+     "pipe": 8,
+     "plan": 2
+    },
+    {
+     "name": "Storage Commands",
+     "icon": "💽",
+     "href": "categories/storage-commands/index.html",
+     "live": 5,
+     "pipe": 0,
+     "plan": 5
+    }
+   ],
+   "live": 34,
+   "pipe": 41
+  },
+  {
    "name": "Modern Ops",
    "cats": [
     {

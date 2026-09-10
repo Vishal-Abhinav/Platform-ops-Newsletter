@@ -45,7 +45,7 @@
 
 This repository *is* the newsletter. Every issue is a self-contained HTML page served straight from GitHub Pages — no build step, no framework, no tracking. Fork it, read it offline, or lift a diagram for your own docs.
 
-**Currently in this repo:** 11 monthly issue pages, 5 Foundation reference deep-dives, a 190-term Linux & Unix glossary with 12 standalone term pages, 34 category pages, 2 section hubs and a homepage index — 65 pages in total.
+**Currently in this repo:** 11 monthly issue pages, 5 Foundation reference deep-dives, 3 command references covering 253 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 78 pages in total.
 
 ---
 
@@ -816,7 +816,9 @@ The homepage is a single hand-written HTML file with no framework behind it:
 | 📡 **RSS** | `feed.xml` carries all 11 issues, and every page advertises it in its `<head>` |
 | 📜 **Scrollable archive** | Latest Issues is an internal scroll panel that stays height-matched to the topics column |
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
-| 🦶 **Shared footer** | One footer across all 26 pages, with links rebuilt per directory depth |
+| 🧭 **Mega-menu** | Cascading browse panel on every page — 11 pillars, 43 categories, with live counts |
+| ⌨️ **Command references** | Searchable, group-filtered command tables — 253 commands so far |
+| 🦶 **Shared footer** | One footer across every page, with links rebuilt per directory depth |
 
 ---
 

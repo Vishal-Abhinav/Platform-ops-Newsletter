@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes Commands · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="kubectl grouped by task — inspect, change, debug, and the output flags that make it scriptable instead of something you read.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
+<link rel="canonical" href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Kubernetes Commands · Platform Ops">
+<meta property="og:description" content="kubectl grouped by task — inspect, change, debug, and the output flags that make it scriptable instead of something you read.">
+<meta property="og:url" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">
+<meta property="og:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Kubernetes Commands · Platform Ops">
+<meta name="twitter:description" content="kubectl grouped by task — inspect, change, debug, and the output flags that make it scriptable instead of something you read.">
+<meta name="twitter:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="../../feed.xml">
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="stylesheet" href="../../Commands/commands.css">
+<link rel="stylesheet" href="../../assets/megamenu.css">
+<script defer src="../../assets/megamenu.js" data-root="../../"></script>
+</head>
+<body>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb">
+    <a href="../../index.html">Home</a><span>/</span>
+    <a href="../../categories/index.html">Categories</a><span>/</span>
+    <a href="../../categories/kubernetes-commands/index.html">Commands</a><span>/</span>
+    <span class="cur">Kubernetes Commands</span>
+  </div>
+  <button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Commands · Reference</div>
+  <h1><span class="ico">☸️</span>Kubernetes Commands</h1>
+  <p class="sub">kubectl grouped by task — inspect, change, debug, and the output flags that make it scriptable instead of something you read.</p>
+</div></header>
+
+<div class="ctl"><div class="ctl-in">
+  <label class="cs">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/>
+      <path d="M20 20l-3.5-3.5"/></svg>
+    <input type="search" id="q" autocomplete="off" spellcheck="false"
+           placeholder="Search 62 commands — try a flag, a task, or part of a name"
+           aria-label="Search commands">
+  </label>
+  <div class="gfilters"><button type="button" class="gf on" data-g="all">All</button><button type="button" class="gf" data-g="look">Inspecting</button><button type="button" class="gf" data-g="change">Applying &amp; deleting</button><button type="button" class="gf" data-g="debug">Logs, exec &amp; debugging</button><button type="button" class="gf" data-g="roll">Rollouts &amp; scaling</button><button type="button" class="gf" data-g="node">Nodes &amp; scheduling</button><button type="button" class="gf" data-g="ctx">Contexts, config &amp; access</button><button type="button" class="gf" data-g="out">Output &amp; scripting</button></div>
+  <div class="cres" id="res" aria-live="polite"></div>
+</div></div>
+
+
+  <section class="grp" data-g="look"><div class="wrap">
+    <div class="grp-h"><h2>Inspecting</h2><span class="cnt">11 commands</span></div>
+    <p class="grp-d"><code>get</code> tells you what exists, <code>describe</code> tells you why it is unhappy. Events at the bottom of describe answer most questions on their own.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>kubectl get</b> po -o wide</td><td class="w">Pods with node, IP and nominated node</td><td class="e">kubectl get po -o wide</td></tr><tr><td class="c"><b>kubectl get</b> po -A</td><td class="w">Across every namespace</td><td class="e">kubectl get po -A | grep -v Running</td></tr><tr><td class="c"><b>kubectl get</b> po --field-selector status.phase!=Running</td><td class="w">Only what is not healthy</td><td class="e">kubectl get po -A --field-selector status.phase!=Running</td></tr><tr><td class="c"><b>kubectl get</b> po -l app=api</td><td class="w">By label — the way controllers select</td><td class="e">kubectl get po -l 'app in (api,web)'</td></tr><tr><td class="c"><b>kubectl get</b> po --sort-by=.status.containerStatuses[0].restartCount</td><td class="w">Worst restart offenders first</td><td class="e">kubectl get po --sort-by=.status.containerStatuses[0].restartCount</td></tr><tr><td class="c"><b>kubectl get</b> ev --sort-by=.lastTimestamp</td><td class="w">Events in time order, not the default jumble</td><td class="e">kubectl get ev -A --sort-by=.lastTimestamp | tail -30</td></tr><tr><td class="c"><b>kubectl describe</b> po NAME</td><td class="w">Full state plus the events for that object</td><td class="e">kubectl describe po api-7d4f-x9k2</td></tr><tr><td class="c"><b>kubectl get</b> all -n NS</td><td class="w">The common workload kinds in one namespace</td><td class="e">kubectl get all -n payments</td></tr><tr><td class="c"><b>kubectl api-resources</b></td><td class="w">Every kind the cluster knows, with short names</td><td class="e">kubectl api-resources --namespaced=true</td></tr><tr><td class="c"><b>kubectl explain</b> po.spec.containers</td><td class="w">Field documentation straight from the API server</td><td class="e">kubectl explain deploy.spec.strategy --recursive</td></tr><tr><td class="c"><b>kubectl top</b> po --sort-by=memory</td><td class="w">Live usage — needs metrics-server</td><td class="e">kubectl top po -A --sort-by=memory</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="change"><div class="wrap">
+    <div class="grp-h"><h2>Applying &amp; deleting</h2><span class="cnt">10 commands</span></div>
+    <p class="grp-d"><code>apply</code> is declarative and records intent in an annotation; <code>create</code> is imperative and fails if the object exists. Use apply.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>kubectl apply</b> -f dir/ -R</td><td class="w">Apply a directory tree</td><td class="e">kubectl apply -f k8s/ -R</td></tr><tr><td class="c"><b>kubectl apply</b> --dry-run=server</td><td class="w">Ask the API server what would happen, admission and all</td><td class="e">kubectl apply -f d.yaml --dry-run=server</td></tr><tr><td class="c"><b>kubectl diff</b> -f</td><td class="w">Diff your manifest against the live object before applying</td><td class="e">kubectl diff -f deploy.yaml</td></tr><tr><td class="c"><b>kubectl create</b> … --dry-run=client -o yaml</td><td class="w">Generate a manifest skeleton to edit</td><td class="e">kubectl create deploy api --image=nginx --dry-run=client -o yaml</td></tr><tr><td class="c"><b>kubectl patch</b> -p</td><td class="w">Change one field without sending the whole object</td><td class="e">kubectl patch deploy api -p '{"spec":{"replicas":5}}'</td></tr><tr><td class="c"><b>kubectl set image</b></td><td class="w">Change an image and trigger a rollout</td><td class="e">kubectl set image deploy/api api=repo/api:v2</td></tr><tr><td class="c"><b>kubectl edit</b></td><td class="w">Open the live object in $EDITOR. Fine for triage, bad as a habit</td><td class="e">kubectl edit deploy api</td></tr><tr><td class="c"><b>kubectl delete</b> --grace-period=0 --force</td><td class="w">Last resort for a stuck pod; it can orphan resources</td><td class="e">kubectl delete po stuck --grace-period=0 --force</td></tr><tr><td class="c"><b>kubectl replace</b> --force</td><td class="w">Delete and recreate — for immutable field changes</td><td class="e">kubectl replace --force -f job.yaml</td></tr><tr><td class="c"><b>kubectl label</b> / <b>annotate</b> --overwrite</td><td class="w">Add or change metadata in place</td><td class="e">kubectl label no worker-3 tier=spot --overwrite</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="debug"><div class="wrap">
+    <div class="grp-h"><h2>Logs, exec &amp; debugging</h2><span class="cnt">11 commands</span></div>
+    <p class="grp-d">The order that finds it fastest: logs, then previous logs, then events, then exec. If the container will not start, exec is not available — use <code>debug</code>.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>kubectl logs</b> -f --tail=100</td><td class="w">Follow the last 100 lines</td><td class="e">kubectl logs -f --tail=100 api-7d4f</td></tr><tr><td class="c"><b>kubectl logs</b> --previous</td><td class="w">Logs from the container that just crashed. The important one</td><td class="e">kubectl logs api-7d4f --previous</td></tr><tr><td class="c"><b>kubectl logs</b> -l app=api --max-log-requests=10</td><td class="w">Aggregate logs across pods by label</td><td class="e">kubectl logs -l app=api --tail=50 --prefix</td></tr><tr><td class="c"><b>kubectl logs</b> --since=15m --timestamps</td><td class="w">Time-bounded, with timestamps</td><td class="e">kubectl logs api-7d4f --since=15m --timestamps</td></tr><tr><td class="c"><b>kubectl exec</b> -it -- sh</td><td class="w">Shell in a running container</td><td class="e">kubectl exec -it api-7d4f -c api -- sh</td></tr><tr><td class="c"><b>kubectl debug</b> -it --image=nicolaka/netshoot</td><td class="w">Attach an ephemeral container with real tools</td><td class="e">kubectl debug -it api-7d4f --image=nicolaka/netshoot --target=api</td></tr><tr><td class="c"><b>kubectl debug</b> node/NAME -it --image=ubuntu</td><td class="w">A privileged pod on a node, with its root at /host</td><td class="e">kubectl debug node/worker-3 -it --image=ubuntu</td></tr><tr><td class="c"><b>kubectl run</b> tmp --rm -it --image=busybox -- sh</td><td class="w">Throwaway pod for a quick test</td><td class="e">kubectl run tmp --rm -it --image=busybox --restart=Never -- sh</td></tr><tr><td class="c"><b>kubectl port-forward</b></td><td class="w">Reach a pod or service from your laptop</td><td class="e">kubectl port-forward svc/api 8080:80</td></tr><tr><td class="c"><b>kubectl cp</b></td><td class="w">Copy files in or out of a container</td><td class="e">kubectl cp api-7d4f:/tmp/heap.hprof ./heap.hprof</td></tr><tr><td class="c"><b>kubectl attach</b> -it</td><td class="w">Attach to PID 1's stdio, rather than starting a new process</td><td class="e">kubectl attach -it api-7d4f</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="roll"><div class="wrap">
+    <div class="grp-h"><h2>Rollouts &amp; scaling</h2><span class="cnt">8 commands</span></div>
+    <p class="grp-d">A rollout is a new ReplicaSet gradually taking over from the old one. <code>rollout status</code> blocks until it settles, which makes it usable in CI.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>kubectl rollout status</b> --timeout=5m</td><td class="w">Wait for a rollout, fail the pipeline if it stalls</td><td class="e">kubectl rollout status deploy/api --timeout=5m</td></tr><tr><td class="c"><b>kubectl rollout history</b></td><td class="w">Revisions, with the change-cause annotation</td><td class="e">kubectl rollout history deploy/api</td></tr><tr><td class="c"><b>kubectl rollout undo</b> --to-revision=3</td><td class="w">Roll back to a specific revision</td><td class="e">kubectl rollout undo deploy/api --to-revision=3</td></tr><tr><td class="c"><b>kubectl rollout restart</b></td><td class="w">Restart every pod without changing the spec — picks up new secrets</td><td class="e">kubectl rollout restart deploy/api</td></tr><tr><td class="c"><b>kubectl rollout pause</b> / <b>resume</b></td><td class="w">Hold a rollout mid-flight to inspect it</td><td class="e">kubectl rollout pause deploy/api</td></tr><tr><td class="c"><b>kubectl scale</b> --replicas=0</td><td class="w">Scale to zero and back — the crudest restart</td><td class="e">kubectl scale deploy/api --replicas=0</td></tr><tr><td class="c"><b>kubectl autoscale</b> --min --max --cpu-percent</td><td class="w">Create an HPA imperatively</td><td class="e">kubectl autoscale deploy/api --min=2 --max=10 --cpu-percent=70</td></tr><tr><td class="c"><b>kubectl wait</b> --for=condition=Ready</td><td class="w">Block until a condition holds — for scripts</td><td class="e">kubectl wait --for=condition=Ready po -l app=api --timeout=120s</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="node"><div class="wrap">
+    <div class="grp-h"><h2>Nodes &amp; scheduling</h2><span class="cnt">7 commands</span></div>
+    <p class="grp-d">Draining is two steps: cordon stops new pods, drain evicts the existing ones respecting PodDisruptionBudgets.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>kubectl get no</b> -o wide</td><td class="w">Nodes with version, OS image and kernel</td><td class="e">kubectl get no -o wide</td></tr><tr><td class="c"><b>kubectl describe no</b> NAME</td><td class="w">Conditions, allocatable, and what is already on it</td><td class="e">kubectl describe no worker-3</td></tr><tr><td class="c"><b>kubectl cordon</b> / <b>uncordon</b></td><td class="w">Stop / resume scheduling onto a node</td><td class="e">kubectl cordon worker-3</td></tr><tr><td class="c"><b>kubectl drain</b> --ignore-daemonsets --delete-emptydir-data</td><td class="w">Evict everything before maintenance</td><td class="e">kubectl drain worker-3 --ignore-daemonsets --delete-emptydir-data</td></tr><tr><td class="c"><b>kubectl taint no</b> key=value:NoSchedule</td><td class="w">Repel pods that lack the matching toleration</td><td class="e">kubectl taint no worker-3 gpu=true:NoSchedule</td></tr><tr><td class="c"><b>kubectl get po</b> --field-selector spec.nodeName=X</td><td class="w">What is running on one node</td><td class="e">kubectl get po -A --field-selector spec.nodeName=worker-3</td></tr><tr><td class="c"><b>kubectl describe no</b> | grep -A5 Allocated</td><td class="w">How much of the node is already requested</td><td class="e">kubectl describe no worker-3 | grep -A6 'Allocated resources'</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="ctx"><div class="wrap">
+    <div class="grp-h"><h2>Contexts, config &amp; access</h2><span class="cnt">7 commands</span></div>
+    <p class="grp-d"><code>kubectl config</code> edits your kubeconfig; <code>auth can-i</code> answers RBAC questions without trial and error.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>kubectl config get-contexts</b></td><td class="w">Every cluster you can reach, and which is current</td><td class="e">kubectl config get-contexts</td></tr><tr><td class="c"><b>kubectl config use-context</b></td><td class="w">Switch cluster</td><td class="e">kubectl config use-context prod-eu</td></tr><tr><td class="c"><b>kubectl config set-context --current --namespace=</b></td><td class="w">Stop typing -n on every command</td><td class="e">kubectl config set-context --current --namespace=payments</td></tr><tr><td class="c"><b>kubectl auth can-i</b> --list</td><td class="w">Everything the current identity may do here</td><td class="e">kubectl auth can-i --list -n payments</td></tr><tr><td class="c"><b>kubectl auth can-i</b> delete po --as=</td><td class="w">Check another user's or service account's rights</td><td class="e">kubectl auth can-i delete po --as=system:serviceaccount:ci:deployer</td></tr><tr><td class="c"><b>kubectl auth whoami</b></td><td class="w">Which identity the API server sees</td><td class="e">kubectl auth whoami</td></tr><tr><td class="c"><b>kubectl get</b> secret NAME -o jsonpath='{.data.k}' | base64 -d</td><td class="w">Read one key out of a secret</td><td class="e">kubectl get secret db -o jsonpath='{.data.password}' | base64 -d</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="out"><div class="wrap">
+    <div class="grp-h"><h2>Output &amp; scripting</h2><span class="cnt">8 commands</span></div>
+    <p class="grp-d">Everything above becomes automatable with the right -o. <code>jsonpath</code> for one value, <code>-o json | jq</code> for anything complex.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>-o jsonpath</b>='{.items[*].metadata.name}'</td><td class="w">Pull specific fields</td><td class="e">kubectl get po -o jsonpath='{.items[*].spec.nodeName}'</td></tr><tr><td class="c"><b>-o custom-columns</b>=</td><td class="w">Build your own table</td><td class="e">kubectl get po -o custom-columns=NAME:.metadata.name,NODE:.spec.nodeName</td></tr><tr><td class="c"><b>-o yaml</b> / <b>-o json</b></td><td class="w">The full object as the API server holds it</td><td class="e">kubectl get deploy api -o yaml</td></tr><tr><td class="c"><b>--no-headers</b></td><td class="w">Machine-readable output for a pipeline</td><td class="e">kubectl get po --no-headers | wc -l</td></tr><tr><td class="c"><b>-w</b> / <b>--watch</b></td><td class="w">Stream changes as they happen</td><td class="e">kubectl get po -w</td></tr><tr><td class="c"><b>kubectl get</b> --raw /metrics</td><td class="w">Hit an API server endpoint directly</td><td class="e">kubectl get --raw /readyz?verbose</td></tr><tr><td class="c"><b>kubectl kustomize</b> dir/</td><td class="w">Render a kustomization without applying it</td><td class="e">kubectl kustomize overlays/prod | less</td></tr><tr><td class="c"><b>kubectl</b> … <b>--v=8</b></td><td class="w">Log every HTTP request kubectl makes — the debugging escape hatch</td><td class="e">kubectl get po --v=8</td></tr></tbody></table></div>
+  </div></section>
+<div class="empty" id="empty" hidden>No command matches that search.</div>
+
+<div class="wrap"><div class="pager"><a href="../LINUX-COMMANDS/linux-commands.html">← Previous<b>Linux Commands</b></a><a class="next" href="../DOCKER-COMMANDS/docker-commands.html">Next →<b>Docker Commands</b></a></div></div>
+
+<footer>
+  <div class="f-in">
+    <a class="f-logo" href="../../index.html">PLATFORM OPS</a>
+    <div class="f-links">
+      <a href="../../categories/kubernetes-commands/index.html">Commands Hub</a>
+      <a href="../../categories/index.html">All Categories</a>
+      <a href="../../index.html#library">Reference Library</a>
+      <a href="../../index.html#subscribe">Subscribe</a>
+      <a href="../../feed.xml">RSS</a>
+    </div>
+  </div>
+  <div class="f-bot">© 2026 Vishal Abhinav · Platform Ops — code MIT,
+    <a href="../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+</footer>
+<script>
+document.getElementById('tt').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});
+(function(){
+  var q=document.getElementById('q'), res=document.getElementById('res'),
+      empty=document.getElementById('empty'),
+      rows=[].slice.call(document.querySelectorAll('tbody tr')),
+      groups=[].slice.call(document.querySelectorAll('.grp')),
+      TOTAL=rows.length, group='all';
+  rows.forEach(function(r){ r.dataset.q=r.textContent.toLowerCase(); });
+
+  function apply(){
+    var term=(q.value||'').trim().toLowerCase(), shown=0;
+    rows.forEach(function(r){
+      var ok=(!term||r.dataset.q.indexOf(term)!==-1) &&
+             (group==='all'||r.closest('.grp').dataset.g===group);
+      r.hidden=!ok; if(ok) shown++;
+    });
+    groups.forEach(function(g){
+      g.hidden=!g.querySelector('tbody tr:not([hidden])');
+    });
+    res.innerHTML = (term||group!=='all')
+      ? '<b>'+shown+'</b> of '+TOTAL+' commands'
+      : TOTAL+' commands across '+groups.length+' groups';
+    empty.hidden = shown!==0;
+  }
+  var t; q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(apply,110);});
+  q.addEventListener('search',apply);
+  document.querySelectorAll('.gf').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.gf').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on'); group=b.dataset.g; apply();
+    });
+  });
+  apply();
+})();
+</script>
+</body>
+</html>

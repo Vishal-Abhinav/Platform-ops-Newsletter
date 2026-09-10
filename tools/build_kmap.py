@@ -19,18 +19,12 @@ from taxonomy import PILLARS, cat_stats  # noqa: E402
 
 SRC = ROOT / 'index.html'
 
-SLUG = {
-    "Foundation": "foundation",
-    "Infrastructure": "infrastructure",
-    "Networking": "networking",
-    "Cloud": "cloud",
-    "Delivery": "delivery",
-    "Kubernetes": "kubernetes",
-    "Reliability": "reliability",
-    "Security": "security",
-    "Data & Applications": "data-and-apps",
-    "Modern Ops": "modern-ops",
-}
+def _slug(name):
+    return name.lower().replace(" & ", "-and-").replace(" ", "-")
+
+
+SLUG = {p: _slug(p) for p, _ in PILLARS}
+SLUG["Data & Applications"] = "data-and-apps"   # keeps the existing anchor
 
 # Published pages, in issue order — the tree's "published/" listing.
 PUBLISHED = [

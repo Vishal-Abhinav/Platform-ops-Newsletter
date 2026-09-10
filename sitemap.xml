@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Commands/DOCKER-COMMANDS/docker-commands.html</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Commands/KUBERNETES-COMMANDS/kubernetes-commands.html</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Commands/LINUX-COMMANDS/linux-commands.html</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/CICD/cicd-pipelines.html</loc>
     <lastmod>2026-09-10</lastmod>
     <priority>0.7</priority>
@@ -161,6 +176,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/ansible-commands/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/api-microservices/</loc>
     <lastmod>2026-09-10</lastmod>
     <priority>0.6</priority>
@@ -211,6 +231,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/docker-commands/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/finops/</loc>
     <lastmod>2026-09-10</lastmod>
     <priority>0.6</priority>
@@ -251,6 +276,16 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/kubernetes-commands/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/linux-commands/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/logging/</loc>
     <lastmod>2026-09-10</lastmod>
     <priority>0.6</priority>
@@ -266,12 +301,27 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/networking-commands/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/observability/</loc>
     <lastmod>2026-09-10</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/openshift/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/openshift-commands/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/performance-commands/</loc>
     <lastmod>2026-09-10</lastmod>
     <priority>0.6</priority>
   </url>
@@ -306,7 +356,22 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/storage-commands/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/supply-chain-security/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/systemd-commands/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/terraform-commands/</loc>
     <lastmod>2026-09-10</lastmod>
     <priority>0.6</priority>
   </url>

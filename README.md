@@ -45,14 +45,14 @@
 
 This repository *is* the newsletter. Every issue is a self-contained HTML page served straight from GitHub Pages — no build step, no framework, no tracking. Fork it, read it offline, or lift a diagram for your own docs.
 
-**Currently in this repo:** 11 monthly issue pages, 5 Foundation reference deep-dives, a 190-term Linux & Unix glossary with 12 standalone term pages, 34 category pages, 2 section hubs and a homepage index — 65 pages in total.
+**Currently in this repo:** 11 monthly issue pages, 5 Foundation reference deep-dives, 3 command references covering 253 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 78 pages in total.
 
 ---
 
 ## 🗺️ Knowledge Map
 
 The **2026 master map** — every subject this newsletter intends to cover, in one place.
-521 topics, grouped into 33 categories and 10 pillars. The homepage renders
+621 topics, grouped into 43 categories and 11 pillars. The homepage renders
 this same map with search and status filters; both are generated from one source
 of truth, so the numbers here and there can never disagree.
 
@@ -67,8 +67,9 @@ of truth, so the numbers here and there can never disagree.
 | `07` | **Reliability** | 7 | 27 | 25 | 64 | 116 |
 | `08` | **Security** | 2 | 0 | 18 | 28 | 46 |
 | `09` | **Data & Applications** | 4 | 1 | 12 | 47 | 60 |
-| `10` | **Modern Ops** | 5 | 3 | 21 | 45 | 69 |
-| | **Total** | **33** | **70** | **131** | **320** | **521** |
+| `10` | **Commands** | 10 | 34 | 41 | 25 | 100 |
+| `11` | **Modern Ops** | 5 | 3 | 21 | 45 | 69 |
+| | **Total** | **43** | **104** | **172** | **345** | **621** |
 
 **Status meanings**
 
@@ -78,7 +79,7 @@ of truth, so the numbers here and there can never disagree.
 | 🔸 **Pipeline** | Next up — adjacent to a series already running, so it's queued rather than hypothetical. |
 | · **Planned** | On the backlog. No date attached; it moves to pipeline when the series in front of it lands. |
 
-Live topics point at the 16 deep-dives already in this repo — 11 monthly issues plus the
+Live topics point at the 19 deep-dives already in this repo — 11 monthly issues plus the
 Foundation reference pages — so one page can light up several topics at once. Issue #051 alone
 covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
 
@@ -638,7 +639,132 @@ covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
 </details>
 
 <details>
-<summary><b>10 · Modern Ops</b> — 5 categories · 3 live · 21 pipeline · 45 planned</summary>
+<summary><b>10 · Commands</b> — 10 categories · 34 live · 41 pipeline · 25 planned</summary>
+
+**🐧 Linux Commands** — 10 live · 0 pipeline · 0 planned  
+✅ [Files & Navigation](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [Permissions & Ownership](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [Text Processing](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [Processes & Signals](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [Users & Groups](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [Package Management](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [Disk & Filesystem](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [Search & Locate](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [Scheduling & Boot](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [Networking Commands](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+
+**⚙️ systemd Commands** — 0 live · 6 pipeline · 4 planned  
+🔸 systemctl &nbsp;
+🔸 journalctl &nbsp;
+🔸 Unit Files &nbsp;
+🔸 Timers &nbsp;
+· Targets &nbsp;
+🔸 systemd-analyze &nbsp;
+· loginctl &nbsp;
+· systemd-run &nbsp;
+· Drop-ins &nbsp;
+🔸 Service Debugging &nbsp;
+
+**🐳 Docker Commands** — 6 live · 3 pipeline · 1 planned  
+✅ [Running Containers](./Commands/DOCKER-COMMANDS/docker-commands.html) &nbsp;
+✅ [Images & Building](./Commands/DOCKER-COMMANDS/docker-commands.html) &nbsp;
+✅ [Inspecting & Logs](./Commands/DOCKER-COMMANDS/docker-commands.html) &nbsp;
+✅ [Networking & Volumes](./Commands/DOCKER-COMMANDS/docker-commands.html) &nbsp;
+✅ [Compose](./Commands/DOCKER-COMMANDS/docker-commands.html) &nbsp;
+✅ [Cleanup & Pruning](./Commands/DOCKER-COMMANDS/docker-commands.html) &nbsp;
+🔸 Registry & Push &nbsp;
+🔸 buildx & Multi-arch &nbsp;
+🔸 Container Debugging &nbsp;
+· Security Scanning &nbsp;
+
+**☸️ Kubernetes Commands** — 7 live · 2 pipeline · 1 planned  
+✅ [Inspecting](./Commands/KUBERNETES-COMMANDS/kubernetes-commands.html) &nbsp;
+✅ [Applying & Deleting](./Commands/KUBERNETES-COMMANDS/kubernetes-commands.html) &nbsp;
+✅ [Logs, Exec & Debug](./Commands/KUBERNETES-COMMANDS/kubernetes-commands.html) &nbsp;
+✅ [Rollouts & Scaling](./Commands/KUBERNETES-COMMANDS/kubernetes-commands.html) &nbsp;
+✅ [Nodes & Scheduling](./Commands/KUBERNETES-COMMANDS/kubernetes-commands.html) &nbsp;
+✅ [Contexts & Access](./Commands/KUBERNETES-COMMANDS/kubernetes-commands.html) &nbsp;
+✅ [Output & Scripting](./Commands/KUBERNETES-COMMANDS/kubernetes-commands.html) &nbsp;
+🔸 kustomize &nbsp;
+🔸 Helm &nbsp;
+· krew Plugins &nbsp;
+
+**🔴 OpenShift Commands** — 0 live · 7 pipeline · 3 planned  
+🔸 oc login & Projects &nbsp;
+🔸 oc new-app &nbsp;
+🔸 Routes &nbsp;
+🔸 oc adm &nbsp;
+🔸 Security Context Constraints &nbsp;
+🔸 must-gather &nbsp;
+· Image Streams &nbsp;
+· BuildConfigs &nbsp;
+🔸 oc debug node &nbsp;
+· Cluster Operators &nbsp;
+
+**🔧 Ansible Commands** — 0 live · 6 pipeline · 4 planned  
+🔸 Ad-hoc Commands &nbsp;
+🔸 ansible-playbook &nbsp;
+🔸 Inventory & Limits &nbsp;
+🔸 ansible-vault &nbsp;
+· ansible-galaxy &nbsp;
+🔸 Facts & Gathering &nbsp;
+🔸 Check & Diff Mode &nbsp;
+· Tags &nbsp;
+· ansible-lint &nbsp;
+· Callback Plugins &nbsp;
+
+**📐 Terraform Commands** — 0 live · 6 pipeline · 4 planned  
+🔸 init & providers &nbsp;
+🔸 plan &nbsp;
+🔸 apply &nbsp;
+🔸 State Commands &nbsp;
+🔸 import &nbsp;
+· Workspaces &nbsp;
+🔸 fmt & validate &nbsp;
+· Outputs &nbsp;
+· taint & replace &nbsp;
+· destroy & targeting &nbsp;
+
+**🌐 Networking Commands** — 6 live · 3 pipeline · 1 planned  
+✅ [ip & Addressing](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [ss & Sockets](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [DNS Tools](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [curl & HTTP](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [tcpdump](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+🔸 Routing &nbsp;
+🔸 Firewall (nft/iptables) &nbsp;
+🔸 ethtool &nbsp;
+✅ [mtr & traceroute](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+· Bandwidth Testing &nbsp;
+
+**⚡ Performance Commands** — 0 live · 8 pipeline · 2 planned  
+🔸 top & htop &nbsp;
+🔸 vmstat &nbsp;
+🔸 iostat &nbsp;
+🔸 sar & sysstat &nbsp;
+🔸 perf &nbsp;
+🔸 strace &nbsp;
+🔸 lsof &nbsp;
+🔸 pidstat &nbsp;
+· bpftrace &nbsp;
+· Flame Graphs &nbsp;
+
+**💽 Storage Commands** — 5 live · 0 pipeline · 5 planned  
+✅ [lsblk & blkid](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [df & du](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [mount & fstab](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [LVM Commands](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+✅ [mkfs & fsck](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
+· NFS Commands &nbsp;
+· Quotas &nbsp;
+· Swap &nbsp;
+· smartctl &nbsp;
+· Storage Benchmarking &nbsp;
+
+</details>
+
+<details>
+<summary><b>11 · Modern Ops</b> — 5 categories · 3 live · 21 pipeline · 45 planned</summary>
 
 **🤖 AI Infrastructure** — 0 live · 6 pipeline · 14 planned  
 🔸 AI Infrastructure &nbsp;
@@ -901,7 +1027,9 @@ The homepage is a single hand-written HTML file with no framework behind it:
 | 📡 **RSS** | `feed.xml` carries all 11 issues, and every page advertises it in its `<head>` |
 | 📜 **Scrollable archive** | Latest Issues is an internal scroll panel that stays height-matched to the topics column |
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
-| 🦶 **Shared footer** | One footer across all 26 pages, with links rebuilt per directory depth |
+| 🧭 **Mega-menu** | Cascading browse panel on every page — 11 pillars, 43 categories, with live counts |
+| ⌨️ **Command references** | Searchable, group-filtered command tables — 253 commands so far |
+| 🦶 **Shared footer** | One footer across every page, with links rebuilt per directory depth |
 
 ---
 

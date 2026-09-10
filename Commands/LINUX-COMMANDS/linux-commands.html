@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux Commands · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="The sysadmin set, grouped by what you are trying to do rather than alphabetically — with the flags that actually get used.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
+<link rel="canonical" href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Commands/LINUX-COMMANDS/linux-commands.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Linux Commands · Platform Ops">
+<meta property="og:description" content="The sysadmin set, grouped by what you are trying to do rather than alphabetically — with the flags that actually get used.">
+<meta property="og:url" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Commands/LINUX-COMMANDS/linux-commands.html">
+<meta property="og:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Linux Commands · Platform Ops">
+<meta name="twitter:description" content="The sysadmin set, grouped by what you are trying to do rather than alphabetically — with the flags that actually get used.">
+<meta name="twitter:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="../../feed.xml">
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="stylesheet" href="../../Commands/commands.css">
+<link rel="stylesheet" href="../../assets/megamenu.css">
+<script defer src="../../assets/megamenu.js" data-root="../../"></script>
+</head>
+<body>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb">
+    <a href="../../index.html">Home</a><span>/</span>
+    <a href="../../categories/index.html">Categories</a><span>/</span>
+    <a href="../../categories/linux-commands/index.html">Commands</a><span>/</span>
+    <span class="cur">Linux Commands</span>
+  </div>
+  <button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Commands · Reference</div>
+  <h1><span class="ico">🐧</span>Linux Commands</h1>
+  <p class="sub">The sysadmin set, grouped by what you are trying to do rather than alphabetically — with the flags that actually get used.</p>
+</div></header>
+
+<div class="ctl"><div class="ctl-in">
+  <label class="cs">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/>
+      <path d="M20 20l-3.5-3.5"/></svg>
+    <input type="search" id="q" autocomplete="off" spellcheck="false"
+           placeholder="Search 132 commands — try a flag, a task, or part of a name"
+           aria-label="Search commands">
+  </label>
+  <div class="gfilters"><button type="button" class="gf on" data-g="all">All</button><button type="button" class="gf" data-g="nav">Files &amp; navigation</button><button type="button" class="gf" data-g="perm">Permissions &amp; ownership</button><button type="button" class="gf" data-g="text">Text processing</button><button type="button" class="gf" data-g="proc">Processes &amp; signals</button><button type="button" class="gf" data-g="user">Users, groups &amp; sessions</button><button type="button" class="gf" data-g="pkg">Packages</button><button type="button" class="gf" data-g="disk">Disk &amp; filesystem</button><button type="button" class="gf" data-g="find">Search &amp; locate</button><button type="button" class="gf" data-g="cron">Scheduling &amp; boot</button><button type="button" class="gf" data-g="net">Networking</button></div>
+  <div class="cres" id="res" aria-live="polite"></div>
+</div></div>
+
+
+  <section class="grp" data-g="nav"><div class="wrap">
+    <div class="grp-h"><h2>Files &amp; navigation</h2><span class="cnt">15 commands</span></div>
+    <p class="grp-d">Moving around and seeing what is there. <code>ls -lh</code> and <code>find</code> do most of the work; the rest is knowing which flag saves the second command.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>ls</b> -lhtr</td><td class="w">Long listing, human sizes, oldest last — newest at the bottom where the cursor is</td><td class="e">ls -lhtr /var/log</td></tr><tr><td class="c"><b>ls</b> -lda</td><td class="w">Show a directory's own entry rather than its contents</td><td class="e">ls -lda /etc/ssl</td></tr><tr><td class="c"><b>cd</b> -</td><td class="w">Jump back to the previous directory</td><td class="e">cd -</td></tr><tr><td class="c"><b>pwd</b> -P</td><td class="w">Physical path, resolving symlinks</td><td class="e">pwd -P</td></tr><tr><td class="c"><b>tree</b> -L 2 -d</td><td class="w">Directory tree, two levels, directories only</td><td class="e">tree -L 2 -d /opt</td></tr><tr><td class="c"><b>stat</b></td><td class="w">Inode, size, permissions and all three timestamps</td><td class="e">stat /etc/passwd</td></tr><tr><td class="c"><b>file</b></td><td class="w">What a file actually is, by content not extension</td><td class="e">file /bin/ls</td></tr><tr><td class="c"><b>readlink</b> -f</td><td class="w">Resolve a symlink chain to its final target</td><td class="e">readlink -f $(which python3)</td></tr><tr><td class="c"><b>basename</b> / <b>dirname</b></td><td class="w">Split a path — useful in scripts</td><td class="e">dirname /a/b/c.txt</td></tr><tr><td class="c"><b>cp</b> -a</td><td class="w">Archive copy: preserves mode, owner, timestamps, links</td><td class="e">cp -a /etc/nginx /backup/</td></tr><tr><td class="c"><b>mv</b> -n</td><td class="w">Move without overwriting an existing target</td><td class="e">mv -n a.log archive/</td></tr><tr><td class="c"><b>rsync</b> -avh --progress</td><td class="w">Copy only what changed, with a progress bar</td><td class="e">rsync -avh src/ dst/</td></tr><tr><td class="c"><b>rsync</b> -avh --delete</td><td class="w">Mirror — removes files gone from the source. Dry-run first</td><td class="e">rsync -avhn --delete a/ b/</td></tr><tr><td class="c"><b>ln</b> -s</td><td class="w">Symbolic link</td><td class="e">ln -s /opt/app/current /usr/local/bin/app</td></tr><tr><td class="c"><b>shred</b> -u</td><td class="w">Overwrite then remove — for keys on spinning disks</td><td class="e">shred -u secret.key</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="perm"><div class="wrap">
+    <div class="grp-h"><h2>Permissions &amp; ownership</h2><span class="cnt">12 commands</span></div>
+    <p class="grp-d">Numeric mode is three digits of read(4) write(2) execute(1). The fourth digit is setuid(4), setgid(2), sticky(1) — and the sticky bit on a shared directory is what stops users deleting each other's files.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>chmod</b> 640</td><td class="w">Owner read/write, group read, others nothing</td><td class="e">chmod 640 /etc/app/secrets.conf</td></tr><tr><td class="c"><b>chmod</b> u+x,g-w</td><td class="w">Symbolic form — change only what you name</td><td class="e">chmod u+x deploy.sh</td></tr><tr><td class="c"><b>chmod</b> -R g+rX</td><td class="w">Recursive; capital X adds execute only to directories</td><td class="e">chmod -R g+rX /srv/www</td></tr><tr><td class="c"><b>chmod</b> 1777</td><td class="w">Sticky bit — only the owner can delete their own files</td><td class="e">chmod 1777 /tmp</td></tr><tr><td class="c"><b>chmod</b> 2775</td><td class="w">setgid on a directory — new files inherit the group</td><td class="e">chmod 2775 /srv/shared</td></tr><tr><td class="c"><b>chown</b> -R user:group</td><td class="w">Change owner and group recursively</td><td class="e">chown -R www-data:www-data /srv/www</td></tr><tr><td class="c"><b>umask</b> 027</td><td class="w">Default mask for new files in this shell</td><td class="e">umask 027</td></tr><tr><td class="c"><b>getfacl</b> / <b>setfacl</b></td><td class="w">Per-user ACLs beyond the owner/group/other model</td><td class="e">setfacl -m u:deploy:rx /srv/app</td></tr><tr><td class="c"><b>lsattr</b> / <b>chattr</b> +i</td><td class="w">Immutable flag — even root cannot modify until cleared</td><td class="e">chattr +i /etc/resolv.conf</td></tr><tr><td class="c"><b>sudo</b> -l</td><td class="w">What can this user actually run as root?</td><td class="e">sudo -l -U deploy</td></tr><tr><td class="c"><b>id</b></td><td class="w">UID, GID and every supplementary group</td><td class="e">id deploy</td></tr><tr><td class="c"><b>namei</b> -l</td><td class="w">Permissions of every component in a path — finds the one bad directory</td><td class="e">namei -l /srv/app/data/f</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="text"><div class="wrap">
+    <div class="grp-h"><h2>Text processing</h2><span class="cnt">19 commands</span></div>
+    <p class="grp-d">The pipeline tools. Worth knowing well: most log investigation is <code>grep</code> to narrow, <code>awk</code> to extract, <code>sort | uniq -c</code> to count.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>grep</b> -rn --include='*.py'</td><td class="w">Recursive search with line numbers, one file type</td><td class="e">grep -rn --include='*.py' TODO .</td></tr><tr><td class="c"><b>grep</b> -c / -l / -v</td><td class="w">Count matches / list files only / invert the match</td><td class="e">grep -c ERROR app.log</td></tr><tr><td class="c"><b>grep</b> -A3 -B3</td><td class="w">Show context lines after and before each hit</td><td class="e">grep -A3 -B3 Traceback app.log</td></tr><tr><td class="c"><b>grep</b> -P '\d{3}'</td><td class="w">Perl regex — the only way to get \d and lookarounds</td><td class="e">grep -oP 'status=\K\d+' access.log</td></tr><tr><td class="c"><b>awk</b> '{print $7}'</td><td class="w">Print a field. The default separator is any run of whitespace</td><td class="e">awk '{print $7}' access.log</td></tr><tr><td class="c"><b>awk</b> -F: '$3>=1000{print $1}'</td><td class="w">Filter on a field with a custom separator</td><td class="e">awk -F: '$3>=1000{print $1}' /etc/passwd</td></tr><tr><td class="c"><b>awk</b> '{s+=$1} END{print s}'</td><td class="w">Sum a column</td><td class="e">du -s * | awk '{s+=$1} END{print s}'</td></tr><tr><td class="c"><b>sed</b> -i.bak 's/a/b/g'</td><td class="w">In-place replace, keeping a .bak. Always keep the backup</td><td class="e">sed -i.bak 's/8080/9090/g' app.conf</td></tr><tr><td class="c"><b>sed</b> -n '100,120p'</td><td class="w">Print a line range without printing everything else</td><td class="e">sed -n '100,120p' huge.log</td></tr><tr><td class="c"><b>sort</b> -k2 -n -r</td><td class="w">Sort by field 2, numeric, descending</td><td class="e">sort -k2 -n -r sizes.txt</td></tr><tr><td class="c"><b>sort</b> | <b>uniq</b> -c | <b>sort</b> -rn</td><td class="w">The counting idiom — top offenders in any log</td><td class="e">awk '{print $1}' a.log | sort | uniq -c | sort -rn | head</td></tr><tr><td class="c"><b>cut</b> -d, -f1,3</td><td class="w">Fields from delimited text, when awk is overkill</td><td class="e">cut -d, -f1,3 data.csv</td></tr><tr><td class="c"><b>tr</b> -d '\r'</td><td class="w">Strip characters — this one fixes CRLF files</td><td class="e">tr -d '\r' < win.txt > unix.txt</td></tr><tr><td class="c"><b>tail</b> -f / -F</td><td class="w">Follow a file; -F survives log rotation</td><td class="e">tail -F /var/log/app.log</td></tr><tr><td class="c"><b>head</b> -n -5</td><td class="w">Everything except the last 5 lines</td><td class="e">head -n -5 file.txt</td></tr><tr><td class="c"><b>wc</b> -l</td><td class="w">Line count</td><td class="e">wc -l access.log</td></tr><tr><td class="c"><b>jq</b> -r '.items[].name'</td><td class="w">Query JSON. -r drops the quotes</td><td class="e">kubectl get po -o json | jq -r '.items[].metadata.name'</td></tr><tr><td class="c"><b>column</b> -t</td><td class="w">Align whitespace-separated output into columns</td><td class="e">mount | column -t</td></tr><tr><td class="c"><b>diff</b> -u / <b>vimdiff</b></td><td class="w">Unified diff between two files</td><td class="e">diff -u old.conf new.conf</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="proc"><div class="wrap">
+    <div class="grp-h"><h2>Processes &amp; signals</h2><span class="cnt">16 commands</span></div>
+    <p class="grp-d">A process is doing one of: running, waiting on I/O (D), sleeping (S), or already dead (Z). Which one it is decides where you look next.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>ps</b> aux --sort=-%mem</td><td class="w">Every process, biggest memory first</td><td class="e">ps aux --sort=-%mem | head</td></tr><tr><td class="c"><b>ps</b> -eo pid,ppid,stat,wchan:20,cmd</td><td class="w">State and the kernel function it is blocked in</td><td class="e">ps -eo pid,stat,wchan:20,cmd</td></tr><tr><td class="c"><b>pgrep</b> -af</td><td class="w">Find PIDs by pattern, showing the full command line</td><td class="e">pgrep -af nginx</td></tr><tr><td class="c"><b>pkill</b> -f -TERM</td><td class="w">Signal by full-command-line match. Check with pgrep first</td><td class="e">pkill -f -TERM 'python worker.py'</td></tr><tr><td class="c"><b>kill</b> -TERM / -KILL</td><td class="w">15 asks politely, 9 cannot be caught or cleaned up after</td><td class="e">kill -TERM 4412</td></tr><tr><td class="c"><b>kill</b> -HUP</td><td class="w">Reload config without a restart, for daemons that support it</td><td class="e">kill -HUP $(pidof nginx)</td></tr><tr><td class="c"><b>kill</b> -l</td><td class="w">List signal names and numbers</td><td class="e">kill -l</td></tr><tr><td class="c"><b>nice</b> / <b>renice</b></td><td class="w">Scheduling priority, -20 (highest) to 19</td><td class="e">renice 10 -p 4412</td></tr><tr><td class="c"><b>ionice</b> -c3</td><td class="w">Idle I/O class — for backups that must not disturb production</td><td class="e">ionice -c3 rsync -a src/ dst/</td></tr><tr><td class="c"><b>nohup</b> … &amp;</td><td class="w">Survive the terminal closing</td><td class="e">nohup ./long-job.sh &amp;</td></tr><tr><td class="c"><b>timeout</b> 30s</td><td class="w">Kill a command that runs too long. Use it in every cron job</td><td class="e">timeout 30s curl https://api/health</td></tr><tr><td class="c"><b>lsof</b> -p PID</td><td class="w">Every file, socket and pipe a process holds open</td><td class="e">lsof -p 4412</td></tr><tr><td class="c"><b>lsof</b> -i :8080</td><td class="w">Which process owns a port</td><td class="e">lsof -i :8080</td></tr><tr><td class="c"><b>fuser</b> -vm /mnt</td><td class="w">Who is using a mount point — before you unmount</td><td class="e">fuser -vm /mnt/data</td></tr><tr><td class="c"><b>strace</b> -c -p PID</td><td class="w">Syscall summary of a running process</td><td class="e">strace -c -p 4412</td></tr><tr><td class="c"><b>pstree</b> -p</td><td class="w">Process tree with PIDs — shows who forked whom</td><td class="e">pstree -p 1</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="user"><div class="wrap">
+    <div class="grp-h"><h2>Users, groups &amp; sessions</h2><span class="cnt">12 commands</span></div>
+    <p class="grp-d">Account state lives in /etc/passwd, /etc/shadow and /etc/group. Everything below just edits those safely.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>useradd</b> -m -s /bin/bash</td><td class="w">Create a user with a home directory and a real shell</td><td class="e">useradd -m -s /bin/bash deploy</td></tr><tr><td class="c"><b>useradd</b> -r -s /usr/sbin/nologin</td><td class="w">System account that cannot log in — for services</td><td class="e">useradd -r -s /usr/sbin/nologin appsvc</td></tr><tr><td class="c"><b>usermod</b> -aG</td><td class="w">Add to a group. Forget the -a and you replace every other group</td><td class="e">usermod -aG docker deploy</td></tr><tr><td class="c"><b>userdel</b> -r</td><td class="w">Delete the user and their home directory</td><td class="e">userdel -r olduser</td></tr><tr><td class="c"><b>passwd</b> -l / -S</td><td class="w">Lock an account / show its password status</td><td class="e">passwd -S deploy</td></tr><tr><td class="c"><b>chage</b> -l</td><td class="w">Password ageing and expiry for an account</td><td class="e">chage -l deploy</td></tr><tr><td class="c"><b>groupadd</b> / <b>gpasswd</b> -a</td><td class="w">Create a group, add a member</td><td class="e">gpasswd -a deploy sudo</td></tr><tr><td class="c"><b>getent</b> passwd</td><td class="w">Query users through NSS — sees LDAP/SSSD, unlike grepping the file</td><td class="e">getent passwd deploy</td></tr><tr><td class="c"><b>w</b> / <b>who</b></td><td class="w">Who is logged in and what they are running</td><td class="e">w</td></tr><tr><td class="c"><b>last</b> -a</td><td class="w">Login history from wtmp</td><td class="e">last -a | head</td></tr><tr><td class="c"><b>lastb</b></td><td class="w">Failed login attempts</td><td class="e">lastb | head</td></tr><tr><td class="c"><b>loginctl</b> list-sessions</td><td class="w">systemd's view of active sessions</td><td class="e">loginctl list-sessions</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="pkg"><div class="wrap">
+    <div class="grp-h"><h2>Packages</h2><span class="cnt">11 commands</span></div>
+    <p class="grp-d">Three families. Know which one you are on before you type — <code>/etc/os-release</code> tells you.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>apt</b> update &amp;&amp; apt upgrade</td><td class="w">Refresh the index, then upgrade (Debian/Ubuntu)</td><td class="e">apt update &amp;&amp; apt upgrade -y</td></tr><tr><td class="c"><b>apt</b> list --installed</td><td class="w">What is installed</td><td class="e">apt list --installed | grep nginx</td></tr><tr><td class="c"><b>apt-cache</b> policy</td><td class="w">Installed version, candidate version, and which repo</td><td class="e">apt-cache policy nginx</td></tr><tr><td class="c"><b>dpkg</b> -l / -L / -S</td><td class="w">List packages / files in a package / which package owns a file</td><td class="e">dpkg -S /usr/sbin/nginx</td></tr><tr><td class="c"><b>dnf</b> install / update</td><td class="w">RHEL 8+, Fedora, Rocky, Alma</td><td class="e">dnf install -y nginx</td></tr><tr><td class="c"><b>dnf</b> history / history undo</td><td class="w">Transaction log, and rolling one back</td><td class="e">dnf history undo last</td></tr><tr><td class="c"><b>rpm</b> -qa / -ql / -qf</td><td class="w">Query all / files in a package / owner of a file</td><td class="e">rpm -qf /usr/sbin/nginx</td></tr><tr><td class="c"><b>rpm</b> -q --changelog</td><td class="w">Why a version exists — includes the CVE it fixed</td><td class="e">rpm -q --changelog openssl | head</td></tr><tr><td class="c"><b>yum</b> / <b>zypper</b> / <b>apk</b></td><td class="w">RHEL 7 / SUSE / Alpine equivalents</td><td class="e">apk add --no-cache curl</td></tr><tr><td class="c"><b>needs-restarting</b> -r</td><td class="w">Does this box need a reboot after patching? (RHEL)</td><td class="e">needs-restarting -r</td></tr><tr><td class="c"><b>ls</b> /var/run/reboot-required</td><td class="w">Same question on Debian/Ubuntu</td><td class="e">cat /var/run/reboot-required</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="disk"><div class="wrap">
+    <div class="grp-h"><h2>Disk &amp; filesystem</h2><span class="cnt">14 commands</span></div>
+    <p class="grp-d">Two different 'full' conditions: out of blocks (<code>df -h</code>) and out of inodes (<code>df -i</code>). Check both — millions of tiny files exhaust inodes first.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>df</b> -h / -i</td><td class="w">Free space by blocks / by inodes</td><td class="e">df -h; df -i</td></tr><tr><td class="c"><b>du</b> -sh * | sort -h</td><td class="w">What is taking the space in this directory</td><td class="e">du -sh * | sort -h | tail</td></tr><tr><td class="c"><b>du</b> -xh --max-depth=1 /</td><td class="w">Top-level usage without crossing into other filesystems</td><td class="e">du -xh --max-depth=1 / | sort -h</td></tr><tr><td class="c"><b>lsblk</b> -o NAME,SIZE,ROTA,MOUNTPOINT</td><td class="w">Block devices, and whether they are rotational</td><td class="e">lsblk -o NAME,SIZE,ROTA,MOUNTPOINT</td></tr><tr><td class="c"><b>blkid</b></td><td class="w">UUIDs and filesystem types — what to put in /etc/fstab</td><td class="e">blkid /dev/sdb1</td></tr><tr><td class="c"><b>mount</b> -o remount,rw /</td><td class="w">Remount read-write, e.g. in rescue mode</td><td class="e">mount -o remount,rw /</td></tr><tr><td class="c"><b>findmnt</b></td><td class="w">Mounts as a tree, with the options actually in effect</td><td class="e">findmnt /var</td></tr><tr><td class="c"><b>mkfs.ext4</b> / <b>mkfs.xfs</b></td><td class="w">Create a filesystem</td><td class="e">mkfs.xfs -L data /dev/sdb1</td></tr><tr><td class="c"><b>xfs_growfs</b> / <b>resize2fs</b></td><td class="w">Grow a filesystem after growing the volume</td><td class="e">xfs_growfs /data</td></tr><tr><td class="c"><b>fsck</b> -n</td><td class="w">Check without repairing. Never fsck a mounted filesystem</td><td class="e">fsck -n /dev/sdb1</td></tr><tr><td class="c"><b>pvs</b> / <b>vgs</b> / <b>lvs</b></td><td class="w">LVM at a glance — physical, group, logical</td><td class="e">vgs; lvs</td></tr><tr><td class="c"><b>lvextend</b> -r -L +50G</td><td class="w">Grow a logical volume and its filesystem in one step</td><td class="e">lvextend -r -L +50G /dev/vg0/data</td></tr><tr><td class="c"><b>iostat</b> -x 1</td><td class="w">Per-device await and utilisation — is the disk the bottleneck?</td><td class="e">iostat -x 1</td></tr><tr><td class="c"><b>lsof</b> +L1</td><td class="w">Deleted files still held open — why df and du disagree</td><td class="e">lsof +L1</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="find"><div class="wrap">
+    <div class="grp-h"><h2>Search &amp; locate</h2><span class="cnt">10 commands</span></div>
+    <p class="grp-d"><code>find</code> is a query language. The order of predicates matters: it evaluates left to right and stops early, so put the cheap tests first.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>find</b> . -name '*.log' -mtime +30</td><td class="w">Files matching a name, older than 30 days</td><td class="e">find /var/log -name '*.log' -mtime +30</td></tr><tr><td class="c"><b>find</b> . -size +100M</td><td class="w">Files over a size</td><td class="e">find / -xdev -size +100M 2>/dev/null</td></tr><tr><td class="c"><b>find</b> . -type f -newer ref</td><td class="w">Changed more recently than a reference file</td><td class="e">find /etc -type f -newer /tmp/mark</td></tr><tr><td class="c"><b>find</b> … -delete</td><td class="w">Delete matches. Run it without -delete first, every time</td><td class="e">find /tmp -name 'core.*' -mtime +7 -delete</td></tr><tr><td class="c"><b>find</b> … -print0 | xargs -0</td><td class="w">Safe with spaces and newlines in filenames</td><td class="e">find . -name '*.gz' -print0 | xargs -0 rm</td></tr><tr><td class="c"><b>find</b> … -exec … +</td><td class="w">One invocation for many files, not one per file</td><td class="e">find . -name '*.c' -exec grep -l TODO {} +</td></tr><tr><td class="c"><b>find</b> / -xdev</td><td class="w">Stay on one filesystem — stops it wandering into /proc and NFS</td><td class="e">find / -xdev -name core</td></tr><tr><td class="c"><b>find</b> . -perm -4000</td><td class="w">setuid binaries — a standard audit sweep</td><td class="e">find / -xdev -perm -4000 -ls</td></tr><tr><td class="c"><b>locate</b> / <b>updatedb</b></td><td class="w">Instant filename search from a prebuilt index</td><td class="e">locate nginx.conf</td></tr><tr><td class="c"><b>which</b> / <b>type</b> -a</td><td class="w">Where a command comes from; type -a shows aliases too</td><td class="e">type -a ls</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="cron"><div class="wrap">
+    <div class="grp-h"><h2>Scheduling &amp; boot</h2><span class="cnt">8 commands</span></div>
+    <p class="grp-d">cron for wall-clock jobs, systemd timers for anything that needs dependencies, logging or a missed-run catch-up.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>crontab</b> -l / -e / -u</td><td class="w">List, edit, or act on another user's crontab</td><td class="e">crontab -l -u deploy</td></tr><tr><td class="c"><b>systemctl</b> list-timers --all</td><td class="w">Every timer, when it last ran and when it runs next</td><td class="e">systemctl list-timers --all</td></tr><tr><td class="c"><b>systemd-analyze</b> blame</td><td class="w">Which units made the boot slow</td><td class="e">systemd-analyze blame | head</td></tr><tr><td class="c"><b>systemd-analyze</b> critical-chain</td><td class="w">The dependency path that determined boot time</td><td class="e">systemd-analyze critical-chain</td></tr><tr><td class="c"><b>at</b> now + 1 hour</td><td class="w">One-off scheduled command</td><td class="e">echo 'systemctl restart app' | at now + 1 hour</td></tr><tr><td class="c"><b>run-parts</b> --test</td><td class="w">What would /etc/cron.daily actually run?</td><td class="e">run-parts --test /etc/cron.daily</td></tr><tr><td class="c"><b>uptime</b> / <b>who</b> -b</td><td class="w">How long since boot, and when it booted</td><td class="e">who -b</td></tr><tr><td class="c"><b>last</b> reboot</td><td class="w">Reboot history</td><td class="e">last reboot | head</td></tr></tbody></table></div>
+  </div></section>
+  <section class="grp" data-g="net"><div class="wrap">
+    <div class="grp-h"><h2>Networking</h2><span class="cnt">15 commands</span></div>
+    <p class="grp-d"><code>ifconfig</code>, <code>netstat</code> and <code>route</code> are deprecated and missing on modern minimal images. The <code>ip</code> and <code>ss</code> equivalents are below.</p>
+    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+      <th>Typical use</th></tr></thead><tbody><tr><td class="c"><b>ip</b> a</td><td class="w">Interfaces and addresses (replaces ifconfig)</td><td class="e">ip -br a</td></tr><tr><td class="c"><b>ip</b> r</td><td class="w">Routing table (replaces route -n)</td><td class="e">ip r get 8.8.8.8</td></tr><tr><td class="c"><b>ip</b> -s link</td><td class="w">Per-interface counters, including errors and drops</td><td class="e">ip -s link show eth0</td></tr><tr><td class="c"><b>ss</b> -tulpn</td><td class="w">Listening TCP/UDP sockets with the owning process (replaces netstat)</td><td class="e">ss -tulpn</td></tr><tr><td class="c"><b>ss</b> -s</td><td class="w">Socket summary — how many in each state</td><td class="e">ss -s</td></tr><tr><td class="c"><b>ss</b> -tan state time-wait | wc -l</td><td class="w">Count sockets in one state</td><td class="e">ss -tan state time-wait | wc -l</td></tr><tr><td class="c"><b>dig</b> +short / +trace</td><td class="w">DNS answer only / the full delegation path</td><td class="e">dig +trace api.example.com</td></tr><tr><td class="c"><b>dig</b> @1.1.1.1</td><td class="w">Ask a specific resolver — proves whether it is your resolver</td><td class="e">dig @1.1.1.1 example.com</td></tr><tr><td class="c"><b>curl</b> -sS -o /dev/null -w '%{http_code} %{time_total}\n'</td><td class="w">Status and timing without the body</td><td class="e">curl -sS -o /dev/null -w '%{http_code} %{time_total}\n' https://api/health</td></tr><tr><td class="c"><b>curl</b> -v --resolve host:443:IP</td><td class="w">Test one backend directly, bypassing DNS</td><td class="e">curl -v --resolve api:443:10.0.1.5 https://api/</td></tr><tr><td class="c"><b>tcpdump</b> -nni any port 443 -w f.pcap</td><td class="w">Capture to a file for Wireshark</td><td class="e">tcpdump -nni any port 443 -c 100</td></tr><tr><td class="c"><b>mtr</b> -rw</td><td class="w">traceroute and ping combined, in a report</td><td class="e">mtr -rw 8.8.8.8</td></tr><tr><td class="c"><b>nc</b> -zv</td><td class="w">Is the port open? The quickest connectivity test there is</td><td class="e">nc -zv db.internal 5432</td></tr><tr><td class="c"><b>ethtool</b> -S</td><td class="w">NIC statistics — drops, errors, ring exhaustion</td><td class="e">ethtool -S eth0 | grep -i drop</td></tr><tr><td class="c"><b>nft</b> list ruleset</td><td class="w">Firewall rules (nftables; iptables-save on older systems)</td><td class="e">nft list ruleset</td></tr></tbody></table></div>
+  </div></section>
+<div class="empty" id="empty" hidden>No command matches that search.</div>
+
+<div class="wrap"><div class="pager"><a href="../../categories/index.html">← Categories<b>Index</b></a><a class="next" href="../KUBERNETES-COMMANDS/kubernetes-commands.html">Next →<b>Kubernetes Commands</b></a></div></div>
+
+<footer>
+  <div class="f-in">
+    <a class="f-logo" href="../../index.html">PLATFORM OPS</a>
+    <div class="f-links">
+      <a href="../../categories/linux-commands/index.html">Commands Hub</a>
+      <a href="../../categories/index.html">All Categories</a>
+      <a href="../../index.html#library">Reference Library</a>
+      <a href="../../index.html#subscribe">Subscribe</a>
+      <a href="../../feed.xml">RSS</a>
+    </div>
+  </div>
+  <div class="f-bot">© 2026 Vishal Abhinav · Platform Ops — code MIT,
+    <a href="../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+</footer>
+<script>
+document.getElementById('tt').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});
+(function(){
+  var q=document.getElementById('q'), res=document.getElementById('res'),
+      empty=document.getElementById('empty'),
+      rows=[].slice.call(document.querySelectorAll('tbody tr')),
+      groups=[].slice.call(document.querySelectorAll('.grp')),
+      TOTAL=rows.length, group='all';
+  rows.forEach(function(r){ r.dataset.q=r.textContent.toLowerCase(); });
+
+  function apply(){
+    var term=(q.value||'').trim().toLowerCase(), shown=0;
+    rows.forEach(function(r){
+      var ok=(!term||r.dataset.q.indexOf(term)!==-1) &&
+             (group==='all'||r.closest('.grp').dataset.g===group);
+      r.hidden=!ok; if(ok) shown++;
+    });
+    groups.forEach(function(g){
+      g.hidden=!g.querySelector('tbody tr:not([hidden])');
+    });
+    res.innerHTML = (term||group!=='all')
+      ? '<b>'+shown+'</b> of '+TOTAL+' commands'
+      : TOTAL+' commands across '+groups.length+' groups';
+    empty.hidden = shown!==0;
+  }
+  var t; q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(apply,110);});
+  q.addEventListener('search',apply);
+  document.querySelectorAll('.gf').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.gf').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on'); group=b.dataset.g; apply();
+    });
+  });
+  apply();
+})();
+</script>
+</body>
+</html>

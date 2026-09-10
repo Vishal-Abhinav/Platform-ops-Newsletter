@@ -27,6 +27,9 @@ OSY = "Foundation/OPERATING-SYSTEMS/operating-systems.html"
 SHB = "Foundation/SHELL-AND-BASH/shell-and-bash.html"
 PYT = "Foundation/PYTHON/python.html"
 GIT = "Foundation/GIT-VERSION-CONTROL/git-version-control.html"
+CLX = "Commands/LINUX-COMMANDS/linux-commands.html"
+CK8 = "Commands/KUBERNETES-COMMANDS/kubernetes-commands.html"
+CDK = "Commands/DOCKER-COMMANDS/docker-commands.html"
 
 # pillar -> [ (category, icon, [ (topic, status, href|None), ... ]) ]
 PILLARS = [
@@ -248,6 +251,63 @@ PILLARS = [
    ("Distributed Transactions","-",None),("Caching","-",None),("Distributed Locking","-",None),
    ("Partition Tolerance","-",None),("CAP Theorem","P",None),("Failure Domains","-",None),
    ("Quorum","L",K8E),("Distributed Coordination","-",None)]),
+]),
+
+("Commands", [
+ ("Linux Commands", "🐧", [
+   ("Files & Navigation","L",CLX),("Permissions & Ownership","L",CLX),
+   ("Text Processing","L",CLX),("Processes & Signals","L",CLX),
+   ("Users & Groups","L",CLX),("Package Management","L",CLX),
+   ("Disk & Filesystem","L",CLX),("Search & Locate","L",CLX),
+   ("Scheduling & Boot","L",CLX),("Networking Commands","L",CLX)]),
+ ("systemd Commands", "⚙️", [
+   ("systemctl","P",None),("journalctl","P",None),("Unit Files","P",None),
+   ("Timers","P",None),("Targets","-",None),("systemd-analyze","P",None),
+   ("loginctl","-",None),("systemd-run","-",None),("Drop-ins","-",None),
+   ("Service Debugging","P",None)]),
+ ("Docker Commands", "🐳", [
+   ("Running Containers","L",CDK),("Images & Building","L",CDK),
+   ("Inspecting & Logs","L",CDK),("Networking & Volumes","L",CDK),
+   ("Compose","L",CDK),("Cleanup & Pruning","L",CDK),
+   ("Registry & Push","P",None),("buildx & Multi-arch","P",None),
+   ("Container Debugging","P",None),("Security Scanning","-",None)]),
+ ("Kubernetes Commands", "☸️", [
+   ("Inspecting","L",CK8),("Applying & Deleting","L",CK8),
+   ("Logs, Exec & Debug","L",CK8),("Rollouts & Scaling","L",CK8),
+   ("Nodes & Scheduling","L",CK8),("Contexts & Access","L",CK8),
+   ("Output & Scripting","L",CK8),("kustomize","P",None),
+   ("Helm","P",None),("krew Plugins","-",None)]),
+ ("OpenShift Commands", "🔴", [
+   ("oc login & Projects","P",None),("oc new-app","P",None),("Routes","P",None),
+   ("oc adm","P",None),("Security Context Constraints","P",None),
+   ("must-gather","P",None),("Image Streams","-",None),("BuildConfigs","-",None),
+   ("oc debug node","P",None),("Cluster Operators","-",None)]),
+ ("Ansible Commands", "🔧", [
+   ("Ad-hoc Commands","P",None),("ansible-playbook","P",None),
+   ("Inventory & Limits","P",None),("ansible-vault","P",None),
+   ("ansible-galaxy","-",None),("Facts & Gathering","P",None),
+   ("Check & Diff Mode","P",None),("Tags","-",None),("ansible-lint","-",None),
+   ("Callback Plugins","-",None)]),
+ ("Terraform Commands", "📐", [
+   ("init & providers","P",None),("plan","P",None),("apply","P",None),
+   ("State Commands","P",None),("import","P",None),("Workspaces","-",None),
+   ("fmt & validate","P",None),("Outputs","-",None),
+   ("taint & replace","-",None),("destroy & targeting","-",None)]),
+ ("Networking Commands", "🌐", [
+   ("ip & Addressing","L",CLX),("ss & Sockets","L",CLX),("DNS Tools","L",CLX),
+   ("curl & HTTP","L",CLX),("tcpdump","L",CLX),("Routing","P",None),
+   ("Firewall (nft/iptables)","P",None),("ethtool","P",None),
+   ("mtr & traceroute","L",CLX),("Bandwidth Testing","-",None)]),
+ ("Performance Commands", "⚡", [
+   ("top & htop","P",None),("vmstat","P",None),("iostat","P",None),
+   ("sar & sysstat","P",None),("perf","P",None),("strace","P",None),
+   ("lsof","P",None),("pidstat","P",None),("bpftrace","-",None),
+   ("Flame Graphs","-",None)]),
+ ("Storage Commands", "💽", [
+   ("lsblk & blkid","L",CLX),("df & du","L",CLX),("mount & fstab","L",CLX),
+   ("LVM Commands","L",CLX),("mkfs & fsck","L",CLX),("NFS Commands","-",None),
+   ("Quotas","-",None),("Swap","-",None),("smartctl","-",None),
+   ("Storage Benchmarking","-",None)]),
 ]),
 
 ("Modern Ops", [

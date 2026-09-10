@@ -58,6 +58,12 @@ PAGES = {
    "The GIL, choosing a concurrency model, streaming large files, subprocess and logging."),
  "Foundation/GIT-VERSION-CONTROL/git-version-control.html": ("Reference", "Git & Version Control",
    "The object model, the three trees, reflog recovery, bisect, and repository weight."),
+ "Commands/LINUX-COMMANDS/linux-commands.html": ("Reference", "Linux Commands",
+   "132 commands in 10 groups — files, permissions, text, processes, packages, disk, network."),
+ "Commands/KUBERNETES-COMMANDS/kubernetes-commands.html": ("Reference", "Kubernetes Commands",
+   "62 kubectl commands by task — inspect, apply, debug, roll out, and script the output."),
+ "Commands/DOCKER-COMMANDS/docker-commands.html": ("Reference", "Docker Commands",
+   "59 commands — run, build, inspect, network, compose, and reclaim the disk."),
 }
 
 STATUS_FILL = {"live": "var(--n-live-bg)", "pipe": "var(--n-pipe-bg)", "plan": "var(--n-plan-bg)"}

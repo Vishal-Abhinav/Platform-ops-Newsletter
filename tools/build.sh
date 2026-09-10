@@ -8,6 +8,7 @@
 #   README.md       <- README.base.md  + build_readme/library
 #   categories/     <- build_hubs      (33 hubs + index + hub.css)
 #   Foundation/     <- build_foundation (topic pages + topic.css)
+#   Commands/       <- build_commands   (command references + commands.css)
 #   feed.xml        <- build_feed
 #   assets/megamenu.* <- build_nav    (nav data, styles, behaviour)
 #   sitemap.xml     <- verify.py
@@ -39,6 +40,9 @@ python3 tools/build_hubs.py
 
 say "topic pages"
 python3 tools/build_foundation.py fnd_a fnd_b
+
+say "command references"
+python3 tools/build_commands.py
 
 say "feed"
 python3 tools/build_feed.py
