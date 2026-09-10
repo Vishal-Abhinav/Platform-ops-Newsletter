@@ -810,14 +810,17 @@ The homepage is a single hand-written HTML file with no framework behind it:
 |:--------|:-------------|
 | 🌓 **Dark / light toggle** | Theme switch in the nav, remembered via `localStorage`, applied before first paint so there's no flash |
 | ♾️ **Animated DevOps loop** | SVG infinity loop with the eight lifecycle stages and a light pulse racing the path |
-| 🗺️ **Knowledge map** | All 521 topics, grouped into 33 categories under 10 pillars — search by name, filter by status, expand a pillar to see what's shipped and what's queued |
+| 🗺️ **Knowledge map** | All 521 topics, grouped into 33 categories under 10 pillars — search by name, filter by status, open a pillar to see what's shipped and what's queued |
 | 🖥️ **Coverage terminal** | Terminal-style `tree` view of the ten pillars with live-vs-total counts, and a `ls published/` listing that links straight into every issue |
 | 🔔 **Topic requests** | Clicking a pipeline or planned topic queues it; the signup then tells Kit which topics that reader is waiting for |
 | 📡 **RSS** | `feed.xml` carries all 11 issues, and every page advertises it in its `<head>` |
-| 📜 **Scrollable archive** | Latest Issues is an internal scroll panel that stays height-matched to the topics column |
+| 📌 **Pinned archive** | On desktop Latest Issues is pinned beside the map and scrolls inside itself, so the issues stay one glance away however far down the map you are |
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
 | 🧭 **Mega-menu** | Cascading browse panel on every page — 11 pillars, 43 categories, with live counts |
 | ⌨️ **Command references** | Searchable, group-filtered command tables — 253 commands so far |
+| 🔍 **Global search** | Centred in the nav of every page — 0 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
+| 🧩 **Category hubs** | Every one of the 0 categories has its own page with a generated architecture diagram and its full topic list |
+| 💼 **LinkedIn column** | The author section carries the latest posts beside the profile, driven by `tools/linkedin_posts.py` |
 | 🦶 **Shared footer** | One footer across every page, with links rebuilt per directory depth |
 
 ---

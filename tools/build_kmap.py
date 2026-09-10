@@ -312,7 +312,11 @@ def flexes(l, p, n):
 
 blocks = []
 for i, (pname, pl, pp, pn, tot, cats) in enumerate(pillar_stats):
-    open_cls = " open"   # the map is a list to read, not a thing to click open
+    # Pillars start CLOSED. With all 621 chips rendered the column ran to
+    # ~15,500px and the page read as endless; collapsed it is 11 tidy rows you
+    # can take in at once. The categories inside stay open, so opening a
+    # pillar shows its whole contents in one click rather than two.
+    open_cls = ""
     cat_html = []
     solo = len(cats) == 1 and cats[0][0] == pname
     for cname, icon, topics in cats:
@@ -346,7 +350,7 @@ for i, (pname, pl, pp, pn, tot, cats) in enumerate(pillar_stats):
         </div>""")
 
     blocks.append(f"""      <section class="km-pillar{open_cls}" data-pillar>
-        <button class="km-p-head" type="button" aria-expanded="true">
+        <button class="km-p-head" type="button" aria-expanded="{'true' if open_cls else 'false'}">
           <span class="km-p-idx">{i + 1:02d}</span>
           <span class="km-p-name">{esc(pname)}</span>
           <span class="km-p-counts"><em>{pl}</em><span class="u"> live</span> · {pp}<span class="u"> pipe</span> · {pn}<span class="u"> planned</span></span>
@@ -489,7 +493,9 @@ JS = """/* ── Knowledge map: two-level accordion + search + status filter �
     });
 
     if (!active) {
-      pillars.forEach(p => setOpen(p, true));
+      /* Back to the default shape, not to everything-open: a search that
+         matched three pillars must not leave all eleven expanded behind it. */
+      pillars.forEach(p => setOpen(p, false));
       result.textContent = '';
     } else {
       result.innerHTML = '<b>' + shown + '</b> of ' + TOTAL + ' topics' +

@@ -117,10 +117,14 @@ feed = f"""<?xml version="1.0" encoding="UTF-8"?>
 </rss>
 """
 
-out = ROOT / 'feed.xml'
-out.write_text(feed, encoding='utf-8')
+if __name__ == "__main__":
+    # ISSUES below is the issue register, and build_readme.py imports it to
+    # count issues and label the repository tree. Guarding the write keeps that
+    # import from silently regenerating feed.xml out of turn.
+    out = ROOT / 'feed.xml'
+    out.write_text(feed, encoding='utf-8')
 
-# well-formedness is not optional for a feed — readers reject the whole file
-import xml.etree.ElementTree as ET  # noqa: E402
-ET.parse(out)
-print(f"feed.xml -> {len(feed)} bytes, {len(ISSUES)} items, parses clean")
+    # well-formedness is not optional for a feed — readers reject the whole file
+    import xml.etree.ElementTree as ET  # noqa: E402
+    ET.parse(out)
+    print(f"feed.xml -> {len(feed)} bytes, {len(ISSUES)} items, parses clean")
