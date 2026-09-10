@@ -33,7 +33,7 @@
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html</loc>
@@ -48,62 +48,62 @@
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/TERMS/fundamentals/bash.html</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/TERMS/fundamentals/init.html</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/TERMS/fundamentals/kernel-modules.html</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/TERMS/fundamentals/linux-commands.html</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/TERMS/fundamentals/linux-distributions.html</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/TERMS/fundamentals/linux-kernel.html</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/TERMS/fundamentals/linux-unix-fundamentals.html</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/TERMS/fundamentals/proc.html</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/TERMS/fundamentals/shell.html</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/TERMS/fundamentals/sys.html</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/TERMS/fundamentals/sysctl.html</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/TERMS/fundamentals/terminal-cli.html</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html</loc>
@@ -118,12 +118,182 @@
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/</loc>
     <lastmod>2026-09-10</lastmod>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/SRE/INCIDENT-MANAGEMENT/incident-management.html</loc>
     <lastmod>2026-09-10</lastmod>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/ai-infrastructure/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/aiops/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/api-microservices/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/architecture/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/automation/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/backup-dr/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/cloud/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/configuration-management/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/containers/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/database/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/devops/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/distributed-systems/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/finops/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/foundation/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/gitops/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/infrastructure-as-code/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/it-infrastructure/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/itsm-operations/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/kubernetes/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/logging/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/middleware/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/networking/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/observability/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/openshift/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/performance-engineering/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/platform-engineering/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/security/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/service-mesh/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/sre/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/storage/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/supply-chain-security/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/troubleshooting/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/virtualization/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/</loc>

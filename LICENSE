@@ -1,6 +1,15 @@
-MIT License
+Platform Ops — Tech with Vishal Abhinav
+Copyright (c) 2026 Vishal Abhinav
 
-Copyright (c) 2026 VISHAL ABHINAV
+This repository is dual-licensed. Which licence applies depends on what you
+are taking.
+
+════════════════════════════════════════════════════════════════════════
+ 1. THE CODE — MIT License
+════════════════════════════════════════════════════════════════════════
+
+Applies to: HTML structure, CSS, JavaScript, build and generator scripts,
+configuration, and the GitHub Actions workflow.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +28,43 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+════════════════════════════════════════════════════════════════════════
+ 2. THE CONTENT — CC BY-NC-ND 4.0
+    Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International
+════════════════════════════════════════════════════════════════════════
+
+Applies to: the written issues, runbooks, glossary entries, architecture
+diagrams, Open Graph card artwork, and every other editorial element of this
+newsletter — everything that took writing rather than coding.
+
+You are free to SHARE it: copy and redistribute the material in any medium
+or format. Under these terms:
+
+  Attribution     Credit "Vishal Abhinav / Platform Ops" and link back to
+                  https://vishal-abhinav.github.io/Platform-ops-Newsletter/
+
+  NonCommercial   You may not use the material for commercial purposes.
+
+  NoDerivatives   If you remix, transform, or build upon the material, you
+                  may not distribute the modified material.
+
+  No additional restrictions — you may not apply legal terms or
+  technological measures that legally restrict others from doing anything
+  the licence permits.
+
+Full legal text:
+  https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode
+
+For commercial licensing, translations, or derivative works, ask first:
+  vishalabhinav.co.in@gmail.com
+
+════════════════════════════════════════════════════════════════════════
+ IN SHORT
+════════════════════════════════════════════════════════════════════════
+
+Lift the code, fork the layout, learn from how it is built — that is what
+the MIT half is for, and no permission is needed.
+
+Republishing the writing or the diagrams, in whole or in part, needs
+permission. Quoting a paragraph with a link back does not.

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="Identity at the front, secrets in the middle, and evidence for the auditor at the end.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
+<link rel="canonical" href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/security/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Security · Platform Ops · Vishal Abhinav">
+<meta property="og:description" content="Identity at the front, secrets in the middle, and evidence for the auditor at the end.">
+<meta property="og:url" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/categories/security/">
+<meta property="og:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Security · Platform Ops · Vishal Abhinav">
+<meta name="twitter:description" content="Identity at the front, secrets in the middle, and evidence for the auditor at the end.">
+<meta name="twitter:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="../../feed.xml">
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="stylesheet" href="../hub.css">
+</head>
+<body>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb"><a href="../../index.html">Home</a><span>/</span><a href="../index.html">Categories</a><span>/</span><span class="cur">Security</span></div>
+  <div class="nav-right"><button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button><a href="../../index.html#subscribe" class="nav-logo"
+    style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Security · Category 23 of 33</div>
+  <h1><span class="ico">🛡️</span>Security</h1>
+  <p class="tagline">Identity at the front, secrets in the middle, and evidence for the auditor at the end.</p>
+  <div class="stats">
+    <div class="stat"><b>31</b><i>Topics</i></div>
+    <div class="stat"><b class="live">0</b><i>Live</i></div>
+    <div class="stat"><b class="pipe">11</b><i>In pipeline</i></div>
+    <div class="stat"><b class="plan">20</b><i>Planned</i></div>
+    <div class="stat"><b>0</b><i>Issues</i></div>
+  </div>
+  <div class="progress"><i class="pipe" style="flex:11"></i><i class="plan" style="flex:20"></i></div>
+</div></header>
+
+<section><div class="wrap">
+  <h2>ARCHITECTURE</h2>
+  <p class="lede">How this category fits together, bottom to top. Every green block is
+    covered by a published issue — click it to go straight there.</p>
+  <div class="dg-scroll"><svg class="dg" viewBox="0 0 1000 492" role="img" aria-label="Security architecture — live blocks link to the issue that covers them"><line class="dg-spine" x1="160" y1="14" x2="160" y2="478.0"/><text class="dg-layer" x="146" y="40.0">FOUNDATIONS</text><circle class="dg-tick" cx="160" cy="36.0" r="3"/><g class="dg-g"><rect x="168.0" y="14" width="264.0" height="44" rx="4" fill="var(--n-pipe-bg)" stroke="var(--n-pipe-br)" stroke-width="1"/><text class="dg-node" x="300.0" y="40.0" fill="var(--n-pipe-fg)">Cybersecurity Fundamentals</text></g><g class="dg-g"><rect x="442.0" y="14" width="264.0" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="574.0" y="40.0" fill="var(--n-plan-fg)">Zero Trust</text></g><g class="dg-g"><rect x="716.0" y="14" width="264.0" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="848.0" y="40.0" fill="var(--n-plan-fg)">Compliance</text></g><text class="dg-layer" x="146" y="110.0">IDENTITY</text><circle class="dg-tick" cx="160" cy="106.0" r="3"/><g class="dg-g"><rect x="168.0" y="84" width="154.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="245.2" y="110.0" fill="var(--n-plan-fg)">IAM</text></g><g class="dg-g"><rect x="332.4" y="84" width="154.4" height="44" rx="4" fill="var(--n-pipe-bg)" stroke="var(--n-pipe-br)" stroke-width="1"/><text class="dg-node" x="409.6" y="110.0" fill="var(--n-pipe-fg)">RBAC</text></g><g class="dg-g"><rect x="496.8" y="84" width="154.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="574.0" y="110.0" fill="var(--n-plan-fg)">PAM</text></g><g class="dg-g"><rect x="661.2" y="84" width="154.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="738.4" y="110.0" fill="var(--n-plan-fg)">LDAP</text></g><g class="dg-g"><rect x="825.6" y="84" width="154.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="902.8" y="110.0" fill="var(--n-plan-fg)">Active Directory</text></g><text class="dg-layer" x="146" y="180.0">FEDERATION</text><circle class="dg-tick" cx="160" cy="176.0" r="3"/><g class="dg-g"><rect x="168.0" y="154" width="195.5" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="265.8" y="180.0" fill="var(--n-plan-fg)">SSO</text></g><g class="dg-g"><rect x="373.5" y="154" width="195.5" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="471.2" y="180.0" fill="var(--n-plan-fg)">OAuth</text></g><g class="dg-g"><rect x="579.0" y="154" width="195.5" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="676.8" y="180.0" fill="var(--n-plan-fg)">OIDC</text></g><g class="dg-g"><rect x="784.5" y="154" width="195.5" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="882.2" y="180.0" fill="var(--n-plan-fg)">SAML</text></g><text class="dg-layer" x="146" y="250.0">CRYPTO</text><circle class="dg-tick" cx="160" cy="246.0" r="3"/><g class="dg-g"><rect x="168.0" y="224" width="264.0" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="300.0" y="250.0" fill="var(--n-plan-fg)">PKI</text></g><g class="dg-g"><rect x="442.0" y="224" width="264.0" height="44" rx="4" fill="var(--n-pipe-bg)" stroke="var(--n-pipe-br)" stroke-width="1"/><text class="dg-node" x="574.0" y="250.0" fill="var(--n-pipe-fg)">TLS/SSL</text></g><g class="dg-g"><rect x="716.0" y="224" width="264.0" height="44" rx="4" fill="var(--n-pipe-bg)" stroke="var(--n-pipe-br)" stroke-width="1"/><text class="dg-node" x="848.0" y="250.0" fill="var(--n-pipe-fg)">Certificates</text></g><text class="dg-layer" x="146" y="320.0">SECRETS</text><circle class="dg-tick" cx="160" cy="316.0" r="3"/><g class="dg-g"><rect x="168.0" y="294" width="401.0" height="44" rx="4" fill="var(--n-pipe-bg)" stroke="var(--n-pipe-br)" stroke-width="1"/><text class="dg-node" x="368.5" y="320.0" fill="var(--n-pipe-fg)">Secrets Management</text></g><g class="dg-g"><rect x="579.0" y="294" width="401.0" height="44" rx="4" fill="var(--n-pipe-bg)" stroke="var(--n-pipe-br)" stroke-width="1"/><text class="dg-node" x="779.5" y="320.0" fill="var(--n-pipe-fg)">HashiCorp Vault</text></g><text class="dg-layer" x="146" y="390.0">LAYERS</text><circle class="dg-tick" cx="160" cy="386.0" r="3"/><g class="dg-g"><rect x="168.0" y="364" width="107.4" height="44" rx="4" fill="var(--n-pipe-bg)" stroke="var(--n-pipe-br)" stroke-width="1"/><text class="dg-node" x="221.7" y="384.0" fill="var(--n-pipe-fg)">Infrastructure</text><text class="dg-node" x="221.7" y="396.0" fill="var(--n-pipe-fg)">Security</text></g><g class="dg-g"><rect x="285.4" y="364" width="107.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="339.1" y="384.0" fill="var(--n-plan-fg)">Network</text><text class="dg-node" x="339.1" y="396.0" fill="var(--n-plan-fg)">Security</text></g><g class="dg-g"><rect x="402.9" y="364" width="107.4" height="44" rx="4" fill="var(--n-pipe-bg)" stroke="var(--n-pipe-br)" stroke-width="1"/><text class="dg-node" x="456.6" y="390.0" fill="var(--n-pipe-fg)">Linux Security</text></g><g class="dg-g"><rect x="520.3" y="364" width="107.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="574.0" y="390.0" fill="var(--n-plan-fg)">Cloud Security</text></g><g class="dg-g"><rect x="637.7" y="364" width="107.4" height="44" rx="4" fill="var(--n-pipe-bg)" stroke="var(--n-pipe-br)" stroke-width="1"/><text class="dg-node" x="691.4" y="384.0" fill="var(--n-pipe-fg)">Container</text><text class="dg-node" x="691.4" y="396.0" fill="var(--n-pipe-fg)">Security</text></g><g class="dg-g"><rect x="755.1" y="364" width="107.4" height="44" rx="4" fill="var(--n-pipe-bg)" stroke="var(--n-pipe-br)" stroke-width="1"/><text class="dg-node" x="808.9" y="384.0" fill="var(--n-pipe-fg)">Kubernetes</text><text class="dg-node" x="808.9" y="396.0" fill="var(--n-pipe-fg)">Security</text></g><g class="dg-g"><rect x="872.6" y="364" width="107.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="926.3" y="384.0" fill="var(--n-plan-fg)">Application</text><text class="dg-node" x="926.3" y="396.0" fill="var(--n-plan-fg)">Security</text></g><text class="dg-layer" x="146" y="460.0">DETECT</text><circle class="dg-tick" cx="160" cy="456.0" r="3"/><g class="dg-g"><rect x="168.0" y="434" width="107.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="221.7" y="460.0" fill="var(--n-plan-fg)">SIEM</text></g><g class="dg-g"><rect x="285.4" y="434" width="107.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="339.1" y="460.0" fill="var(--n-plan-fg)">SOC</text></g><g class="dg-g"><rect x="402.9" y="434" width="107.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="456.6" y="454.0" fill="var(--n-plan-fg)">Threat</text><text class="dg-node" x="456.6" y="466.0" fill="var(--n-plan-fg)">Detection</text></g><g class="dg-g"><rect x="520.3" y="434" width="107.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="574.0" y="454.0" fill="var(--n-plan-fg)">Vulnerability</text><text class="dg-node" x="574.0" y="466.0" fill="var(--n-plan-fg)">Management</text></g><g class="dg-g"><rect x="637.7" y="434" width="107.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="691.4" y="454.0" fill="var(--n-plan-fg)">Security</text><text class="dg-node" x="691.4" y="466.0" fill="var(--n-plan-fg)">Scanning</text></g><g class="dg-g"><rect x="755.1" y="434" width="107.4" height="44" rx="4" fill="var(--n-plan-bg)" stroke="var(--n-plan-br)" stroke-dasharray=&quot;3 3&quot; stroke-width="1"/><text class="dg-node" x="808.9" y="454.0" fill="var(--n-plan-fg)">Security</text><text class="dg-node" x="808.9" y="466.0" fill="var(--n-plan-fg)">Auditing</text></g><g class="dg-g"><rect x="872.6" y="434" width="107.4" height="44" rx="4" fill="var(--n-pipe-bg)" stroke="var(--n-pipe-br)" stroke-width="1"/><text class="dg-node" x="926.3" y="460.0" fill="var(--n-pipe-fg)">DevSecOps</text></g></svg></div>
+  <div class="dg-key">
+    <span><i class="live"></i> Live — click through</span>
+    <span><i class="pipe"></i> In pipeline</span>
+    <span><i class="plan"></i> Planned</span>
+  </div>
+</div></section>
+
+<section><div class="wrap"><h2>NOTHING PUBLISHED YET</h2><p class="lede">No issue covers this category so far. Queue the topics you want and you'll get an email the day one lands — that queue is also how the running order gets decided.</p></div></section>
+
+<section><div class="wrap">
+  <h2>ALL 31 TOPICS</h2>
+  <div class="hint"><b>Click</b> any pipeline or planned topic to be told when it lands</div>
+  <div class="zone pipe">In pipeline · 11</div><div class="chips"><button type="button" class="chip pipe">Cybersecurity Fundamentals</button><button type="button" class="chip pipe">Infrastructure Security</button><button type="button" class="chip pipe">Linux Security</button><button type="button" class="chip pipe">Container Security</button><button type="button" class="chip pipe">Kubernetes Security</button><button type="button" class="chip pipe">DevSecOps</button><button type="button" class="chip pipe">RBAC</button><button type="button" class="chip pipe">TLS/SSL</button><button type="button" class="chip pipe">Certificates</button><button type="button" class="chip pipe">Secrets Management</button><button type="button" class="chip pipe">HashiCorp Vault</button></div><div class="zone plan">Planned · 20</div><div class="chips"><button type="button" class="chip plan">Network Security</button><button type="button" class="chip plan">Cloud Security</button><button type="button" class="chip plan">Application Security</button><button type="button" class="chip plan">Zero Trust</button><button type="button" class="chip plan">IAM</button><button type="button" class="chip plan">PAM</button><button type="button" class="chip plan">LDAP</button><button type="button" class="chip plan">Active Directory</button><button type="button" class="chip plan">SSO</button><button type="button" class="chip plan">OAuth</button><button type="button" class="chip plan">OIDC</button><button type="button" class="chip plan">SAML</button><button type="button" class="chip plan">PKI</button><button type="button" class="chip plan">Vulnerability Management</button><button type="button" class="chip plan">Security Scanning</button><button type="button" class="chip plan">SIEM</button><button type="button" class="chip plan">SOC</button><button type="button" class="chip plan">Threat Detection</button><button type="button" class="chip plan">Compliance</button><button type="button" class="chip plan">Security Auditing</button></div>
+</div></section>
+
+<section style="border-bottom:0"><div class="wrap">
+  <h2>SECURITY PILLAR</h2>
+  <p class="lede">The other categories sitting alongside this one.</p>
+  <div class="siblings"><a class="sib cur" href="../security/index.html"><span class="n">🛡️ Security</span><span class="c">0 live · 11 pipe · 20 planned</span></a><a class="sib" href="../supply-chain-security/index.html"><span class="n">🔗 Supply Chain Security</span><span class="c">0 live · 7 pipe · 8 planned</span></a></div>
+  <div class="pager"><a href="../itsm-operations/index.html">← Previous<b>ITSM &amp; Operations</b></a><a class="next" href="../supply-chain-security/index.html">Next →<b>Supply Chain Security</b></a></div>
+</div></section>
+
+<a class="req-pill" id="pill" href="../../index.html#subscribe">
+  <span><b id="pillN">0</b> topics queued</span><span class="go">Get notified →</span>
+</a>
+<footer>
+  <div class="f-in">
+    <div class="f-top">
+      <div>
+        <a class="f-logo" href="../../index.html">PLATFORM OPS</a>
+        <p class="f-tag">Field notes on Kubernetes, SRE, and Platform Engineering —
+          written from production, not slideware.</p>
+      </div>
+      <div class="f-cols">
+        <div><div class="f-col-t">Newsletter</div>
+          <a href="../../index.html#issues">Latest Issues</a>
+          <a href="../../Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Newest — Issue #057</a>
+          <a href="../../index.html#subscribe">Subscribe</a></div>
+        <div><div class="f-col-t">Explore</div>
+          <a href="../../categories/index.html">All Categories</a>
+          <a href="../../index.html#topics">Knowledge Map</a>
+          <a href="../../index.html#authors">About the Author</a></div>
+        <div><div class="f-col-t">Connect</div>
+          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="../../feed.xml">RSS Feed</a>
+          <a href="#">Back to Top ↑</a></div>
+      </div>
+    </div>
+    <div class="f-bot">
+      <div>© 2026 Vishal Abhinav · Platform Ops — code MIT,
+        <a href="../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+      <div>Built for engineers, by an engineer.</div>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('tt').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});
+/* Topic requests share sessionStorage with the homepage — same origin, same
+   key — so a topic queued on a hub is already in the form when you land there. */
+(function(){
+  var pill=document.getElementById('pill'), n=document.getElementById('pillN');
+  if(!pill) return;
+  var q=[]; try{q=JSON.parse(sessionStorage.getItem('po-topics')||'[]');}catch(e){}
+  if(!Array.isArray(q)) q=[];
+  function save(){try{sessionStorage.setItem('po-topics',JSON.stringify(q));}catch(e){}}
+  function paint(){
+    document.querySelectorAll('button.chip').forEach(function(b){
+      b.classList.toggle('req', q.indexOf(b.textContent.trim())!==-1);
+    });
+    n.textContent=q.length; pill.classList.toggle('show', q.length>0);
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('button.chip'); if(!b) return;
+    var t=b.textContent.trim(), i=q.indexOf(t);
+    if(i!==-1){q.splice(i,1);} else if(q.length<8){q.push(t);}
+    save(); paint();
+  });
+  paint();
+})();
+</script>
+</body>
+</html>
