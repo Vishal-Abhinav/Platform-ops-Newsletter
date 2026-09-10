@@ -35,9 +35,6 @@ python3 tools/build_readme.py        # knowledge map section
 say "reference library (writes into BOTH index.html and README.md)"
 python3 tools/build_library.py
 
-say "layout — unstack the knowledge row"
-python3 tools/build_layout.py
-
 say "category hubs"
 python3 tools/build_hubs.py
 
