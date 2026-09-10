@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Regenerate every derived file in the repo from tools/taxonomy.py.
+#
+#   ./tools/build.sh
+#
+# Everything below is DERIVED. Edit the source in tools/, never the output:
+#   index.html      <- index.base.html + build_kmap/features/wire/library
+#   README.md       <- README.base.md  + build_readme/library
+#   categories/     <- build_hubs      (33 hubs + index + hub.css)
+#   Foundation/     <- build_foundation (topic pages + topic.css)
+#   feed.xml        <- build_feed
+#   sitemap.xml     <- verify.py
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export PO_ROOT="$ROOT"
+cd "$ROOT"
+
+say() { printf '\n\033[1m── %s\033[0m\n' "$*"; }
+
+say "reset the two generated files to their bases"
+cp tools/index.base.html index.html
+cp tools/README.base.md  README.md
+
+say "index.html"
+python3 tools/build_kmap.py          # knowledge map, from the taxonomy
+python3 tools/build_features.py      # topic requests, analytics, RSS link
+python3 tools/build_wire.py          # category hub links, nav, licence line
+
+say "README.md"
+python3 tools/build_readme.py        # knowledge map section
+
+say "reference library (writes into BOTH index.html and README.md)"
+python3 tools/build_library.py
+
+say "category hubs"
+python3 tools/build_hubs.py
+
+say "topic pages"
+python3 tools/build_foundation.py fnd_a fnd_b
+
+say "feed"
+python3 tools/build_feed.py
+
+say "verify + sitemap"
+python3 tools/verify.py
+
+say "done — review 'git status', then commit"
