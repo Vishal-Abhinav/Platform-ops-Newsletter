@@ -51,38 +51,675 @@ This repository *is* the newsletter. Every issue is a self-contained HTML page s
 
 ## 🗺️ Knowledge Map
 
-Live = published and linked. Roadmap = planned, not yet written.
+The **2026 master map** — every subject this newsletter intends to cover, in one place.
+521 topics, grouped into 33 categories and 10 pillars. The homepage renders
+this same map with search and status filters; both are generated from one source
+of truth, so the numbers here and there can never disagree.
 
-```
-platform-ops/
-│
-├── ⚙️  DevOps ........................................ 6 live · 3 planned
-│   ├── ✅ Kubernetes Architecture .................... issue #048
-│   ├── ✅ Kubernetes Networking ...................... issue #047
-│   ├── ✅ Kubernetes & OpenShift Error Runbook ....... issue #049
-│   ├── ✅ Kubernetes Storage ......................... issue #050
-│   ├── ✅ Kubernetes Observability ................... issue #051
-│   ├── ✅ CI/CD & GitOps ............................. issue #052
-│   └── 🔜 RBAC · Admission Controllers · Multi-Cluster Federation
-│
-├── 📡  SRE ........................................... 1 live · 5 planned
-│   ├── ✅ Incident Management & Postmortems .......... issue #053
-│   └── 🔜 SLIs/SLOs/SLAs · Error Budgets · Reliability Eng
-│          Chaos Engineering · On-Call Design
-│
-├── 🏗️  Infrastructure ................................ 4 live · 6 planned
-│   ├── ✅ Linux Fundamentals ......................... issue #054
-│   ├── ✅ Linux Advanced ............................. issue #055
-│   ├── ✅ Linux Troubleshooting ...................... issue #056
-│   ├── ✅ Linux & Unix Glossary (190 terms) .......... issue #057
-│   └── 🔜 Windows Server · Unix/BSD · Virtualization
-│          AWS · Azure · GCP
-│
-└── 🌐  Networking .................................... 1 live · 6 planned
-    ├── ✅ Kubernetes Networking Decoded .............. issue #047
-    └── 🔜 OSI Model · TCP/IP · Load Balancing
-           Gateway API · Service Mesh · eBPF
-```
+| | Pillar | Categories | ✅ Live | 🔸 Pipeline | · Planned | Total |
+|:--|:--|--:|--:|--:|--:|--:|
+| `01` | **Foundation** | 1 | 3 | 3 | 4 | 10 |
+| `02` | **Infrastructure** | 3 | 1 | 8 | 29 | 38 |
+| `03` | **Networking** | 1 | 1 | 4 | 26 | 31 |
+| `04` | **Cloud** | 1 | 0 | 4 | 13 | 17 |
+| `05` | **Delivery** | 6 | 12 | 22 | 42 | 76 |
+| `06` | **Kubernetes** | 3 | 18 | 17 | 23 | 58 |
+| `07` | **Reliability** | 7 | 27 | 25 | 64 | 116 |
+| `08` | **Security** | 2 | 0 | 18 | 28 | 46 |
+| `09` | **Data & Applications** | 4 | 1 | 12 | 47 | 60 |
+| `10` | **Modern Ops** | 5 | 2 | 22 | 45 | 69 |
+| | **Total** | **33** | **65** | **135** | **321** | **521** |
+
+**Status meanings**
+
+| | Meaning |
+|:--|:--|
+| ✅ **Live** | A published issue covers it, and the topic links straight to that page. |
+| 🔸 **Pipeline** | Next up — adjacent to a series already running, so it's queued rather than hypothetical. |
+| · **Planned** | On the backlog. No date attached; it moves to pipeline when the series in front of it lands. |
+
+Live topics point at the 11 deep-dives already in this repo, so one issue can light up several
+topics at once — issue #051 alone covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
+
+<br>
+
+<details>
+<summary><b>01 · Foundation</b> — 1 category · 3 live · 3 pipeline · 4 planned</summary>
+
+**🧱 Foundation** — 3 live · 3 pipeline · 4 planned  
+· Computer Fundamentals &nbsp;
+🔸 Operating Systems &nbsp;
+✅ [Linux](./Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html) &nbsp;
+✅ [Unix](./Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html) &nbsp;
+· Windows Server &nbsp;
+✅ [Shell & Bash](./Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html) &nbsp;
+🔸 Python &nbsp;
+· Programming Fundamentals &nbsp;
+· Data Structures & Algorithms &nbsp;
+🔸 Git & Version Control &nbsp;
+
+</details>
+
+<details>
+<summary><b>02 · Infrastructure</b> — 3 categories · 1 live · 8 pipeline · 29 planned</summary>
+
+**🏗️ IT Infrastructure** — 0 live · 5 pipeline · 7 planned  
+🔸 IT Infrastructure &nbsp;
+🔸 Server Administration &nbsp;
+· Hardware &nbsp;
+· Data Center &nbsp;
+· Rack / Power / Cooling &nbsp;
+🔸 Capacity Planning &nbsp;
+🔸 High Availability &nbsp;
+· Fault Tolerance &nbsp;
+🔸 Disaster Recovery &nbsp;
+· Business Continuity &nbsp;
+· Infrastructure Architecture &nbsp;
+· Enterprise Infrastructure &nbsp;
+
+**💽 Storage** — 1 live · 2 pipeline · 12 planned  
+🔸 Storage Fundamentals &nbsp;
+· Local Storage &nbsp;
+· RAID &nbsp;
+✅ [LVM](./Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html) &nbsp;
+· SAN &nbsp;
+· NAS &nbsp;
+· NFS &nbsp;
+· SMB / CIFS &nbsp;
+· Object Storage &nbsp;
+· Block Storage &nbsp;
+· File Storage &nbsp;
+· Storage Replication &nbsp;
+· Storage Performance &nbsp;
+· Storage Backup &nbsp;
+🔸 Storage Troubleshooting &nbsp;
+
+**🖥️ Virtualization** — 0 live · 1 pipeline · 10 planned  
+🔸 Virtualization Fundamentals &nbsp;
+· VMware &nbsp;
+· ESXi &nbsp;
+· vCenter &nbsp;
+· KVM &nbsp;
+· QEMU &nbsp;
+· Hyper-V &nbsp;
+· Virtual Networking &nbsp;
+· Virtual Storage &nbsp;
+· VM Lifecycle &nbsp;
+· VM HA / DR &nbsp;
+
+</details>
+
+<details>
+<summary><b>03 · Networking</b> — 1 category · 1 live · 4 pipeline · 26 planned</summary>
+
+**🌐 Networking** — 1 live · 4 pipeline · 26 planned  
+🔸 Networking Fundamentals &nbsp;
+🔸 OSI Model &nbsp;
+🔸 TCP/IP &nbsp;
+· IPv4 &nbsp;
+· IPv6 &nbsp;
+· Subnetting &nbsp;
+· VLAN &nbsp;
+· Switching &nbsp;
+· Routing &nbsp;
+· BGP &nbsp;
+· OSPF &nbsp;
+· EIGRP &nbsp;
+· MPLS &nbsp;
+· ARP &nbsp;
+· ICMP &nbsp;
+· TCP &nbsp;
+· UDP &nbsp;
+✅ [DNS](./DevOps/K8/Networking/k8-networking.html) &nbsp;
+· DHCP &nbsp;
+· NAT &nbsp;
+· Proxy &nbsp;
+· VPN &nbsp;
+· IPSec &nbsp;
+🔸 Load Balancing &nbsp;
+· Network Security &nbsp;
+· Firewall &nbsp;
+· WAF &nbsp;
+· SDN &nbsp;
+· SD-WAN &nbsp;
+· Network Automation &nbsp;
+· Network Monitoring &nbsp;
+
+</details>
+
+<details>
+<summary><b>04 · Cloud</b> — 1 category · 0 live · 4 pipeline · 13 planned</summary>
+
+**☁️ Cloud** — 0 live · 4 pipeline · 13 planned  
+🔸 Cloud Fundamentals &nbsp;
+🔸 AWS &nbsp;
+🔸 Microsoft Azure &nbsp;
+· Google Cloud &nbsp;
+· Cloud Networking &nbsp;
+· Cloud Compute &nbsp;
+· Cloud Storage &nbsp;
+· Cloud Databases &nbsp;
+· Cloud IAM &nbsp;
+· Cloud Security &nbsp;
+· Cloud Monitoring &nbsp;
+· Cloud Backup &nbsp;
+· Cloud DR &nbsp;
+🔸 Hybrid Cloud &nbsp;
+· Multi-Cloud &nbsp;
+· Cloud Migration &nbsp;
+· Cloud Architecture &nbsp;
+
+</details>
+
+<details>
+<summary><b>05 · Delivery</b> — 6 categories · 12 live · 22 pipeline · 42 planned</summary>
+
+**⚙️ DevOps** — 9 live · 5 pipeline · 7 planned  
+🔸 DevOps Fundamentals &nbsp;
+· DevOps Culture &nbsp;
+✅ [CI/CD](./DevOps/CICD/cicd-pipelines.html) &nbsp;
+✅ [Continuous Integration](./DevOps/CICD/cicd-pipelines.html) &nbsp;
+✅ [Continuous Delivery](./DevOps/CICD/cicd-pipelines.html) &nbsp;
+✅ [Continuous Deployment](./DevOps/CICD/cicd-pipelines.html) &nbsp;
+✅ [Jenkins](./DevOps/CICD/cicd-pipelines.html) &nbsp;
+✅ [GitLab CI/CD](./DevOps/CICD/cicd-pipelines.html) &nbsp;
+🔸 GitHub Actions &nbsp;
+· Azure DevOps &nbsp;
+· Build Automation &nbsp;
+· Artifact Management &nbsp;
+· Release Automation &nbsp;
+✅ [Deployment Strategies](./DevOps/CICD/cicd-pipelines.html) &nbsp;
+✅ [Blue/Green Deployment](./DevOps/CICD/cicd-pipelines.html) &nbsp;
+✅ [Canary Deployment](./DevOps/CICD/cicd-pipelines.html) &nbsp;
+🔸 Rolling Deployment &nbsp;
+🔸 Rollback &nbsp;
+· Feature Flags &nbsp;
+🔸 Pipeline Security &nbsp;
+· Pipeline Optimization &nbsp;
+
+**📦 Containers** — 0 live · 6 pipeline · 6 planned  
+🔸 Containers &nbsp;
+🔸 Docker &nbsp;
+· Podman &nbsp;
+· Containerd &nbsp;
+· CRI &nbsp;
+· OCI &nbsp;
+🔸 Container Images &nbsp;
+· Container Registries &nbsp;
+🔸 Container Networking &nbsp;
+· Container Storage &nbsp;
+🔸 Container Security &nbsp;
+🔸 Container Troubleshooting &nbsp;
+
+**📐 Infrastructure as Code** — 0 live · 3 pipeline · 8 planned  
+🔸 Infrastructure as Code &nbsp;
+🔸 Terraform &nbsp;
+· OpenTofu &nbsp;
+· Pulumi &nbsp;
+· Terraform Modules &nbsp;
+🔸 Terraform State &nbsp;
+· Remote State &nbsp;
+· Terraform Providers &nbsp;
+· IaC Security &nbsp;
+· IaC Testing &nbsp;
+· IaC Drift Management &nbsp;
+
+**🔧 Configuration Management** — 0 live · 3 pipeline · 9 planned  
+🔸 Configuration Management &nbsp;
+🔸 Ansible &nbsp;
+🔸 Ansible Playbooks &nbsp;
+· Roles &nbsp;
+· Inventories &nbsp;
+· Variables &nbsp;
+· Templates &nbsp;
+· Ansible Vault &nbsp;
+· AWX / Automation Platform &nbsp;
+· Puppet &nbsp;
+· Chef &nbsp;
+· Salt &nbsp;
+
+**🔀 GitOps** — 3 live · 2 pipeline · 3 planned  
+✅ [GitOps](./DevOps/CICD/cicd-pipelines.html) &nbsp;
+✅ [Argo CD](./DevOps/CICD/cicd-pipelines.html) &nbsp;
+✅ [Flux](./DevOps/CICD/cicd-pipelines.html) &nbsp;
+🔸 Git-based Infrastructure &nbsp;
+🔸 Declarative Deployment &nbsp;
+· Drift Detection &nbsp;
+· Progressive Delivery &nbsp;
+· GitOps Security &nbsp;
+
+**🛠️ Platform Engineering** — 0 live · 3 pipeline · 9 planned  
+🔸 Platform Engineering &nbsp;
+🔸 Internal Developer Platform &nbsp;
+· Developer Experience &nbsp;
+· Self-Service Infrastructure &nbsp;
+· Golden Paths &nbsp;
+· Platform-as-a-Product &nbsp;
+🔸 Backstage &nbsp;
+· Developer Portals &nbsp;
+· Platform APIs &nbsp;
+· Platform Governance &nbsp;
+· Platform Automation &nbsp;
+· Platform Security &nbsp;
+
+</details>
+
+<details>
+<summary><b>06 · Kubernetes</b> — 3 categories · 18 live · 17 pipeline · 23 planned</summary>
+
+**☸️ Kubernetes** — 16 live · 13 pipeline · 6 planned  
+✅ [Kubernetes Fundamentals](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
+✅ [Kubernetes Architecture](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
+✅ [Pods](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
+✅ [Deployments](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
+🔸 ReplicaSets &nbsp;
+🔸 DaemonSets &nbsp;
+✅ [StatefulSets](./DevOps/K8/STORAGE/k8-storage.html) &nbsp;
+· Jobs / CronJobs &nbsp;
+✅ [Services](./DevOps/K8/Networking/k8-networking.html) &nbsp;
+✅ [Ingress](./DevOps/K8/Networking/k8-networking.html) &nbsp;
+🔸 ConfigMaps &nbsp;
+🔸 Secrets &nbsp;
+✅ [Volumes](./DevOps/K8/STORAGE/k8-storage.html) &nbsp;
+✅ [Persistent Volumes](./DevOps/K8/STORAGE/k8-storage.html) &nbsp;
+✅ [Storage Classes](./DevOps/K8/STORAGE/k8-storage.html) &nbsp;
+🔸 RBAC &nbsp;
+🔸 Namespaces &nbsp;
+✅ [Resource Requests/Limits](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
+🔸 Probes &nbsp;
+✅ [Scheduling](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
+🔸 Taints / Tolerations &nbsp;
+🔸 Affinity / Anti-Affinity &nbsp;
+🔸 Autoscaling &nbsp;
+🔸 HPA &nbsp;
+🔸 VPA &nbsp;
+· Cluster Autoscaling &nbsp;
+✅ [Kubernetes Networking](./DevOps/K8/Networking/k8-networking.html) &nbsp;
+✅ [CNI](./DevOps/K8/Networking/k8-networking.html) &nbsp;
+✅ [CSI](./DevOps/K8/STORAGE/k8-storage.html) &nbsp;
+🔸 Kubernetes Security &nbsp;
+✅ [Kubernetes Troubleshooting](./DevOps/K8/ERROR/K8-error.html) &nbsp;
+· Kubernetes Upgrade &nbsp;
+· Kubernetes Backup &nbsp;
+· Multi-Cluster Kubernetes &nbsp;
+· Kubernetes Disaster Recovery &nbsp;
+
+**🔴 OpenShift** — 2 live · 2 pipeline · 9 planned  
+🔸 OpenShift Fundamentals &nbsp;
+🔸 OpenShift Architecture &nbsp;
+· Projects &nbsp;
+· Routes &nbsp;
+· Operators &nbsp;
+✅ [SCC](./DevOps/K8/ERROR/K8-error.html) &nbsp;
+· OpenShift Networking &nbsp;
+· OpenShift Storage &nbsp;
+· OpenShift Monitoring &nbsp;
+· OpenShift Logging &nbsp;
+· OpenShift Security &nbsp;
+✅ [OpenShift Troubleshooting](./DevOps/K8/ERROR/K8-error.html) &nbsp;
+· OpenShift Upgrades &nbsp;
+
+**🕸️ Service Mesh** — 0 live · 2 pipeline · 8 planned  
+🔸 Service Mesh &nbsp;
+🔸 Istio &nbsp;
+· Envoy &nbsp;
+· Linkerd &nbsp;
+· Traffic Management &nbsp;
+· mTLS &nbsp;
+· Service-to-Service Security &nbsp;
+· Service Discovery &nbsp;
+· Observability in Service Mesh &nbsp;
+· Multi-Cluster Service Mesh &nbsp;
+
+</details>
+
+<details>
+<summary><b>07 · Reliability</b> — 7 categories · 27 live · 25 pipeline · 64 planned</summary>
+
+**📡 SRE** — 4 live · 8 pipeline · 13 planned  
+🔸 SRE Fundamentals &nbsp;
+🔸 SLI &nbsp;
+🔸 SLO &nbsp;
+🔸 SLA &nbsp;
+🔸 Error Budget &nbsp;
+🔸 Reliability Engineering &nbsp;
+· Availability &nbsp;
+· Reliability &nbsp;
+· Scalability &nbsp;
+· Latency &nbsp;
+✅ [MTTR](./SRE/INCIDENT-MANAGEMENT/incident-management.html) &nbsp;
+· MTBF &nbsp;
+✅ [Incident Management](./SRE/INCIDENT-MANAGEMENT/incident-management.html) &nbsp;
+🔸 Problem Management &nbsp;
+✅ [RCA](./SRE/INCIDENT-MANAGEMENT/incident-management.html) &nbsp;
+✅ [Postmortem](./SRE/INCIDENT-MANAGEMENT/incident-management.html) &nbsp;
+· Toil Reduction &nbsp;
+· Capacity Planning &nbsp;
+· Reliability Testing &nbsp;
+🔸 Chaos Engineering &nbsp;
+· Resilience Engineering &nbsp;
+· Service Health &nbsp;
+· Production Readiness &nbsp;
+· Operational Readiness &nbsp;
+· SRE Automation &nbsp;
+
+**📊 Observability** — 11 live · 4 pipeline · 7 planned  
+✅ [Observability](./DevOps/K8/OBSERVABILITY/k8-observability.html) &nbsp;
+✅ [Monitoring](./DevOps/K8/OBSERVABILITY/k8-observability.html) &nbsp;
+✅ [Metrics](./DevOps/K8/OBSERVABILITY/k8-observability.html) &nbsp;
+✅ [Logs](./DevOps/K8/OBSERVABILITY/k8-observability.html) &nbsp;
+✅ [Traces](./DevOps/K8/OBSERVABILITY/k8-observability.html) &nbsp;
+· Profiles &nbsp;
+🔸 OpenTelemetry &nbsp;
+✅ [Prometheus](./DevOps/K8/OBSERVABILITY/k8-observability.html) &nbsp;
+✅ [Grafana](./DevOps/K8/OBSERVABILITY/k8-observability.html) &nbsp;
+✅ [Alertmanager](./DevOps/K8/OBSERVABILITY/k8-observability.html) &nbsp;
+✅ [Loki](./DevOps/K8/OBSERVABILITY/k8-observability.html) &nbsp;
+✅ [Jaeger](./DevOps/K8/OBSERVABILITY/k8-observability.html) &nbsp;
+🔸 Tempo &nbsp;
+🔸 ELK &nbsp;
+· OpenSearch &nbsp;
+✅ [Distributed Tracing](./DevOps/K8/OBSERVABILITY/k8-observability.html) &nbsp;
+· Application Performance Monitoring &nbsp;
+· Synthetic Monitoring &nbsp;
+· Real User Monitoring &nbsp;
+🔸 Alert Engineering &nbsp;
+· Telemetry Pipelines &nbsp;
+· Observability Architecture &nbsp;
+
+**📜 Logging** — 2 live · 3 pipeline · 9 planned  
+✅ [Linux Logging](./Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html) &nbsp;
+🔸 Syslog &nbsp;
+✅ [Journald](./Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html) &nbsp;
+🔸 Log Rotation &nbsp;
+🔸 Centralized Logging &nbsp;
+· Logstash &nbsp;
+· Fluent Bit &nbsp;
+· Fluentd &nbsp;
+· Elasticsearch &nbsp;
+· OpenSearch &nbsp;
+· Kibana &nbsp;
+· Log Correlation &nbsp;
+· Log Retention &nbsp;
+· Log Security &nbsp;
+
+**⚡ Performance Engineering** — 4 live · 2 pipeline · 6 planned  
+✅ [CPU Performance](./Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html) &nbsp;
+✅ [Memory Performance](./Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html) &nbsp;
+✅ [Disk I/O](./Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html) &nbsp;
+🔸 Network Performance &nbsp;
+· Application Performance &nbsp;
+· Database Performance &nbsp;
+· Load Testing &nbsp;
+· Stress Testing &nbsp;
+· Benchmarking &nbsp;
+🔸 Profiling &nbsp;
+· Capacity Modeling &nbsp;
+✅ [Performance Troubleshooting](./Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html) &nbsp;
+
+**🔍 Troubleshooting** — 5 live · 2 pipeline · 5 planned  
+✅ [Linux Troubleshooting](./Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html) &nbsp;
+🔸 Network Troubleshooting &nbsp;
+🔸 Storage Troubleshooting &nbsp;
+· Database Troubleshooting &nbsp;
+· Application Troubleshooting &nbsp;
+✅ [Kubernetes Troubleshooting](./DevOps/K8/ERROR/K8-error.html) &nbsp;
+· Cloud Troubleshooting &nbsp;
+✅ [Performance Troubleshooting](./Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html) &nbsp;
+· Security Troubleshooting &nbsp;
+✅ [Production Incident Troubleshooting](./SRE/INCIDENT-MANAGEMENT/incident-management.html) &nbsp;
+✅ [Root Cause Analysis](./SRE/INCIDENT-MANAGEMENT/incident-management.html) &nbsp;
+· Failure Analysis &nbsp;
+
+**🗄️ Backup & DR** — 0 live · 4 pipeline · 12 planned  
+🔸 Backup Fundamentals &nbsp;
+· Full Backup &nbsp;
+· Incremental Backup &nbsp;
+· Differential Backup &nbsp;
+· Snapshot &nbsp;
+· Replication &nbsp;
+🔸 RPO &nbsp;
+🔸 RTO &nbsp;
+🔸 DR Architecture &nbsp;
+· Active/Active &nbsp;
+· Active/Passive &nbsp;
+· Backup Validation &nbsp;
+· Restore Testing &nbsp;
+· DR Drill &nbsp;
+· Failover &nbsp;
+· Failback &nbsp;
+
+**🎫 ITSM & Operations** — 1 live · 2 pipeline · 12 planned  
+· ITIL &nbsp;
+✅ [Incident Management](./SRE/INCIDENT-MANAGEMENT/incident-management.html) &nbsp;
+🔸 Problem Management &nbsp;
+🔸 Change Management &nbsp;
+· Release Management &nbsp;
+· Service Request &nbsp;
+· Event Management &nbsp;
+· CMDB &nbsp;
+· Asset Management &nbsp;
+· Configuration Management &nbsp;
+· ServiceNow &nbsp;
+· Remedy &nbsp;
+· CAB &nbsp;
+· Change Windows &nbsp;
+· Operational Documentation &nbsp;
+
+</details>
+
+<details>
+<summary><b>08 · Security</b> — 2 categories · 0 live · 18 pipeline · 28 planned</summary>
+
+**🛡️ Security** — 0 live · 11 pipeline · 20 planned  
+🔸 Cybersecurity Fundamentals &nbsp;
+🔸 Infrastructure Security &nbsp;
+· Network Security &nbsp;
+🔸 Linux Security &nbsp;
+· Cloud Security &nbsp;
+🔸 Container Security &nbsp;
+🔸 Kubernetes Security &nbsp;
+· Application Security &nbsp;
+🔸 DevSecOps &nbsp;
+· Zero Trust &nbsp;
+· IAM &nbsp;
+🔸 RBAC &nbsp;
+· PAM &nbsp;
+· LDAP &nbsp;
+· Active Directory &nbsp;
+· SSO &nbsp;
+· OAuth &nbsp;
+· OIDC &nbsp;
+· SAML &nbsp;
+· PKI &nbsp;
+🔸 TLS/SSL &nbsp;
+🔸 Certificates &nbsp;
+🔸 Secrets Management &nbsp;
+🔸 HashiCorp Vault &nbsp;
+· Vulnerability Management &nbsp;
+· Security Scanning &nbsp;
+· SIEM &nbsp;
+· SOC &nbsp;
+· Threat Detection &nbsp;
+· Compliance &nbsp;
+· Security Auditing &nbsp;
+
+**🔗 Supply Chain Security** — 0 live · 7 pipeline · 8 planned  
+🔸 Software Supply Chain Security &nbsp;
+🔸 SBOM &nbsp;
+· SLSA &nbsp;
+· Artifact Signing &nbsp;
+🔸 Image Signing &nbsp;
+· Cosign &nbsp;
+🔸 Admission Control &nbsp;
+🔸 Policy as Code &nbsp;
+· OPA &nbsp;
+· Gatekeeper &nbsp;
+· Kyverno &nbsp;
+· Dependency Security &nbsp;
+🔸 Container Image Scanning &nbsp;
+· Secrets Scanning &nbsp;
+🔸 CI/CD Security &nbsp;
+
+</details>
+
+<details>
+<summary><b>09 · Data & Applications</b> — 4 categories · 1 live · 12 pipeline · 47 planned</summary>
+
+**🗃️ Database** — 0 live · 3 pipeline · 13 planned  
+🔸 Database Fundamentals &nbsp;
+· MySQL &nbsp;
+🔸 PostgreSQL &nbsp;
+· Oracle &nbsp;
+· SQL Server &nbsp;
+· MongoDB &nbsp;
+· Redis &nbsp;
+· Database Replication &nbsp;
+🔸 Database HA &nbsp;
+· Database Backup &nbsp;
+· Database Recovery &nbsp;
+· Database Performance &nbsp;
+· Connection Management &nbsp;
+· Query Optimization &nbsp;
+· Database Monitoring &nbsp;
+· Database Security &nbsp;
+
+**🧩 Middleware** — 0 live · 3 pipeline · 11 planned  
+· Application Servers &nbsp;
+🔸 Nginx &nbsp;
+· Apache &nbsp;
+· Tomcat &nbsp;
+· WildFly &nbsp;
+· JBoss &nbsp;
+· RabbitMQ &nbsp;
+🔸 Apache Kafka &nbsp;
+· Redis &nbsp;
+🔸 Message Queues &nbsp;
+· Event Streaming &nbsp;
+· Event-Driven Architecture &nbsp;
+· Middleware HA &nbsp;
+· Middleware Troubleshooting &nbsp;
+
+**🔌 API & Microservices** — 0 live · 4 pipeline · 12 planned  
+🔸 REST APIs &nbsp;
+🔸 HTTP/HTTPS &nbsp;
+🔸 API Gateway &nbsp;
+· API Management &nbsp;
+· API Security &nbsp;
+· Authentication &nbsp;
+· Authorization &nbsp;
+· Rate Limiting &nbsp;
+🔸 Microservices &nbsp;
+· Service Discovery &nbsp;
+· Circuit Breaker &nbsp;
+· Retry &nbsp;
+· Timeout &nbsp;
+· Bulkhead &nbsp;
+· Distributed Transactions &nbsp;
+· Event-Driven Microservices &nbsp;
+
+**🕮 Distributed Systems** — 1 live · 2 pipeline · 11 planned  
+🔸 Distributed Systems &nbsp;
+· Consensus &nbsp;
+· Leader Election &nbsp;
+· Replication &nbsp;
+· Consistency &nbsp;
+· Eventual Consistency &nbsp;
+· Distributed Transactions &nbsp;
+· Caching &nbsp;
+· Distributed Locking &nbsp;
+· Partition Tolerance &nbsp;
+🔸 CAP Theorem &nbsp;
+· Failure Domains &nbsp;
+✅ [Quorum](./DevOps/K8/ERROR/K8-error.html) &nbsp;
+· Distributed Coordination &nbsp;
+
+</details>
+
+<details>
+<summary><b>10 · Modern Ops</b> — 5 categories · 2 live · 22 pipeline · 45 planned</summary>
+
+**🤖 AI Infrastructure** — 0 live · 6 pipeline · 14 planned  
+🔸 AI Infrastructure &nbsp;
+🔸 GPU Infrastructure &nbsp;
+🔸 GPU Scheduling &nbsp;
+🔸 GPU Kubernetes &nbsp;
+🔸 AI Workloads on Kubernetes &nbsp;
+🔸 Model Serving &nbsp;
+· Inference Infrastructure &nbsp;
+· LLMOps &nbsp;
+· MLOps &nbsp;
+· Model Monitoring &nbsp;
+· Model Observability &nbsp;
+· AI Cost Management &nbsp;
+· AI Reliability &nbsp;
+· AI Security &nbsp;
+· AI Governance &nbsp;
+· RAG Infrastructure &nbsp;
+· Vector Databases &nbsp;
+· Model Gateways &nbsp;
+· AI CI/CD &nbsp;
+· AI Infrastructure Automation &nbsp;
+
+**🧠 AIOps** — 0 live · 4 pipeline · 10 planned  
+🔸 AIOps &nbsp;
+· AI Incident Detection &nbsp;
+🔸 AI Root Cause Analysis &nbsp;
+· AI Alert Correlation &nbsp;
+· AI Log Analysis &nbsp;
+· AI Capacity Forecasting &nbsp;
+· AI Remediation &nbsp;
+· AI-assisted Troubleshooting &nbsp;
+· AI Operations Agents &nbsp;
+🔸 Agentic DevOps &nbsp;
+🔸 Agentic SRE &nbsp;
+· Agentic CloudOps &nbsp;
+· Human-in-the-loop Automation &nbsp;
+· AI Operational Guardrails &nbsp;
+
+**💰 FinOps** — 0 live · 5 pipeline · 6 planned  
+🔸 FinOps &nbsp;
+🔸 Cloud Cost Management &nbsp;
+· Cost Allocation &nbsp;
+· Tagging &nbsp;
+· Resource Optimization &nbsp;
+🔸 Rightsizing &nbsp;
+· Reserved Capacity &nbsp;
+🔸 Spot / Preemptible Instances &nbsp;
+🔸 Kubernetes Cost Management &nbsp;
+· Cloud Waste Management &nbsp;
+· Cost Governance &nbsp;
+
+**🔁 Automation** — 2 live · 4 pipeline · 6 planned  
+✅ [Shell Automation](./Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html) &nbsp;
+✅ [Bash Automation](./Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html) &nbsp;
+🔸 Python Automation &nbsp;
+🔸 Ansible Automation &nbsp;
+· Terraform Automation &nbsp;
+· API Automation &nbsp;
+· Cloud Automation &nbsp;
+🔸 Kubernetes Automation &nbsp;
+· Network Automation &nbsp;
+· Database Automation &nbsp;
+· Monitoring Automation &nbsp;
+🔸 Self-Healing Infrastructure &nbsp;
+
+**🏛️ Architecture** — 0 live · 3 pipeline · 9 planned  
+🔸 System Architecture &nbsp;
+· Cloud Architecture &nbsp;
+🔸 Microservice Architecture &nbsp;
+· Distributed Architecture &nbsp;
+· Event-Driven Architecture &nbsp;
+· Multi-Tenant Architecture &nbsp;
+· Scalable Architecture &nbsp;
+· Resilient Architecture &nbsp;
+🔸 Zero-Downtime Architecture &nbsp;
+· Multi-Region Architecture &nbsp;
+· Multi-Cloud Architecture &nbsp;
+· Hybrid Architecture &nbsp;
+
+</details>
+
 
 ---
 
@@ -173,7 +810,8 @@ The homepage is a single hand-written HTML file with no framework behind it:
 |:--------|:-------------|
 | 🌓 **Dark / light toggle** | Theme switch in the nav, remembered via `localStorage`, applied before first paint so there's no flash |
 | ♾️ **Animated DevOps loop** | SVG infinity loop with the eight lifecycle stages and a light pulse racing the path |
-| 🗺️ **Knowledge map** | Terminal-style `tree` view of every live and planned topic, plus a click-to-expand accordion per domain |
+| 🗺️ **Knowledge map** | All 521 topics, grouped into 33 categories under 10 pillars — search by name, filter by status, expand a pillar to see what's shipped and what's queued |
+| 🖥️ **Coverage terminal** | Terminal-style `tree` view of the ten pillars with live-vs-total counts, and a `ls published/` listing that links straight into every issue |
 | 📜 **Scrollable archive** | Latest Issues is an internal scroll panel that stays height-matched to the topics column |
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
 | 🦶 **Shared footer** | One footer across all 26 pages, with links rebuilt per directory depth |
@@ -252,18 +890,32 @@ git checkout -b issue/058-gateway-api
 mkdir -p Networking/GATEWAY-API
 $EDITOR Networking/GATEWAY-API/gateway-api.html
 
-# 3. Wire it into the homepage so it stops being a dead end:
-#    - add the file to the knowledge-map tree in index.html
-#    - add a topic-card badge link for its domain
-#    - add an .issue-card entry in the Latest Issues archive
-#    - bump the live/planned counts for that domain
+# 3. Flip every topic the issue covers to live in the knowledge map.
+#    One issue usually lights up several topics — mark all of them.
+#    In index.html, find the topic inside its pillar and swap
+#      <span class="km-t plan">Gateway API</span>
+#    for
+#      <a class="km-t live" data-s="live" href="Networking/GATEWAY-API/gateway-api.html">Gateway API</a>
+#    Then update, in the same file:
+#      - that category's  km-c-counts  line
+#      - that pillar's    km-p-counts  line and its km-p-mini flex values
+#      - the five km-stat numbers and the km-bar flex values
+#      - the pillar row and the published/ list in the terminal tree
+#      - the two ✓ summary lines under the tree
 
-# 4. Verify, commit, push
+# 4. Add an .issue-card entry in the Latest Issues archive, then update this
+#    README's Knowledge Map table and the matching <details> block.
+
+# 5. Verify, commit, push
 #    (run the link checker above — it catches wrong ../ depth immediately)
-git add Networking/ index.html
+git add Networking/ index.html README.md
 git commit -m "Issue #058: Gateway API — the future of Ingress"
 git push origin issue/058-gateway-api
 ```
+
+> **Keep the counts honest.** Every number on the homepage is derived from topic
+> statuses. Flip a topic to live without updating the counts and the map starts
+> lying — search index.html for `km-stat-n` and work outward from there.
 
 > **Relative-path gotcha:** a page three folders deep needs `../../../index.html` to reach home.
 > Getting this wrong is the single most common break — always run the link checker before pushing.

@@ -452,7 +452,6 @@ nav.scrolled {
 .kr-topics.section { max-width: none; margin: 0; padding: 100px 40px 80px 64px; }
 .kr-issues.issues-bg { padding: 0; }
 .kr-issues .issues-inner { max-width: none; margin: 0; padding: 100px 64px 80px 40px; }
-.kr-topics .topics-grid { grid-template-columns: 1fr; }
 .kr-issues .issues-grid { grid-template-columns: 1fr; }
 .kr-issues .issue-featured, .kr-issues .issue-featured-new { padding: 28px; }
 .kr-issues .issues-inner { display: flex; flex-direction: column; }
@@ -503,81 +502,183 @@ nav.scrolled {
   font-size: 19px; color: var(--muted); max-width: 600px; margin-bottom: 56px;
 }
 
-/* ─── TOPIC CARDS ─── */
-.topics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; }
-.topic-card {
-  background: var(--panel-bg); padding: 0; overflow: hidden;
-  cursor: pointer; position: relative; transition: background 0.25s;
-}
-.topic-card:hover { background: var(--coal); }
-.topic-card:hover .tc-title,.topic-card:hover .tc-count,.topic-card:hover .tc-arrow { color: var(--paper); }
-.topic-card:hover .tc-items { border-color: rgba(255,255,255,0.12); }
-.topic-card:hover .tc-item { color: rgba(255,255,255,0.55); }
-.topic-card:hover .tc-badge { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
-.topic-card:hover .tc-indicator { background: var(--crimson); }
-.tc-header {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  padding: 32px 32px 24px;
-}
-.tc-icon-wrap {
-  width:44px; height:44px; display:flex; align-items:center; justify-content:center;
-  font-size:22px; background:var(--wash-2); border-radius:4px; flex-shrink:0;
-}
-.topic-card:hover .tc-icon-wrap { background: rgba(255,255,255,0.08); }
-.tc-meta { flex:1; padding-left:16px; }
-.tc-title {
-  font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: 1px;
-  color: var(--heading-fg); line-height: 1; margin-bottom: 4px; transition: color 0.25s;
-}
-.tc-count {
-  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px;
-  color: var(--muted); text-transform: uppercase; transition: color 0.25s;
-}
-.tc-arrow { font-size: 20px; color: var(--muted); transition: color 0.25s, transform 0.25s; }
-.topic-card:hover .tc-arrow { transform: rotate(-45deg); color: var(--crimson) !important; }
-.tc-indicator {
-  position: absolute; top:0; left:0; width:3px; height:100%;
-  background: transparent; transition: background 0.25s;
-}
-.tc-body { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(.25,.46,.45,.94); padding: 0 32px; }
-.topic-card.open .tc-body { max-height: 600px; }
-.topic-card.open .tc-arrow { transform: rotate(-90deg); }
-.topic-card.open .tc-indicator { background: var(--crimson); }
-.tc-items {
-  border-top: 1px solid var(--hairline-2); padding: 20px 0 28px;
-  display: flex; flex-wrap: wrap; gap: 6px;
-}
-.tc-badge {
-  display: inline-block; background: var(--hairline-1); color: var(--muted);
-  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px;
-  padding: 5px 12px; border-radius: 20px; text-transform: uppercase;
-  transition: background 0.25s, color 0.25s;
-}
-.tc-badge-link {
-  display: inline-block; background: rgba(229,57,53,0.1); color: var(--crimson);
-  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px;
-  padding: 5px 12px; border-radius: 20px; text-transform: uppercase;
-  text-decoration: none; border: 1px solid rgba(229,57,53,0.2);
-  transition: background 0.25s, color 0.25s, border-color 0.25s;
-}
-.tc-badge-link:hover { background: var(--crimson); color: #fff; }
-.topic-card:hover .tc-badge-link { background: rgba(229,57,53,0.2); border-color: rgba(229,57,53,0.4); }
-.tc-sub-group { width:100%; margin-top:12px; }
-.tc-sub-title {
-  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--cyan); margin-bottom: 8px;
-}
-.topic-card:hover .tc-sub-title { color: var(--cyan); }
+/* ─── KNOWLEDGE MAP: STATS, FILTERS, PILLARS, CATEGORIES, TOPICS ─── */
+.km-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--hairline-2);
+  border:1px solid var(--hairline-2);margin:-32px 0 14px;}
+.km-stat{background:var(--page-bg);padding:16px 8px 14px;text-align:center;}
+.km-stat-n{font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1;color:var(--heading-fg);letter-spacing:0.5px;}
+.km-stat-n.live{color:#5a9c1a;}
+.km-stat-n.pipe{color:#b97309;}
+.km-stat-n.plan{color:var(--ash);}
+.km-stat-l{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.6px;
+  text-transform:uppercase;color:var(--muted);margin-top:6px;}
+html[data-theme="dark"] .km-stat-n.live{color:var(--lime);}
+html[data-theme="dark"] .km-stat-n.pipe{color:var(--amber);}
 
-/* ─── LIVE / ROADMAP STATUS SYSTEM ─── */
-.legend-row{display:flex;align-items:center;gap:24px;margin:-32px 0 40px;flex-wrap:wrap;}
+.km-bar{display:flex;height:5px;overflow:hidden;margin-bottom:26px;background:var(--hairline-1);}
+.km-bar i{display:block;height:100%;}
+.km-bar i.live{background:var(--lime);}
+.km-bar i.pipe{background:var(--amber);}
+.km-bar i.plan{background:var(--hairline-4);}
 
-.kmap-terminal{background:#0d0f14;border:1px solid rgba(255,255,255,0.08);border-radius:8px;box-shadow:0 32px 80px rgba(0,0,0,.45);overflow:hidden;margin-bottom:48px;position:relative;}
+.km-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px;}
+.km-search{position:relative;flex:1 1 200px;min-width:0;display:flex;align-items:center;}
+.km-search svg{position:absolute;left:12px;width:14px;height:14px;stroke:var(--muted);fill:none;
+  stroke-width:2;pointer-events:none;}
+.km-search input{width:100%;min-width:0;background:var(--wash-1);border:1px solid var(--hairline-3);
+  border-radius:3px;padding:11px 12px 11px 34px;font-family:'DM Mono',monospace;font-size:11.5px;
+  letter-spacing:0.6px;color:var(--page-fg);outline:none;transition:border-color .2s,background .2s;
+  -webkit-appearance:none;appearance:none;}
+.km-search input::placeholder{color:var(--ash);}
+.km-search input:focus{border-color:var(--crimson);background:var(--page-bg);}
+.km-filters{display:flex;gap:2px;flex-shrink:0;}
+.km-f{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;
+  padding:10px 13px;border:1px solid var(--hairline-3);background:transparent;color:var(--muted);
+  cursor:pointer;transition:background .2s,color .2s,border-color .2s;}
+.km-f:hover{color:var(--heading-fg);border-color:var(--hairline-5);}
+.km-f.on{background:var(--cta-bg);border-color:var(--cta-bg);color:var(--cta-fg);}
+.km-result{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;
+  color:var(--muted);min-height:15px;margin-bottom:22px;}
+.km-result b{color:var(--crimson);font-weight:400;}
+
+.km-pillars{display:flex;flex-direction:column;gap:2px;}
+.km-pillar{background:var(--panel-bg);position:relative;}
+.km-pillar::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;
+  background:transparent;transition:background .25s;}
+.km-pillar.open::before{background:var(--crimson);}
+.km-p-head{display:flex;align-items:center;gap:12px;width:100%;padding:16px 22px;background:none;
+  border:0;cursor:pointer;text-align:left;font:inherit;color:inherit;transition:background .2s;}
+.km-p-head:hover{background:var(--wash-2);}
+.km-p-idx{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1px;color:var(--ash);flex-shrink:0;}
+.km-p-name{font-family:'Bebas Neue',sans-serif;font-size:23px;letter-spacing:1.2px;
+  color:var(--heading-fg);line-height:1;flex:1;min-width:0;}
+.km-p-counts{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1px;color:var(--muted);
+  white-space:nowrap;flex-shrink:0;}
+.km-p-counts em{font-style:normal;color:#5a9c1a;}
+html[data-theme="dark"] .km-p-counts em{color:var(--lime);}
+.km-p-mini{display:flex;width:52px;height:4px;flex-shrink:0;background:var(--hairline-1);overflow:hidden;}
+.km-p-mini i.live{background:var(--lime);}
+.km-p-mini i.pipe{background:var(--amber);}
+.km-p-mini i.plan{background:var(--hairline-4);}
+.km-p-arrow{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);flex-shrink:0;
+  transition:transform .3s,color .2s;}
+.km-pillar.open .km-p-arrow{transform:rotate(-180deg);color:var(--crimson);}
+.km-p-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s cubic-bezier(.25,.46,.45,.94);}
+.km-pillar.open .km-p-body{grid-template-rows:1fr;}
+.km-p-inner{overflow:hidden;min-height:0;}
+.km-cats{padding:0 12px 12px;display:flex;flex-direction:column;gap:1px;}
+
+/* Same card language as the old domain cards — icon tile, Bebas title, status
+   line with a live dot — just at the tighter scale 33 of them demand. */
+.km-cat{background:var(--card-bg);position:relative;}
+.km-cat::before{content:'';position:absolute;top:0;left:0;width:2px;height:100%;
+  background:transparent;transition:background .25s;}
+.km-cat.open::before{background:var(--crimson);}
+.km-c-head{display:flex;align-items:center;gap:13px;width:100%;padding:13px 16px;background:none;
+  border:0;cursor:pointer;text-align:left;font:inherit;color:inherit;transition:background .2s;}
+.km-c-head:hover{background:var(--wash-1);}
+.km-c-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  font-size:17px;line-height:1;background:var(--wash-2);border-radius:4px;flex-shrink:0;}
+.km-c-meta{flex:1;min-width:0;}
+.km-c-name{display:block;font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:1px;
+  line-height:1;color:var(--heading-fg);}
+.km-c-counts{display:flex;align-items:center;gap:6px;margin-top:4px;
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--muted);}
+.km-c-counts em{font-style:normal;color:#5a9c1a;font-weight:700;}
+.km-c-counts .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--lime);
+  animation:legend-pulse 2s ease-in-out infinite;}
+.km-c-counts .dot.none{background:transparent;border:1.5px dashed var(--ash);animation:none;box-shadow:none;}
+html[data-theme="dark"] .km-c-counts em{color:var(--lime);}
+.km-c-arrow{font-family:'DM Mono',monospace;font-size:12px;color:var(--ash);flex-shrink:0;
+  transition:transform .3s;}
+.km-cat.open .km-c-arrow{transform:rotate(-180deg);color:var(--crimson);}
+.km-c-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s cubic-bezier(.25,.46,.45,.94);}
+.km-cat.open .km-c-body{grid-template-rows:1fr;}
+.km-c-inner{overflow:hidden;min-height:0;}
+.km-topics{display:flex;flex-wrap:wrap;gap:5px;padding:4px 14px 18px;
+  border-top:1px solid var(--hairline-1);margin:0 0 0 0;}
+
+.km-zone{width:100%;display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;
+  font-size:8.5px;letter-spacing:2px;text-transform:uppercase;margin:12px 0 5px;}
+.km-zone::after{content:'';flex:1;height:1px;background:var(--hairline-2);}
+.km-zone:first-child{margin-top:14px;}
+.km-zone.live{color:#5a9c1a;}
+.km-zone.pipe{color:#b97309;}
+.km-zone.plan{color:var(--ash);}
+html[data-theme="dark"] .km-zone.live{color:var(--lime);}
+html[data-theme="dark"] .km-zone.pipe{color:var(--amber);}
+
+.km-t{display:inline-block;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.7px;
+  padding:4px 10px;border-radius:20px;text-transform:uppercase;text-decoration:none;
+  border:1px solid transparent;transition:background .2s,color .2s,border-color .2s;}
+.km-t.live{background:rgba(132,204,22,0.14);border-color:rgba(132,204,22,0.4);color:#4c840f;}
+.km-t.live:hover{background:var(--lime);color:#0c0e12;border-color:var(--lime);}
+.km-t.live::before{content:'●';font-size:7px;vertical-align:middle;margin-right:5px;color:var(--lime);}
+.km-t.live::after{content:' ↗';letter-spacing:0;}
+.km-t.pipe{background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.35);color:#a06508;}
+.km-t.plan{background:transparent;border:1px dashed var(--hairline-4);color:var(--ash);}
+html[data-theme="dark"] .km-t.live{color:#a7e137;}
+html[data-theme="dark"] .km-t.pipe{color:#f5b544;}
+html[data-theme="dark"] .km-t.plan{color:#7d7a72;}
+.km-t[hidden],.km-zone[hidden],.km-cat[hidden],.km-pillar[hidden]{display:none!important;}
+
+/* A pillar that isn't subdivided (Foundation, Networking, Cloud) would otherwise
+   show a category row repeating its own name — drop the row, keep the topics. */
+.km-cat.solo{background:transparent;}
+.km-cat.solo > .km-c-head{display:none;}
+.km-cat.solo > .km-c-body{grid-template-rows:1fr;}
+.km-cat.solo .km-topics{border-top:0;padding-top:0;}
+.km-cat.solo .km-zone:first-child{margin-top:4px;}
+
+.km-empty{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:1px;color:var(--muted);
+  padding:26px 4px;text-align:center;}
+/* --ash is a light-theme value and stays bright in dark mode, so the "planned"
+   greys have to be restated here or the backlog shouts louder than what's live. */
+html[data-theme="dark"] .km-stat-n.plan,
+html[data-theme="dark"] .km-zone.plan,
+html[data-theme="dark"] .km-p-idx,
+html[data-theme="dark"] .km-c-arrow,
+html[data-theme="dark"] .km-search input::placeholder{color:#6e6b64;}
+
+/* The knowledge row is a grid; without min-width:0 the column is sized by its
+   widest min-content child (the search input's default size) and pushes the
+   whole page sideways on a phone. */
+.knowledge-row > .kr-col{min-width:0;}
+@media(max-width:600px){
+  /* 5 cells over 3 columns leaves a hole; 6 tracks lets the last two split a row. */
+  .km-stats{grid-template-columns:repeat(6,1fr);}
+  .km-stat{grid-column:span 2;}
+  .km-stat:nth-child(4),.km-stat:nth-child(5){grid-column:span 3;}
+  .km-stat-n{font-size:26px;}
+  .km-p-mini{display:none;}
+  .km-p-counts,.km-c-counts{font-size:8.5px;}
+  .km-p-counts .u,.km-c-counts .u{display:none;}
+  .km-p-head{padding:14px 16px;gap:9px;}
+  .km-c-head{padding:10px 11px;gap:9px;}
+  .km-cats{padding:0 8px 8px;}
+  .km-topics{padding:4px 11px 16px;}
+}
+
+/* ─── LEGEND + KNOWLEDGE-MAP TERMINAL ─── */
+.legend-row{display:flex;align-items:center;gap:20px;margin:0 0 26px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.legend-dot.live{background:var(--lime);box-shadow:0 0 0 3px rgba(132,204,22,0.18);animation:legend-pulse 2s ease-in-out infinite;}
+.legend-dot.pipe{background:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,0.16);}
+.legend-dot.soon{background:transparent;border:1.5px dashed var(--muted);}
+@keyframes legend-pulse{0%,100%{box-shadow:0 0 0 3px rgba(132,204,22,0.18);}50%{box-shadow:0 0 0 5px rgba(132,204,22,0.08);}}
+
+.kmap-terminal{background:#0d0f14;border:1px solid rgba(255,255,255,0.08);border-radius:8px;box-shadow:0 32px 80px rgba(0,0,0,.45);overflow:hidden;margin-bottom:40px;position:relative;}
 .kmap-terminal::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22160%22%20viewBox%3D%220%200%20160%20160%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M0%2C40%20H60%20V0%22/%3E%3Cpath%20d%3D%22M160%2C120%20H100%20V160%22/%3E%3Cpath%20d%3D%22M0%2C160%20V140%20H40%22/%3E%3Cpath%20d%3D%22M160%2C0%20V60%20H120%22/%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2240%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22120%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%22140%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%22120%22%20cy%3D%2260%22%20r%3D%223%22/%3E%3Cpath%20d%3D%22M0%2C90%20H160%22%20stroke-dasharray%3D%222%206%22/%3E%3Cpath%20d%3D%22M80%2C0%20V160%22%20stroke-dasharray%3D%222%206%22/%3E%3C/g%3E%3C/svg%3E");background-size:160px 160px;animation:bg-drift 60s linear infinite;pointer-events:none;z-index:0;}
 .kmap-terminal .terminal-bar{position:relative;z-index:1;}
-.kmap-body{position:relative;z-index:1;padding:28px 32px;font-family:'DM Mono',monospace;font-size:12.5px;line-height:2;overflow-x:auto;}
+/* The terminal is dark in both themes, so it has to state its own foreground —
+   inheriting the page colour left bare rows black-on-black in light mode. */
+.kmap-body{position:relative;z-index:1;padding:24px 28px;font-family:'DM Mono',monospace;
+  font-size:11.5px;line-height:1.8;overflow-x:auto;color:rgba(255,255,255,.55);}
 .kt-row{display:block;white-space:pre;opacity:0;transform:translateX(-10px);transition:opacity .45s ease,transform .45s ease;}
-.kt-row-split{display:flex!important;align-items:baseline;gap:10px;white-space:normal;}
+.kt-row-split{display:flex!important;align-items:baseline;justify-content:space-between;gap:14px;white-space:normal;}
 .kt-row-split .kt-left{white-space:pre;}
 .kt-row.visible{opacity:1;transform:translateX(0);}
 .tl-branch{color:rgba(255,255,255,.16);}
@@ -586,38 +687,11 @@ nav.scrolled {
 .tl-live:hover{color:var(--lime);border-color:var(--lime);}
 .tl-live::before{content:'● ';color:var(--lime);font-size:8px;}
 .tl-soon{color:rgba(255,255,255,.25);white-space:normal;}
-.tl-count-live{color:var(--lime);}
-.tl-count-soon{color:rgba(255,255,255,.32);}
-@media(max-width:900px){ .kmap-body{font-size:10.5px;padding:22px 16px;} }
-.legend-item{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
-.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.legend-dot.live{background:var(--lime);box-shadow:0 0 0 3px rgba(132,204,22,0.18);animation:legend-pulse 2s ease-in-out infinite;}
-.legend-dot.soon{background:transparent;border:1.5px dashed var(--muted);}
-@keyframes legend-pulse{0%,100%{box-shadow:0 0 0 3px rgba(132,204,22,0.18);}50%{box-shadow:0 0 0 5px rgba(132,204,22,0.08);}}
-
-.tc-status{display:inline-flex;align-items:center;gap:6px;margin-top:3px;}
-.tc-status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.tc-status-dot.live{background:var(--lime);animation:legend-pulse 2s ease-in-out infinite;}
-.tc-status-dot.soon{background:transparent;border:1.5px dashed var(--ash);}
-.tc-status-text{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
-.tc-status-text .n{color:var(--lime);font-weight:700;}
-.topic-card:hover .tc-status-text{color:rgba(255,255,255,0.5);}
-
-.tc-zone-label{width:100%;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;margin:14px 0 8px;display:flex;align-items:center;gap:8px;}
-.tc-zone-label:first-child{margin-top:0;}
-.tc-zone-label::after{content:'';flex:1;height:1px;background:var(--hairline-2);}
-.topic-card:hover .tc-zone-label::after{background:rgba(255,255,255,0.1);}
-.tc-zone-label.live{color:#5a9c1a;}
-.topic-card:hover .tc-zone-label.live{color:var(--lime);}
-.tc-zone-label.soon{color:var(--ash);}
-.topic-card:hover .tc-zone-label.soon{color:rgba(255,255,255,0.35);}
-
-.tc-badge-link .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--lime);margin-right:6px;vertical-align:middle;box-shadow:0 0 0 2px rgba(132,204,22,0.2);}
-.tc-badge.soon{background:transparent;border:1.5px dashed var(--hairline-4);color:var(--ash);}
-.topic-card:hover .tc-badge.soon{border-color:rgba(255,255,255,0.18);background:transparent;color:rgba(255,255,255,0.3);}
-
-.ic-soon-flag{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-top:8px;}
-.ic-soon-flag::before{content:'';width:5px;height:5px;border-radius:50%;border:1.5px dashed rgba(255,255,255,0.25);}
+.tl-out{color:rgba(255,255,255,.3);}
+.tl-count-live{color:var(--lime);white-space:pre;}
+.tl-count-soon{color:rgba(255,255,255,.32);white-space:pre;}
+.tl-ok{color:var(--lime);}
+@media(max-width:900px){ .kmap-body{font-size:10px;padding:20px 14px;} }
 
 /* ─── TOOLCHAIN DIAGRAM ─── */
 .toolchain-section{background:var(--ink);padding:0;position:relative;overflow:hidden;}
@@ -937,7 +1011,6 @@ html[data-theme="dark"] .sub-status.ok { color: var(--lime); }
   nav{padding:16px 24px;}
   .nav-links{display:none;}
   .section{padding:64px 32px;}
-  .topics-grid{grid-template-columns:1fr;}
   .issues-grid{grid-template-columns:1fr;}
   .issues-inner{padding:64px 32px;}
   .issue-featured,.issue-featured-new{grid-template-columns:1fr;}
@@ -1212,11 +1285,38 @@ a.footer-logo:hover{color:#fff;}
   <div class="kr-col kr-topics section reveal" id="topics">
     <div class="section-tag">Knowledge Map</div>
     <h2 class="section-title">WHAT WE COVER</h2>
-    <p class="section-lead">Deep technical content across the full Platform Engineering stack — click any domain to explore.</p>
-    <div class="legend-row">
-      <div class="legend-item"><span class="legend-dot live"></span> Live — published & linked</div>
-      <div class="legend-item"><span class="legend-dot soon"></span> On the roadmap — not yet published</div>
+    <p class="section-lead">The 2026 master map — 521 topics, 33 categories, 10 pillars. Search it, filter it, or open a pillar to see exactly what's shipped and what's queued.</p>
+
+    <div class="km-stats">
+      <div class="km-stat"><div class="km-stat-n">521</div><div class="km-stat-l">Topics</div></div>
+      <div class="km-stat"><div class="km-stat-n">33</div><div class="km-stat-l">Categories</div></div>
+      <div class="km-stat"><div class="km-stat-n live">65</div><div class="km-stat-l">Live</div></div>
+      <div class="km-stat"><div class="km-stat-n pipe">135</div><div class="km-stat-l">In pipeline</div></div>
+      <div class="km-stat"><div class="km-stat-n plan">321</div><div class="km-stat-l">Planned</div></div>
     </div>
+    <div class="km-bar" aria-hidden="true"><i class="live" style="flex:65"></i><i class="pipe" style="flex:135"></i><i class="plan" style="flex:321"></i></div>
+
+    <div class="legend-row">
+      <div class="legend-item"><span class="legend-dot live"></span> Live — published &amp; linked</div>
+      <div class="legend-item"><span class="legend-dot pipe"></span> In pipeline — next up</div>
+      <div class="legend-item"><span class="legend-dot soon"></span> Planned — on the backlog</div>
+    </div>
+
+    <div class="km-controls">
+      <label class="km-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input type="search" id="kmSearch" autocomplete="off" spellcheck="false"
+               placeholder="Search 521 topics — kubernetes, bgp, terraform, slo…"
+               aria-label="Search the knowledge map">
+      </label>
+      <div class="km-filters" role="group" aria-label="Filter by status">
+        <button type="button" class="km-f on" data-f="all">All</button>
+        <button type="button" class="km-f" data-f="live">Live</button>
+        <button type="button" class="km-f" data-f="pipe">Pipeline</button>
+        <button type="button" class="km-f" data-f="plan">Planned</button>
+      </div>
+    </div>
+    <div class="km-result" id="kmResult" aria-live="polite"></div>
 
     <div class="kmap-terminal">
       <div class="terminal-bar">
@@ -1224,172 +1324,1149 @@ a.footer-logo:hover{color:#fff;}
         <div class="t-title">platform-ops ~ knowledge-map</div>
       </div>
       <div class="terminal-body kmap-body">
-        <span class="tl kt-row"><span class="tl-prompt">❯</span> <span class="tl-cmd">tree platform-ops/ --content-map --road-map</span></span>
+        <span class="tl kt-row"><span class="tl-prompt">❯</span> <span class="tl-cmd">tree platform-ops/ --master-map-2026</span></span>
         <span class="tl kt-row">platform-ops/</span>
-        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">├── </span><span class="tl-dir">content-map/</span></span><span class="tl-count-live">[ 12 LIVE ]</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   ├── </span><span class="tl-dir">devops/</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="tl-live">k8-architecture.html</a> <span class="tl-out">· issue #048</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/Networking/k8-networking.html" class="tl-live">k8-networking.html</a> <span class="tl-out">· issue #047</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/ERROR/K8-error.html" class="tl-live">k8-error-runbook.html</a> <span class="tl-out">· issue #049</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/STORAGE/k8-storage.html" class="tl-live">k8-storage.html</a> <span class="tl-out">· issue #050</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   │   ├── </span><a href="DevOps/K8/OBSERVABILITY/k8-observability.html" class="tl-live">k8-observability.html</a> <span class="tl-out">· issue #051</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   │   └── </span><a href="DevOps/CICD/cicd-pipelines.html" class="tl-live">cicd-gitops.html</a> <span class="tl-out">· issue #052</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   ├── </span><span class="tl-dir">networking/</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   │   └── </span><a href="DevOps/K8/Networking/k8-networking.html" class="tl-live">k8-networking-decoded.html</a> <span class="tl-out">· issue #047</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   ├── </span><span class="tl-dir">sre/</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   │   └── </span><a href="SRE/INCIDENT-MANAGEMENT/incident-management.html" class="tl-live">incident-management.html</a> <span class="tl-out">· issue #053</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│   └── </span><span class="tl-dir">infrastructure/</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│       └── </span><span class="tl-dir">os/linux/</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│           ├── </span><a href="Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html" class="tl-live">linux-fundamentals.html</a> <span class="tl-out">· issue #054</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│           ├── </span><a href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html" class="tl-live">linux-advanced.html</a> <span class="tl-out">· issue #055</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│           ├── </span><a href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html" class="tl-live">linux-troubleshooting.html</a> <span class="tl-out">· issue #056</span></span>
-        <span class="tl kt-row"><span class="tl-branch">│           └── </span><a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html" class="tl-live">linux-unix-glossary.html</a> <span class="tl-out">· issue #057 (190 terms)</span></span>
-        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">└── </span><span class="tl-dir">road-map/</span></span><span class="tl-count-soon">[ 20 PLANNED ]</span></span>
-        <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">devops/</span>          <span class="tl-soon">rbac · admission-controllers · multi-cluster-federation</span></span>
-        <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">sre/</span>              <span class="tl-soon">slis-slos-slas · error-budgets · reliability-eng · chaos-eng · on-call-design</span></span>
-        <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">infrastructure/</span>   <span class="tl-soon">windows-server · unix-bsd · virtualization · aws · azure · gcp</span></span>
-        <span class="tl kt-row"><span class="tl-branch">    └── </span><span class="tl-dir">networking/</span>       <span class="tl-soon">osi · tcp-ip · load-balancing · gateway-api · service-mesh · ebpf</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">├── </span><span class="tl-dir">foundation/</span></span><span class="tl-count-live">[ 3 live / 10 ]</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">├── </span><span class="tl-dir">infrastructure/</span></span><span class="tl-count-live">[ 1 live / 38 ]</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">├── </span><span class="tl-dir">networking/</span></span><span class="tl-count-live">[ 1 live / 31 ]</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">├── </span><span class="tl-dir">cloud/</span></span><span class="tl-count-soon">[ 0 live / 17 ]</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">├── </span><span class="tl-dir">delivery/</span></span><span class="tl-count-live">[ 12 live / 76 ]</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">├── </span><span class="tl-dir">kubernetes/</span></span><span class="tl-count-live">[ 18 live / 58 ]</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">├── </span><span class="tl-dir">reliability/</span></span><span class="tl-count-live">[ 27 live / 116 ]</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">├── </span><span class="tl-dir">security/</span></span><span class="tl-count-soon">[ 0 live / 46 ]</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">├── </span><span class="tl-dir">data-and-apps/</span></span><span class="tl-count-live">[ 1 live / 60 ]</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">└── </span><span class="tl-dir">modern-ops/</span></span><span class="tl-count-live">[ 2 live / 69 ]</span></span>
         <span class="tl kt-row"> </span>
-        <span class="tl kt-row"><span class="tl-ok">✓</span> <span class="tl-out">10 directories, 12 live articles, 20 planned topics</span></span>
+        <span class="tl kt-row"><span class="tl-prompt">❯</span> <span class="tl-cmd">ls -1 published/</span></span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><a href="DevOps/K8/Networking/k8-networking.html" class="tl-live">k8-networking.html</a> <span class="tl-out">· issue #047</span></span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="tl-live">k8-architecture.html</a> <span class="tl-out">· issue #048</span></span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><a href="DevOps/K8/ERROR/K8-error.html" class="tl-live">k8-error-runbook.html</a> <span class="tl-out">· issue #049</span></span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><a href="DevOps/K8/STORAGE/k8-storage.html" class="tl-live">k8-storage.html</a> <span class="tl-out">· issue #050</span></span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><a href="DevOps/K8/OBSERVABILITY/k8-observability.html" class="tl-live">k8-observability.html</a> <span class="tl-out">· issue #051</span></span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><a href="DevOps/CICD/cicd-pipelines.html" class="tl-live">cicd-gitops.html</a> <span class="tl-out">· issue #052</span></span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><a href="SRE/INCIDENT-MANAGEMENT/incident-management.html" class="tl-live">incident-management.html</a> <span class="tl-out">· issue #053</span></span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><a href="Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html" class="tl-live">linux-fundamentals.html</a> <span class="tl-out">· issue #054</span></span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><a href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html" class="tl-live">linux-advanced.html</a> <span class="tl-out">· issue #055</span></span>
+        <span class="tl kt-row"><span class="tl-branch">├── </span><a href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html" class="tl-live">linux-troubleshooting.html</a> <span class="tl-out">· issue #056</span></span>
+        <span class="tl kt-row"><span class="tl-branch">└── </span><a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html" class="tl-live">linux-unix-glossary.html</a> <span class="tl-out">· issue #057</span></span>
+        <span class="tl kt-row"> </span>
+        <span class="tl kt-row"><span class="tl-ok">✓</span> <span class="tl-out">10 pillars, 33 categories, 521 topics — 11 deep-dives online</span></span>
+        <span class="tl kt-row"><span class="tl-ok">✓</span> <span class="tl-out">65 topics live · 135 in pipeline · 321 planned</span></span>
         <span class="tl kt-row"><span class="tl-prompt">❯</span> <span class="cursor-blink"></span></span>
       </div>
     </div>
 
-    <div class="topics-grid">
-
-      <!-- DEVOPS -->
-      <div class="topic-card open" onclick="toggleTopic(this)">
-        <div class="tc-indicator"></div>
-        <div class="tc-header">
-          <div class="tc-icon-wrap">⚙️</div>
-          <div class="tc-meta">
-            <div class="tc-title">DevOps</div>
-            <div class="tc-status"><span class="tc-status-dot live"></span><span class="tc-status-text"><span class="n">6</span> Live · 3 Planned</span></div>
-          </div>
-          <span class="tc-arrow">↓</span>
+    <div class="km-pillars" id="kmPillars">
+      <section class="km-pillar open" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="true">
+          <span class="km-p-idx">01</span>
+          <span class="km-p-name">Foundation</span>
+          <span class="km-p-counts"><em>3</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 4<span class="u"> planned</span></span>
+          <span class="km-p-mini" aria-hidden="true"><i class="live" style="flex:3"></i><i class="pipe" style="flex:3"></i><i class="plan" style="flex:4"></i></span>
+          <span class="km-p-arrow" aria-hidden="true">⌄</span>
+        </button>
+        <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
+        <div class="km-cat solo open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🧱</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Foundation</span>
+              <span class="km-c-counts"><i class="dot"></i><em>3</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 4<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html">Linux</a>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Unix</a>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Shell &amp; Bash</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Operating Systems</span>
+          <span class="km-t pipe" data-s="pipe">Python</span>
+          <span class="km-t pipe" data-s="pipe">Git &amp; Version Control</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Computer Fundamentals</span>
+          <span class="km-t plan" data-s="plan">Windows Server</span>
+          <span class="km-t plan" data-s="plan">Programming Fundamentals</span>
+          <span class="km-t plan" data-s="plan">Data Structures &amp; Algorithms</span>
+          </div></div></div>
         </div>
-        <div class="tc-body">
-          <div class="tc-items">
-            <div class="tc-zone-label live">✅ Live Now</div>
-            <a href="DevOps/K8/ARCHITECTURE/k8-architecture.html" class="tc-badge-link"><span class="dot"></span>K8 Architecture ↗</a>
-            <a href="DevOps/K8/Networking/k8-networking.html" class="tc-badge-link"><span class="dot"></span>K8 Networking ↗</a>
-            <a href="DevOps/K8/ERROR/K8-error.html" class="tc-badge-link" style="background:rgba(229,57,53,0.15);border-color:rgba(229,57,53,0.35);"><span class="dot"></span>K8 Error Runbook ↗</a>
-            <a href="DevOps/K8/STORAGE/k8-storage.html" class="tc-badge-link" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.35);"><span class="dot"></span>K8 Storage ↗</a>
-            <a href="DevOps/K8/OBSERVABILITY/k8-observability.html" class="tc-badge-link" style="background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.35);"><span class="dot"></span>K8 Observability ↗</a>
-            <a href="DevOps/CICD/cicd-pipelines.html" class="tc-badge-link" style="background:rgba(0,194,212,0.15);border-color:rgba(0,194,212,0.35);"><span class="dot"></span>CI/CD & GitOps ↗</a>
-
-            <div class="tc-zone-label soon">🔜 On the Roadmap</div>
-            <span class="tc-badge soon">RBAC Deep-Dive</span>
-            <span class="tc-badge soon">Admission Controllers</span>
-            <span class="tc-badge soon">Multi-Cluster Federation</span>
-
-            <div class="tc-sub-group">
-              <div class="tc-sub-title">Also touched on</div>
-              <span class="tc-badge">Docker</span>
-              <span class="tc-badge">Terraform</span>
-              <span class="tc-badge">Ansible</span>
-              <span class="tc-badge">Helm</span>
-              <span class="tc-badge">Prometheus</span>
-              <span class="tc-badge">Grafana</span>
-              <span class="tc-badge">ELK Stack</span>
-            </div>
-          </div>
+        </div></div></div>
+      </section>
+      <section class="km-pillar" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="false">
+          <span class="km-p-idx">02</span>
+          <span class="km-p-name">Infrastructure</span>
+          <span class="km-p-counts"><em>1</em><span class="u"> live</span> · 8<span class="u"> pipe</span> · 29<span class="u"> planned</span></span>
+          <span class="km-p-mini" aria-hidden="true"><i class="live" style="flex:1"></i><i class="pipe" style="flex:8"></i><i class="plan" style="flex:29"></i></span>
+          <span class="km-p-arrow" aria-hidden="true">⌄</span>
+        </button>
+        <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🏗️</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">IT Infrastructure</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 5<span class="u"> pipe</span> · 7<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">IT Infrastructure</span>
+          <span class="km-t pipe" data-s="pipe">Server Administration</span>
+          <span class="km-t pipe" data-s="pipe">Capacity Planning</span>
+          <span class="km-t pipe" data-s="pipe">High Availability</span>
+          <span class="km-t pipe" data-s="pipe">Disaster Recovery</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Hardware</span>
+          <span class="km-t plan" data-s="plan">Data Center</span>
+          <span class="km-t plan" data-s="plan">Rack / Power / Cooling</span>
+          <span class="km-t plan" data-s="plan">Fault Tolerance</span>
+          <span class="km-t plan" data-s="plan">Business Continuity</span>
+          <span class="km-t plan" data-s="plan">Infrastructure Architecture</span>
+          <span class="km-t plan" data-s="plan">Enterprise Infrastructure</span>
+          </div></div></div>
         </div>
-      </div>
-
-      <!-- SRE -->
-      <div class="topic-card" onclick="toggleTopic(this)">
-        <div class="tc-indicator"></div>
-        <div class="tc-header">
-          <div class="tc-icon-wrap">📡</div>
-          <div class="tc-meta">
-            <div class="tc-title">SRE</div>
-            <div class="tc-status"><span class="tc-status-dot live"></span><span class="tc-status-text"><span class="n">1</span> Live · 5 Planned</span></div>
-          </div>
-          <span class="tc-arrow">↓</span>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">💽</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Storage</span>
+              <span class="km-c-counts"><i class="dot"></i><em>1</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 12<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html">LVM</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Storage Fundamentals</span>
+          <span class="km-t pipe" data-s="pipe">Storage Troubleshooting</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Local Storage</span>
+          <span class="km-t plan" data-s="plan">RAID</span>
+          <span class="km-t plan" data-s="plan">SAN</span>
+          <span class="km-t plan" data-s="plan">NAS</span>
+          <span class="km-t plan" data-s="plan">NFS</span>
+          <span class="km-t plan" data-s="plan">SMB / CIFS</span>
+          <span class="km-t plan" data-s="plan">Object Storage</span>
+          <span class="km-t plan" data-s="plan">Block Storage</span>
+          <span class="km-t plan" data-s="plan">File Storage</span>
+          <span class="km-t plan" data-s="plan">Storage Replication</span>
+          <span class="km-t plan" data-s="plan">Storage Performance</span>
+          <span class="km-t plan" data-s="plan">Storage Backup</span>
+          </div></div></div>
         </div>
-        <div class="tc-body">
-          <div class="tc-items">
-            <div class="tc-zone-label live">✅ Live Now</div>
-            <a href="SRE/INCIDENT-MANAGEMENT/incident-management.html" class="tc-badge-link" style="background:rgba(229,57,53,0.15);border-color:rgba(229,57,53,0.35);"><span class="dot"></span>Incident Management & Postmortems ↗</a>
-
-            <div class="tc-zone-label soon">🔜 On the Roadmap</div>
-            <span class="tc-badge soon">SLIs / SLOs / SLAs</span>
-            <span class="tc-badge soon">Error Budgets</span>
-            <span class="tc-badge soon">Reliability Engineering</span>
-            <span class="tc-badge soon">Chaos Engineering</span>
-            <span class="tc-badge soon">On-Call Design</span>
-          </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🖥️</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Virtualization</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 1<span class="u"> pipe</span> · 10<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Virtualization Fundamentals</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">VMware</span>
+          <span class="km-t plan" data-s="plan">ESXi</span>
+          <span class="km-t plan" data-s="plan">vCenter</span>
+          <span class="km-t plan" data-s="plan">KVM</span>
+          <span class="km-t plan" data-s="plan">QEMU</span>
+          <span class="km-t plan" data-s="plan">Hyper-V</span>
+          <span class="km-t plan" data-s="plan">Virtual Networking</span>
+          <span class="km-t plan" data-s="plan">Virtual Storage</span>
+          <span class="km-t plan" data-s="plan">VM Lifecycle</span>
+          <span class="km-t plan" data-s="plan">VM HA / DR</span>
+          </div></div></div>
         </div>
-      </div>
-
-      <!-- INFRASTRUCTURE -->
-      <div class="topic-card" onclick="toggleTopic(this)">
-        <div class="tc-indicator"></div>
-        <div class="tc-header">
-          <div class="tc-icon-wrap">🏗️</div>
-          <div class="tc-meta">
-            <div class="tc-title">Infrastructure</div>
-            <div class="tc-status"><span class="tc-status-dot live"></span><span class="tc-status-text"><span class="n">4</span> Live · 6 Planned</span></div>
-          </div>
-          <span class="tc-arrow">↓</span>
+        </div></div></div>
+      </section>
+      <section class="km-pillar" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="false">
+          <span class="km-p-idx">03</span>
+          <span class="km-p-name">Networking</span>
+          <span class="km-p-counts"><em>1</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 26<span class="u"> planned</span></span>
+          <span class="km-p-mini" aria-hidden="true"><i class="live" style="flex:1"></i><i class="pipe" style="flex:4"></i><i class="plan" style="flex:26"></i></span>
+          <span class="km-p-arrow" aria-hidden="true">⌄</span>
+        </button>
+        <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
+        <div class="km-cat solo open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🌐</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Networking</span>
+              <span class="km-c-counts"><i class="dot"></i><em>1</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 26<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="DevOps/K8/Networking/k8-networking.html">DNS</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Networking Fundamentals</span>
+          <span class="km-t pipe" data-s="pipe">OSI Model</span>
+          <span class="km-t pipe" data-s="pipe">TCP/IP</span>
+          <span class="km-t pipe" data-s="pipe">Load Balancing</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">IPv4</span>
+          <span class="km-t plan" data-s="plan">IPv6</span>
+          <span class="km-t plan" data-s="plan">Subnetting</span>
+          <span class="km-t plan" data-s="plan">VLAN</span>
+          <span class="km-t plan" data-s="plan">Switching</span>
+          <span class="km-t plan" data-s="plan">Routing</span>
+          <span class="km-t plan" data-s="plan">BGP</span>
+          <span class="km-t plan" data-s="plan">OSPF</span>
+          <span class="km-t plan" data-s="plan">EIGRP</span>
+          <span class="km-t plan" data-s="plan">MPLS</span>
+          <span class="km-t plan" data-s="plan">ARP</span>
+          <span class="km-t plan" data-s="plan">ICMP</span>
+          <span class="km-t plan" data-s="plan">TCP</span>
+          <span class="km-t plan" data-s="plan">UDP</span>
+          <span class="km-t plan" data-s="plan">DHCP</span>
+          <span class="km-t plan" data-s="plan">NAT</span>
+          <span class="km-t plan" data-s="plan">Proxy</span>
+          <span class="km-t plan" data-s="plan">VPN</span>
+          <span class="km-t plan" data-s="plan">IPSec</span>
+          <span class="km-t plan" data-s="plan">Network Security</span>
+          <span class="km-t plan" data-s="plan">Firewall</span>
+          <span class="km-t plan" data-s="plan">WAF</span>
+          <span class="km-t plan" data-s="plan">SDN</span>
+          <span class="km-t plan" data-s="plan">SD-WAN</span>
+          <span class="km-t plan" data-s="plan">Network Automation</span>
+          <span class="km-t plan" data-s="plan">Network Monitoring</span>
+          </div></div></div>
         </div>
-        <div class="tc-body">
-          <div class="tc-items">
-            <div class="tc-zone-label live">✅ Live Now</div>
-            <div class="tc-sub-group">
-              <div class="tc-sub-title">Linux</div>
-              <a href="Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html" class="tc-badge-link"><span class="dot"></span>Fundamentals ↗</a>
-              <a href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html" class="tc-badge-link"><span class="dot"></span>Advanced ↗</a>
-              <a href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html" class="tc-badge-link"><span class="dot"></span>Troubleshooting ↗</a>
-              <a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html" class="tc-badge-link" style="background:rgba(229,57,53,0.15);border-color:rgba(229,57,53,0.35);"><span class="dot"></span>Glossary (190 terms) ↗</a>
-            </div>
-
-            <div class="tc-zone-label soon">🔜 On the Roadmap</div>
-            <div class="tc-sub-group">
-              <div class="tc-sub-title">More OS Families</div>
-              <span class="tc-badge soon">Windows Server</span>
-              <span class="tc-badge soon">Unix / BSD</span>
-            </div>
-            <span class="tc-badge soon">Virtualization</span>
-            <div class="tc-sub-group">
-              <div class="tc-sub-title">Cloud Providers</div>
-              <span class="tc-badge soon">AWS</span>
-              <span class="tc-badge soon">Azure</span>
-              <span class="tc-badge soon">GCP</span>
-            </div>
-          </div>
+        </div></div></div>
+      </section>
+      <section class="km-pillar" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="false">
+          <span class="km-p-idx">04</span>
+          <span class="km-p-name">Cloud</span>
+          <span class="km-p-counts"><em>0</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 13<span class="u"> planned</span></span>
+          <span class="km-p-mini" aria-hidden="true"><i class="pipe" style="flex:4"></i><i class="plan" style="flex:13"></i></span>
+          <span class="km-p-arrow" aria-hidden="true">⌄</span>
+        </button>
+        <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
+        <div class="km-cat solo open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">☁️</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Cloud</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 13<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Cloud Fundamentals</span>
+          <span class="km-t pipe" data-s="pipe">AWS</span>
+          <span class="km-t pipe" data-s="pipe">Microsoft Azure</span>
+          <span class="km-t pipe" data-s="pipe">Hybrid Cloud</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Google Cloud</span>
+          <span class="km-t plan" data-s="plan">Cloud Networking</span>
+          <span class="km-t plan" data-s="plan">Cloud Compute</span>
+          <span class="km-t plan" data-s="plan">Cloud Storage</span>
+          <span class="km-t plan" data-s="plan">Cloud Databases</span>
+          <span class="km-t plan" data-s="plan">Cloud IAM</span>
+          <span class="km-t plan" data-s="plan">Cloud Security</span>
+          <span class="km-t plan" data-s="plan">Cloud Monitoring</span>
+          <span class="km-t plan" data-s="plan">Cloud Backup</span>
+          <span class="km-t plan" data-s="plan">Cloud DR</span>
+          <span class="km-t plan" data-s="plan">Multi-Cloud</span>
+          <span class="km-t plan" data-s="plan">Cloud Migration</span>
+          <span class="km-t plan" data-s="plan">Cloud Architecture</span>
+          </div></div></div>
         </div>
-      </div>
-
-      <!-- NETWORKING -->
-      <div class="topic-card" onclick="toggleTopic(this)">
-        <div class="tc-indicator"></div>
-        <div class="tc-header">
-          <div class="tc-icon-wrap">🌐</div>
-          <div class="tc-meta">
-            <div class="tc-title">Networking</div>
-            <div class="tc-status"><span class="tc-status-dot live"></span><span class="tc-status-text"><span class="n">1</span> Live · 6 Planned</span></div>
-          </div>
-          <span class="tc-arrow">↓</span>
+        </div></div></div>
+      </section>
+      <section class="km-pillar" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="false">
+          <span class="km-p-idx">05</span>
+          <span class="km-p-name">Delivery</span>
+          <span class="km-p-counts"><em>12</em><span class="u"> live</span> · 22<span class="u"> pipe</span> · 42<span class="u"> planned</span></span>
+          <span class="km-p-mini" aria-hidden="true"><i class="live" style="flex:12"></i><i class="pipe" style="flex:22"></i><i class="plan" style="flex:42"></i></span>
+          <span class="km-p-arrow" aria-hidden="true">⌄</span>
+        </button>
+        <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">⚙️</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">DevOps</span>
+              <span class="km-c-counts"><i class="dot"></i><em>9</em><span class="u"> live</span> · 5<span class="u"> pipe</span> · 7<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">CI/CD</a>
+          <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Continuous Integration</a>
+          <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Continuous Delivery</a>
+          <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Continuous Deployment</a>
+          <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Jenkins</a>
+          <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">GitLab CI/CD</a>
+          <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Deployment Strategies</a>
+          <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Blue/Green Deployment</a>
+          <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Canary Deployment</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">DevOps Fundamentals</span>
+          <span class="km-t pipe" data-s="pipe">GitHub Actions</span>
+          <span class="km-t pipe" data-s="pipe">Rolling Deployment</span>
+          <span class="km-t pipe" data-s="pipe">Rollback</span>
+          <span class="km-t pipe" data-s="pipe">Pipeline Security</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">DevOps Culture</span>
+          <span class="km-t plan" data-s="plan">Azure DevOps</span>
+          <span class="km-t plan" data-s="plan">Build Automation</span>
+          <span class="km-t plan" data-s="plan">Artifact Management</span>
+          <span class="km-t plan" data-s="plan">Release Automation</span>
+          <span class="km-t plan" data-s="plan">Feature Flags</span>
+          <span class="km-t plan" data-s="plan">Pipeline Optimization</span>
+          </div></div></div>
         </div>
-        <div class="tc-body">
-          <div class="tc-items">
-            <div class="tc-zone-label live">✅ Live Now</div>
-            <a href="DevOps/K8/Networking/k8-networking.html" class="tc-badge-link"><span class="dot"></span>K8 Networking Decoded ↗</a>
-
-            <div class="tc-zone-label soon">🔜 On the Roadmap</div>
-            <span class="tc-badge soon">OSI Model</span>
-            <span class="tc-badge soon">TCP/IP</span>
-            <span class="tc-badge soon">Load Balancing</span>
-            <span class="tc-badge soon">Gateway API</span>
-            <span class="tc-badge soon">Service Mesh</span>
-            <span class="tc-badge soon">eBPF Deep-Dive</span>
-          </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">📦</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Containers</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 6<span class="u"> pipe</span> · 6<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Containers</span>
+          <span class="km-t pipe" data-s="pipe">Docker</span>
+          <span class="km-t pipe" data-s="pipe">Container Images</span>
+          <span class="km-t pipe" data-s="pipe">Container Networking</span>
+          <span class="km-t pipe" data-s="pipe">Container Security</span>
+          <span class="km-t pipe" data-s="pipe">Container Troubleshooting</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Podman</span>
+          <span class="km-t plan" data-s="plan">Containerd</span>
+          <span class="km-t plan" data-s="plan">CRI</span>
+          <span class="km-t plan" data-s="plan">OCI</span>
+          <span class="km-t plan" data-s="plan">Container Registries</span>
+          <span class="km-t plan" data-s="plan">Container Storage</span>
+          </div></div></div>
         </div>
-      </div>
-
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">📐</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Infrastructure as Code</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 8<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Infrastructure as Code</span>
+          <span class="km-t pipe" data-s="pipe">Terraform</span>
+          <span class="km-t pipe" data-s="pipe">Terraform State</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">OpenTofu</span>
+          <span class="km-t plan" data-s="plan">Pulumi</span>
+          <span class="km-t plan" data-s="plan">Terraform Modules</span>
+          <span class="km-t plan" data-s="plan">Remote State</span>
+          <span class="km-t plan" data-s="plan">Terraform Providers</span>
+          <span class="km-t plan" data-s="plan">IaC Security</span>
+          <span class="km-t plan" data-s="plan">IaC Testing</span>
+          <span class="km-t plan" data-s="plan">IaC Drift Management</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🔧</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Configuration Management</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 9<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Configuration Management</span>
+          <span class="km-t pipe" data-s="pipe">Ansible</span>
+          <span class="km-t pipe" data-s="pipe">Ansible Playbooks</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Roles</span>
+          <span class="km-t plan" data-s="plan">Inventories</span>
+          <span class="km-t plan" data-s="plan">Variables</span>
+          <span class="km-t plan" data-s="plan">Templates</span>
+          <span class="km-t plan" data-s="plan">Ansible Vault</span>
+          <span class="km-t plan" data-s="plan">AWX / Automation Platform</span>
+          <span class="km-t plan" data-s="plan">Puppet</span>
+          <span class="km-t plan" data-s="plan">Chef</span>
+          <span class="km-t plan" data-s="plan">Salt</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🔀</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">GitOps</span>
+              <span class="km-c-counts"><i class="dot"></i><em>3</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 3<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">GitOps</a>
+          <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Argo CD</a>
+          <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Flux</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Git-based Infrastructure</span>
+          <span class="km-t pipe" data-s="pipe">Declarative Deployment</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Drift Detection</span>
+          <span class="km-t plan" data-s="plan">Progressive Delivery</span>
+          <span class="km-t plan" data-s="plan">GitOps Security</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🛠️</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Platform Engineering</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 9<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Platform Engineering</span>
+          <span class="km-t pipe" data-s="pipe">Internal Developer Platform</span>
+          <span class="km-t pipe" data-s="pipe">Backstage</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Developer Experience</span>
+          <span class="km-t plan" data-s="plan">Self-Service Infrastructure</span>
+          <span class="km-t plan" data-s="plan">Golden Paths</span>
+          <span class="km-t plan" data-s="plan">Platform-as-a-Product</span>
+          <span class="km-t plan" data-s="plan">Developer Portals</span>
+          <span class="km-t plan" data-s="plan">Platform APIs</span>
+          <span class="km-t plan" data-s="plan">Platform Governance</span>
+          <span class="km-t plan" data-s="plan">Platform Automation</span>
+          <span class="km-t plan" data-s="plan">Platform Security</span>
+          </div></div></div>
+        </div>
+        </div></div></div>
+      </section>
+      <section class="km-pillar" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="false">
+          <span class="km-p-idx">06</span>
+          <span class="km-p-name">Kubernetes</span>
+          <span class="km-p-counts"><em>18</em><span class="u"> live</span> · 17<span class="u"> pipe</span> · 23<span class="u"> planned</span></span>
+          <span class="km-p-mini" aria-hidden="true"><i class="live" style="flex:18"></i><i class="pipe" style="flex:17"></i><i class="plan" style="flex:23"></i></span>
+          <span class="km-p-arrow" aria-hidden="true">⌄</span>
+        </button>
+        <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">☸️</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Kubernetes</span>
+              <span class="km-c-counts"><i class="dot"></i><em>16</em><span class="u"> live</span> · 13<span class="u"> pipe</span> · 6<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="DevOps/K8/ARCHITECTURE/k8-architecture.html">Kubernetes Fundamentals</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/ARCHITECTURE/k8-architecture.html">Kubernetes Architecture</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/ARCHITECTURE/k8-architecture.html">Pods</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/ARCHITECTURE/k8-architecture.html">Deployments</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/STORAGE/k8-storage.html">StatefulSets</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/Networking/k8-networking.html">Services</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/Networking/k8-networking.html">Ingress</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/STORAGE/k8-storage.html">Volumes</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/STORAGE/k8-storage.html">Persistent Volumes</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/STORAGE/k8-storage.html">Storage Classes</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/ARCHITECTURE/k8-architecture.html">Resource Requests/Limits</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/ARCHITECTURE/k8-architecture.html">Scheduling</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/Networking/k8-networking.html">Kubernetes Networking</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/Networking/k8-networking.html">CNI</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/STORAGE/k8-storage.html">CSI</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">Kubernetes Troubleshooting</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">ReplicaSets</span>
+          <span class="km-t pipe" data-s="pipe">DaemonSets</span>
+          <span class="km-t pipe" data-s="pipe">ConfigMaps</span>
+          <span class="km-t pipe" data-s="pipe">Secrets</span>
+          <span class="km-t pipe" data-s="pipe">RBAC</span>
+          <span class="km-t pipe" data-s="pipe">Namespaces</span>
+          <span class="km-t pipe" data-s="pipe">Probes</span>
+          <span class="km-t pipe" data-s="pipe">Taints / Tolerations</span>
+          <span class="km-t pipe" data-s="pipe">Affinity / Anti-Affinity</span>
+          <span class="km-t pipe" data-s="pipe">Autoscaling</span>
+          <span class="km-t pipe" data-s="pipe">HPA</span>
+          <span class="km-t pipe" data-s="pipe">VPA</span>
+          <span class="km-t pipe" data-s="pipe">Kubernetes Security</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Jobs / CronJobs</span>
+          <span class="km-t plan" data-s="plan">Cluster Autoscaling</span>
+          <span class="km-t plan" data-s="plan">Kubernetes Upgrade</span>
+          <span class="km-t plan" data-s="plan">Kubernetes Backup</span>
+          <span class="km-t plan" data-s="plan">Multi-Cluster Kubernetes</span>
+          <span class="km-t plan" data-s="plan">Kubernetes Disaster Recovery</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🔴</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">OpenShift</span>
+              <span class="km-c-counts"><i class="dot"></i><em>2</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 9<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">SCC</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">OpenShift Troubleshooting</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">OpenShift Fundamentals</span>
+          <span class="km-t pipe" data-s="pipe">OpenShift Architecture</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Projects</span>
+          <span class="km-t plan" data-s="plan">Routes</span>
+          <span class="km-t plan" data-s="plan">Operators</span>
+          <span class="km-t plan" data-s="plan">OpenShift Networking</span>
+          <span class="km-t plan" data-s="plan">OpenShift Storage</span>
+          <span class="km-t plan" data-s="plan">OpenShift Monitoring</span>
+          <span class="km-t plan" data-s="plan">OpenShift Logging</span>
+          <span class="km-t plan" data-s="plan">OpenShift Security</span>
+          <span class="km-t plan" data-s="plan">OpenShift Upgrades</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🕸️</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Service Mesh</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 8<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Service Mesh</span>
+          <span class="km-t pipe" data-s="pipe">Istio</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Envoy</span>
+          <span class="km-t plan" data-s="plan">Linkerd</span>
+          <span class="km-t plan" data-s="plan">Traffic Management</span>
+          <span class="km-t plan" data-s="plan">mTLS</span>
+          <span class="km-t plan" data-s="plan">Service-to-Service Security</span>
+          <span class="km-t plan" data-s="plan">Service Discovery</span>
+          <span class="km-t plan" data-s="plan">Observability in Service Mesh</span>
+          <span class="km-t plan" data-s="plan">Multi-Cluster Service Mesh</span>
+          </div></div></div>
+        </div>
+        </div></div></div>
+      </section>
+      <section class="km-pillar" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="false">
+          <span class="km-p-idx">07</span>
+          <span class="km-p-name">Reliability</span>
+          <span class="km-p-counts"><em>27</em><span class="u"> live</span> · 25<span class="u"> pipe</span> · 64<span class="u"> planned</span></span>
+          <span class="km-p-mini" aria-hidden="true"><i class="live" style="flex:27"></i><i class="pipe" style="flex:25"></i><i class="plan" style="flex:64"></i></span>
+          <span class="km-p-arrow" aria-hidden="true">⌄</span>
+        </button>
+        <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">📡</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">SRE</span>
+              <span class="km-c-counts"><i class="dot"></i><em>4</em><span class="u"> live</span> · 8<span class="u"> pipe</span> · 13<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">MTTR</a>
+          <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Incident Management</a>
+          <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">RCA</a>
+          <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Postmortem</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">SRE Fundamentals</span>
+          <span class="km-t pipe" data-s="pipe">SLI</span>
+          <span class="km-t pipe" data-s="pipe">SLO</span>
+          <span class="km-t pipe" data-s="pipe">SLA</span>
+          <span class="km-t pipe" data-s="pipe">Error Budget</span>
+          <span class="km-t pipe" data-s="pipe">Reliability Engineering</span>
+          <span class="km-t pipe" data-s="pipe">Problem Management</span>
+          <span class="km-t pipe" data-s="pipe">Chaos Engineering</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Availability</span>
+          <span class="km-t plan" data-s="plan">Reliability</span>
+          <span class="km-t plan" data-s="plan">Scalability</span>
+          <span class="km-t plan" data-s="plan">Latency</span>
+          <span class="km-t plan" data-s="plan">MTBF</span>
+          <span class="km-t plan" data-s="plan">Toil Reduction</span>
+          <span class="km-t plan" data-s="plan">Capacity Planning</span>
+          <span class="km-t plan" data-s="plan">Reliability Testing</span>
+          <span class="km-t plan" data-s="plan">Resilience Engineering</span>
+          <span class="km-t plan" data-s="plan">Service Health</span>
+          <span class="km-t plan" data-s="plan">Production Readiness</span>
+          <span class="km-t plan" data-s="plan">Operational Readiness</span>
+          <span class="km-t plan" data-s="plan">SRE Automation</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">📊</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Observability</span>
+              <span class="km-c-counts"><i class="dot"></i><em>11</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 7<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Observability</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Monitoring</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Metrics</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Logs</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Traces</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Prometheus</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Grafana</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Alertmanager</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Loki</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Jaeger</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Distributed Tracing</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">OpenTelemetry</span>
+          <span class="km-t pipe" data-s="pipe">Tempo</span>
+          <span class="km-t pipe" data-s="pipe">ELK</span>
+          <span class="km-t pipe" data-s="pipe">Alert Engineering</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Profiles</span>
+          <span class="km-t plan" data-s="plan">OpenSearch</span>
+          <span class="km-t plan" data-s="plan">Application Performance Monitoring</span>
+          <span class="km-t plan" data-s="plan">Synthetic Monitoring</span>
+          <span class="km-t plan" data-s="plan">Real User Monitoring</span>
+          <span class="km-t plan" data-s="plan">Telemetry Pipelines</span>
+          <span class="km-t plan" data-s="plan">Observability Architecture</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">📜</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Logging</span>
+              <span class="km-c-counts"><i class="dot"></i><em>2</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 9<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html">Linux Logging</a>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html">Journald</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Syslog</span>
+          <span class="km-t pipe" data-s="pipe">Log Rotation</span>
+          <span class="km-t pipe" data-s="pipe">Centralized Logging</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Logstash</span>
+          <span class="km-t plan" data-s="plan">Fluent Bit</span>
+          <span class="km-t plan" data-s="plan">Fluentd</span>
+          <span class="km-t plan" data-s="plan">Elasticsearch</span>
+          <span class="km-t plan" data-s="plan">OpenSearch</span>
+          <span class="km-t plan" data-s="plan">Kibana</span>
+          <span class="km-t plan" data-s="plan">Log Correlation</span>
+          <span class="km-t plan" data-s="plan">Log Retention</span>
+          <span class="km-t plan" data-s="plan">Log Security</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">⚡</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Performance Engineering</span>
+              <span class="km-c-counts"><i class="dot"></i><em>4</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 6<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html">CPU Performance</a>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html">Memory Performance</a>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html">Disk I/O</a>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html">Performance Troubleshooting</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Network Performance</span>
+          <span class="km-t pipe" data-s="pipe">Profiling</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Application Performance</span>
+          <span class="km-t plan" data-s="plan">Database Performance</span>
+          <span class="km-t plan" data-s="plan">Load Testing</span>
+          <span class="km-t plan" data-s="plan">Stress Testing</span>
+          <span class="km-t plan" data-s="plan">Benchmarking</span>
+          <span class="km-t plan" data-s="plan">Capacity Modeling</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🔍</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Troubleshooting</span>
+              <span class="km-c-counts"><i class="dot"></i><em>5</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 5<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html">Linux Troubleshooting</a>
+          <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">Kubernetes Troubleshooting</a>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html">Performance Troubleshooting</a>
+          <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Production Incident Troubleshooting</a>
+          <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Root Cause Analysis</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Network Troubleshooting</span>
+          <span class="km-t pipe" data-s="pipe">Storage Troubleshooting</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Database Troubleshooting</span>
+          <span class="km-t plan" data-s="plan">Application Troubleshooting</span>
+          <span class="km-t plan" data-s="plan">Cloud Troubleshooting</span>
+          <span class="km-t plan" data-s="plan">Security Troubleshooting</span>
+          <span class="km-t plan" data-s="plan">Failure Analysis</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🗄️</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Backup &amp; DR</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 12<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Backup Fundamentals</span>
+          <span class="km-t pipe" data-s="pipe">RPO</span>
+          <span class="km-t pipe" data-s="pipe">RTO</span>
+          <span class="km-t pipe" data-s="pipe">DR Architecture</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Full Backup</span>
+          <span class="km-t plan" data-s="plan">Incremental Backup</span>
+          <span class="km-t plan" data-s="plan">Differential Backup</span>
+          <span class="km-t plan" data-s="plan">Snapshot</span>
+          <span class="km-t plan" data-s="plan">Replication</span>
+          <span class="km-t plan" data-s="plan">Active/Active</span>
+          <span class="km-t plan" data-s="plan">Active/Passive</span>
+          <span class="km-t plan" data-s="plan">Backup Validation</span>
+          <span class="km-t plan" data-s="plan">Restore Testing</span>
+          <span class="km-t plan" data-s="plan">DR Drill</span>
+          <span class="km-t plan" data-s="plan">Failover</span>
+          <span class="km-t plan" data-s="plan">Failback</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🎫</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">ITSM &amp; Operations</span>
+              <span class="km-c-counts"><i class="dot"></i><em>1</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 12<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Incident Management</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Problem Management</span>
+          <span class="km-t pipe" data-s="pipe">Change Management</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">ITIL</span>
+          <span class="km-t plan" data-s="plan">Release Management</span>
+          <span class="km-t plan" data-s="plan">Service Request</span>
+          <span class="km-t plan" data-s="plan">Event Management</span>
+          <span class="km-t plan" data-s="plan">CMDB</span>
+          <span class="km-t plan" data-s="plan">Asset Management</span>
+          <span class="km-t plan" data-s="plan">Configuration Management</span>
+          <span class="km-t plan" data-s="plan">ServiceNow</span>
+          <span class="km-t plan" data-s="plan">Remedy</span>
+          <span class="km-t plan" data-s="plan">CAB</span>
+          <span class="km-t plan" data-s="plan">Change Windows</span>
+          <span class="km-t plan" data-s="plan">Operational Documentation</span>
+          </div></div></div>
+        </div>
+        </div></div></div>
+      </section>
+      <section class="km-pillar" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="false">
+          <span class="km-p-idx">08</span>
+          <span class="km-p-name">Security</span>
+          <span class="km-p-counts"><em>0</em><span class="u"> live</span> · 18<span class="u"> pipe</span> · 28<span class="u"> planned</span></span>
+          <span class="km-p-mini" aria-hidden="true"><i class="pipe" style="flex:18"></i><i class="plan" style="flex:28"></i></span>
+          <span class="km-p-arrow" aria-hidden="true">⌄</span>
+        </button>
+        <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🛡️</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Security</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 11<span class="u"> pipe</span> · 20<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Cybersecurity Fundamentals</span>
+          <span class="km-t pipe" data-s="pipe">Infrastructure Security</span>
+          <span class="km-t pipe" data-s="pipe">Linux Security</span>
+          <span class="km-t pipe" data-s="pipe">Container Security</span>
+          <span class="km-t pipe" data-s="pipe">Kubernetes Security</span>
+          <span class="km-t pipe" data-s="pipe">DevSecOps</span>
+          <span class="km-t pipe" data-s="pipe">RBAC</span>
+          <span class="km-t pipe" data-s="pipe">TLS/SSL</span>
+          <span class="km-t pipe" data-s="pipe">Certificates</span>
+          <span class="km-t pipe" data-s="pipe">Secrets Management</span>
+          <span class="km-t pipe" data-s="pipe">HashiCorp Vault</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Network Security</span>
+          <span class="km-t plan" data-s="plan">Cloud Security</span>
+          <span class="km-t plan" data-s="plan">Application Security</span>
+          <span class="km-t plan" data-s="plan">Zero Trust</span>
+          <span class="km-t plan" data-s="plan">IAM</span>
+          <span class="km-t plan" data-s="plan">PAM</span>
+          <span class="km-t plan" data-s="plan">LDAP</span>
+          <span class="km-t plan" data-s="plan">Active Directory</span>
+          <span class="km-t plan" data-s="plan">SSO</span>
+          <span class="km-t plan" data-s="plan">OAuth</span>
+          <span class="km-t plan" data-s="plan">OIDC</span>
+          <span class="km-t plan" data-s="plan">SAML</span>
+          <span class="km-t plan" data-s="plan">PKI</span>
+          <span class="km-t plan" data-s="plan">Vulnerability Management</span>
+          <span class="km-t plan" data-s="plan">Security Scanning</span>
+          <span class="km-t plan" data-s="plan">SIEM</span>
+          <span class="km-t plan" data-s="plan">SOC</span>
+          <span class="km-t plan" data-s="plan">Threat Detection</span>
+          <span class="km-t plan" data-s="plan">Compliance</span>
+          <span class="km-t plan" data-s="plan">Security Auditing</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🔗</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Supply Chain Security</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 7<span class="u"> pipe</span> · 8<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Software Supply Chain Security</span>
+          <span class="km-t pipe" data-s="pipe">SBOM</span>
+          <span class="km-t pipe" data-s="pipe">Image Signing</span>
+          <span class="km-t pipe" data-s="pipe">Admission Control</span>
+          <span class="km-t pipe" data-s="pipe">Policy as Code</span>
+          <span class="km-t pipe" data-s="pipe">Container Image Scanning</span>
+          <span class="km-t pipe" data-s="pipe">CI/CD Security</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">SLSA</span>
+          <span class="km-t plan" data-s="plan">Artifact Signing</span>
+          <span class="km-t plan" data-s="plan">Cosign</span>
+          <span class="km-t plan" data-s="plan">OPA</span>
+          <span class="km-t plan" data-s="plan">Gatekeeper</span>
+          <span class="km-t plan" data-s="plan">Kyverno</span>
+          <span class="km-t plan" data-s="plan">Dependency Security</span>
+          <span class="km-t plan" data-s="plan">Secrets Scanning</span>
+          </div></div></div>
+        </div>
+        </div></div></div>
+      </section>
+      <section class="km-pillar" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="false">
+          <span class="km-p-idx">09</span>
+          <span class="km-p-name">Data &amp; Applications</span>
+          <span class="km-p-counts"><em>1</em><span class="u"> live</span> · 12<span class="u"> pipe</span> · 47<span class="u"> planned</span></span>
+          <span class="km-p-mini" aria-hidden="true"><i class="live" style="flex:1"></i><i class="pipe" style="flex:12"></i><i class="plan" style="flex:47"></i></span>
+          <span class="km-p-arrow" aria-hidden="true">⌄</span>
+        </button>
+        <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🗃️</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Database</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 13<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Database Fundamentals</span>
+          <span class="km-t pipe" data-s="pipe">PostgreSQL</span>
+          <span class="km-t pipe" data-s="pipe">Database HA</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">MySQL</span>
+          <span class="km-t plan" data-s="plan">Oracle</span>
+          <span class="km-t plan" data-s="plan">SQL Server</span>
+          <span class="km-t plan" data-s="plan">MongoDB</span>
+          <span class="km-t plan" data-s="plan">Redis</span>
+          <span class="km-t plan" data-s="plan">Database Replication</span>
+          <span class="km-t plan" data-s="plan">Database Backup</span>
+          <span class="km-t plan" data-s="plan">Database Recovery</span>
+          <span class="km-t plan" data-s="plan">Database Performance</span>
+          <span class="km-t plan" data-s="plan">Connection Management</span>
+          <span class="km-t plan" data-s="plan">Query Optimization</span>
+          <span class="km-t plan" data-s="plan">Database Monitoring</span>
+          <span class="km-t plan" data-s="plan">Database Security</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🧩</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Middleware</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 11<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Nginx</span>
+          <span class="km-t pipe" data-s="pipe">Apache Kafka</span>
+          <span class="km-t pipe" data-s="pipe">Message Queues</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Application Servers</span>
+          <span class="km-t plan" data-s="plan">Apache</span>
+          <span class="km-t plan" data-s="plan">Tomcat</span>
+          <span class="km-t plan" data-s="plan">WildFly</span>
+          <span class="km-t plan" data-s="plan">JBoss</span>
+          <span class="km-t plan" data-s="plan">RabbitMQ</span>
+          <span class="km-t plan" data-s="plan">Redis</span>
+          <span class="km-t plan" data-s="plan">Event Streaming</span>
+          <span class="km-t plan" data-s="plan">Event-Driven Architecture</span>
+          <span class="km-t plan" data-s="plan">Middleware HA</span>
+          <span class="km-t plan" data-s="plan">Middleware Troubleshooting</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🔌</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">API &amp; Microservices</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 12<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">REST APIs</span>
+          <span class="km-t pipe" data-s="pipe">HTTP/HTTPS</span>
+          <span class="km-t pipe" data-s="pipe">API Gateway</span>
+          <span class="km-t pipe" data-s="pipe">Microservices</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">API Management</span>
+          <span class="km-t plan" data-s="plan">API Security</span>
+          <span class="km-t plan" data-s="plan">Authentication</span>
+          <span class="km-t plan" data-s="plan">Authorization</span>
+          <span class="km-t plan" data-s="plan">Rate Limiting</span>
+          <span class="km-t plan" data-s="plan">Service Discovery</span>
+          <span class="km-t plan" data-s="plan">Circuit Breaker</span>
+          <span class="km-t plan" data-s="plan">Retry</span>
+          <span class="km-t plan" data-s="plan">Timeout</span>
+          <span class="km-t plan" data-s="plan">Bulkhead</span>
+          <span class="km-t plan" data-s="plan">Distributed Transactions</span>
+          <span class="km-t plan" data-s="plan">Event-Driven Microservices</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🕮</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Distributed Systems</span>
+              <span class="km-c-counts"><i class="dot"></i><em>1</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 11<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">Quorum</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Distributed Systems</span>
+          <span class="km-t pipe" data-s="pipe">CAP Theorem</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Consensus</span>
+          <span class="km-t plan" data-s="plan">Leader Election</span>
+          <span class="km-t plan" data-s="plan">Replication</span>
+          <span class="km-t plan" data-s="plan">Consistency</span>
+          <span class="km-t plan" data-s="plan">Eventual Consistency</span>
+          <span class="km-t plan" data-s="plan">Distributed Transactions</span>
+          <span class="km-t plan" data-s="plan">Caching</span>
+          <span class="km-t plan" data-s="plan">Distributed Locking</span>
+          <span class="km-t plan" data-s="plan">Partition Tolerance</span>
+          <span class="km-t plan" data-s="plan">Failure Domains</span>
+          <span class="km-t plan" data-s="plan">Distributed Coordination</span>
+          </div></div></div>
+        </div>
+        </div></div></div>
+      </section>
+      <section class="km-pillar" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="false">
+          <span class="km-p-idx">10</span>
+          <span class="km-p-name">Modern Ops</span>
+          <span class="km-p-counts"><em>2</em><span class="u"> live</span> · 22<span class="u"> pipe</span> · 45<span class="u"> planned</span></span>
+          <span class="km-p-mini" aria-hidden="true"><i class="live" style="flex:2"></i><i class="pipe" style="flex:22"></i><i class="plan" style="flex:45"></i></span>
+          <span class="km-p-arrow" aria-hidden="true">⌄</span>
+        </button>
+        <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🤖</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">AI Infrastructure</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 6<span class="u"> pipe</span> · 14<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">AI Infrastructure</span>
+          <span class="km-t pipe" data-s="pipe">GPU Infrastructure</span>
+          <span class="km-t pipe" data-s="pipe">GPU Scheduling</span>
+          <span class="km-t pipe" data-s="pipe">GPU Kubernetes</span>
+          <span class="km-t pipe" data-s="pipe">AI Workloads on Kubernetes</span>
+          <span class="km-t pipe" data-s="pipe">Model Serving</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Inference Infrastructure</span>
+          <span class="km-t plan" data-s="plan">LLMOps</span>
+          <span class="km-t plan" data-s="plan">MLOps</span>
+          <span class="km-t plan" data-s="plan">Model Monitoring</span>
+          <span class="km-t plan" data-s="plan">Model Observability</span>
+          <span class="km-t plan" data-s="plan">AI Cost Management</span>
+          <span class="km-t plan" data-s="plan">AI Reliability</span>
+          <span class="km-t plan" data-s="plan">AI Security</span>
+          <span class="km-t plan" data-s="plan">AI Governance</span>
+          <span class="km-t plan" data-s="plan">RAG Infrastructure</span>
+          <span class="km-t plan" data-s="plan">Vector Databases</span>
+          <span class="km-t plan" data-s="plan">Model Gateways</span>
+          <span class="km-t plan" data-s="plan">AI CI/CD</span>
+          <span class="km-t plan" data-s="plan">AI Infrastructure Automation</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🧠</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">AIOps</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 10<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">AIOps</span>
+          <span class="km-t pipe" data-s="pipe">AI Root Cause Analysis</span>
+          <span class="km-t pipe" data-s="pipe">Agentic DevOps</span>
+          <span class="km-t pipe" data-s="pipe">Agentic SRE</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">AI Incident Detection</span>
+          <span class="km-t plan" data-s="plan">AI Alert Correlation</span>
+          <span class="km-t plan" data-s="plan">AI Log Analysis</span>
+          <span class="km-t plan" data-s="plan">AI Capacity Forecasting</span>
+          <span class="km-t plan" data-s="plan">AI Remediation</span>
+          <span class="km-t plan" data-s="plan">AI-assisted Troubleshooting</span>
+          <span class="km-t plan" data-s="plan">AI Operations Agents</span>
+          <span class="km-t plan" data-s="plan">Agentic CloudOps</span>
+          <span class="km-t plan" data-s="plan">Human-in-the-loop Automation</span>
+          <span class="km-t plan" data-s="plan">AI Operational Guardrails</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">💰</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">FinOps</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 5<span class="u"> pipe</span> · 6<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">FinOps</span>
+          <span class="km-t pipe" data-s="pipe">Cloud Cost Management</span>
+          <span class="km-t pipe" data-s="pipe">Rightsizing</span>
+          <span class="km-t pipe" data-s="pipe">Spot / Preemptible Instances</span>
+          <span class="km-t pipe" data-s="pipe">Kubernetes Cost Management</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Cost Allocation</span>
+          <span class="km-t plan" data-s="plan">Tagging</span>
+          <span class="km-t plan" data-s="plan">Resource Optimization</span>
+          <span class="km-t plan" data-s="plan">Reserved Capacity</span>
+          <span class="km-t plan" data-s="plan">Cloud Waste Management</span>
+          <span class="km-t plan" data-s="plan">Cost Governance</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🔁</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Automation</span>
+              <span class="km-c-counts"><i class="dot"></i><em>2</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 6<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone live" data-zone="live">Live now</div>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html">Shell Automation</a>
+          <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Bash Automation</a>
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">Python Automation</span>
+          <span class="km-t pipe" data-s="pipe">Ansible Automation</span>
+          <span class="km-t pipe" data-s="pipe">Kubernetes Automation</span>
+          <span class="km-t pipe" data-s="pipe">Self-Healing Infrastructure</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Terraform Automation</span>
+          <span class="km-t plan" data-s="plan">API Automation</span>
+          <span class="km-t plan" data-s="plan">Cloud Automation</span>
+          <span class="km-t plan" data-s="plan">Network Automation</span>
+          <span class="km-t plan" data-s="plan">Database Automation</span>
+          <span class="km-t plan" data-s="plan">Monitoring Automation</span>
+          </div></div></div>
+        </div>
+        <div class="km-cat" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="false">
+            <span class="km-c-icon" aria-hidden="true">🏛️</span>
+            <span class="km-c-meta">
+              <span class="km-c-name">Architecture</span>
+              <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 9<span class="u"> planned</span></span>
+            </span>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
+          <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
+          <span class="km-t pipe" data-s="pipe">System Architecture</span>
+          <span class="km-t pipe" data-s="pipe">Microservice Architecture</span>
+          <span class="km-t pipe" data-s="pipe">Zero-Downtime Architecture</span>
+          <div class="km-zone plan" data-zone="plan">Planned</div>
+          <span class="km-t plan" data-s="plan">Cloud Architecture</span>
+          <span class="km-t plan" data-s="plan">Distributed Architecture</span>
+          <span class="km-t plan" data-s="plan">Event-Driven Architecture</span>
+          <span class="km-t plan" data-s="plan">Multi-Tenant Architecture</span>
+          <span class="km-t plan" data-s="plan">Scalable Architecture</span>
+          <span class="km-t plan" data-s="plan">Resilient Architecture</span>
+          <span class="km-t plan" data-s="plan">Multi-Region Architecture</span>
+          <span class="km-t plan" data-s="plan">Multi-Cloud Architecture</span>
+          <span class="km-t plan" data-s="plan">Hybrid Architecture</span>
+          </div></div></div>
+        </div>
+        </div></div></div>
+      </section>
     </div>
+    <div class="km-empty" id="kmEmpty" hidden>No topic matches that search.</div>
   </div>
 
   <!-- ═══════════ LATEST ISSUES ═══════════ -->
@@ -1738,7 +2815,7 @@ document.addEventListener('mousemove', e => {
   ring.style.left=rx+'px'; ring.style.top=ry+'px';
   requestAnimationFrame(animRing);
 })();
-document.querySelectorAll('a,button,.topic-card,.issue-card,.issue-featured,.issue-featured-new,.author-card,.tool-node').forEach(el=>{
+document.querySelectorAll('a,button,.km-p-head,.km-c-head,.issue-card,.issue-featured,.issue-featured-new,.author-card,.tool-node').forEach(el=>{
   el.addEventListener('mouseenter',()=>{
     ring.style.width='56px'; ring.style.height='56px';
     ring.style.borderColor='var(--crimson)';
@@ -1872,16 +2949,108 @@ const NEWSLETTER = {
   });
 })();
 
-/* ── Accordion ── */
-function toggleTopic(card){
-  const isOpen = card.classList.contains('open');
-  document.querySelectorAll('.topic-card').forEach(c=>c.classList.remove('open'));
-  if(!isOpen) card.classList.add('open');
-  setTimeout(syncIssuesScrollHeight, 520);
-}
-document.querySelectorAll('.tc-badge-link').forEach(link=>{
-  link.addEventListener('click', e=>e.stopPropagation());
-});
+/* ── Knowledge map: two-level accordion + search + status filter ── */
+(function(){
+  const root = document.getElementById('kmPillars');
+  if (!root) return;
+  const search  = document.getElementById('kmSearch');
+  const result  = document.getElementById('kmResult');
+  const empty   = document.getElementById('kmEmpty');
+  const pillars = Array.from(root.querySelectorAll('[data-pillar]'));
+  const cats    = Array.from(root.querySelectorAll('[data-cat]'));
+  const topics  = Array.from(root.querySelectorAll('.km-t'));
+  const TOTAL   = topics.length;
+  let filter = 'all';
+
+  topics.forEach(t => { t.dataset.q = t.textContent.trim().toLowerCase(); });
+
+  const setOpen = (el, on) => {
+    if (el.classList.contains('solo')) return;   /* undivided pillar — always open */
+    el.classList.toggle('open', on);
+    const head = el.querySelector('button');
+    if (head) head.setAttribute('aria-expanded', on ? 'true' : 'false');
+  };
+
+  /* Accordion — one pillar open at a time, one category open per pillar. */
+  root.addEventListener('click', e => {
+    const pHead = e.target.closest('.km-p-head');
+    if (pHead) {
+      const p = pHead.closest('[data-pillar]');
+      const wasOpen = p.classList.contains('open');
+      pillars.forEach(x => setOpen(x, false));
+      setOpen(p, !wasOpen);
+      setTimeout(syncIssuesScrollHeight, 460);
+      return;
+    }
+    const cHead = e.target.closest('.km-c-head');
+    if (cHead) {
+      const c = cHead.closest('[data-cat]');
+      const wasOpen = c.classList.contains('open');
+      c.closest('[data-pillar]').querySelectorAll('[data-cat]').forEach(x => setOpen(x, false));
+      setOpen(c, !wasOpen);
+      setTimeout(syncIssuesScrollHeight, 400);
+    }
+  });
+
+  function apply(){
+    const q = (search.value || '').trim().toLowerCase();
+    const active = q.length > 0 || filter !== 'all';
+    let shown = 0;
+
+    cats.forEach(c => {
+      let hits = 0;
+      c.querySelectorAll('.km-t').forEach(t => {
+        const ok = (!q || t.dataset.q.indexOf(q) !== -1) &&
+                   (filter === 'all' || t.dataset.s === filter);
+        t.hidden = !ok;
+        if (ok) hits++;
+      });
+      /* A zone heading only earns its place if something under it survived. */
+      c.querySelectorAll('.km-zone').forEach(z => {
+        let n = 0, el = z.nextElementSibling;
+        while (el && !el.classList.contains('km-zone')) {
+          if (el.classList.contains('km-t') && !el.hidden) n++;
+          el = el.nextElementSibling;
+        }
+        z.hidden = n === 0;
+      });
+      c.hidden = active && hits === 0;
+      if (active && hits > 0) setOpen(c, true);
+      if (!active) setOpen(c, false);
+      shown += hits;
+      c.dataset.hits = hits;
+    });
+
+    pillars.forEach(p => {
+      const hits = Array.from(p.querySelectorAll('[data-cat]'))
+                        .reduce((n, c) => n + Number(c.dataset.hits || 0), 0);
+      p.hidden = active && hits === 0;
+      if (active) setOpen(p, hits > 0);
+    });
+
+    if (!active) {
+      pillars.forEach((p, i) => setOpen(p, i === 0));
+      result.textContent = '';
+    } else {
+      result.innerHTML = '<b>' + shown + '</b> of ' + TOTAL + ' topics' +
+        (q ? ' matching “' + q.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '”' : '');
+    }
+    if (empty) empty.hidden = shown !== 0;
+    setTimeout(syncIssuesScrollHeight, 60);
+  }
+
+  let t;
+  search.addEventListener('input', () => { clearTimeout(t); t = setTimeout(apply, 120); });
+  search.addEventListener('search', apply);
+  document.querySelectorAll('.km-f').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.km-f').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      filter = btn.dataset.f;
+      apply();
+    });
+  });
+})();
 
 /* ── Keep the Latest Issues scroll panel flush with the Topics column height ── */
 function syncIssuesScrollHeight(){
