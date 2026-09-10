@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vishal-abhinav.github.io/Platform-ops-Newsletter/sitemap.xml

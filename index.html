@@ -4,6 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Platform Ops · Tech with Vishal Abhinav</title>
+<!-- ─── social / SEO ─── -->
+<meta name="description" content="Deep dives on Kubernetes, SRE, infrastructure and platform engineering — written from production, not slideware. A free monthly technical newsletter by Vishal Abhinav.">
+<meta name="author" content="Vishal Abhinav">
+<link rel="canonical" href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:description" content="Deep dives on Kubernetes, SRE, infrastructure and platform engineering — written from production, not slideware. A free monthly technical newsletter by Vishal Abhinav.">
+<meta property="og:url" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/">
+<meta property="og:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Platform Ops · Tech with Vishal Abhinav — Platform Ops">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Platform Ops · Tech with Vishal Abhinav">
+<meta name="twitter:description" content="Deep dives on Kubernetes, SRE, infrastructure and platform engineering — written from production, not slideware. A free monthly technical newsletter by Vishal Abhinav.">
+<meta name="twitter:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+
 <script>
 /* Apply saved theme before first paint to avoid a light/dark flash */
 (function(){
@@ -866,6 +884,22 @@ html[data-theme="dark"] .sub-status.ok { color: var(--lime); }
   border-radius: 16px; margin: 0 6px 6px 0;
 }
 
+/* ─── AUTHOR PROFILE LINKS ─── */
+.author-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--hairline-2); }
+.au-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 13px 7px 9px; border-radius: 20px; text-decoration: none;
+  background: var(--wash-1); border: 1px solid var(--hairline-3);
+  font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 0.5px;
+  color: var(--heading-fg); transition: background .2s, border-color .2s, transform .2s;
+}
+.au-link:hover { transform: translateY(-2px); }
+.au-link svg { display: block; flex-shrink: 0; }
+.au-link.li:hover   { background: rgba(10,102,194,.12);  border-color: rgba(10,102,194,.45); }
+.au-link.hr:hover   { background: rgba(0,176,85,.12);    border-color: rgba(0,176,85,.45); }
+.au-link.rg:hover   { background: rgba(0,204,187,.12);   border-color: rgba(0,204,187,.45); }
+.au-link.gh:hover   { background: var(--hairline-3);     border-color: var(--hairline-5); }
+
 /* ─── FOOTER ─── */
 
 
@@ -1210,13 +1244,13 @@ a.footer-logo:hover{color:#fff;}
         <span class="tl kt-row"><span class="tl-branch">│           ├── </span><a href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html" class="tl-live">linux-advanced.html</a> <span class="tl-out">· issue #055</span></span>
         <span class="tl kt-row"><span class="tl-branch">│           ├── </span><a href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html" class="tl-live">linux-troubleshooting.html</a> <span class="tl-out">· issue #056</span></span>
         <span class="tl kt-row"><span class="tl-branch">│           └── </span><a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html" class="tl-live">linux-unix-glossary.html</a> <span class="tl-out">· issue #057 (190 terms)</span></span>
-        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">└── </span><span class="tl-dir">road-map/</span></span><span class="tl-count-soon">[ 14 PLANNED ]</span></span>
+        <span class="tl kt-row kt-row-split"><span class="kt-left"><span class="tl-branch">└── </span><span class="tl-dir">road-map/</span></span><span class="tl-count-soon">[ 20 PLANNED ]</span></span>
         <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">devops/</span>          <span class="tl-soon">rbac · admission-controllers · multi-cluster-federation</span></span>
         <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">sre/</span>              <span class="tl-soon">slis-slos-slas · error-budgets · reliability-eng · chaos-eng · on-call-design</span></span>
         <span class="tl kt-row"><span class="tl-branch">    ├── </span><span class="tl-dir">infrastructure/</span>   <span class="tl-soon">windows-server · unix-bsd · virtualization · aws · azure · gcp</span></span>
         <span class="tl kt-row"><span class="tl-branch">    └── </span><span class="tl-dir">networking/</span>       <span class="tl-soon">osi · tcp-ip · load-balancing · gateway-api · service-mesh · ebpf</span></span>
         <span class="tl kt-row"> </span>
-        <span class="tl kt-row"><span class="tl-ok">✓</span> <span class="tl-out">10 directories, 12 live articles, 14 planned topics</span></span>
+        <span class="tl kt-row"><span class="tl-ok">✓</span> <span class="tl-out">10 directories, 12 live articles, 20 planned topics</span></span>
         <span class="tl kt-row"><span class="tl-prompt">❯</span> <span class="cursor-blink"></span></span>
       </div>
     </div>
@@ -1607,6 +1641,24 @@ a.footer-logo:hover{color:#fff;}
             <span class="spec-badge">Infrastructure & Automation Specialist</span>
             <span class="spec-badge">SMPP</span>
             <span class="spec-badge">PDU Session</span>
+          </div>
+          <div class="author-links">
+            <a class="au-link li" href="https://www.linkedin.com/in/vishal-abhinav/" target="_blank" rel="noopener" aria-label="Vishal Abhinav on LinkedIn">
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="3" fill="#0A66C2"/><path fill="#fff" d="M7.1 9.3H4.6V19h2.5V9.3zM5.85 8.2a1.45 1.45 0 1 0 0-2.9 1.45 1.45 0 0 0 0 2.9zM19.4 19h-2.5v-4.7c0-1.12-.02-2.56-1.56-2.56-1.56 0-1.8 1.22-1.8 2.48V19H11V9.3h2.4v1.33h.04c.33-.63 1.15-1.3 2.37-1.3 2.54 0 3.6 1.67 3.6 3.84V19z"/></svg>
+              LinkedIn
+            </a>
+            <a class="au-link hr" href="https://www.hackerrank.com/Vishal_Abhinav?hr_r=1" target="_blank" rel="noopener" aria-label="Vishal Abhinav on HackerRank">
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="#00B085" d="M12 .6 2.4 6.3v11.4L12 23.4l9.6-5.7V6.3L12 .6z"/><path fill="#fff" d="M14.05 17.4h-1.3l.55-4.55h-2.6L10.15 17.4H8.9l1.05-10.8h1.3l-.42 4.5h2.6l.42-4.5h1.25l-1.05 10.8z"/></svg>
+              HackerRank
+            </a>
+            <a class="au-link rg" href="https://www.researchgate.net/profile/Vishal-Abhinav/research" target="_blank" rel="noopener" aria-label="Vishal Abhinav on ResearchGate">
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="4" fill="#00CCBB"/><path fill="#fff" d="M9.4 6.4c1.5 0 2.6.35 3.3 1.05.6.6.9 1.4.9 2.4 0 1.6-.85 2.7-2.35 3.15L14 17.6h-1.9l-2.5-4.25H7.9V17.6H6.2V6.4h3.2zm-.1 1.5H7.9v3.95h1.35c1.55 0 2.4-.7 2.4-2 0-1.3-.8-1.95-2.35-1.95zM17.1 6.3c1.2 0 2 .35 2.5.9l-.75 1.05c-.4-.4-.95-.6-1.65-.6-1.4 0-2.2.9-2.2 2.35 0 1.5.75 2.4 2.1 2.4.5 0 .9-.1 1.2-.25v-1.5h-1.4V9.5h2.85v3.85c-.7.5-1.65.8-2.75.8-2.2 0-3.6-1.45-3.6-3.9 0-2.4 1.5-3.95 3.7-3.95z"/></svg>
+              ResearchGate
+            </a>
+            <a class="au-link gh" href="https://github.com/Vishal-Abhinav" target="_blank" rel="noopener" aria-label="Vishal Abhinav on GitHub">
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.5A10.5 10.5 0 0 0 8.68 22c.52.1.71-.23.71-.5v-1.9c-2.9.64-3.52-1.25-3.52-1.25-.48-1.2-1.16-1.52-1.16-1.52-.95-.65.07-.64.07-.64 1.05.08 1.6 1.08 1.6 1.08.94 1.6 2.46 1.14 3.06.87.1-.68.37-1.14.67-1.4-2.32-.27-4.76-1.16-4.76-5.16 0-1.14.4-2.07 1.07-2.8-.1-.27-.46-1.33.1-2.77 0 0 .88-.28 2.88 1.07a9.9 9.9 0 0 1 5.24 0c2-1.35 2.87-1.07 2.87-1.07.57 1.44.21 2.5.11 2.77.67.73 1.07 1.66 1.07 2.8 0 4.01-2.45 4.89-4.78 5.15.38.33.71.97.71 1.95v2.9c0 .28.19.61.72.5A10.5 10.5 0 0 0 12 1.5z"/></svg>
+              GitHub
+            </a>
           </div>
         </div>
       </div>

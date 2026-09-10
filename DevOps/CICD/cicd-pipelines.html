@@ -4,37 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CI/CD & GitOps Deep-Dive · Platform Ops · Vishal Abhinav</title>
+<!-- ─── social / SEO ─── -->
+<meta name="description" content="CI/CD Deep-Dive — Jenkins &amp; GitLab CI pipeline design, GitOps with ArgoCD/Flux, pipeline security gates, deployment strategies, and secrets/artifact management. Production-tested patterns.">
+<meta name="author" content="Vishal Abhinav">
+<link rel="canonical" href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/CICD/cicd-pipelines.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="CI/CD &amp; GitOps — Pipelines, ArgoCD/Flux, Security Gates &amp; Deploy Strategy">
+<meta property="og:description" content="Jenkins/GitLab CI pipeline design, GitOps reconciliation, pipeline security, canary/blue-green rollouts, and secrets management.">
+<meta property="og:url" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/CICD/cicd-pipelines.html">
+<meta property="og:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/i052.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="CI/CD &amp; GitOps — Pipelines, ArgoCD/Flux, Security Gates &amp; Deploy Strategy — Platform Ops">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CI/CD &amp; GitOps — Pipelines, ArgoCD/Flux, Security Gates &amp; Deploy Strategy">
+<meta name="twitter:description" content="Jenkins/GitLab CI pipeline design, GitOps reconciliation, pipeline security, canary/blue-green rollouts, and secrets management.">
+<meta name="twitter:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/i052.png">
+
 
 <!-- ── SEO ── -->
-<meta name="description" content="CI/CD Deep-Dive — Jenkins & GitLab CI pipeline design, GitOps with ArgoCD/Flux, pipeline security gates, deployment strategies, and secrets/artifact management. Production-tested patterns.">
-<meta name="author" content="Vishal Abhinav">
 <meta name="keywords" content="CI/CD, Jenkins, GitLab CI, ArgoCD, Flux, GitOps, DevSecOps, Canary, Blue-Green, Kubernetes, DevOps, SRE">
 
 <!-- ── Open Graph ── -->
-<meta property="og:type" content="article">
-<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
-<meta property="og:title" content="CI/CD & GitOps — Pipelines, ArgoCD/Flux, Security Gates & Deploy Strategy">
-<meta property="og:description" content="Jenkins/GitLab CI pipeline design, GitOps reconciliation, pipeline security, canary/blue-green rollouts, and secrets management.">
-<meta property="og:url" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/CICD/cicd-pipelines.html">
-<meta property="og:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/CICD/og-cicd.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="CI/CD & GitOps Deep-Dive">
-
 <!-- ── Twitter / X ── -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="CI/CD & GitOps — Pipelines, ArgoCD/Flux, Security Gates & Deploy Strategy">
-<meta name="twitter:description" content="Jenkins/GitLab CI, GitOps reconciliation, pipeline security, canary/blue-green, secrets management.">
-<meta name="twitter:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/CICD/og-cicd.png">
-<meta name="twitter:creator" content="@VishalAbhinav">
-
 <!-- ── Article meta ── -->
-<meta property="article:author" content="Vishal Abhinav">
-<meta property="article:published_time" content="2026-08-10">
-<meta property="article:section" content="Platform Engineering">
-<meta property="article:tag" content="CI/CD">
-<meta property="article:tag" content="GitOps">
-<meta property="article:tag" content="DevOps">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {

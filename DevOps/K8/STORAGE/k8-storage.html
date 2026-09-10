@@ -4,37 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>K8s Storage Deep-Dive · Platform Ops · Vishal Abhinav</title>
+<!-- ─── social / SEO ─── -->
+<meta name="description" content="Kubernetes Storage Deep-Dive — PV/PVC lifecycle, StorageClasses &amp; dynamic provisioning, CSI driver architecture, StatefulSets, and backup/DR strategy. Production-tested patterns and commands.">
+<meta name="author" content="Vishal Abhinav">
+<link rel="canonical" href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/STORAGE/k8-storage.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="K8s Storage Deep-Dive — PV/PVC, StorageClasses, CSI, StatefulSets &amp; DR">
+<meta property="og:description" content="Everything storage in Kubernetes: provisioning models, CSI internals, stateful workloads, and how to actually back the cluster up.">
+<meta property="og:url" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/DevOps/K8/STORAGE/k8-storage.html">
+<meta property="og:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/i050.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="K8s Storage Deep-Dive — PV/PVC, StorageClasses, CSI, StatefulSets &amp; DR — Platform Ops">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="K8s Storage Deep-Dive — PV/PVC, StorageClasses, CSI, StatefulSets &amp; DR">
+<meta name="twitter:description" content="Everything storage in Kubernetes: provisioning models, CSI internals, stateful workloads, and how to actually back the cluster up.">
+<meta name="twitter:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/i050.png">
+
 
 <!-- ── SEO ── -->
-<meta name="description" content="Kubernetes Storage Deep-Dive — PV/PVC lifecycle, StorageClasses & dynamic provisioning, CSI driver architecture, StatefulSets, and backup/DR strategy. Production-tested patterns and commands.">
-<meta name="author" content="Vishal Abhinav">
 <meta name="keywords" content="Kubernetes, K8s, OpenShift, PersistentVolume, PVC, StorageClass, CSI, StatefulSet, Velero, VolumeSnapshot, DevOps, SRE, Platform Engineering">
 
 <!-- ── Open Graph ── -->
-<meta property="og:type" content="article">
-<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
-<meta property="og:title" content="K8s Storage Deep-Dive — PV/PVC, StorageClasses, CSI, StatefulSets & DR">
-<meta property="og:description" content="Everything storage in Kubernetes: provisioning models, CSI internals, stateful workloads, and how to actually back the cluster up.">
-<meta property="og:url" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/K8/STORAGE/k8-storage.html">
-<meta property="og:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/K8/STORAGE/og-storage.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="K8s Storage Deep-Dive — PV, PVC, StorageClass, CSI, StatefulSet">
-
 <!-- ── Twitter / X ── -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="K8s Storage Deep-Dive — PV/PVC, StorageClasses, CSI, StatefulSets & DR">
-<meta name="twitter:description" content="Provisioning models, CSI internals, stateful workloads, backup & DR — with commands and YAML from production.">
-<meta name="twitter:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/K8/STORAGE/og-storage.png">
-<meta name="twitter:creator" content="@VishalAbhinav">
-
 <!-- ── Article meta ── -->
-<meta property="article:author" content="Vishal Abhinav">
-<meta property="article:published_time" content="2026-06-08">
-<meta property="article:section" content="Platform Engineering">
-<meta property="article:tag" content="Kubernetes">
-<meta property="article:tag" content="Storage">
-<meta property="article:tag" content="DevOps">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
