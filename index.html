@@ -1160,6 +1160,46 @@ a.footer-logo:hover{color:#fff;}
 .footer-meta{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:rgba(255,255,255,.2);}
 @media (max-width:900px){footer{padding:56px 32px 28px;}.footer-top{grid-template-columns:1fr;gap:32px;}}
 @media (max-width:600px){footer{padding:48px 22px 24px;}.footer-cols{grid-template-columns:1fr 1fr;}}
+
+/* ─── KNOWLEDGE ROW: STACKED, FULL WIDTH ─── */
+/* Loaded last so it wins over the two-column rules above. */
+.knowledge-row{display:block!important;}
+.kr-topics.section{max-width:1240px!important;margin:0 auto!important;
+  padding:96px 64px 72px!important;}
+.kr-issues.issues-bg{padding:0!important;}
+.kr-issues .issues-inner{max-width:1240px!important;margin:0 auto!important;
+  padding:88px 64px 96px!important;display:block!important;}
+
+/* the archive is a grid now, not a capped scroller */
+.kr-issues .issues-scroll{max-height:none!important;overflow:visible!important;
+  padding-right:0!important;margin-right:0!important;}
+.kr-issues .issues-scroll-wrap::after{display:none!important;}
+.issues-scroll-hint{display:none!important;}
+.kr-issues .issues-grid{display:grid!important;
+  grid-template-columns:repeat(auto-fill,minmax(330px,1fr))!important;gap:2px!important;}
+.kr-issues .issue-featured-new,.kr-issues .issue-featured{margin-bottom:2px;}
+
+/* the map has the full page now — let the pillars breathe */
+.km-stats{grid-template-columns:repeat(5,1fr);}
+.km-cats{padding:0 14px 14px;}
+.km-topics{padding:6px 16px 20px;}
+.km-c-head{padding:15px 18px;}
+.km-p-head{padding:18px 24px;}
+.km-p-name{font-size:25px;}
+
+/* Cards are shorter in a grid than they were in the narrow scroll column, so
+   the big ghost numeral now sits under the "no page yet" flag. Lift the text. */
+.kr-issues .ic-soon-flag{position:relative;z-index:2;}
+.kr-issues .ic-ghost-num{z-index:0;}
+
+@media(max-width:1100px){
+  .kr-topics.section{padding:72px 32px 56px!important;}
+  .kr-issues .issues-inner{padding:64px 32px 72px!important;}
+}
+@media(max-width:600px){
+  .kr-topics.section{padding:56px 20px 44px!important;}
+  .kr-issues .issues-inner{padding:48px 20px 56px!important;}
+}
 </style>
 
 <!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
@@ -1495,7 +1535,7 @@ a.footer-logo:hover{color:#fff;}
       </div>
     </div>
 
-    <a class="km-allcats" href="categories/index.html"><b>Every category has its own page</b> — architecture diagram, the issues that cover it, and the full topic list. Browse all 33 →</a>
+    <a class="km-allcats" href="categories/index.html"><b>Every category has its own page</b> — architecture diagram, the issues that cover it, and the full topic list. Browse all 43 →</a>
     <div class="km-pillars" id="kmPillars">
       <section class="km-pillar open" data-pillar>
         <button class="km-p-head" type="button" aria-expanded="true">
@@ -3710,27 +3750,11 @@ function poTrack(path, title){
 
 /* ── Keep the Latest Issues scroll panel flush with the Topics column height ── */
 function syncIssuesScrollHeight(){
-  const topics = document.querySelector('.kr-topics');
-  const issuesInner = document.querySelector('.kr-issues .issues-inner');
-  const scrollWrap = document.querySelector('.kr-issues .issues-scroll-wrap');
-  const scrollBox = document.getElementById('issuesScroll');
-  if (!topics || !issuesInner || !scrollWrap || !scrollBox) return;
-  if (window.innerWidth <= 1100) { scrollBox.style.maxHeight = ''; return; }
-  // Measure the non-scrolling chrome from the gaps around the wrap, not from
-  // the inner's own height — the latter already reflects whatever maxHeight we
-  // set last time, so it feeds back and collapses the panel to its floor.
-  const innerRect = issuesInner.getBoundingClientRect();
-  const wrapRect  = scrollWrap.getBoundingClientRect();
-  const chrome    = (wrapRect.top - innerRect.top)
-                  + (innerRect.bottom - wrapRect.bottom);
-  const byColumn  = topics.getBoundingClientRect().height - chrome;
-  // Never taller than the screen. The topics column is ~2300px now, and a panel
-  // matched to it put its own scrollbar mostly off-screen — the scroll still
-  // worked, you just couldn't reach the bar, which reads as it being disabled.
-  const byScreen  = window.innerHeight - 120;
-  scrollBox.style.maxHeight =
-    Math.max(360, Math.round(Math.min(byColumn, byScreen))) + 'px';
+  /* No-op: the archive is full width and uncapped, so there is no
+     longer a column height to match. Kept because the knowledge-map
+     accordion still calls it after each open. */
 }
+
 window.addEventListener('load', syncIssuesScrollHeight);
 window.addEventListener('resize', syncIssuesScrollHeight);
 syncIssuesScrollHeight();

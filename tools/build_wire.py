@@ -10,6 +10,9 @@ import sys
 
 sys.path.insert(0, str(TOOLS))
 from hubs_spec import SPEC   # noqa: E402
+from taxonomy import PILLARS  # noqa: E402
+
+N_CATS = sum(len(c) for _, c in PILLARS)
 
 SRC = ROOT / 'index.html'
 src = SRC.read_text(encoding='utf-8')
@@ -40,7 +43,7 @@ print(f'hub links added to {n} categories')
 src = src.replace('    <div class="km-pillars" id="kmPillars">',
                   '    <a class="km-allcats" href="categories/index.html">'
                   '<b>Every category has its own page</b> — architecture diagram, the issues that '
-                  'cover it, and the full topic list. Browse all 33 →</a>\n'
+                  f'cover it, and the full topic list. Browse all {N_CATS} →</a>\n'
                   '    <div class="km-pillars" id="kmPillars">', 1)
 
 # ── styles for both ──────────────────────────────────────────────────────────
