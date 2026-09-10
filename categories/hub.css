@@ -140,7 +140,7 @@ button.chip{cursor:pointer;line-height:1.5;font-family:'DM Mono',monospace;}
 .pager a b{display:block;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.5px;
  color:var(--heading-fg);font-weight:400;margin-top:5px;}
 
-.req-pill{position:fixed;right:22px;bottom:22px;z-index:60;display:none;align-items:center;gap:12px;
+.req-pill{position:fixed;left:22px;bottom:22px;z-index:60;display:none;align-items:center;gap:12px;
  background:var(--coal);color:var(--paper);border:0;border-radius:40px;padding:13px 15px 13px 20px;
  box-shadow:0 18px 44px rgba(0,0,0,.32);cursor:pointer;font-family:'DM Mono',monospace;
  font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;text-decoration:none;}
@@ -149,7 +149,7 @@ html[data-theme="dark"] .req-pill{background:var(--paper);color:var(--coal);}
 .req-pill b{color:var(--lime);font-weight:400;}
 html[data-theme="dark"] .req-pill b{color:#4c840f;}
 .req-pill .go{background:var(--crimson);color:#fff;border-radius:30px;padding:6px 12px;}
-@media(max-width:600px){.req-pill{right:12px;bottom:12px;left:12px;justify-content:space-between;}}
+@media(max-width:600px){.req-pill{left:12px;right:12px;bottom:12px;justify-content:space-between;}}
 
 footer{background:var(--coal);color:var(--paper);padding:52px 40px 26px;margin-top:0;}
 .f-in{max-width:1120px;margin:0 auto;}
