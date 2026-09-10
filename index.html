@@ -1146,6 +1146,59 @@ a.footer-logo:hover{color:#fff;}
   .kr-issues .issues-inner > .section-title{font-size:clamp(32px,3.2vw,44px);margin-bottom:8px;}
   .kr-issues .issues-inner > .section-lead{font-size:15px;margin-bottom:22px;}
 }
+
+/* ─── AUTHOR: PROFILE LEFT, LINKEDIN RIGHT ─── */
+/* Last in the sheet, so it wins over the 1fr 2fr grid defined above. */
+.authors-inner{display:block!important;max-width:1240px;}
+.au-head{margin-bottom:40px;}
+/* stretch, not start: the LinkedIn panel is shorter than the profile card
+   until real posts are embedded, and `start` left a hole under it. */
+.au-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);
+  gap:40px;align-items:stretch;}
+.au-left .author-card{height:100%;}
+
+.au-right{display:flex;flex-direction:column;gap:0;background:var(--card-bg);
+  border-radius:4px;box-shadow:0 2px 20px rgba(0,0,0,.06);overflow:hidden;}
+.li-bar{display:flex;align-items:center;gap:10px;padding:16px 20px;
+  border-bottom:1px solid var(--hairline-2);}
+.li-mark svg{display:block;width:20px;height:20px;border-radius:3px;}
+.li-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.6px;
+  text-transform:uppercase;color:var(--heading-fg);}
+.li-note{margin-left:auto;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--muted);}
+
+/* card-bg, not a hairline gap colour: with one empty state centred in a tall
+   column the gap became two grey bands rather than a separator. */
+.li-feed{display:flex;flex-direction:column;justify-content:center;
+  flex:1;background:var(--card-bg);}
+.li-embed{display:block;width:100%;border:0;background:var(--card-bg);}
+.li-embed + .li-embed{border-top:1px solid var(--hairline-2);}
+
+.li-empty{background:var(--card-bg);padding:28px 20px;text-align:center;}
+.li-av{width:44px;height:44px;margin:0 auto 12px;}
+.li-av svg{display:block;width:44px;height:44px;border-radius:6px;}
+.li-who b{display:block;font-size:15px;font-weight:700;color:var(--heading-fg);}
+.li-who span{display:block;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1.1px;
+  text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.li-say{font-size:13px;line-height:1.65;color:var(--muted);margin:14px auto 0;max-width:36ch;}
+.li-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;
+  margin-top:18px;padding-top:18px;border-top:1px solid var(--hairline-2);}
+.li-tag{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--muted);background:var(--wash-1);
+  border:1px solid var(--hairline-3);border-radius:14px;padding:4px 10px;}
+
+.li-cta{display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px;text-decoration:none;background:#0A66C2;color:#fff;
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;
+  transition:background .18s;}
+.li-cta:hover{background:#004182;}
+.li-cta svg{transition:transform .18s;}
+.li-cta:hover svg{transform:translateX(3px);}
+
+@media (max-width:1000px){
+  .au-grid{grid-template-columns:1fr;gap:28px;}
+  .au-head{margin-bottom:32px;}
+}
 </style>
 
 <!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
@@ -3116,13 +3169,14 @@ a.footer-logo:hover{color:#fff;}
 
 <!-- ═══════════ AUTHORS ═══════════ -->
 <div class="authors-section" id="authors">
-  <div class="authors-inner reveal">
-    <div>
+  <div class="authors-inner">
+    <div class="au-head reveal">
       <div class="section-tag">Behind the Newsletter</div>
-      <h2 class="section-title">THE AUTHORS</h2>
+      <h2 class="section-title">THE AUTHOR</h2>
       <p class="section-lead" style="margin-bottom:0">One practitioner building in the trenches of Platform Engineering, sharing what actually works.</p>
     </div>
-    <div class="author-cards">
+    <div class="au-grid reveal">
+    <div class="au-left">
       <div class="author-card">
         <div class="author-avatar v">VA</div>
         <div>
@@ -3162,13 +3216,34 @@ a.footer-logo:hover{color:#fff;}
         </div>
       </div>
     </div>
+    <aside class="au-right">
+      <div class="li-bar">
+        <span class="li-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="3" fill="#0A66C2"/><path fill="#fff" d="M7.1 9.3H4.6V19h2.5V9.3zM5.85 8.2a1.45 1.45 0 1 0 0-2.9 1.45 1.45 0 0 0 0 2.9zM19.4 19h-2.5v-4.7c0-1.12-.02-2.56-1.56-2.56-1.56 0-1.8 1.22-1.8 2.48V19H11V9.3h2.4v1.33h.04c.33-.63 1.15-1.3 2.37-1.3 2.54 0 3.6 1.67 3.6 3.84V19z"/></svg></span>
+        <span class="li-title">Latest on LinkedIn</span>
+        <span class="li-note">follow for updates</span>
+      </div>
+      <div class="li-feed">
+      <div class="li-empty">
+        <div class="li-av"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="3" fill="#0A66C2"/><path fill="#fff" d="M7.1 9.3H4.6V19h2.5V9.3zM5.85 8.2a1.45 1.45 0 1 0 0-2.9 1.45 1.45 0 0 0 0 2.9zM19.4 19h-2.5v-4.7c0-1.12-.02-2.56-1.56-2.56-1.56 0-1.8 1.22-1.8 2.48V19H11V9.3h2.4v1.33h.04c.33-.63 1.15-1.3 2.37-1.3 2.54 0 3.6 1.67 3.6 3.84V19z"/></svg></div>
+        <div class="li-who">
+          <b>Vishal Abhinav</b>
+          <span>Platform Ops Engineer · Kubernetes · SRE</span>
+        </div>
+        <p class="li-say">Posts land here as they go up — runbooks, postmortems and
+          the odd 2 AM lesson. Follow along on LinkedIn in the meantime.</p>
+        <div class="li-tags"><span class="li-tag">Commands</span><span class="li-tag">Reliability</span><span class="li-tag">Kubernetes</span><span class="li-tag">Delivery</span><span class="li-tag">Foundation</span></div>
+      </div>
+      </div>
+      <a class="li-cta" href="https://www.linkedin.com/in/vishal-abhinav/" target="_blank" rel="noopener">
+        Follow on LinkedIn
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+        ><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </aside>
+    </div>
   </div>
 </div>
-
-<button class="req-pill" id="reqPill" type="button" hidden>
-  <span><b id="reqPillN">0</b> topics queued</span>
-  <span class="go">Get notified →</span>
-</button>
 
 <!-- ═══════════ SUBSCRIBE ═══════════ -->
 <div class="subscribe-section" id="subscribe">

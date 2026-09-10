@@ -254,9 +254,11 @@ JS = """var PO_NAV = __NAV_JSON__;
       if (panel.classList.contains('on')) place();
     }, { passive: true });
 
-    /* Put it next to the logo where there's room, else at the end of the nav. */
+    /* Next to the logo where there's room, else at the end of the nav.
+       search.js may later move both into a .nav-side group; insert relative to
+       the logo rather than to the nav so the order survives either way. */
     var logo = nav.querySelector('.nav-logo');
-    if (logo && logo.parentNode === nav) logo.insertAdjacentElement('afterend', btn);
+    if (logo) logo.insertAdjacentElement('afterend', btn);
     else nav.appendChild(btn);
   }
 })();

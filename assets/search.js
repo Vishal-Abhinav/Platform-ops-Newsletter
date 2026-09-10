@@ -34,12 +34,32 @@ var PO_SEARCH = [[0,"Foundation","categories/foundation/index.html","Foundation"
     pop.className = 'gs-pop';
     document.body.appendChild(pop);
 
-    /* Centre it: after the logo when the nav is a flex row, else appended. */
-    var logo = nav.querySelector('.nav-logo');
-    var mm = nav.querySelector('.mm-btn');
-    if (mm) mm.insertAdjacentElement('afterend', wrap);
-    else if (logo && logo.parentNode === nav) logo.insertAdjacentElement('afterend', wrap);
-    else nav.appendChild(wrap);
+    /* Put the box on the page's true centre line. The nav is a flex row whose
+       right flank is much wider than its left, so simply dropping the box in
+       the middle leaves it off-centre. Collect what is already there into two
+       equal-weight side groups and sit between them.
+         [ .nav-side.l ][ .gs-wrap ][ .nav-side.r ]
+       The logo and the mega-menu button go left, everything else right. This
+       runs after megamenu.js has injected .mm-btn (search.js loads second). */
+    var l = document.createElement('div'); l.className = 'nav-side l';
+    var r = document.createElement('div'); r.className = 'nav-side r';
+    var kids = [].slice.call(nav.children);
+    kids.forEach(function (k) {
+      if (k.classList.contains('nav-logo') || k.classList.contains('mm-btn')) l.appendChild(k);
+      else r.appendChild(k);
+    });
+    nav.appendChild(l); nav.appendChild(wrap); nav.appendChild(r);
+
+    /* Rank the links so the stylesheet can drop the ones this box and the
+       Browse panel already cover, rather than letting them crowd it. */
+    [].forEach.call(nav.querySelectorAll('.nav-links li'), function (li) {
+      var a = li.querySelector('a');
+      if (!a) return;
+      li.setAttribute('data-p',
+        a.classList.contains('nav-cta') ? '0'
+          : /categories\/index\.html$/.test(a.getAttribute('href') || '') ? '2'
+          : '1');
+    });
 
     var input = wrap.querySelector('input'), sel = -1, hits = [];
 

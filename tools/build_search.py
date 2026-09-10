@@ -56,7 +56,38 @@ for spec in COMMANDS:
 INDEX = json.dumps(rows, ensure_ascii=False, separators=(",", ":"))
 
 CSS = """/* Global search — centred in the nav on every page. */
-.gs-wrap{position:relative;flex:0 1 380px;min-width:0;margin:0 auto;}
+/* `margin:0 auto` only centres in the space LEFT OVER, and the nav's right
+   flank (5 links + the theme toggle, ~530px) is far wider than its left one
+   (logo + Browse, ~300px), so that put the box 130px left of the page's
+   midline. Instead the flanks are wrapped in two side groups at runtime and
+   the nav becomes a 1fr auto 1fr grid: equal side tracks put the middle child
+   on the true centre line whatever they hold. Grid, not flex:1 1 0 — a 1fr
+   track's floor is its own content, so a flank that no longer fits widens its
+   track and squeezes the box instead of overlapping it.
+
+   True centring needs 2 x (widest flank) + box + padding to fit the window.
+   With all five links that is 1540px, so below the breakpoints here the links
+   the mega-menu and this box already cover step out of the way:
+     [data-p=2] Categories — the Browse panel next to the logo IS this
+     [data-p=1] Topics / Issues / Authors — in-page anchors, also in the footer
+     [data-p=0] Subscribe — the CTA, never hidden */
+nav{display:grid!important;grid-template-columns:1fr minmax(0,380px) 1fr;
+  align-items:center;}
+nav > .nav-side{display:flex;align-items:center;min-width:0;}
+nav > .nav-side.l{justify-content:flex-start;gap:4px;}
+nav > .nav-side.r{justify-content:flex-end;gap:20px;}
+nav > .nav-side.l > .nav-logo{white-space:nowrap;}
+/* minmax(0,380px), not auto: an `auto` middle track holds its 380px and the
+   squeeze lands on the side tracks instead, which wrapped the logo onto two
+   lines at 1024px. This way the box gives way and the flanks keep their size. */
+.gs-wrap{position:relative;width:100%;min-width:0;}
+@media (max-width:1540px){nav .nav-links li[data-p="2"]{display:none;}
+  nav .nav-links{gap:26px;}}
+@media (max-width:1270px){nav .nav-links li[data-p="1"]{display:none;}}
+/* Below 900 the box and the links are both gone and the side tracks are wildly
+   uneven, so equal 1fr tracks only push the logo around. Back to a plain row. */
+@media (max-width:900px){nav{display:flex!important;}
+  nav > .nav-side{flex:0 0 auto;} nav > .nav-side.r{margin-left:auto;}}
 .gs-in{display:flex;align-items:center;gap:8px;background:rgba(128,128,128,.12);
   border:1px solid rgba(128,128,128,.28);border-radius:4px;padding:0 10px;
   transition:border-color .18s,background .18s;}
@@ -137,12 +168,32 @@ JS = """var PO_SEARCH = __INDEX__;
     pop.className = 'gs-pop';
     document.body.appendChild(pop);
 
-    /* Centre it: after the logo when the nav is a flex row, else appended. */
-    var logo = nav.querySelector('.nav-logo');
-    var mm = nav.querySelector('.mm-btn');
-    if (mm) mm.insertAdjacentElement('afterend', wrap);
-    else if (logo && logo.parentNode === nav) logo.insertAdjacentElement('afterend', wrap);
-    else nav.appendChild(wrap);
+    /* Put the box on the page's true centre line. The nav is a flex row whose
+       right flank is much wider than its left, so simply dropping the box in
+       the middle leaves it off-centre. Collect what is already there into two
+       equal-weight side groups and sit between them.
+         [ .nav-side.l ][ .gs-wrap ][ .nav-side.r ]
+       The logo and the mega-menu button go left, everything else right. This
+       runs after megamenu.js has injected .mm-btn (search.js loads second). */
+    var l = document.createElement('div'); l.className = 'nav-side l';
+    var r = document.createElement('div'); r.className = 'nav-side r';
+    var kids = [].slice.call(nav.children);
+    kids.forEach(function (k) {
+      if (k.classList.contains('nav-logo') || k.classList.contains('mm-btn')) l.appendChild(k);
+      else r.appendChild(k);
+    });
+    nav.appendChild(l); nav.appendChild(wrap); nav.appendChild(r);
+
+    /* Rank the links so the stylesheet can drop the ones this box and the
+       Browse panel already cover, rather than letting them crowd it. */
+    [].forEach.call(nav.querySelectorAll('.nav-links li'), function (li) {
+      var a = li.querySelector('a');
+      if (!a) return;
+      li.setAttribute('data-p',
+        a.classList.contains('nav-cta') ? '0'
+          : /categories\/index\.html$/.test(a.getAttribute('href') || '') ? '2'
+          : '1');
+    });
 
     var input = wrap.querySelector('input'), sel = -1, hits = [];
 

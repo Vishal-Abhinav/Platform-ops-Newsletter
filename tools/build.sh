@@ -10,6 +10,7 @@
 #   Foundation/     <- build_foundation (topic pages + topic.css)
 #   Commands/       <- build_commands   (command references + commands.css)
 #   feed.xml        <- build_feed
+#   LinkedIn column <- tools/linkedin_posts.py (hand-kept list of post URLs)
 #   assets/megamenu.* <- build_nav    (nav data, styles, behaviour)
 #   sitemap.xml     <- verify.py
 set -euo pipefail
@@ -37,6 +38,9 @@ python3 tools/build_library.py
 
 say "sticky archive"
 python3 tools/build_sticky.py
+
+say "author section (profile + LinkedIn)"
+python3 tools/build_author.py
 
 say "category hubs"
 python3 tools/build_hubs.py

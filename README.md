@@ -31,7 +31,7 @@
 
 ### 🌐 **[Read it live → vishal-abhinav.github.io/Platform-ops-Newsletter](https://vishal-abhinav.github.io/Platform-ops-Newsletter/)**
 
-[📚 Issues](#-published-issues) · [📖 Library](#-reference-library) · [🗺️ Knowledge Map](#️-knowledge-map) · [🗂️ Structure](#️-repository-structure) · [🚀 Run Locally](#-quick-start)
+[📚 Issues](#-published-issues) · [📖 Library](#-reference-library) · [📖 Library](#-reference-library) · [🗺️ Knowledge Map](#️-knowledge-map) · [🗂️ Structure](#️-repository-structure) · [🚀 Run Locally](#-quick-start)
 
 </div>
 
