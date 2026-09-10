@@ -33,35 +33,57 @@ LI_SVG = ('<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="
           '1.67 3.6 3.84V19z"/></svg>')
 
 
-def activity_id(url):
-    """Pull the 19-digit post id out of any of LinkedIn's URL shapes.
+DEFAULT_H = 560          # only used when a bare URL was pasted
 
-    posts/…-activity-7312…-Ab1c  ·  feed/update/urn:li:activity:7312…
-    embed/feed/update/urn:li:share:7312…
+
+def parse(entry):
+    """Read one POSTS entry — a whole embed snippet, or a bare post URL.
+
+    Returns (src, height) or None.
+
+    The URN TYPE is carried through rather than assumed. LinkedIn uses
+    urn:li:ugcPost:, urn:li:share: and urn:li:activity: for posts created
+    different ways, and the embed renders an empty box if you name the wrong
+    one — so a pasted snippet is used verbatim, and only a bare URL falls back
+    to a guess.
     """
-    m = re.search(r"(\d{19})", url)
-    return m.group(1) if m else None
+    m = re.search(r'src="([^"]*/embed/feed/update/[^"]+)"', entry)
+    if m:                                   # a full <iframe …> snippet
+        h = re.search(r'height="(\d+)"', entry)
+        return m.group(1), int(h.group(1)) if h else DEFAULT_H
+
+    m = re.search(r"urn:li:(\w+):(\d+)", entry)      # a urn-shaped URL
+    if m:
+        return (f"https://www.linkedin.com/embed/feed/update/"
+                f"urn:li:{m.group(1)}:{m.group(2)}", DEFAULT_H)
+
+    m = re.search(r"(\d{19})", entry)                 # …-activity-<id>-XXXX
+    if m:
+        return (f"https://www.linkedin.com/embed/feed/update/"
+                f"urn:li:share:{m.group(1)}", DEFAULT_H)
+    return None
 
 
-ids = [i for i in (activity_id(u) for u in POSTS[:SHOW]) if i]
+embeds = [e for e in (parse(x) for x in POSTS[:SHOW]) if e]
 
-if ids:
+if embeds:
+    # width 504 is what LinkedIn measured those heights against; hold the
+    # column to it on desktop so nothing reflows and nothing clips. The
+    # narrow fallback is handled in CSS, where the height gets slack.
     feed = "\n".join(
-        f'      <iframe class="li-embed" src="https://www.linkedin.com/embed/feed/update/'
-        f'urn:li:share:{i}" height="480" width="100%" frameborder="0" allowfullscreen=""\n'
-        f'        loading="lazy" title="LinkedIn post"></iframe>'
-        for i in ids)
-    feed_note = f'{len(ids)} most recent'
+        f'      <iframe class="li-embed" style="--h:{h}px" src="{src}"\n'
+        f'        loading="lazy" frameborder="0" allowfullscreen=""\n'
+        f'        title="LinkedIn post"></iframe>'
+        for src, h in embeds)
+    feed_note = f"{len(embeds)} most recent"
 else:
-    # No posts configured yet. A real panel, not an empty box: what the column
-    # is for, and the one link that always works.
-    # The pillars carrying the most published work — what the posts are
-    # actually about, counted from the taxonomy rather than asserted.
+    # No posts configured. A real panel, not an empty box: what the column is
+    # for, the pillars carrying the most published work, and the one link that
+    # always works. Counted from the taxonomy rather than asserted.
     live = sorted(
         ((p, sum(1 for _, _, ts in cats for t in ts if t[1] == "L")) for p, cats in PILLARS),
         key=lambda x: -x[1])
-    tags = "".join(f'<span class="li-tag">{p}</span>'
-                   for p, n in live[:5] if n)
+    tags = "".join(f'<span class="li-tag">{p}</span>' for p, n in live[:5] if n)
     feed = f"""      <div class="li-empty">
         <div class="li-av">{LI_SVG}</div>
         <div class="li-who">
@@ -74,13 +96,16 @@ else:
       </div>"""
     feed_note = "follow for updates"
 
+grid_cls = " has-embeds" if embeds else ""
+feed_cls = " scrolls" if embeds else ""
+
 RIGHT = f"""    <aside class="au-right">
       <div class="li-bar">
         <span class="li-mark">{LI_SVG}</span>
         <span class="li-title">Latest on LinkedIn</span>
         <span class="li-note">{feed_note}</span>
       </div>
-      <div class="li-feed">
+      <div class="li-feed{feed_cls}">
 {feed}
       </div>
       <a class="li-cta" href="{PROFILE}" target="_blank" rel="noopener">
@@ -110,7 +135,7 @@ NEW = f"""<!-- ═══════════ AUTHORS ═══════�
       <h2 class="section-title">THE AUTHOR</h2>
       <p class="section-lead" style="margin-bottom:0">{lead}</p>
     </div>
-    <div class="au-grid reveal">
+    <div class="au-grid reveal{grid_cls}">
     <div class="au-left">
 {card}
     </div>
@@ -132,6 +157,21 @@ CSS = """
    until real posts are embedded, and `start` left a hole under it. */
 .au-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);
   gap:40px;align-items:stretch;}
+/* 504px is the width LinkedIn measured each embed's height against. Hold the
+   column to it and the posts render exactly as LinkedIn laid them out —
+   narrower and the text reflows taller than the height attribute allows, so
+   the last lines get cut off inside the iframe. */
+/* 520, not 504: the feed's own scrollbar eats ~10px, and the iframe has to
+   END UP at 504 for the heights to be right. Any slack shows as an even
+   margin either side of the post, which is invisible. */
+@media (min-width:1001px){ .au-grid.has-embeds{grid-template-columns:minmax(0,1fr) 520px;} }
+/* start, not stretch, once there are embeds. Stretch exists to close the hole
+   under a SHORT LinkedIn panel; with posts in it the panel carries its own
+   weight, and stretching then just padded the profile card with 180px of
+   empty background. Two columns of near-equal height, each ending where its
+   content does. */
+.au-grid.has-embeds{align-items:start;}
+.au-grid.has-embeds .author-card{height:auto;}
 .au-left .author-card{height:100%;}
 
 .au-right{display:flex;flex-direction:column;gap:0;background:var(--card-bg);
@@ -148,10 +188,32 @@ CSS = """
    column the gap became two grey bands rather than a separator. */
 .li-feed{display:flex;flex-direction:column;justify-content:center;
   flex:1;background:var(--card-bg);}
-.li-embed{display:block;width:100%;border:0;background:var(--card-bg);}
+/* flex:0 0 auto — the feed is a flex COLUMN, so its children shrink along the
+   main axis by default. The three iframes total ~3,570px and were being
+   squashed to exactly fill the 600px box (150 + 261 + 189), which is not a
+   scroll, it is three slivers. */
+.li-embed{display:block;width:504px;max-width:100%;margin-inline:auto;
+  border:0;background:var(--card-bg);height:var(--h,560px);flex:0 0 auto;}
 .li-embed + .li-embed{border-top:1px solid var(--hairline-2);}
 
-.li-empty{background:var(--card-bg);padding:28px 20px;text-align:center;}
+/* Three posts run to ~3,600px. Left to grow, the author section would be
+   taller than the rest of the page put together, so the feed scrolls inside
+   itself — the same move the archive makes. */
+/* 420 puts the column at 53 + 420 + 46 = 519px, within a few pixels of the
+   profile card's natural 515 — so the two read as a matched pair rather than
+   one running 180px past the other. */
+.li-feed.scrolls{justify-content:flex-start;overflow-y:auto;max-height:420px;
+  scrollbar-width:thin;scrollbar-gutter:stable;}
+.li-feed.scrolls::-webkit-scrollbar{width:8px;}
+.li-feed.scrolls::-webkit-scrollbar-track{background:var(--wash-1);}
+.li-feed.scrolls::-webkit-scrollbar-thumb{background:var(--hairline-5);border-radius:4px;}
+@media (max-width:1000px){ .li-feed.scrolls{max-height:70vh;} }
+/* Only once the column is genuinely narrower than 504px does the text reflow
+   longer than the measured height — and only then does the slack belong.
+   Applying it at 1000px padded the stacked-but-wide layout with blank card. */
+@media (max-width:560px){ .li-embed{height:calc(var(--h,560px) * 1.3);} }
+
+.li-empty{background:var(--card-bg);padding:28px 20px;text-align:center;flex:0 0 auto;}
 .li-av{width:44px;height:44px;margin:0 auto 12px;}
 .li-av svg{display:block;width:44px;height:44px;border-radius:6px;}
 .li-who b{display:block;font-size:15px;font-weight:700;color:var(--heading-fg);}
@@ -183,4 +245,4 @@ src = src[:i] + CSS + src[i:]
 
 SRC.write_text(src, encoding="utf-8")
 print(f"index.html -> {len(src)} chars, author split "
-      f"({len(ids)} LinkedIn embed{'' if len(ids) == 1 else 's'})")
+      f"({len(embeds)} LinkedIn embed{'' if len(embeds) == 1 else 's'})")
