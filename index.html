@@ -763,6 +763,53 @@ html[data-theme="dark"] .sub-rss a:hover{color:#fff;border-color:#fff;}
 .km-allcats:hover{background:var(--wash-2);color:var(--heading-fg);}
 .km-allcats b{color:var(--heading-fg);font-weight:400;}
 
+/* ─── REFERENCE LIBRARY ─── */
+.lib-section{background:var(--panel-bg);border-top:1px solid var(--hairline-2);}
+.lib-inner{max-width:1200px;margin:0 auto;padding:100px 64px 90px;}
+.lib-stats{display:flex;flex-wrap:wrap;gap:1px;background:var(--hairline-2);
+  border:1px solid var(--hairline-2);margin:-32px 0 40px;}
+.lib-stats > div{flex:1 1 120px;background:var(--page-bg);padding:15px 20px;text-align:center;}
+.lib-stats b{display:block;font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;
+  color:var(--heading-fg);font-weight:400;}
+.lib-stats i{display:block;font-style:normal;font-family:'DM Mono',monospace;font-size:8.5px;
+  letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:2px;}
+.lib-card{position:relative;background:var(--card-bg);border:1px solid var(--hairline-1);
+  padding:26px 26px 22px;transition:background .22s,border-color .22s;}
+.lib-card:hover{background:var(--page-bg);border-color:var(--hairline-4);}
+/* one full-card hit area, so the nested lists stay selectable text */
+.lib-hit{position:absolute;inset:0;z-index:1;text-indent:-9999px;overflow:hidden;}
+.lib-card > *:not(.lib-hit){position:relative;pointer-events:none;}
+.lib-top{display:flex;align-items:flex-start;gap:14px;}
+.lib-n{font-family:'DM Mono',monospace;font-size:10px;color:var(--ash);padding-top:5px;}
+.lib-title{font-family:'Bebas Neue',sans-serif;font-size:27px;letter-spacing:.6px;line-height:1;
+  color:var(--heading-fg);font-weight:400;}
+.lib-meta{display:flex;flex-wrap:wrap;gap:12px;margin-top:7px;font-family:'DM Mono',monospace;
+  font-size:8.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);}
+.lib-kind{color:var(--crimson);}
+.lib-desc{font-size:13px;line-height:1.6;color:var(--muted);margin:14px 0 0;}
+.lib-model{margin-top:14px;padding:10px 12px;background:var(--wash-1);
+  border-left:2px solid var(--cyan);font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:.8px;line-height:1.8;color:var(--muted);text-transform:uppercase;}
+.lib-model b{display:block;color:var(--cyan);letter-spacing:1.6px;margin-bottom:3px;font-weight:400;}
+.lib-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.lib-col-t{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:2px;text-transform:uppercase;
+  padding-bottom:6px;margin-bottom:8px;border-bottom:1px solid var(--hairline-2);}
+.lib-col-t.core{color:#4c840f;}
+.lib-col-t.adv{color:#8a5806;}
+html[data-theme="dark"] .lib-col-t.core{color:var(--lime);}
+html[data-theme="dark"] .lib-col-t.adv{color:var(--amber);}
+.lib-col ul{list-style:none;margin:0;padding:0;}
+.lib-col li{font-size:11.5px;line-height:1.5;color:var(--muted);padding:3px 0 3px 12px;
+  position:relative;}
+.lib-col li::before{content:'';position:absolute;left:0;top:10px;width:4px;height:1px;
+  background:var(--hairline-4);}
+.lib-go{margin-top:20px;padding-top:14px;border-top:1px solid var(--hairline-2);
+  font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;
+  color:var(--crimson);}
+@media(max-width:900px){.lib-inner{padding:70px 32px 64px;}}
+@media(max-width:560px){.lib-inner{padding:56px 20px 50px;}.lib-cols{grid-template-columns:1fr;gap:14px;}}
+
 /* ─── TOOLCHAIN DIAGRAM ─── */
 .toolchain-section{background:var(--ink);padding:0;position:relative;overflow:hidden;}
 .toolchain-inner{max-width:1200px;margin:0 auto;padding:100px 64px 80px;position:relative;z-index:2;}
@@ -1139,6 +1186,7 @@ a.footer-logo:hover{color:#fff;}
   <ul class="nav-links">
     <li><a href="#topics">Topics</a></li>
     <li><a href="categories/index.html">Categories</a></li>
+    <li><a href="#library">Library</a></li>
     <li><a href="#issues">Issues</a></li>
     <li><a href="#authors">Authors</a></li>
     <li><a href="#subscribe" class="nav-cta">Subscribe →</a></li>
@@ -2813,6 +2861,116 @@ a.footer-logo:hover{color:#fff;}
 </div>
 </div>
 
+
+<!-- ═══════════ REFERENCE LIBRARY ═══════════ -->
+<div class="lib-section" id="library">
+  <div class="lib-inner reveal">
+    <div class="section-tag">Reference Library</div>
+    <h2 class="section-title">DEEP-DIVES, IN FULL</h2>
+    <p class="section-lead">Standing reference pages, separate from the monthly issues — each one
+      an architecture diagram, a core section, an advanced section, worked examples and a
+      cheatsheet. Everything each page covers is listed below.</p>
+    <div class="lib-stats">
+      <div><b>5</b><i>Pages</i></div>
+      <div><b>20</b><i>Core topics</i></div>
+      <div><b>20</b><i>Advanced topics</i></div>
+      <div><b>Foundation</b><i>Category</i></div>
+    </div>
+    <div class="lib-grid">
+      <article class="lib-card">
+        <a class="lib-hit" href="Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html" aria-label="Computer Fundamentals"></a>
+        <div class="lib-top">
+          <span class="lib-n">01</span>
+          <div class="lib-id">
+            <h3 class="lib-title">Computer Fundamentals</h3>
+            <div class="lib-meta"><span class="lib-kind">Reference</span>
+              <span>22 min read</span><span>Foundation</span></div>
+          </div>
+        </div>
+        <p class="lib-desc">What the hardware is actually doing underneath your process — caches, translation, interrupts and the six orders of magnitude between L1 and a disk seek.</p>
+        <div class="lib-model"><b>The model</b> Software → Kernel → Translation → Cache → Memory → Storage → Network</div>
+        <div class="lib-cols">
+          <div class="lib-col"><div class="lib-col-t core">Core</div><ul><li>The execution model</li><li>Memory hierarchy and the cache line</li><li>Virtual memory, the MMU and the TLB</li><li>The storage stack</li></ul></div>
+          <div class="lib-col"><div class="lib-col-t adv">Advanced</div><ul><li>NUMA — when &#x27;the RAM&#x27; is several different RAMs</li><li>Interrupts, DMA and IRQ affinity</li><li>Context switches and what they really cost</li><li>Numbers worth memorising</li></ul></div>
+        </div>
+        <div class="lib-go">Read Computer Fundamentals →</div>
+      </article>
+      <article class="lib-card">
+        <a class="lib-hit" href="Foundation/OPERATING-SYSTEMS/operating-systems.html" aria-label="Operating Systems"></a>
+        <div class="lib-top">
+          <span class="lib-n">02</span>
+          <div class="lib-id">
+            <h3 class="lib-title">Operating Systems</h3>
+            <div class="lib-meta"><span class="lib-kind">Reference</span>
+              <span>26 min read</span><span>Foundation</span></div>
+          </div>
+        </div>
+        <p class="lib-desc">The kernel as an operator sees it — the syscall boundary, the scheduler, the page cache, cgroups, and the failure modes each one produces in production.</p>
+        <div class="lib-model"><b>The model</b> User Space → The Boundary → Kernel: Process → Kernel: Memory → Kernel: I/O → Drivers → Hardware</div>
+        <div class="lib-cols">
+          <div class="lib-col"><div class="lib-col-t core">Core</div><ul><li>The user / kernel boundary</li><li>Processes, threads and what the scheduler sees</li><li>Virtual memory, the page cache and writeback</li><li>File descriptors, VFS and everything-is-a-file</li></ul></div>
+          <div class="lib-col"><div class="lib-col-t adv">Advanced</div><ul><li>cgroups and namespaces — containers, demystified</li><li>The OOM killer and cgroup memory accounting</li><li>Signals, and why your container ignores SIGTERM</li><li>I/O paths: buffered, direct, and io_uring</li></ul></div>
+        </div>
+        <div class="lib-go">Read Operating Systems →</div>
+      </article>
+      <article class="lib-card">
+        <a class="lib-hit" href="Foundation/SHELL-AND-BASH/shell-and-bash.html" aria-label="Shell &amp; Bash"></a>
+        <div class="lib-top">
+          <span class="lib-n">03</span>
+          <div class="lib-id">
+            <h3 class="lib-title">Shell &amp; Bash</h3>
+            <div class="lib-meta"><span class="lib-kind">Reference</span>
+              <span>23 min read</span><span>Foundation</span></div>
+          </div>
+        </div>
+        <p class="lib-desc">How the shell reads, expands and executes a line — and why nearly every shell bug is really a quoting bug at the word-splitting stage.</p>
+        <div class="lib-model"><b>The model</b> 1 · Read → 2 · Expand → 3 · Split → 4 · Redirect → 5 · Execute</div>
+        <div class="lib-cols">
+          <div class="lib-col"><div class="lib-col-t core">Core</div><ul><li>Expansion order — the root of most shell bugs</li><li>Exit codes, pipelines and where failures hide</li><li>Redirection and file descriptors</li><li>Test constructs: [ vs [[ vs ((</li></ul></div>
+          <div class="lib-col"><div class="lib-col-t adv">Advanced</div><ul><li>set -euo pipefail — and where it lies to you</li><li>Traps, cleanup and signal handling</li><li>Process substitution and doing without a temp file</li><li>Parallelism without a job scheduler</li></ul></div>
+        </div>
+        <div class="lib-go">Read Shell &amp; Bash →</div>
+      </article>
+      <article class="lib-card">
+        <a class="lib-hit" href="Foundation/PYTHON/python.html" aria-label="Python"></a>
+        <div class="lib-top">
+          <span class="lib-n">04</span>
+          <div class="lib-id">
+            <h3 class="lib-title">Python</h3>
+            <div class="lib-meta"><span class="lib-kind">Reference</span>
+              <span>25 min read</span><span>Foundation</span></div>
+          </div>
+        </div>
+        <p class="lib-desc">Python for people who run things — the GIL, choosing a concurrency model, streaming instead of loading, and the subprocess and logging patterns that survive production.</p>
+        <div class="lib-model"><b>The model</b> Source → Compile → Runtime → Concurrency → Escape Hatches → Environment</div>
+        <div class="lib-cols">
+          <div class="lib-col"><div class="lib-col-t core">Core</div><ul><li>The GIL — what it does and doesn&#x27;t block</li><li>Threads, processes, asyncio — picking one</li><li>Environments and dependency resolution</li><li>Generators and not loading the 40 GB file</li></ul></div>
+          <div class="lib-col"><div class="lib-col-t adv">Advanced</div><ul><li>Memory: refcounting, cycles, and why RSS never drops</li><li>subprocess, done correctly</li><li>Logging that survives contact with production</li><li>Making Python fast enough</li></ul></div>
+        </div>
+        <div class="lib-go">Read Python →</div>
+      </article>
+      <article class="lib-card">
+        <a class="lib-hit" href="Foundation/GIT-VERSION-CONTROL/git-version-control.html" aria-label="Git &amp; Version Control"></a>
+        <div class="lib-top">
+          <span class="lib-n">05</span>
+          <div class="lib-id">
+            <h3 class="lib-title">Git &amp; Version Control</h3>
+            <div class="lib-meta"><span class="lib-kind">Reference</span>
+              <span>24 min read</span><span>Foundation</span></div>
+          </div>
+        </div>
+        <p class="lib-desc">Git as a content-addressed object store — the four object types, the three trees, and the recovery paths that mean you have almost certainly not lost that work.</p>
+        <div class="lib-model"><b>The model</b> Your Edits → Staging → Object Store → Refs → Safety Net → Remote</div>
+        <div class="lib-cols">
+          <div class="lib-col"><div class="lib-col-t core">Core</div><ul><li>The object model — Git is a content-addressed store</li><li>The three trees</li><li>Branches are pointers, and that is the whole trick</li><li>Merge, rebase, squash — what each actually produces</li></ul></div>
+          <div class="lib-col"><div class="lib-col-t adv">Advanced</div><ul><li>The reflog — why nothing is really lost</li><li>git bisect — binary search over history</li><li>Packfiles, gc, and why the clone is 4 GB</li><li>Hooks, worktrees and the bits that save real time</li></ul></div>
+        </div>
+        <div class="lib-go">Read Git &amp; Version Control →</div>
+      </article>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════ AUTHORS ═══════════ -->
 <div class="authors-section" id="authors">
   <div class="authors-inner reveal">
@@ -2916,6 +3074,7 @@ a.footer-logo:hover{color:#fff;}
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Explore</div>
+          <a href="#library">Reference Library</a>
           <a href="categories/index.html">All Categories</a>
           <a href="#topics">Knowledge Map</a>
           <a href="Infrastructure/OS/index.html">OS / Linux Series</a>

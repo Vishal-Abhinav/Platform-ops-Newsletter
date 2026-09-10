@@ -31,7 +31,7 @@
 
 ### 🌐 **[Read it live → vishal-abhinav.github.io/Platform-ops-Newsletter](https://vishal-abhinav.github.io/Platform-ops-Newsletter/)**
 
-[📚 Issues](#-published-issues) · [🗺️ Knowledge Map](#️-knowledge-map) · [🗂️ Structure](#️-repository-structure) · [🚀 Run Locally](#-quick-start)
+[📚 Issues](#-published-issues) · [📖 Library](#-reference-library) · [🗺️ Knowledge Map](#️-knowledge-map) · [🗂️ Structure](#️-repository-structure) · [🚀 Run Locally](#-quick-start)
 
 </div>
 
@@ -748,6 +748,90 @@ editions of the newsletter that have not been migrated here yet.
 | #042 | Oct 2025 | Observability: Prometheus + Loki + Tempo | 🗄️ Archive listing |
 
 **Section hubs:** [DevOps / Kubernetes](./DevOps/K8/index.html) · [Infrastructure / OS](./Infrastructure/OS/index.html)
+
+---
+
+## 📖 Reference Library
+
+Standing deep-dives, separate from the monthly issues. Each is an architecture diagram, a
+**core** section, an **advanced** section, worked terminal examples, a decision table and a
+cheatsheet. They carry no issue number and are not mailed out — they are the reference the
+issues link back to.
+
+| Page | Read | Sections | Covers |
+|:--|:--|:--|:--|
+| **[Computer Fundamentals](./Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html)** | 22 min | 4 core · 4 advanced | What the hardware is actually doing underneath your process |
+| **[Operating Systems](./Foundation/OPERATING-SYSTEMS/operating-systems.html)** | 26 min | 4 core · 4 advanced | The kernel as an operator sees it |
+| **[Shell & Bash](./Foundation/SHELL-AND-BASH/shell-and-bash.html)** | 23 min | 4 core · 4 advanced | How the shell reads, expands and executes a line |
+| **[Python](./Foundation/PYTHON/python.html)** | 25 min | 4 core · 4 advanced | Python for people who run things |
+| **[Git & Version Control](./Foundation/GIT-VERSION-CONTROL/git-version-control.html)** | 24 min | 4 core · 4 advanced | Git as a content-addressed object store |
+
+Expand any of them for the full contents:
+
+<details>
+<summary><b>Computer Fundamentals</b> — 22 min read, 4 core + 4 advanced sections</summary>
+
+*What the hardware is actually doing underneath your process — caches, translation, interrupts and the six orders of magnitude between L1 and a disk seek.*
+
+**The model:** Software → Kernel → Translation → Cache → Memory → Storage → Network
+
+<table><tr><th align="left">Core</th><th align="left">Advanced</th></tr>
+<tr><td valign="top"><ul><li>The execution model</li><li>Memory hierarchy and the cache line</li><li>Virtual memory, the MMU and the TLB</li><li>The storage stack</li></ul></td><td valign="top"><ul><li>NUMA — when &#x27;the RAM&#x27; is several different RAMs</li><li>Interrupts, DMA and IRQ affinity</li><li>Context switches and what they really cost</li><li>Numbers worth memorising</li></ul></td></tr></table>
+
+[Read it →](./Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html)
+</details>
+
+<details>
+<summary><b>Operating Systems</b> — 26 min read, 4 core + 4 advanced sections</summary>
+
+*The kernel as an operator sees it — the syscall boundary, the scheduler, the page cache, cgroups, and the failure modes each one produces in production.*
+
+**The model:** User Space → The Boundary → Kernel: Process → Kernel: Memory → Kernel: I/O → Drivers → Hardware
+
+<table><tr><th align="left">Core</th><th align="left">Advanced</th></tr>
+<tr><td valign="top"><ul><li>The user / kernel boundary</li><li>Processes, threads and what the scheduler sees</li><li>Virtual memory, the page cache and writeback</li><li>File descriptors, VFS and everything-is-a-file</li></ul></td><td valign="top"><ul><li>cgroups and namespaces — containers, demystified</li><li>The OOM killer and cgroup memory accounting</li><li>Signals, and why your container ignores SIGTERM</li><li>I/O paths: buffered, direct, and io_uring</li></ul></td></tr></table>
+
+[Read it →](./Foundation/OPERATING-SYSTEMS/operating-systems.html)
+</details>
+
+<details>
+<summary><b>Shell &amp; Bash</b> — 23 min read, 4 core + 4 advanced sections</summary>
+
+*How the shell reads, expands and executes a line — and why nearly every shell bug is really a quoting bug at the word-splitting stage.*
+
+**The model:** 1 · Read → 2 · Expand → 3 · Split → 4 · Redirect → 5 · Execute
+
+<table><tr><th align="left">Core</th><th align="left">Advanced</th></tr>
+<tr><td valign="top"><ul><li>Expansion order — the root of most shell bugs</li><li>Exit codes, pipelines and where failures hide</li><li>Redirection and file descriptors</li><li>Test constructs: [ vs [[ vs ((</li></ul></td><td valign="top"><ul><li>set -euo pipefail — and where it lies to you</li><li>Traps, cleanup and signal handling</li><li>Process substitution and doing without a temp file</li><li>Parallelism without a job scheduler</li></ul></td></tr></table>
+
+[Read it →](./Foundation/SHELL-AND-BASH/shell-and-bash.html)
+</details>
+
+<details>
+<summary><b>Python</b> — 25 min read, 4 core + 4 advanced sections</summary>
+
+*Python for people who run things — the GIL, choosing a concurrency model, streaming instead of loading, and the subprocess and logging patterns that survive production.*
+
+**The model:** Source → Compile → Runtime → Concurrency → Escape Hatches → Environment
+
+<table><tr><th align="left">Core</th><th align="left">Advanced</th></tr>
+<tr><td valign="top"><ul><li>The GIL — what it does and doesn&#x27;t block</li><li>Threads, processes, asyncio — picking one</li><li>Environments and dependency resolution</li><li>Generators and not loading the 40 GB file</li></ul></td><td valign="top"><ul><li>Memory: refcounting, cycles, and why RSS never drops</li><li>subprocess, done correctly</li><li>Logging that survives contact with production</li><li>Making Python fast enough</li></ul></td></tr></table>
+
+[Read it →](./Foundation/PYTHON/python.html)
+</details>
+
+<details>
+<summary><b>Git &amp; Version Control</b> — 24 min read, 4 core + 4 advanced sections</summary>
+
+*Git as a content-addressed object store — the four object types, the three trees, and the recovery paths that mean you have almost certainly not lost that work.*
+
+**The model:** Your Edits → Staging → Object Store → Refs → Safety Net → Remote
+
+<table><tr><th align="left">Core</th><th align="left">Advanced</th></tr>
+<tr><td valign="top"><ul><li>The object model — Git is a content-addressed store</li><li>The three trees</li><li>Branches are pointers, and that is the whole trick</li><li>Merge, rebase, squash — what each actually produces</li></ul></td><td valign="top"><ul><li>The reflog — why nothing is really lost</li><li>git bisect — binary search over history</li><li>Packfiles, gc, and why the clone is 4 GB</li><li>Hooks, worktrees and the bits that save real time</li></ul></td></tr></table>
+
+[Read it →](./Foundation/GIT-VERSION-CONTROL/git-version-control.html)
+</details>
 
 ---
 
