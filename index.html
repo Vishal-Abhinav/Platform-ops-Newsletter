@@ -576,10 +576,8 @@ html[data-theme="dark"] .km-p-counts em{color:var(--lime);}
   background:transparent;transition:background .25s;}
 .km-cat.open::before{background:var(--crimson);}
 .km-c-head{display:flex;align-items:center;gap:13px;width:100%;padding:13px 16px;background:none;
-  border:0;cursor:pointer;text-align:left;font:inherit;color:inherit;text-decoration:none;
-  transition:background .2s;}
+  border:0;cursor:pointer;text-align:left;font:inherit;color:inherit;transition:background .2s;}
 .km-c-head:hover{background:var(--wash-1);}
-.km-c-head:hover .km-c-arrow{color:var(--crimson);transform:translateX(3px);}
 .km-c-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:center;
   font-size:17px;line-height:1;background:var(--wash-2);border-radius:4px;flex-shrink:0;}
 .km-c-meta{flex:1;min-width:0;}
@@ -594,7 +592,8 @@ html[data-theme="dark"] .km-p-counts em{color:var(--lime);}
 .km-c-counts .dot.none{background:transparent;border:1.5px dashed var(--ash);animation:none;box-shadow:none;}
 html[data-theme="dark"] .km-c-counts em{color:var(--lime);}
 .km-c-arrow{font-family:'DM Mono',monospace;font-size:12px;color:var(--ash);flex-shrink:0;
-  transition:transform .25s,color .2s;}
+  transition:transform .3s;}
+.km-cat.open .km-c-arrow{transform:rotate(-180deg);color:var(--crimson);}
 .km-c-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s cubic-bezier(.25,.46,.45,.94);}
 .km-cat.open .km-c-body{grid-template-rows:1fr;}
 .km-c-inner{overflow:hidden;min-height:0;}
@@ -625,6 +624,14 @@ html[data-theme="dark"] .km-t.live{color:#a7e137;}
 html[data-theme="dark"] .km-t.pipe{color:#f5b544;}
 html[data-theme="dark"] .km-t.plan{color:#7d7a72;}
 .km-t[hidden],.km-zone[hidden],.km-cat[hidden],.km-pillar[hidden]{display:none!important;}
+
+/* A pillar that isn't subdivided (Foundation, Networking, Cloud) would otherwise
+   show a category row repeating its own name — drop the row, keep the topics. */
+.km-cat.solo{background:transparent;}
+.km-cat.solo > .km-c-head{display:none;}
+.km-cat.solo > .km-c-body{grid-template-rows:1fr;}
+.km-cat.solo .km-topics{border-top:0;padding-top:0;}
+.km-cat.solo .km-zone:first-child{margin-top:4px;}
 
 .km-empty{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:1px;color:var(--muted);
   padding:26px 4px;text-align:center;}
@@ -755,53 +762,6 @@ html[data-theme="dark"] .sub-rss a:hover{color:#fff;border-color:#fff;}
   text-transform:uppercase;color:var(--muted);transition:background .2s;}
 .km-allcats:hover{background:var(--wash-2);color:var(--heading-fg);}
 .km-allcats b{color:var(--heading-fg);font-weight:400;}
-
-/* ─── REFERENCE LIBRARY ─── */
-.lib-section{background:var(--panel-bg);border-top:1px solid var(--hairline-2);}
-.lib-inner{max-width:1200px;margin:0 auto;padding:100px 64px 90px;}
-.lib-stats{display:flex;flex-wrap:wrap;gap:1px;background:var(--hairline-2);
-  border:1px solid var(--hairline-2);margin:-32px 0 40px;}
-.lib-stats > div{flex:1 1 120px;background:var(--page-bg);padding:15px 20px;text-align:center;}
-.lib-stats b{display:block;font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;
-  color:var(--heading-fg);font-weight:400;}
-.lib-stats i{display:block;font-style:normal;font-family:'DM Mono',monospace;font-size:8.5px;
-  letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-top:6px;}
-.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:2px;}
-.lib-card{position:relative;background:var(--card-bg);border:1px solid var(--hairline-1);
-  padding:26px 26px 22px;transition:background .22s,border-color .22s;}
-.lib-card:hover{background:var(--page-bg);border-color:var(--hairline-4);}
-/* one full-card hit area, so the nested lists stay selectable text */
-.lib-hit{position:absolute;inset:0;z-index:1;text-indent:-9999px;overflow:hidden;}
-.lib-card > *:not(.lib-hit){position:relative;pointer-events:none;}
-.lib-top{display:flex;align-items:flex-start;gap:14px;}
-.lib-n{font-family:'DM Mono',monospace;font-size:10px;color:var(--ash);padding-top:5px;}
-.lib-title{font-family:'Bebas Neue',sans-serif;font-size:27px;letter-spacing:.6px;line-height:1;
-  color:var(--heading-fg);font-weight:400;}
-.lib-meta{display:flex;flex-wrap:wrap;gap:12px;margin-top:7px;font-family:'DM Mono',monospace;
-  font-size:8.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);}
-.lib-kind{color:var(--crimson);}
-.lib-desc{font-size:13px;line-height:1.6;color:var(--muted);margin:14px 0 0;}
-.lib-model{margin-top:14px;padding:10px 12px;background:var(--wash-1);
-  border-left:2px solid var(--cyan);font-family:'DM Mono',monospace;font-size:9px;
-  letter-spacing:.8px;line-height:1.8;color:var(--muted);text-transform:uppercase;}
-.lib-model b{display:block;color:var(--cyan);letter-spacing:1.6px;margin-bottom:3px;font-weight:400;}
-.lib-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
-.lib-col-t{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:2px;text-transform:uppercase;
-  padding-bottom:6px;margin-bottom:8px;border-bottom:1px solid var(--hairline-2);}
-.lib-col-t.core{color:#4c840f;}
-.lib-col-t.adv{color:#8a5806;}
-html[data-theme="dark"] .lib-col-t.core{color:var(--lime);}
-html[data-theme="dark"] .lib-col-t.adv{color:var(--amber);}
-.lib-col ul{list-style:none;margin:0;padding:0;}
-.lib-col li{font-size:11.5px;line-height:1.5;color:var(--muted);padding:3px 0 3px 12px;
-  position:relative;}
-.lib-col li::before{content:'';position:absolute;left:0;top:10px;width:4px;height:1px;
-  background:var(--hairline-4);}
-.lib-go{margin-top:20px;padding-top:14px;border-top:1px solid var(--hairline-2);
-  font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;
-  color:var(--crimson);}
-@media(max-width:900px){.lib-inner{padding:70px 32px 64px;}}
-@media(max-width:560px){.lib-inner{padding:56px 20px 50px;}.lib-cols{grid-template-columns:1fr;gap:14px;}}
 
 /* ─── TOOLCHAIN DIAGRAM ─── */
 .toolchain-section{background:var(--ink);padding:0;position:relative;overflow:hidden;}
@@ -1153,6 +1113,39 @@ a.footer-logo:hover{color:#fff;}
 .footer-meta{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:rgba(255,255,255,.2);}
 @media (max-width:900px){footer{padding:56px 32px 28px;}.footer-top{grid-template-columns:1fr;gap:32px;}}
 @media (max-width:600px){footer{padding:48px 22px 24px;}.footer-cols{grid-template-columns:1fr 1fr;}}
+
+/* ─── STICKY ARCHIVE ─── */
+/* Last in the sheet so it wins the cascade. */
+@media (min-width: 1101px) {
+  /* NB: no align-items:start. Sticky needs its containing block taller than
+     itself, and it is the default `stretch` that gives the grid item the full
+     row height. align-items:start shrink-wraps it and sticky never moves. */
+  .kr-issues.issues-bg{position:relative;}
+
+  /* The whole archive column scrolls as one pinned pane. Capping the inner
+     scroll box instead made the flex column squash the two featured cards
+     down to their badges — one scroll area, no squashing, everything
+     reachable. */
+  .kr-issues .issues-inner{position:sticky;top:0;height:100vh;overflow-y:auto;
+    padding:44px 64px 40px 40px!important;display:block!important;
+    scrollbar-width:auto;scrollbar-gutter:stable;
+    scrollbar-color:rgba(255,255,255,.34) rgba(255,255,255,.07);}
+  .kr-issues .issues-inner::-webkit-scrollbar{width:10px;}
+  .kr-issues .issues-inner::-webkit-scrollbar-track{background:rgba(255,255,255,.07);}
+  .kr-issues .issues-inner::-webkit-scrollbar-thumb{background:rgba(255,255,255,.34);
+    border-radius:5px;}
+  .kr-issues .issues-inner::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.55);}
+
+  /* the inner box is no longer the scroller */
+  .kr-issues .issues-scroll{max-height:none!important;overflow:visible!important;
+    padding-right:0!important;margin-right:0!important;}
+  .kr-issues .issues-scroll-wrap::after{display:none!important;}
+  .issues-scroll-hint{display:none!important;}
+
+  .kr-issues .issues-inner > .section-tag{margin-bottom:12px;}
+  .kr-issues .issues-inner > .section-title{font-size:clamp(32px,3.2vw,44px);margin-bottom:8px;}
+  .kr-issues .issues-inner > .section-lead{font-size:15px;margin-bottom:22px;}
+}
 </style>
 
 <!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
@@ -1181,7 +1174,6 @@ a.footer-logo:hover{color:#fff;}
   <ul class="nav-links">
     <li><a href="#topics">Topics</a></li>
     <li><a href="categories/index.html">Categories</a></li>
-    <li><a href="#library">Library</a></li>
     <li><a href="#issues">Issues</a></li>
     <li><a href="#authors">Authors</a></li>
     <li><a href="#subscribe" class="nav-cta">Subscribe →</a></li>
@@ -1499,16 +1491,17 @@ a.footer-logo:hover{color:#fff;}
           <span class="km-p-arrow" aria-hidden="true">⌄</span>
         </button>
         <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/foundation/index.html">
+        <div class="km-cat open solo" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🧱</span>
             <span class="km-c-meta">
               <span class="km-c-name">Foundation</span>
               <span class="km-c-counts"><i class="dot"></i><em>7</em><span class="u"> live</span> · 0<span class="u"> pipe</span> · 3<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/foundation/index.html">Open the Foundation hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html">Computer Fundamentals</a>
           <a class="km-t live" data-s="live" href="Foundation/OPERATING-SYSTEMS/operating-systems.html">Operating Systems</a>
@@ -1525,8 +1518,8 @@ a.footer-logo:hover{color:#fff;}
         </div>
         </div></div></div>
       </section>
-      <section class="km-pillar" data-pillar>
-        <button class="km-p-head" type="button" aria-expanded="false">
+      <section class="km-pillar open" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="true">
           <span class="km-p-idx">02</span>
           <span class="km-p-name">Infrastructure</span>
           <span class="km-p-counts"><em>1</em><span class="u"> live</span> · 8<span class="u"> pipe</span> · 29<span class="u"> planned</span></span>
@@ -1534,16 +1527,17 @@ a.footer-logo:hover{color:#fff;}
           <span class="km-p-arrow" aria-hidden="true">⌄</span>
         </button>
         <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/it-infrastructure/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🏗️</span>
             <span class="km-c-meta">
               <span class="km-c-name">IT Infrastructure</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 5<span class="u"> pipe</span> · 7<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/it-infrastructure/index.html">Open the IT Infrastructure hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">IT Infrastructure</button>
           <button type="button" class="km-t pipe" data-s="pipe">Server Administration</button>
@@ -1560,16 +1554,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Enterprise Infrastructure</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/storage/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">💽</span>
             <span class="km-c-meta">
               <span class="km-c-name">Storage</span>
               <span class="km-c-counts"><i class="dot"></i><em>1</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 12<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/storage/index.html">Open the Storage hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html">LVM</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
@@ -1590,16 +1585,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Storage Backup</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/virtualization/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🖥️</span>
             <span class="km-c-meta">
               <span class="km-c-name">Virtualization</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 1<span class="u"> pipe</span> · 10<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/virtualization/index.html">Open the Virtualization hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Virtualization Fundamentals</button>
           <div class="km-zone plan" data-zone="plan">Planned</div>
@@ -1617,8 +1613,8 @@ a.footer-logo:hover{color:#fff;}
         </div>
         </div></div></div>
       </section>
-      <section class="km-pillar" data-pillar>
-        <button class="km-p-head" type="button" aria-expanded="false">
+      <section class="km-pillar open" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="true">
           <span class="km-p-idx">03</span>
           <span class="km-p-name">Networking</span>
           <span class="km-p-counts"><em>1</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 26<span class="u"> planned</span></span>
@@ -1626,16 +1622,17 @@ a.footer-logo:hover{color:#fff;}
           <span class="km-p-arrow" aria-hidden="true">⌄</span>
         </button>
         <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/networking/index.html">
+        <div class="km-cat open solo" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🌐</span>
             <span class="km-c-meta">
               <span class="km-c-name">Networking</span>
               <span class="km-c-counts"><i class="dot"></i><em>1</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 26<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/networking/index.html">Open the Networking hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="DevOps/K8/Networking/k8-networking.html">DNS</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
@@ -1674,8 +1671,8 @@ a.footer-logo:hover{color:#fff;}
         </div>
         </div></div></div>
       </section>
-      <section class="km-pillar" data-pillar>
-        <button class="km-p-head" type="button" aria-expanded="false">
+      <section class="km-pillar open" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="true">
           <span class="km-p-idx">04</span>
           <span class="km-p-name">Cloud</span>
           <span class="km-p-counts"><em>0</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 13<span class="u"> planned</span></span>
@@ -1683,16 +1680,17 @@ a.footer-logo:hover{color:#fff;}
           <span class="km-p-arrow" aria-hidden="true">⌄</span>
         </button>
         <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/cloud/index.html">
+        <div class="km-cat open solo" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">☁️</span>
             <span class="km-c-meta">
               <span class="km-c-name">Cloud</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 13<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/cloud/index.html">Open the Cloud hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Cloud Fundamentals</button>
           <button type="button" class="km-t pipe" data-s="pipe">AWS</button>
@@ -1716,8 +1714,8 @@ a.footer-logo:hover{color:#fff;}
         </div>
         </div></div></div>
       </section>
-      <section class="km-pillar" data-pillar>
-        <button class="km-p-head" type="button" aria-expanded="false">
+      <section class="km-pillar open" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="true">
           <span class="km-p-idx">05</span>
           <span class="km-p-name">Delivery</span>
           <span class="km-p-counts"><em>12</em><span class="u"> live</span> · 22<span class="u"> pipe</span> · 42<span class="u"> planned</span></span>
@@ -1725,16 +1723,17 @@ a.footer-logo:hover{color:#fff;}
           <span class="km-p-arrow" aria-hidden="true">⌄</span>
         </button>
         <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/devops/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">⚙️</span>
             <span class="km-c-meta">
               <span class="km-c-name">DevOps</span>
               <span class="km-c-counts"><i class="dot"></i><em>9</em><span class="u"> live</span> · 5<span class="u"> pipe</span> · 7<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/devops/index.html">Open the DevOps hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">CI/CD</a>
           <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Continuous Integration</a>
@@ -1761,16 +1760,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Pipeline Optimization</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/containers/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">📦</span>
             <span class="km-c-meta">
               <span class="km-c-name">Containers</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 6<span class="u"> pipe</span> · 6<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/containers/index.html">Open the Containers hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Containers</button>
           <button type="button" class="km-t pipe" data-s="pipe">Docker</button>
@@ -1787,16 +1787,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Container Storage</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/infrastructure-as-code/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">📐</span>
             <span class="km-c-meta">
               <span class="km-c-name">Infrastructure as Code</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 8<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/infrastructure-as-code/index.html">Open the Infrastructure as Code hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Infrastructure as Code</button>
           <button type="button" class="km-t pipe" data-s="pipe">Terraform</button>
@@ -1812,16 +1813,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">IaC Drift Management</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/configuration-management/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🔧</span>
             <span class="km-c-meta">
               <span class="km-c-name">Configuration Management</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 9<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/configuration-management/index.html">Open the Configuration Management hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Configuration Management</button>
           <button type="button" class="km-t pipe" data-s="pipe">Ansible</button>
@@ -1838,16 +1840,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Salt</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/gitops/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🔀</span>
             <span class="km-c-meta">
               <span class="km-c-name">GitOps</span>
               <span class="km-c-counts"><i class="dot"></i><em>3</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 3<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/gitops/index.html">Open the GitOps hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">GitOps</a>
           <a class="km-t live" data-s="live" href="DevOps/CICD/cicd-pipelines.html">Argo CD</a>
@@ -1861,16 +1864,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">GitOps Security</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/platform-engineering/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🛠️</span>
             <span class="km-c-meta">
               <span class="km-c-name">Platform Engineering</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 9<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/platform-engineering/index.html">Open the Platform Engineering hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Platform Engineering</button>
           <button type="button" class="km-t pipe" data-s="pipe">Internal Developer Platform</button>
@@ -1889,8 +1893,8 @@ a.footer-logo:hover{color:#fff;}
         </div>
         </div></div></div>
       </section>
-      <section class="km-pillar" data-pillar>
-        <button class="km-p-head" type="button" aria-expanded="false">
+      <section class="km-pillar open" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="true">
           <span class="km-p-idx">06</span>
           <span class="km-p-name">Kubernetes</span>
           <span class="km-p-counts"><em>18</em><span class="u"> live</span> · 17<span class="u"> pipe</span> · 23<span class="u"> planned</span></span>
@@ -1898,16 +1902,17 @@ a.footer-logo:hover{color:#fff;}
           <span class="km-p-arrow" aria-hidden="true">⌄</span>
         </button>
         <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/kubernetes/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">☸️</span>
             <span class="km-c-meta">
               <span class="km-c-name">Kubernetes</span>
               <span class="km-c-counts"><i class="dot"></i><em>16</em><span class="u"> live</span> · 13<span class="u"> pipe</span> · 6<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/kubernetes/index.html">Open the Kubernetes hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="DevOps/K8/ARCHITECTURE/k8-architecture.html">Kubernetes Fundamentals</a>
           <a class="km-t live" data-s="live" href="DevOps/K8/ARCHITECTURE/k8-architecture.html">Kubernetes Architecture</a>
@@ -1948,16 +1953,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Kubernetes Disaster Recovery</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/openshift/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🔴</span>
             <span class="km-c-meta">
               <span class="km-c-name">OpenShift</span>
               <span class="km-c-counts"><i class="dot"></i><em>2</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 9<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/openshift/index.html">Open the OpenShift hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">SCC</a>
           <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">OpenShift Troubleshooting</a>
@@ -1976,16 +1982,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">OpenShift Upgrades</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/service-mesh/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🕸️</span>
             <span class="km-c-meta">
               <span class="km-c-name">Service Mesh</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 8<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/service-mesh/index.html">Open the Service Mesh hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Service Mesh</button>
           <button type="button" class="km-t pipe" data-s="pipe">Istio</button>
@@ -2002,8 +2009,8 @@ a.footer-logo:hover{color:#fff;}
         </div>
         </div></div></div>
       </section>
-      <section class="km-pillar" data-pillar>
-        <button class="km-p-head" type="button" aria-expanded="false">
+      <section class="km-pillar open" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="true">
           <span class="km-p-idx">07</span>
           <span class="km-p-name">Reliability</span>
           <span class="km-p-counts"><em>27</em><span class="u"> live</span> · 25<span class="u"> pipe</span> · 64<span class="u"> planned</span></span>
@@ -2011,16 +2018,17 @@ a.footer-logo:hover{color:#fff;}
           <span class="km-p-arrow" aria-hidden="true">⌄</span>
         </button>
         <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/sre/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">📡</span>
             <span class="km-c-meta">
               <span class="km-c-name">SRE</span>
               <span class="km-c-counts"><i class="dot"></i><em>4</em><span class="u"> live</span> · 8<span class="u"> pipe</span> · 13<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/sre/index.html">Open the SRE hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">MTTR</a>
           <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Incident Management</a>
@@ -2051,16 +2059,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">SRE Automation</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/observability/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">📊</span>
             <span class="km-c-meta">
               <span class="km-c-name">Observability</span>
               <span class="km-c-counts"><i class="dot"></i><em>11</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 7<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/observability/index.html">Open the Observability hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Observability</a>
           <a class="km-t live" data-s="live" href="DevOps/K8/OBSERVABILITY/k8-observability.html">Monitoring</a>
@@ -2088,16 +2097,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Observability Architecture</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/logging/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">📜</span>
             <span class="km-c-meta">
               <span class="km-c-name">Logging</span>
               <span class="km-c-counts"><i class="dot"></i><em>2</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 9<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/logging/index.html">Open the Logging hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html">Linux Logging</a>
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html">Journald</a>
@@ -2117,16 +2127,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Log Security</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/performance-engineering/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">⚡</span>
             <span class="km-c-meta">
               <span class="km-c-name">Performance Engineering</span>
               <span class="km-c-counts"><i class="dot"></i><em>4</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 6<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/performance-engineering/index.html">Open the Performance Engineering hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html">CPU Performance</a>
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html">Memory Performance</a>
@@ -2144,16 +2155,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Capacity Modeling</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/troubleshooting/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🔍</span>
             <span class="km-c-meta">
               <span class="km-c-name">Troubleshooting</span>
               <span class="km-c-counts"><i class="dot"></i><em>5</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 5<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/troubleshooting/index.html">Open the Troubleshooting hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html">Linux Troubleshooting</a>
           <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">Kubernetes Troubleshooting</a>
@@ -2171,16 +2183,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Failure Analysis</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/backup-dr/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🗄️</span>
             <span class="km-c-meta">
               <span class="km-c-name">Backup &amp; DR</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 12<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/backup-dr/index.html">Open the Backup &amp; DR hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Backup Fundamentals</button>
           <button type="button" class="km-t pipe" data-s="pipe">RPO</button>
@@ -2201,16 +2214,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Failback</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/itsm-operations/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🎫</span>
             <span class="km-c-meta">
               <span class="km-c-name">ITSM &amp; Operations</span>
               <span class="km-c-counts"><i class="dot"></i><em>1</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 12<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/itsm-operations/index.html">Open the ITSM &amp; Operations hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="SRE/INCIDENT-MANAGEMENT/incident-management.html">Incident Management</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
@@ -2233,8 +2247,8 @@ a.footer-logo:hover{color:#fff;}
         </div>
         </div></div></div>
       </section>
-      <section class="km-pillar" data-pillar>
-        <button class="km-p-head" type="button" aria-expanded="false">
+      <section class="km-pillar open" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="true">
           <span class="km-p-idx">08</span>
           <span class="km-p-name">Security</span>
           <span class="km-p-counts"><em>0</em><span class="u"> live</span> · 18<span class="u"> pipe</span> · 28<span class="u"> planned</span></span>
@@ -2242,16 +2256,17 @@ a.footer-logo:hover{color:#fff;}
           <span class="km-p-arrow" aria-hidden="true">⌄</span>
         </button>
         <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/security/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🛡️</span>
             <span class="km-c-meta">
               <span class="km-c-name">Security</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 11<span class="u"> pipe</span> · 20<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/security/index.html">Open the Security hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Cybersecurity Fundamentals</button>
           <button type="button" class="km-t pipe" data-s="pipe">Infrastructure Security</button>
@@ -2287,16 +2302,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Security Auditing</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/supply-chain-security/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🔗</span>
             <span class="km-c-meta">
               <span class="km-c-name">Supply Chain Security</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 7<span class="u"> pipe</span> · 8<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/supply-chain-security/index.html">Open the Supply Chain Security hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Software Supply Chain Security</button>
           <button type="button" class="km-t pipe" data-s="pipe">SBOM</button>
@@ -2318,8 +2334,8 @@ a.footer-logo:hover{color:#fff;}
         </div>
         </div></div></div>
       </section>
-      <section class="km-pillar" data-pillar>
-        <button class="km-p-head" type="button" aria-expanded="false">
+      <section class="km-pillar open" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="true">
           <span class="km-p-idx">09</span>
           <span class="km-p-name">Data &amp; Applications</span>
           <span class="km-p-counts"><em>1</em><span class="u"> live</span> · 12<span class="u"> pipe</span> · 47<span class="u"> planned</span></span>
@@ -2327,16 +2343,17 @@ a.footer-logo:hover{color:#fff;}
           <span class="km-p-arrow" aria-hidden="true">⌄</span>
         </button>
         <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/database/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🗃️</span>
             <span class="km-c-meta">
               <span class="km-c-name">Database</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 13<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/database/index.html">Open the Database hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Database Fundamentals</button>
           <button type="button" class="km-t pipe" data-s="pipe">PostgreSQL</button>
@@ -2357,16 +2374,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Database Security</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/middleware/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🧩</span>
             <span class="km-c-meta">
               <span class="km-c-name">Middleware</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 11<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/middleware/index.html">Open the Middleware hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Nginx</button>
           <button type="button" class="km-t pipe" data-s="pipe">Apache Kafka</button>
@@ -2385,16 +2403,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Middleware Troubleshooting</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/api-microservices/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🔌</span>
             <span class="km-c-meta">
               <span class="km-c-name">API &amp; Microservices</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 12<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/api-microservices/index.html">Open the API &amp; Microservices hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">REST APIs</button>
           <button type="button" class="km-t pipe" data-s="pipe">HTTP/HTTPS</button>
@@ -2415,16 +2434,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Event-Driven Microservices</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/distributed-systems/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🕮</span>
             <span class="km-c-meta">
               <span class="km-c-name">Distributed Systems</span>
               <span class="km-c-counts"><i class="dot"></i><em>1</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 11<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/distributed-systems/index.html">Open the Distributed Systems hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="DevOps/K8/ERROR/K8-error.html">Quorum</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
@@ -2446,8 +2466,8 @@ a.footer-logo:hover{color:#fff;}
         </div>
         </div></div></div>
       </section>
-      <section class="km-pillar" data-pillar>
-        <button class="km-p-head" type="button" aria-expanded="false">
+      <section class="km-pillar open" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="true">
           <span class="km-p-idx">10</span>
           <span class="km-p-name">Commands</span>
           <span class="km-p-counts"><em>34</em><span class="u"> live</span> · 41<span class="u"> pipe</span> · 25<span class="u"> planned</span></span>
@@ -2455,16 +2475,17 @@ a.footer-logo:hover{color:#fff;}
           <span class="km-p-arrow" aria-hidden="true">⌄</span>
         </button>
         <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/linux-commands/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🐧</span>
             <span class="km-c-meta">
               <span class="km-c-name">Linux Commands</span>
               <span class="km-c-counts"><i class="dot"></i><em>10</em><span class="u"> live</span> · 0<span class="u"> pipe</span> · 0<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/linux-commands/index.html">Open the Linux Commands hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="Commands/LINUX-COMMANDS/linux-commands.html">Files &amp; Navigation</a>
           <a class="km-t live" data-s="live" href="Commands/LINUX-COMMANDS/linux-commands.html">Permissions &amp; Ownership</a>
@@ -2478,16 +2499,17 @@ a.footer-logo:hover{color:#fff;}
           <a class="km-t live" data-s="live" href="Commands/LINUX-COMMANDS/linux-commands.html">Networking Commands</a>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/systemd-commands/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">⚙️</span>
             <span class="km-c-meta">
               <span class="km-c-name">systemd Commands</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 6<span class="u"> pipe</span> · 4<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/systemd-commands/index.html">Open the systemd Commands hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">systemctl</button>
           <button type="button" class="km-t pipe" data-s="pipe">journalctl</button>
@@ -2502,16 +2524,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Drop-ins</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/docker-commands/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🐳</span>
             <span class="km-c-meta">
               <span class="km-c-name">Docker Commands</span>
               <span class="km-c-counts"><i class="dot"></i><em>6</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 1<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/docker-commands/index.html">Open the Docker Commands hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="Commands/DOCKER-COMMANDS/docker-commands.html">Running Containers</a>
           <a class="km-t live" data-s="live" href="Commands/DOCKER-COMMANDS/docker-commands.html">Images &amp; Building</a>
@@ -2527,16 +2550,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Security Scanning</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/kubernetes-commands/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">☸️</span>
             <span class="km-c-meta">
               <span class="km-c-name">Kubernetes Commands</span>
               <span class="km-c-counts"><i class="dot"></i><em>7</em><span class="u"> live</span> · 2<span class="u"> pipe</span> · 1<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/kubernetes-commands/index.html">Open the Kubernetes Commands hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">Inspecting</a>
           <a class="km-t live" data-s="live" href="Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">Applying &amp; Deleting</a>
@@ -2552,16 +2576,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">krew Plugins</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/openshift-commands/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🔴</span>
             <span class="km-c-meta">
               <span class="km-c-name">OpenShift Commands</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 7<span class="u"> pipe</span> · 3<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/openshift-commands/index.html">Open the OpenShift Commands hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">oc login &amp; Projects</button>
           <button type="button" class="km-t pipe" data-s="pipe">oc new-app</button>
@@ -2576,16 +2601,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Cluster Operators</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/ansible-commands/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🔧</span>
             <span class="km-c-meta">
               <span class="km-c-name">Ansible Commands</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 6<span class="u"> pipe</span> · 4<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/ansible-commands/index.html">Open the Ansible Commands hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">Ad-hoc Commands</button>
           <button type="button" class="km-t pipe" data-s="pipe">ansible-playbook</button>
@@ -2600,16 +2626,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Callback Plugins</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/terraform-commands/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">📐</span>
             <span class="km-c-meta">
               <span class="km-c-name">Terraform Commands</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 6<span class="u"> pipe</span> · 4<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/terraform-commands/index.html">Open the Terraform Commands hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">init &amp; providers</button>
           <button type="button" class="km-t pipe" data-s="pipe">plan</button>
@@ -2624,16 +2651,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">destroy &amp; targeting</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/networking-commands/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🌐</span>
             <span class="km-c-meta">
               <span class="km-c-name">Networking Commands</span>
               <span class="km-c-counts"><i class="dot"></i><em>6</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 1<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/networking-commands/index.html">Open the Networking Commands hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="Commands/LINUX-COMMANDS/linux-commands.html">ip &amp; Addressing</a>
           <a class="km-t live" data-s="live" href="Commands/LINUX-COMMANDS/linux-commands.html">ss &amp; Sockets</a>
@@ -2649,16 +2677,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Bandwidth Testing</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/performance-commands/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">⚡</span>
             <span class="km-c-meta">
               <span class="km-c-name">Performance Commands</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 8<span class="u"> pipe</span> · 2<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/performance-commands/index.html">Open the Performance Commands hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">top &amp; htop</button>
           <button type="button" class="km-t pipe" data-s="pipe">vmstat</button>
@@ -2673,16 +2702,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Flame Graphs</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/storage-commands/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">💽</span>
             <span class="km-c-meta">
               <span class="km-c-name">Storage Commands</span>
               <span class="km-c-counts"><i class="dot"></i><em>5</em><span class="u"> live</span> · 0<span class="u"> pipe</span> · 5<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/storage-commands/index.html">Open the Storage Commands hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="Commands/LINUX-COMMANDS/linux-commands.html">lsblk &amp; blkid</a>
           <a class="km-t live" data-s="live" href="Commands/LINUX-COMMANDS/linux-commands.html">df &amp; du</a>
@@ -2699,8 +2729,8 @@ a.footer-logo:hover{color:#fff;}
         </div>
         </div></div></div>
       </section>
-      <section class="km-pillar" data-pillar>
-        <button class="km-p-head" type="button" aria-expanded="false">
+      <section class="km-pillar open" data-pillar>
+        <button class="km-p-head" type="button" aria-expanded="true">
           <span class="km-p-idx">11</span>
           <span class="km-p-name">Modern Ops</span>
           <span class="km-p-counts"><em>3</em><span class="u"> live</span> · 21<span class="u"> pipe</span> · 45<span class="u"> planned</span></span>
@@ -2708,16 +2738,17 @@ a.footer-logo:hover{color:#fff;}
           <span class="km-p-arrow" aria-hidden="true">⌄</span>
         </button>
         <div class="km-p-body"><div class="km-p-inner"><div class="km-cats">
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/ai-infrastructure/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🤖</span>
             <span class="km-c-meta">
               <span class="km-c-name">AI Infrastructure</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 6<span class="u"> pipe</span> · 14<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/ai-infrastructure/index.html">Open the AI Infrastructure hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">AI Infrastructure</button>
           <button type="button" class="km-t pipe" data-s="pipe">GPU Infrastructure</button>
@@ -2742,16 +2773,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">AI Infrastructure Automation</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/aiops/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🧠</span>
             <span class="km-c-meta">
               <span class="km-c-name">AIOps</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 4<span class="u"> pipe</span> · 10<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/aiops/index.html">Open the AIOps hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">AIOps</button>
           <button type="button" class="km-t pipe" data-s="pipe">AI Root Cause Analysis</button>
@@ -2770,16 +2802,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">AI Operational Guardrails</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/finops/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">💰</span>
             <span class="km-c-meta">
               <span class="km-c-name">FinOps</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 5<span class="u"> pipe</span> · 6<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/finops/index.html">Open the FinOps hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">FinOps</button>
           <button type="button" class="km-t pipe" data-s="pipe">Cloud Cost Management</button>
@@ -2795,16 +2828,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Cost Governance</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/automation/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🔁</span>
             <span class="km-c-meta">
               <span class="km-c-name">Automation</span>
               <span class="km-c-counts"><i class="dot"></i><em>3</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 6<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/automation/index.html">Open the Automation hub — architecture, issues, full topic list →</a>
           <div class="km-zone live" data-zone="live">Live now</div>
           <a class="km-t live" data-s="live" href="Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html">Shell Automation</a>
           <a class="km-t live" data-s="live" href="Foundation/SHELL-AND-BASH/shell-and-bash.html">Bash Automation</a>
@@ -2822,16 +2856,17 @@ a.footer-logo:hover{color:#fff;}
           <button type="button" class="km-t plan" data-s="plan">Monitoring Automation</button>
           </div></div></div>
         </div>
-        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/architecture/index.html">
+        <div class="km-cat open" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">🏛️</span>
             <span class="km-c-meta">
               <span class="km-c-name">Architecture</span>
               <span class="km-c-counts"><i class="dot none"></i><em>0</em><span class="u"> live</span> · 3<span class="u"> pipe</span> · 9<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
+          <a class="km-hublink" href="categories/architecture/index.html">Open the Architecture hub — architecture, issues, full topic list →</a>
           <div class="km-zone pipe" data-zone="pipe">In pipeline</div>
           <button type="button" class="km-t pipe" data-s="pipe">System Architecture</button>
           <button type="button" class="km-t pipe" data-s="pipe">Microservice Architecture</button>
@@ -3077,116 +3112,6 @@ a.footer-logo:hover{color:#fff;}
 </div>
 </div>
 
-
-<!-- ═══════════ REFERENCE LIBRARY ═══════════ -->
-<div class="lib-section" id="library">
-  <div class="lib-inner reveal">
-    <div class="section-tag">Reference Library</div>
-    <h2 class="section-title">DEEP-DIVES, IN FULL</h2>
-    <p class="section-lead">Standing reference pages, separate from the monthly issues — each one
-      an architecture diagram, a core section, an advanced section, worked examples and a
-      cheatsheet. Everything each page covers is listed below.</p>
-    <div class="lib-stats">
-      <div><b>5</b><i>Pages</i></div>
-      <div><b>20</b><i>Core topics</i></div>
-      <div><b>20</b><i>Advanced topics</i></div>
-      <div><b>Foundation</b><i>Category</i></div>
-    </div>
-    <div class="lib-grid">
-      <article class="lib-card">
-        <a class="lib-hit" href="Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html" aria-label="Computer Fundamentals"></a>
-        <div class="lib-top">
-          <span class="lib-n">01</span>
-          <div class="lib-id">
-            <h3 class="lib-title">Computer Fundamentals</h3>
-            <div class="lib-meta"><span class="lib-kind">Reference</span>
-              <span>22 min read</span><span>Foundation</span></div>
-          </div>
-        </div>
-        <p class="lib-desc">What the hardware is actually doing underneath your process — caches, translation, interrupts and the six orders of magnitude between L1 and a disk seek.</p>
-        <div class="lib-model"><b>The model</b> Software → Kernel → Translation → Cache → Memory → Storage → Network</div>
-        <div class="lib-cols">
-          <div class="lib-col"><div class="lib-col-t core">Core</div><ul><li>The execution model</li><li>Memory hierarchy and the cache line</li><li>Virtual memory, the MMU and the TLB</li><li>The storage stack</li></ul></div>
-          <div class="lib-col"><div class="lib-col-t adv">Advanced</div><ul><li>NUMA — when &#x27;the RAM&#x27; is several different RAMs</li><li>Interrupts, DMA and IRQ affinity</li><li>Context switches and what they really cost</li><li>Numbers worth memorising</li></ul></div>
-        </div>
-        <div class="lib-go">Read Computer Fundamentals →</div>
-      </article>
-      <article class="lib-card">
-        <a class="lib-hit" href="Foundation/OPERATING-SYSTEMS/operating-systems.html" aria-label="Operating Systems"></a>
-        <div class="lib-top">
-          <span class="lib-n">02</span>
-          <div class="lib-id">
-            <h3 class="lib-title">Operating Systems</h3>
-            <div class="lib-meta"><span class="lib-kind">Reference</span>
-              <span>26 min read</span><span>Foundation</span></div>
-          </div>
-        </div>
-        <p class="lib-desc">The kernel as an operator sees it — the syscall boundary, the scheduler, the page cache, cgroups, and the failure modes each one produces in production.</p>
-        <div class="lib-model"><b>The model</b> User Space → The Boundary → Kernel: Process → Kernel: Memory → Kernel: I/O → Drivers → Hardware</div>
-        <div class="lib-cols">
-          <div class="lib-col"><div class="lib-col-t core">Core</div><ul><li>The user / kernel boundary</li><li>Processes, threads and what the scheduler sees</li><li>Virtual memory, the page cache and writeback</li><li>File descriptors, VFS and everything-is-a-file</li></ul></div>
-          <div class="lib-col"><div class="lib-col-t adv">Advanced</div><ul><li>cgroups and namespaces — containers, demystified</li><li>The OOM killer and cgroup memory accounting</li><li>Signals, and why your container ignores SIGTERM</li><li>I/O paths: buffered, direct, and io_uring</li></ul></div>
-        </div>
-        <div class="lib-go">Read Operating Systems →</div>
-      </article>
-      <article class="lib-card">
-        <a class="lib-hit" href="Foundation/SHELL-AND-BASH/shell-and-bash.html" aria-label="Shell &amp; Bash"></a>
-        <div class="lib-top">
-          <span class="lib-n">03</span>
-          <div class="lib-id">
-            <h3 class="lib-title">Shell &amp; Bash</h3>
-            <div class="lib-meta"><span class="lib-kind">Reference</span>
-              <span>23 min read</span><span>Foundation</span></div>
-          </div>
-        </div>
-        <p class="lib-desc">How the shell reads, expands and executes a line — and why nearly every shell bug is really a quoting bug at the word-splitting stage.</p>
-        <div class="lib-model"><b>The model</b> 1 · Read → 2 · Expand → 3 · Split → 4 · Redirect → 5 · Execute</div>
-        <div class="lib-cols">
-          <div class="lib-col"><div class="lib-col-t core">Core</div><ul><li>Expansion order — the root of most shell bugs</li><li>Exit codes, pipelines and where failures hide</li><li>Redirection and file descriptors</li><li>Test constructs: [ vs [[ vs ((</li></ul></div>
-          <div class="lib-col"><div class="lib-col-t adv">Advanced</div><ul><li>set -euo pipefail — and where it lies to you</li><li>Traps, cleanup and signal handling</li><li>Process substitution and doing without a temp file</li><li>Parallelism without a job scheduler</li></ul></div>
-        </div>
-        <div class="lib-go">Read Shell &amp; Bash →</div>
-      </article>
-      <article class="lib-card">
-        <a class="lib-hit" href="Foundation/PYTHON/python.html" aria-label="Python"></a>
-        <div class="lib-top">
-          <span class="lib-n">04</span>
-          <div class="lib-id">
-            <h3 class="lib-title">Python</h3>
-            <div class="lib-meta"><span class="lib-kind">Reference</span>
-              <span>25 min read</span><span>Foundation</span></div>
-          </div>
-        </div>
-        <p class="lib-desc">Python for people who run things — the GIL, choosing a concurrency model, streaming instead of loading, and the subprocess and logging patterns that survive production.</p>
-        <div class="lib-model"><b>The model</b> Source → Compile → Runtime → Concurrency → Escape Hatches → Environment</div>
-        <div class="lib-cols">
-          <div class="lib-col"><div class="lib-col-t core">Core</div><ul><li>The GIL — what it does and doesn&#x27;t block</li><li>Threads, processes, asyncio — picking one</li><li>Environments and dependency resolution</li><li>Generators and not loading the 40 GB file</li></ul></div>
-          <div class="lib-col"><div class="lib-col-t adv">Advanced</div><ul><li>Memory: refcounting, cycles, and why RSS never drops</li><li>subprocess, done correctly</li><li>Logging that survives contact with production</li><li>Making Python fast enough</li></ul></div>
-        </div>
-        <div class="lib-go">Read Python →</div>
-      </article>
-      <article class="lib-card">
-        <a class="lib-hit" href="Foundation/GIT-VERSION-CONTROL/git-version-control.html" aria-label="Git &amp; Version Control"></a>
-        <div class="lib-top">
-          <span class="lib-n">05</span>
-          <div class="lib-id">
-            <h3 class="lib-title">Git &amp; Version Control</h3>
-            <div class="lib-meta"><span class="lib-kind">Reference</span>
-              <span>24 min read</span><span>Foundation</span></div>
-          </div>
-        </div>
-        <p class="lib-desc">Git as a content-addressed object store — the four object types, the three trees, and the recovery paths that mean you have almost certainly not lost that work.</p>
-        <div class="lib-model"><b>The model</b> Your Edits → Staging → Object Store → Refs → Safety Net → Remote</div>
-        <div class="lib-cols">
-          <div class="lib-col"><div class="lib-col-t core">Core</div><ul><li>The object model — Git is a content-addressed store</li><li>The three trees</li><li>Branches are pointers, and that is the whole trick</li><li>Merge, rebase, squash — what each actually produces</li></ul></div>
-          <div class="lib-col"><div class="lib-col-t adv">Advanced</div><ul><li>The reflog — why nothing is really lost</li><li>git bisect — binary search over history</li><li>Packfiles, gc, and why the clone is 4 GB</li><li>Hooks, worktrees and the bits that save real time</li></ul></div>
-        </div>
-        <div class="lib-go">Read Git &amp; Version Control →</div>
-      </article>
-    </div>
-  </div>
-</div>
-
 <!-- ═══════════ AUTHORS ═══════════ -->
 <div class="authors-section" id="authors">
   <div class="authors-inner reveal">
@@ -3290,7 +3215,6 @@ a.footer-logo:hover{color:#fff;}
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Explore</div>
-          <a href="#library">Reference Library</a>
           <a href="categories/index.html">All Categories</a>
           <a href="#topics">Knowledge Map</a>
           <a href="Infrastructure/OS/index.html">OS / Linux Series</a>
@@ -3564,6 +3488,7 @@ function poTrack(path, title){
   topics.forEach(t => { t.dataset.q = t.textContent.trim().toLowerCase(); });
 
   const setOpen = (el, on) => {
+    if (el.classList.contains('solo')) return;   /* header hidden; stays open */
     el.classList.toggle('open', on);
     const head = el.querySelector('button');
     if (head) head.setAttribute('aria-expanded', on ? 'true' : 'false');
@@ -3574,16 +3499,16 @@ function poTrack(path, title){
     const pHead = e.target.closest('.km-p-head');
     if (pHead) {
       const p = pHead.closest('[data-pillar]');
-      const wasOpen = p.classList.contains('open');
-      pillars.forEach(x => setOpen(x, false));
-      setOpen(p, !wasOpen);
+      setOpen(p, !p.classList.contains('open'));   /* toggle this one only */
       setTimeout(syncIssuesScrollHeight, 460);
       return;
     }
-    /* Categories are links to their hub page — the hub has the architecture
-       diagram, the issues and the full list at full width, so expanding a
-       cramped copy of it here was duplication. The collapsible body below is
-       still populated: search opens it to show the topics that matched. */
+    const cHead = e.target.closest('.km-c-head');
+    if (cHead) {
+      const c = cHead.closest('[data-cat]');
+      setOpen(c, !c.classList.contains('open'));   /* toggle this one only */
+      setTimeout(syncIssuesScrollHeight, 400);
+    }
   });
 
   function apply(){
@@ -3610,7 +3535,7 @@ function poTrack(path, title){
       });
       c.hidden = active && hits === 0;
       if (active && hits > 0) setOpen(c, true);
-      if (!active) setOpen(c, false);
+      if (!active) setOpen(c, true);
       shown += hits;
       c.dataset.hits = hits;
     });
@@ -3623,7 +3548,7 @@ function poTrack(path, title){
     });
 
     if (!active) {
-      pillars.forEach((p, i) => setOpen(p, i === 0));
+      pillars.forEach(p => setOpen(p, true));
       result.textContent = '';
     } else {
       if (q.length >= 3) {
@@ -3661,20 +3586,10 @@ function syncIssuesScrollHeight(){
   const scrollBox = document.getElementById('issuesScroll');
   if (!topics || !issuesInner || !scrollWrap || !scrollBox) return;
   if (window.innerWidth <= 1100) { scrollBox.style.maxHeight = ''; return; }
-  // Measure the non-scrolling chrome from the gaps around the wrap, not from
-  // the inner's own height — the latter already reflects whatever maxHeight we
-  // set last time, so it feeds back and collapses the panel to its floor.
-  const innerRect = issuesInner.getBoundingClientRect();
-  const wrapRect  = scrollWrap.getBoundingClientRect();
-  const chrome    = (wrapRect.top - innerRect.top)
-                  + (innerRect.bottom - wrapRect.bottom);
-  const byColumn  = topics.getBoundingClientRect().height - chrome;
-  // Never taller than the screen. The topics column is ~2300px now, and a panel
-  // matched to it put its own scrollbar mostly off-screen — the scroll still
-  // worked, you just couldn't reach the bar, which reads as it being disabled.
-  const byScreen  = window.innerHeight - 120;
-  scrollBox.style.maxHeight =
-    Math.max(360, Math.round(Math.min(byColumn, byScreen))) + 'px';
+  // Nothing to size on desktop: the whole archive column is one pinned,
+  // scrolling pane, so the inner box just grows to its content. Below the
+  // breakpoint the columns stack and the stylesheet's own cap applies.
+  scrollBox.style.maxHeight = '';
 }
 window.addEventListener('load', syncIssuesScrollHeight);
 window.addEventListener('resize', syncIssuesScrollHeight);

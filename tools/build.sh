@@ -32,8 +32,11 @@ python3 tools/build_wire.py          # category hub links, nav, licence line
 say "README.md"
 python3 tools/build_readme.py        # knowledge map section
 
-say "reference library (writes into BOTH index.html and README.md)"
+say "reference library (README only now)"
 python3 tools/build_library.py
+
+say "sticky archive"
+python3 tools/build_sticky.py
 
 say "category hubs"
 python3 tools/build_hubs.py

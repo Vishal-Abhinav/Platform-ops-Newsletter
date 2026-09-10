@@ -203,24 +203,8 @@ Expand any of them for the full contents:
 
 
 if __name__ == "__main__":
-    # 1. homepage
-    SRC = ROOT / 'index.html'
-    src = SRC.read_text(encoding='utf-8')
-    if 'id="library"' in src:
-        print('index.html already has the library section — skipping')
-    else:
-      src = src.replace('<!-- ═══════════ AUTHORS ═══════════ -->',
-                      homepage_html() + '\n<!-- ═══════════ AUTHORS ═══════════ -->', 1)
-      src = src.replace('/* ─── TOOLCHAIN DIAGRAM ─── */',
-                        CSS.strip() + '\n\n/* ─── TOOLCHAIN DIAGRAM ─── */', 1)
-      src = src.replace('    <li><a href="categories/index.html">Categories</a></li>\n',
-                        '    <li><a href="categories/index.html">Categories</a></li>\n'
-                        '    <li><a href="#library">Library</a></li>\n', 1)
-      src = src.replace('          <a href="categories/index.html">All Categories</a>',
-                        '          <a href="#library">Reference Library</a>\n'
-                        '          <a href="categories/index.html">All Categories</a>', 1)
-      SRC.write_text(src, encoding='utf-8')
-    print(f'index.html -> {len(src)} chars, library section added')
+    # The homepage no longer carries a library section — the Foundation
+    # pages are reached through their category hub. README keeps it.
 
     # 2. README
     R = ROOT / 'README.md'

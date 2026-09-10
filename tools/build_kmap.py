@@ -16,7 +16,6 @@ import sys
 
 sys.path.insert(0, str(TOOLS))
 from taxonomy import PILLARS, cat_stats  # noqa: E402
-from hubs_spec import SPEC              # noqa: E402
 
 SRC = ROOT / 'index.html'
 
@@ -142,10 +141,8 @@ html[data-theme="dark"] .km-p-counts em{color:var(--lime);}
   background:transparent;transition:background .25s;}
 .km-cat.open::before{background:var(--crimson);}
 .km-c-head{display:flex;align-items:center;gap:13px;width:100%;padding:13px 16px;background:none;
-  border:0;cursor:pointer;text-align:left;font:inherit;color:inherit;text-decoration:none;
-  transition:background .2s;}
+  border:0;cursor:pointer;text-align:left;font:inherit;color:inherit;transition:background .2s;}
 .km-c-head:hover{background:var(--wash-1);}
-.km-c-head:hover .km-c-arrow{color:var(--crimson);transform:translateX(3px);}
 .km-c-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:center;
   font-size:17px;line-height:1;background:var(--wash-2);border-radius:4px;flex-shrink:0;}
 .km-c-meta{flex:1;min-width:0;}
@@ -160,7 +157,8 @@ html[data-theme="dark"] .km-p-counts em{color:var(--lime);}
 .km-c-counts .dot.none{background:transparent;border:1.5px dashed var(--ash);animation:none;box-shadow:none;}
 html[data-theme="dark"] .km-c-counts em{color:var(--lime);}
 .km-c-arrow{font-family:'DM Mono',monospace;font-size:12px;color:var(--ash);flex-shrink:0;
-  transition:transform .25s,color .2s;}
+  transition:transform .3s;}
+.km-cat.open .km-c-arrow{transform:rotate(-180deg);color:var(--crimson);}
 .km-c-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s cubic-bezier(.25,.46,.45,.94);}
 .km-cat.open .km-c-body{grid-template-rows:1fr;}
 .km-c-inner{overflow:hidden;min-height:0;}
@@ -191,6 +189,14 @@ html[data-theme="dark"] .km-t.live{color:#a7e137;}
 html[data-theme="dark"] .km-t.pipe{color:#f5b544;}
 html[data-theme="dark"] .km-t.plan{color:#7d7a72;}
 .km-t[hidden],.km-zone[hidden],.km-cat[hidden],.km-pillar[hidden]{display:none!important;}
+
+/* A pillar that isn't subdivided (Foundation, Networking, Cloud) would otherwise
+   show a category row repeating its own name — drop the row, keep the topics. */
+.km-cat.solo{background:transparent;}
+.km-cat.solo > .km-c-head{display:none;}
+.km-cat.solo > .km-c-body{grid-template-rows:1fr;}
+.km-cat.solo .km-topics{border-top:0;padding-top:0;}
+.km-cat.solo .km-zone:first-child{margin-top:4px;}
 
 .km-empty{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:1px;color:var(--muted);
   padding:26px 4px;text-align:center;}
@@ -306,7 +312,7 @@ def flexes(l, p, n):
 
 blocks = []
 for i, (pname, pl, pp, pn, tot, cats) in enumerate(pillar_stats):
-    open_cls = " open" if i == 0 else ""
+    open_cls = " open"   # the map is a list to read, not a thing to click open
     cat_html = []
     solo = len(cats) == 1 and cats[0][0] == pname
     for cname, icon, topics in cats:
@@ -325,22 +331,22 @@ for i, (pname, pl, pp, pn, tot, cats) in enumerate(pillar_stats):
                 else:
                     chips.append(f'          <button type="button" class="km-t {k}" '
                                  f'data-s="{k}">{lbl}</button>')
-        cat_html.append(f"""        <div class="km-cat" data-cat>
-          <a class="km-c-head" href="categories/{SPEC[cname][0]}/index.html">
+        cat_html.append(f"""        <div class="km-cat open{' solo' if solo else ''}" data-cat>
+          <button class="km-c-head" type="button" aria-expanded="true">
             <span class="km-c-icon" aria-hidden="true">{icon}</span>
             <span class="km-c-meta">
               <span class="km-c-name">{esc(cname)}</span>
               <span class="km-c-counts"><i class="dot{'' if l else ' none'}"></i><em>{l}</em><span class="u"> live</span> · {p}<span class="u"> pipe</span> · {n}<span class="u"> planned</span></span>
             </span>
-            <span class="km-c-arrow" aria-hidden="true">→</span>
-          </a>
+            <span class="km-c-arrow" aria-hidden="true">⌄</span>
+          </button>
           <div class="km-c-body"><div class="km-c-inner"><div class="km-topics">
 {chr(10).join(chips)}
           </div></div></div>
         </div>""")
 
     blocks.append(f"""      <section class="km-pillar{open_cls}" data-pillar>
-        <button class="km-p-head" type="button" aria-expanded="{'true' if i == 0 else 'false'}">
+        <button class="km-p-head" type="button" aria-expanded="true">
           <span class="km-p-idx">{i + 1:02d}</span>
           <span class="km-p-name">{esc(pname)}</span>
           <span class="km-p-counts"><em>{pl}</em><span class="u"> live</span> · {pp}<span class="u"> pipe</span> · {pn}<span class="u"> planned</span></span>
@@ -423,6 +429,7 @@ JS = """/* ── Knowledge map: two-level accordion + search + status filter �
   topics.forEach(t => { t.dataset.q = t.textContent.trim().toLowerCase(); });
 
   const setOpen = (el, on) => {
+    if (el.classList.contains('solo')) return;   /* header hidden; stays open */
     el.classList.toggle('open', on);
     const head = el.querySelector('button');
     if (head) head.setAttribute('aria-expanded', on ? 'true' : 'false');
@@ -433,16 +440,16 @@ JS = """/* ── Knowledge map: two-level accordion + search + status filter �
     const pHead = e.target.closest('.km-p-head');
     if (pHead) {
       const p = pHead.closest('[data-pillar]');
-      const wasOpen = p.classList.contains('open');
-      pillars.forEach(x => setOpen(x, false));
-      setOpen(p, !wasOpen);
+      setOpen(p, !p.classList.contains('open'));   /* toggle this one only */
       setTimeout(syncIssuesScrollHeight, 460);
       return;
     }
-    /* Categories are links to their hub page — the hub has the architecture
-       diagram, the issues and the full list at full width, so expanding a
-       cramped copy of it here was duplication. The collapsible body below is
-       still populated: search opens it to show the topics that matched. */
+    const cHead = e.target.closest('.km-c-head');
+    if (cHead) {
+      const c = cHead.closest('[data-cat]');
+      setOpen(c, !c.classList.contains('open'));   /* toggle this one only */
+      setTimeout(syncIssuesScrollHeight, 400);
+    }
   });
 
   function apply(){
@@ -469,7 +476,7 @@ JS = """/* ── Knowledge map: two-level accordion + search + status filter �
       });
       c.hidden = active && hits === 0;
       if (active && hits > 0) setOpen(c, true);
-      if (!active) setOpen(c, false);
+      if (!active) setOpen(c, true);
       shown += hits;
       c.dataset.hits = hits;
     });
@@ -482,7 +489,7 @@ JS = """/* ── Knowledge map: two-level accordion + search + status filter �
     });
 
     if (!active) {
-      pillars.forEach((p, i) => setOpen(p, i === 0));
+      pillars.forEach(p => setOpen(p, true));
       result.textContent = '';
     } else {
       result.innerHTML = '<b>' + shown + '</b> of ' + TOTAL + ' topics' +

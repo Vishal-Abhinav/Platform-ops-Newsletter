@@ -9,6 +9,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(TOOLS))
+from hubs_spec import SPEC   # noqa: E402
 from taxonomy import PILLARS  # noqa: E402
 
 N_CATS = sum(len(c) for _, c in PILLARS)
@@ -21,7 +22,22 @@ src = src.replace('    <li><a href="#topics">Topics</a></li>\n',
                   '    <li><a href="#topics">Topics</a></li>\n'
                   '    <li><a href="categories/index.html">Categories</a></li>\n', 1)
 
-# Category rows are links to their hubs, emitted by build_kmap.
+# ── knowledge map: link every category row to its hub ────────────────────────
+n = 0
+for cname, (slug, _tag, _layers) in SPEC.items():
+    esc = cname.replace('&', '&amp;')
+    needle = f'<span class="km-c-name">{esc}</span>'
+    if needle not in src:
+        print('  !! category not found in index.html:', cname)
+        continue
+    # the hub link is the first row inside the category's expanded topic area
+    body_at = src.index('<div class="km-topics">', src.index(needle))
+    ins = body_at + len('<div class="km-topics">')
+    link = (f'\n          <a class="km-hublink" href="categories/{slug}/index.html">'
+            f'Open the {esc} hub — architecture, issues, full topic list →</a>')
+    src = src[:ins] + link + src[ins:]
+    n += 1
+print(f'hub links added to {n} categories')
 
 # ── the "all categories" entry above the pillar list ─────────────────────────
 src = src.replace('    <div class="km-pillars" id="kmPillars">',
