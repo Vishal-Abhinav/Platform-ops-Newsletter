@@ -9,6 +9,7 @@
 #   categories/     <- build_hubs      (33 hubs + index + hub.css)
 #   Foundation/     <- build_foundation (topic pages + topic.css)
 #   feed.xml        <- build_feed
+#   assets/megamenu.* <- build_nav    (nav data, styles, behaviour)
 #   sitemap.xml     <- verify.py
 set -euo pipefail
 
@@ -41,6 +42,9 @@ python3 tools/build_foundation.py fnd_a fnd_b
 
 say "feed"
 python3 tools/build_feed.py
+
+say "mega-menu (assets + wiring into every page)"
+python3 tools/build_nav.py
 
 say "verify + sitemap"
 python3 tools/verify.py
