@@ -36,6 +36,31 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/GIT-VERSION-CONTROL/git-version-control.html</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/OPERATING-SYSTEMS/operating-systems.html</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/PYTHON/python.html</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/SHELL-AND-BASH/shell-and-bash.html</loc>
+    <lastmod>2026-09-10</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://vishal-abhinav.github.io/Platform-ops-Newsletter/Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html</loc>
     <lastmod>2026-09-10</lastmod>
     <priority>0.7</priority>

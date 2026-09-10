@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operating Systems · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="The kernel as an operator sees it — the syscall boundary, the scheduler, the page cache, cgroups, and the failure modes each one produces in production.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
+<link rel="canonical" href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/OPERATING-SYSTEMS/operating-systems.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Operating Systems · Platform Ops">
+<meta property="og:description" content="The kernel as an operator sees it — the syscall boundary, the scheduler, the page cache, cgroups, and the failure modes each one produces in production.">
+<meta property="og:url" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/OPERATING-SYSTEMS/operating-systems.html">
+<meta property="og:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Operating Systems · Platform Ops">
+<meta name="twitter:description" content="The kernel as an operator sees it — the syscall boundary, the scheduler, the page cache, cgroups, and the failure modes each one produces in production.">
+<meta name="twitter:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="../../feed.xml">
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="stylesheet" href="../../Foundation/topic.css">
+</head>
+<body>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb"><a href="../../index.html">Home</a><span>/</span><a href="../../categories/index.html">Categories</a><span>/</span><a href="../../categories/foundation/index.html">Foundation</a><span>/</span><span class="cur">Operating Systems</span></div>
+  <div class="nav-right"><button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button><a href="../../index.html#subscribe" class="nav-logo"
+    style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Foundation · Core</div>
+  <h1>Operating Systems</h1>
+  <p class="sub">The kernel as an operator sees it — the syscall boundary, the scheduler, the page cache, cgroups, and the failure modes each one produces in production.</p>
+  <div class="meta"><span><b>26 min</b> read</span> <span>Level: <b>core → advanced</b></span> <span>Foundation <b>02 / 10</b></span></div>
+</div></header>
+
+<section><div class="wrap"><div class="sec-tag">The model</div><h2>WHAT SITS BETWEEN YOU AND THE HARDWARE</h2><p class="lede">Everything a process does that it cannot do itself crosses this boundary exactly once.</p><div class="dg-scroll"><svg class="dg" viewBox="0 0 1000 518" role="img" aria-label="From a process call to hardware, and the kernel subsystems in between"><line class="dg-spine" x1="160" y1="14" x2="160" y2="504.0"/><text class="dg-layer" x="146" y="41.0">USER SPACE</text><circle class="dg-tick" cx="160" cy="37.0" r="3"/><rect x="168.0" y="14" width="195.5" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="265.8" y="41.0" fill="#066c77">Your process</text><rect x="373.5" y="14" width="195.5" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="471.2" y="41.0" fill="#066c77">libc / runtime</text><rect x="579.0" y="14" width="195.5" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="676.8" y="41.0" fill="#066c77">Shared libs</text><rect x="784.5" y="14" width="195.5" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="882.2" y="41.0" fill="#3f6f0c">vDSO</text><text class="dg-layer" x="146" y="115.0">THE BOUNDARY</text><circle class="dg-tick" cx="160" cy="111.0" r="3"/><rect x="168.0" y="88" width="264.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="300.0" y="115.0" fill="#a32b28">syscall instruction</text><rect x="442.0" y="88" width="264.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="574.0" y="115.0" fill="#a32b28">Trap → ring 0</text><rect x="716.0" y="88" width="264.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="848.0" y="115.0" fill="#8a5806">seccomp filter</text><text class="dg-layer" x="146" y="189.0">KERNEL: PROCESS</text><circle class="dg-tick" cx="160" cy="185.0" r="3"/><rect x="168.0" y="162" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="245.2" y="189.0" fill="#8a5806">Scheduler (EEVDF)</text><rect x="332.4" y="162" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="409.6" y="189.0" fill="#8a5806">task_struct</text><rect x="496.8" y="162" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="574.0" y="189.0" fill="#8a5806">Signals</text><rect x="661.2" y="162" width="154.4" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="738.4" y="189.0" fill="#5b21b6">cgroups</text><rect x="825.6" y="162" width="154.4" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="902.8" y="189.0" fill="#5b21b6">namespaces</text><text class="dg-layer" x="146" y="263.0">KERNEL: MEMORY</text><circle class="dg-tick" cx="160" cy="259.0" r="3"/><rect x="168.0" y="236" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="265.8" y="263.0" fill="#8a5806">Virtual memory</text><rect x="373.5" y="236" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="471.2" y="263.0" fill="#8a5806">Page cache</text><rect x="579.0" y="236" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="676.8" y="263.0" fill="#8a5806">Writeback</text><rect x="784.5" y="236" width="195.5" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="882.2" y="263.0" fill="#a32b28">OOM killer</text><text class="dg-layer" x="146" y="337.0">KERNEL: I/O</text><circle class="dg-tick" cx="160" cy="333.0" r="3"/><rect x="168.0" y="310" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="265.8" y="337.0" fill="#8a5806">VFS</text><rect x="373.5" y="310" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="471.2" y="337.0" fill="#8a5806">Filesystem</text><rect x="579.0" y="310" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="676.8" y="337.0" fill="#8a5806">Block layer</text><rect x="784.5" y="310" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="882.2" y="337.0" fill="#8a5806">Net stack</text><text class="dg-layer" x="146" y="411.0">DRIVERS</text><circle class="dg-tick" cx="160" cy="407.0" r="3"/><rect x="168.0" y="384" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="368.5" y="411.0" fill="#6b6860">Device drivers</text><rect x="579.0" y="384" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="779.5" y="411.0" fill="#6b6860">IRQ handlers</text><text class="dg-layer" x="146" y="485.0">HARDWARE</text><circle class="dg-tick" cx="160" cy="481.0" r="3"/><rect x="168.0" y="458" width="195.5" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="265.8" y="485.0" fill="#6b6860">CPU / MMU</text><rect x="373.5" y="458" width="195.5" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="471.2" y="485.0" fill="#6b6860">RAM</text><rect x="579.0" y="458" width="195.5" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="676.8" y="485.0" fill="#6b6860">Disk</text><rect x="784.5" y="458" width="195.5" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="882.2" y="485.0" fill="#6b6860">NIC</text></svg></div><p class="dg-cap">Containers do not add a layer to this diagram. They are the cgroups and namespaces boxes applied to an ordinary process — which is why a container problem is always a Linux problem underneath.</p></div></section><section><div class="wrap"><div class="sec-tag">Core</div><h2>CORE CONCEPTS</h2><p class="lede">The four abstractions that every production incident eventually comes back to.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">01</span>
+    <span class="rc-main"><span class="rc-name">The user / kernel boundary</span>
+      <span class="rc-desc">One instruction, one privilege change, and the only door between the two worlds.</span>
+      <span class="rc-tags"><span class="tg">syscall</span><span class="tg">ring 0</span><span class="tg">vDSO</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Your process runs in <strong>user mode</strong> and cannot touch hardware, other processes'
+memory, or the page tables. Everything it needs from the outside world goes through a
+<strong>system call</strong>: it puts a number in <code>rax</code>, arguments in registers, and
+executes the <code>syscall</code> instruction. The CPU switches to <strong>ring 0</strong>, jumps
+to a fixed kernel entry point, and the kernel does the work on the process's behalf.</p>
+<p>The base cost is roughly 50–100 ns, meaningfully more since Spectre/Meltdown mitigations added
+page-table isolation. That is cheap once and ruinous a million times a second — which is the entire
+reason <code>io_uring</code>, batched writes and buffered I/O exist.</p>
+<h3>The vDSO shortcut</h3>
+<p>Some calls don't need the kernel at all. <code>gettimeofday()</code> and
+<code>clock_gettime()</code> are served from the <strong>vDSO</strong> — a small shared page the
+kernel maps into every process, containing data the kernel keeps updated. The call becomes an
+ordinary function call at a few nanoseconds instead of a trap. If you ever wonder why timestamping
+every log line is affordable, this is why.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">watching the boundary</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">strace -c -p 4412</span></div><div class="tl"><span class="to">% time     seconds  usecs/call     calls    errors syscall</span></div><div class="tl"><span class="to">------ ----------- ----------- --------- --------- ----------------</span></div><div class="tl"><span class="to"> 61.28    2.914021           3    971340           futex</span></div><div class="tl"><span class="to"> 22.10    1.050882           2    525441           epoll_wait</span></div><div class="tl"><span class="to">  9.44    0.448911           4    112228           write</span></div><div class="tl"><span class="tc">971k futex calls means lock contention, not I/O. Look at the locking,</span></div><div class="tl"><span class="tc">not the disk — strace -c is the fastest way to find that out.</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">02</span>
+    <span class="rc-main"><span class="rc-name">Processes, threads and what the scheduler sees</span>
+      <span class="rc-desc">The kernel does not really distinguish them. That explains a lot.</span>
+      <span class="rc-tags"><span class="tg">task_struct</span><span class="tg">clone</span><span class="tg">EEVDF</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Linux schedules <strong>tasks</strong>. A process and a thread are both a
+<code>task_struct</code>; the only difference is how much they share. <code>fork()</code> creates a
+task with a copy of the address space, <code>clone()</code> with <code>CLONE_VM</code> creates one
+that shares it. "Thread" is a userspace word for a task that shares memory with its siblings.</p>
+<h3>Copy-on-write fork</h3>
+<p><code>fork()</code> does not copy your 8 GB heap. It marks every page read-only in both parent
+and child and copies a page only when one of them writes to it. This is why forking a large process
+is fast — and why a forked child can still trigger an out-of-memory kill minutes later, when the
+writes finally arrive. Redis's background save is the canonical example.</p>
+<h3>The scheduler</h3>
+<p>Since kernel 6.6 the default is <strong>EEVDF</strong> (Earliest Eligible Virtual Deadline
+First), replacing CFS. Both are fair-share designs: each runnable task accrues virtual runtime,
+and the one that has had least gets the CPU. EEVDF adds an explicit deadline so latency-sensitive
+tasks can be served ahead of throughput-hungry ones rather than merely fairly.</p>
+<p>What matters operationally is unchanged: <strong>fair-share means nobody is starved and nobody
+is guaranteed</strong>. If you need a guarantee, you need <code>SCHED_FIFO</code>, cgroup CPU
+bandwidth, or pinning — not a nice value.</p>
+<div class="tw"><table class="tbl mono"><thead><tr><th>State</th><th>In <code>ps</code></th><th>What it means</th></tr></thead><tbody><tr><td>Running / runnable</td><td>R</td><td>On a CPU, or in the run queue waiting for one</td></tr><tr><td>Interruptible sleep</td><td>S</td><td>Waiting on I/O or an event; signals wake it</td></tr><tr><td>Uninterruptible sleep</td><td>D</td><td>In a kernel path that cannot be interrupted — usually disk or NFS. Persistent D state is a storage problem</td></tr><tr><td>Stopped</td><td>T</td><td>SIGSTOP, or under a debugger</td></tr><tr><td>Zombie</td><td>Z</td><td>Exited, but the parent hasn't called <code>wait()</code>. Harmless singly, a PID leak in bulk</td></tr></tbody></table></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">03</span>
+    <span class="rc-main"><span class="rc-name">Virtual memory, the page cache and writeback</span>
+      <span class="rc-desc">Why 'free' memory is the least interesting number on the box.</span>
+      <span class="rc-tags"><span class="tg">page cache</span><span class="tg">dirty pages</span><span class="tg">RSS vs VSZ</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>The kernel uses every spare byte of RAM as <strong>page cache</strong> — a cache of file
+contents. A box showing 200 MB free and 60 GB cached is not short of memory; it is doing exactly
+what it should. Cache is reclaimable on demand. The number to watch is <code>available</code> in
+<code>/proc/meminfo</code>, which accounts for that.</p>
+<h3>Reading the memory columns</h3>
+<ul>
+<li><strong>VSZ</strong> — everything mapped, including memory never touched and files mapped but
+not read. Nearly meaningless for capacity.</li>
+<li><strong>RSS</strong> — resident pages, but shared pages are counted in full against every
+process sharing them. Sum the RSS of 20 workers and you'll double-count libc twenty times.</li>
+<li><strong>PSS</strong> — proportional set size; shared pages divided among sharers. This is the
+number you want when asking "how much is this process really costing me".</li>
+</ul>
+<h3>Writeback</h3>
+<p>A buffered write returns as soon as the page is marked dirty. Flushing happens later, governed
+by <code>vm.dirty_ratio</code> and <code>vm.dirty_background_ratio</code>. When dirty pages exceed
+<code>dirty_ratio</code>, writers are <strong>throttled synchronously</strong> — the application
+stalls in the kernel until writeback catches up. On a box with lots of RAM and a slow disk, the
+defaults let gigabytes accumulate and then stall everything at once. Lowering the ratios trades a
+little throughput for far less latency variance.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">reading memory honestly</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">free -h</span></div><div class="tl"><span class="to">               total        used        free      shared  buff/cache   available</span></div><div class="tl"><span class="to">Mem:            125Gi        48Gi       1.2Gi       892Mi        76Gi        75Gi</span></div><div class="tl"><span class="tc">free 1.2Gi looks alarming; available 75Gi is the truth.</span></div><div class="tl"><span class="tp">$</span> <span class="tt">grep -E &#x27;Dirty|Writeback&#x27; /proc/meminfo</span></div><div class="tl"><span class="to">Dirty:           4194304 kB</span></div><div class="tl"><span class="tc">4 GB of dirty pages waiting on a disk that does 200 MB/s = a 20s stall</span></div><div class="tl"><span class="tp">$</span> <span class="tt">sysctl vm.dirty_ratio vm.dirty_background_ratio</span></div><div class="tl"><span class="tp">$</span> <span class="tt">grep Pss /proc/4412/smaps_rollup</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">04</span>
+    <span class="rc-main"><span class="rc-name">File descriptors, VFS and everything-is-a-file</span>
+      <span class="rc-desc">One integer, one abstraction, and the reason ulimits page you at 3am.</span>
+      <span class="rc-tags"><span class="tg">fd</span><span class="tg">VFS</span><span class="tg">ulimit</span><span class="tg">epoll</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>A file descriptor is a small integer indexing a per-process table. Behind it the
+<strong>VFS</strong> presents one interface — read, write, seek, close — over regular files,
+sockets, pipes, devices, epoll instances, timers, even other processes' memory. That uniformity is
+why <code>strace</code> is so useful: almost everything a process does is a read or a write to
+some fd.</p>
+<p>Descriptors are a hard-limited resource, and the limit is per-process, inherited at exec, and
+usually far lower than people expect. A service that leaks one fd per request will run for hours
+and then fail all at once with <code>EMFILE</code> — accept() starts failing while the process
+looks perfectly healthy.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">fd accounting</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">ls /proc/4412/fd | wc -l</span></div><div class="tl"><span class="to">1021</span></div><div class="tl"><span class="tp">$</span> <span class="tt">cat /proc/4412/limits | grep &#x27;open files&#x27;</span></div><div class="tl"><span class="to">Max open files            1024                 1048576              files</span></div><div class="tl"><span class="tc">soft limit 1024 and 1021 in use — this fails within the minute</span></div><div class="tl"><span class="tp">$</span> <span class="tt">ls -l /proc/4412/fd | awk &#x27;{print $NF}&#x27; | sort | uniq -c | sort -rn | head</span></div><div class="tl"><span class="to">    847 socket:[8823191]</span></div><div class="tl"><span class="tc">847 sockets: connections not being closed. Raising the limit buys</span></div><div class="tl"><span class="tc">time; it does not fix a leak.</span></div></div></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">Advanced</div><h2>ADVANCED</h2><p class="lede">Container behaviour, memory accounting, signals and the modern I/O paths.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">05</span>
+    <span class="rc-main"><span class="rc-name">cgroups and namespaces — containers, demystified</span>
+      <span class="rc-desc">There is no such thing as a container. There are two kernel features.</span>
+      <span class="rc-tags"><span class="tg">cgroup v2</span><span class="tg">namespaces</span><span class="tg">containers</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>A container is a normal Linux process with two things done to it. <strong>Namespaces</strong>
+change what it can see; <strong>cgroups</strong> limit what it can use. There is no container
+object in the kernel, which is exactly why containers start in milliseconds and why a container
+escape is a kernel bug rather than a hypervisor bug.</p>
+<h3>The namespaces</h3>
+<ul>
+<li><strong>pid</strong> — its own PID 1 and process tree. Your process is 1 inside, 48122 outside.</li>
+<li><strong>net</strong> — its own interfaces, routes, iptables rules, port space.</li>
+<li><strong>mnt</strong> — its own mount table; the root filesystem it sees.</li>
+<li><strong>uts</strong> — its own hostname.</li>
+<li><strong>ipc</strong> — its own shared memory and semaphores.</li>
+<li><strong>user</strong> — UID mapping; root inside, unprivileged outside. The one that makes
+rootless containers possible.</li>
+<li><strong>cgroup</strong> — hides the host's cgroup hierarchy from the process.</li>
+</ul>
+<h3>Why PID 1 matters inside</h3>
+<p>PID 1 has special duties: it reaps orphaned children and it does not get default signal
+handlers. Run an application as PID 1 without thinking about it and you get two classic bugs —
+zombie processes accumulating because nothing reaps them, and <code>SIGTERM</code> being ignored
+so every deploy waits the full termination grace period and then gets SIGKILLed. That is what
+<code>--init</code> and tini exist to fix.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">a container is just a process</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">docker run -d --name web --memory=512m nginx</span></div><div class="tl"><span class="tp">$</span> <span class="tt">docker inspect -f &#x27;{{.State.Pid}}&#x27; web</span></div><div class="tl"><span class="to">48122</span></div><div class="tl"><span class="tp">$</span> <span class="tt">ls -l /proc/48122/ns/</span></div><div class="tl"><span class="to">lrwxrwxrwx ... net -&gt; &#x27;net:[4026532281]&#x27;</span></div><div class="tl"><span class="to">lrwxrwxrwx ... pid -&gt; &#x27;pid:[4026532283]&#x27;</span></div><div class="tl"><span class="tp">$</span> <span class="tt">cat /sys/fs/cgroup/system.slice/docker-*.scope/memory.max</span></div><div class="tl"><span class="to">536870912</span></div><div class="tl"><span class="tc">It&#x27;s PID 48122 on the host, with different namespace inodes and a</span></div><div class="tl"><span class="tc">cgroup memory ceiling. That is the entire trick.</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">06</span>
+    <span class="rc-main"><span class="rc-name">The OOM killer and cgroup memory accounting</span>
+      <span class="rc-desc">Why your pod died and the node's memory graph looks fine.</span>
+      <span class="rc-tags"><span class="tg">OOM</span><span class="tg">memory.max</span><span class="tg">oom_score_adj</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Two different OOM paths exist and they behave differently. <strong>Global OOM</strong> fires
+when the whole machine is out and the kernel picks a victim by <code>oom_score</code> — roughly,
+whoever is using the most, adjusted by <code>oom_score_adj</code>. <strong>cgroup OOM</strong>
+fires when a single cgroup hits its <code>memory.max</code>, and kills something inside that cgroup
+only. The host has plenty of free memory; the container still dies.</p>
+<p>This is the entire explanation for the most confusing Kubernetes failure mode: a pod is OOMKilled
+while the node's memory graph shows 40% used. The node was never the constraint. The container's
+limit was.</p>
+<h3>What counts against the limit</h3>
+<p>Under cgroup v2, the charge includes anonymous memory <em>and</em> page cache the cgroup caused.
+A process that reads a lot of files can be OOMKilled for cache it does not need and would happily
+give back — the kernel does try to reclaim first, but a fast enough reader can outrun reclaim.
+This is why a batch job that streams large files needs a limit well above its apparent working set.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">post-mortem on a kill</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">dmesg -T | grep -i -A3 &#x27;killed process&#x27;</span></div><div class="tl"><span class="to">[Wed Sep 10 04:12:08] Memory cgroup out of memory: Killed process 48901 (java)</span></div><div class="tl"><span class="to">  total-vm:9812344kB, anon-rss:4103288kB, file-rss:18244kB</span></div><div class="tl"><span class="tc">&#x27;Memory cgroup out of memory&#x27; — a limit, not the node.</span></div><div class="tl"><span class="tp">$</span> <span class="tt">cat /sys/fs/cgroup/.../memory.events</span></div><div class="tl"><span class="to">low 0</span></div><div class="tl"><span class="to">high 2841</span></div><div class="tl"><span class="to">max 19</span></div><div class="tl"><span class="to">oom 3</span></div><div class="tl"><span class="to">oom_kill 1</span></div><div class="tl"><span class="tc">high 2841 = it was throttled under reclaim pressure 2841 times before</span></div><div class="tl"><span class="tc">it died. That pressure was visible for a long time first.</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">07</span>
+    <span class="rc-main"><span class="rc-name">Signals, and why your container ignores SIGTERM</span>
+      <span class="rc-desc">The default disposition changes for PID 1, and nobody tells you.</span>
+      <span class="rc-tags"><span class="tg">SIGTERM</span><span class="tg">PID 1</span><span class="tg">graceful shutdown</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Signals are the kernel's interrupt mechanism for processes. Most have a default disposition:
+<code>SIGTERM</code> terminates, <code>SIGKILL</code> terminates and cannot be caught,
+<code>SIGSEGV</code> dumps core. A process can install a handler for anything except
+<code>SIGKILL</code> and <code>SIGSTOP</code>.</p>
+<p><strong>PID 1 is the exception.</strong> The kernel does not apply default dispositions to it.
+A process running as PID 1 with no explicit <code>SIGTERM</code> handler simply ignores the signal.
+Kubernetes sends SIGTERM, waits <code>terminationGracePeriodSeconds</code> (30 by default), then
+SIGKILLs. If your entrypoint is the application itself and it has no handler, every single pod
+deletion takes the full 30 seconds and ends in a hard kill — connections dropped, in-flight
+requests lost, and a rolling deploy that takes half an hour.</p>
+<div class="note trap"><b>Shell-form entrypoints swallow signals</b>
+<p style="margin:0"><code>ENTRYPOINT ./app</code> in shell form becomes <code>/bin/sh -c ./app</code>.
+The shell is PID 1, your app is a child, and <code>sh</code> does not forward signals to it. Use
+exec form — <code>ENTRYPOINT ["./app"]</code> — or <code>exec ./app</code> in your wrapper script.
+This one line is behind a remarkable proportion of "why are deploys so slow" investigations.</p></div><div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">proving it</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">kubectl exec -it web -- ps -o pid,comm</span></div><div class="tl"><span class="to">  PID COMMAND</span></div><div class="tl"><span class="to">    1 sh</span></div><div class="tl"><span class="to">    7 node</span></div><div class="tl"><span class="tc">node is PID 7. SIGTERM goes to sh, which does nothing with it.</span></div><div class="tl"><span class="tp">$</span> <span class="tt">time kubectl delete pod web</span></div><div class="tl"><span class="to">pod &quot;web&quot; deleted</span></div><div class="tl"><span class="to">real    0m30.4s</span></div><div class="tl"><span class="tc">30 seconds every time = the grace period expiring, then SIGKILL</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">08</span>
+    <span class="rc-main"><span class="rc-name">I/O paths: buffered, direct, and io_uring</span>
+      <span class="rc-desc">Three ways to get bytes off a disk, with very different syscall bills.</span>
+      <span class="rc-tags"><span class="tg">io_uring</span><span class="tg">O_DIRECT</span><span class="tg">page cache</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p><strong>Buffered I/O</strong> is the default: reads are served from page cache when possible,
+writes return once dirty. Great throughput, unpredictable latency, and a copy between kernel and
+user buffers on every call.</p>
+<p><strong>Direct I/O</strong> (<code>O_DIRECT</code>) bypasses the page cache entirely and DMAs
+straight into your buffer. Databases use it because they maintain a better cache than the kernel
+can — they know which pages matter. It demands aligned buffers and aligned offsets, and it is
+slower for anything that would have hit cache.</p>
+<p><strong>io_uring</strong> replaces the syscall-per-operation model with two shared ring buffers
+between userspace and kernel. You write submission entries into a ring, the kernel writes
+completions into another, and with polling mode you can do sustained I/O with <em>zero</em>
+syscalls. For anything issuing hundreds of thousands of operations a second, this is the
+difference between spending 40% of your CPU in kernel entry overhead and spending almost none.</p>
+<div class="tw"><table class="tbl "><thead><tr><th>Path</th><th>Syscalls per op</th><th>Page cache</th><th>Use when</th></tr></thead><tbody><tr><td>Buffered read/write</td><td>1+</td><td>Yes</td><td>Almost everything. Default for a reason.</td></tr><tr><td><code>mmap</code></td><td>0 after map</td><td>Yes</td><td>Random access to a file that fits in RAM; beware page-fault stalls</td></tr><tr><td><code>O_DIRECT</code></td><td>1+</td><td>Bypassed</td><td>You maintain your own cache — databases, mostly</td></tr><tr><td><code>io_uring</code></td><td>~0 (batched)</td><td>Optional</td><td>Very high IOPS, or many concurrent ops from few threads</td></tr></tbody></table></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">In practice</div><h2>TRIAGING A SLOW PROCESS</h2>
+<p>A process is slow and you have sixty seconds. This is the order that finds the answer fastest,
+because each step rules out an entire class of cause.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">triage in four commands</span></div><div class="tb-body"><div class="tl"><span class="tc">1. Is it even running, or is it blocked?</span></div><div class="tl"><span class="tp">$</span> <span class="tt">ps -o pid,stat,wchan:20,comm -p 4412</span></div><div class="tl"><span class="to">  PID STAT WCHAN                COMMAND</span></div><div class="tl"><span class="to"> 4412 D    io_schedule          postgres</span></div><div class="tl"><span class="tc">D + io_schedule = blocked on disk. Stop looking at the CPU.</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tc">2. What is it asking the kernel for?</span></div><div class="tl"><span class="tp">$</span> <span class="tt">strace -c -f -p 4412 -- sleep 10</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tc">3. Is the machine or the cgroup the constraint?</span></div><div class="tl"><span class="tp">$</span> <span class="tt">cat /sys/fs/cgroup/$(cut -d: -f3 /proc/4412/cgroup | tail -1)/memory.events</span></div><div class="tl"><span class="tp">$</span> <span class="tt">cat /sys/fs/cgroup/.../cpu.stat | grep throttled</span></div><div class="tl"><span class="to">nr_throttled 88213</span></div><div class="tl"><span class="to">throttled_usec 41028339</span></div><div class="tl"><span class="tc">CPU throttling: the limit is the problem, not the code.</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tc">4. Where is the time actually going?</span></div><div class="tl"><span class="tp">$</span> <span class="tt">perf record -F 99 -g -p 4412 -- sleep 20 &amp;&amp; perf report --stdio | head -30</span></div></div></div><div class="note tip"><b>cpu.stat before anything else, in a container</b>
+<p style="margin:0">In Kubernetes, <code>nr_throttled</code> climbing is the single most common
+cause of "the app is slow and the CPU graph looks fine". CFS bandwidth control gives the cgroup a
+quota per 100 ms period; burn it in 20 ms and the process is frozen for the remaining 80 ms. The
+average utilisation looks like 20%. The p99 latency looks like a disaster. Both are true.</p></div></div></section><section><div class="wrap"><div class="sec-tag">Reference</div><h2>CHEATSHEET</h2><div class="tw"><table class="tbl mono"><thead><tr><th>Command</th><th>What it answers</th></tr></thead><tbody><tr><td><code>ps -o pid,stat,wchan:25,comm -p PID</code></td><td>Running, sleeping, or stuck — and in which kernel function</td></tr><tr><td><code>strace -c -f -p PID</code></td><td>Which syscalls dominate, and which are erroring</td></tr><tr><td><code>ltrace -p PID</code></td><td>Library calls, when the syscalls look innocent</td></tr><tr><td><code>cat /proc/PID/status</code></td><td>Threads, signal masks, VmRSS, context switch counts</td></tr><tr><td><code>cat /proc/PID/limits</code></td><td>Every rlimit, soft and hard</td></tr><tr><td><code>cat /proc/PID/stack</code></td><td>Kernel stack of a D-state process — what it's blocked in</td></tr><tr><td><code>grep Pss /proc/PID/smaps_rollup</code></td><td>Honest per-process memory, shared pages apportioned</td></tr><tr><td><code>ls -l /proc/PID/ns/</code></td><td>Which namespaces it's in — is it actually containerised?</td></tr><tr><td><code>cat /proc/PID/cgroup</code></td><td>Which cgroup, so you can find its limits</td></tr><tr><td><code>cat &lt;cgroup&gt;/cpu.stat</code></td><td><code>nr_throttled</code> — CPU-limit throttling</td></tr><tr><td><code>cat &lt;cgroup&gt;/memory.events</code></td><td><code>high</code>, <code>max</code>, <code>oom_kill</code> counts</td></tr><tr><td><code>dmesg -T | grep -i oom</code></td><td>Who got killed, by which OOM path, and how big they were</td></tr><tr><td><code>vmstat 1</code></td><td>Run queue, context switches, swap, io wait, at a glance</td></tr><tr><td><code>pidstat -d -p PID 1</code></td><td>Per-process read/write throughput</td></tr><tr><td><code>sysctl -a | grep dirty</code></td><td>Writeback thresholds — the stall-under-load knobs</td></tr><tr><td><code>perf record -F 99 -g -p PID</code></td><td>Sampled stacks; the only honest answer to 'where is the time'</td></tr></tbody></table></div></div></section>
+
+<section style="border-bottom:0"><div class="wrap"><div class="pager"><a href="../COMPUTER-FUNDAMENTALS/computer-fundamentals.html">← Previous<b>Computer Fundamentals</b></a><a class="next" href="../../Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html">Next →<b>Linux</b></a></div></div></section>
+
+<footer>
+  <div class="f-in">
+    <div class="f-top">
+      <div>
+        <a class="f-logo" href="../../index.html">PLATFORM OPS</a>
+        <p class="f-tag">Field notes on Kubernetes, SRE, and Platform Engineering —
+          written from production, not slideware.</p>
+      </div>
+      <div class="f-cols">
+        <div><div class="f-col-t">Newsletter</div>
+          <a href="../../index.html#issues">Latest Issues</a>
+          <a href="../../index.html#subscribe">Subscribe</a>
+          <a href="../../feed.xml">RSS Feed</a></div>
+        <div><div class="f-col-t">Explore</div>
+          <a href="../../categories/index.html">All Categories</a>
+          <a href="../../categories/foundation/index.html">Foundation Hub</a>
+          <a href="../../index.html#topics">Knowledge Map</a></div>
+        <div><div class="f-col-t">Connect</div>
+          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="../../index.html#authors">About the Author</a>
+          <a href="#">Back to Top ↑</a></div>
+      </div>
+    </div>
+    <div class="f-bot">
+      <div>© 2026 Vishal Abhinav · Platform Ops — code MIT,
+        <a href="../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+      <div>Built for engineers, by an engineer.</div>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('tt').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});
+document.addEventListener('click',function(e){
+  var h=e.target.closest('.rc-head'); if(!h) return;
+  var c=h.parentElement, open=c.classList.contains('open');
+  c.classList.toggle('open',!open);
+  h.setAttribute('aria-expanded', !open?'true':'false');
+});
+</script>
+</body>
+</html>

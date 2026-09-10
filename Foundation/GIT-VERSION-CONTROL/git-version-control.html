@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git &amp; Version Control · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="Git as a content-addressed object store — the four object types, the three trees, and the recovery paths that mean you have almost certainly not lost that work.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
+<link rel="canonical" href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/GIT-VERSION-CONTROL/git-version-control.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Git &amp; Version Control · Platform Ops">
+<meta property="og:description" content="Git as a content-addressed object store — the four object types, the three trees, and the recovery paths that mean you have almost certainly not lost that work.">
+<meta property="og:url" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/GIT-VERSION-CONTROL/git-version-control.html">
+<meta property="og:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Git &amp; Version Control · Platform Ops">
+<meta name="twitter:description" content="Git as a content-addressed object store — the four object types, the three trees, and the recovery paths that mean you have almost certainly not lost that work.">
+<meta name="twitter:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="../../feed.xml">
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="stylesheet" href="../../Foundation/topic.css">
+</head>
+<body>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb"><a href="../../index.html">Home</a><span>/</span><a href="../../categories/index.html">Categories</a><span>/</span><a href="../../categories/foundation/index.html">Foundation</a><span>/</span><span class="cur">Git &amp; Version Control</span></div>
+  <div class="nav-right"><button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button><a href="../../index.html#subscribe" class="nav-logo"
+    style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Foundation · Core</div>
+  <h1>Git &amp; Version Control</h1>
+  <p class="sub">Git as a content-addressed object store — the four object types, the three trees, and the recovery paths that mean you have almost certainly not lost that work.</p>
+  <div class="meta"><span><b>24 min</b> read</span> <span>Level: <b>core → advanced</b></span> <span>Foundation <b>10 / 10</b></span></div>
+</div></header>
+
+<section><div class="wrap"><div class="sec-tag">The model</div><h2>WHAT GIT ACTUALLY STORES</h2><p class="lede">Four object types, three trees, and a reflog that keeps 90 days of everything you thought you deleted.</p><div class="dg-scroll"><svg class="dg" viewBox="0 0 1000 444" role="img" aria-label="Git&#x27;s four object types, the three trees, and where a lost commit still lives"><line class="dg-spine" x1="160" y1="14" x2="160" y2="430.0"/><text class="dg-layer" x="146" y="41.0">YOUR EDITS</text><circle class="dg-tick" cx="160" cy="37.0" r="3"/><rect x="168.0" y="14" width="401.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="368.5" y="41.0" fill="#066c77">Working tree</text><rect x="579.0" y="14" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="779.5" y="41.0" fill="#6b6860">Untracked files</text><text class="dg-layer" x="146" y="115.0">STAGING</text><circle class="dg-tick" cx="160" cy="111.0" r="3"/><rect x="168.0" y="88" width="264.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="300.0" y="115.0" fill="#8a5806">Index / staging area</text><rect x="442.0" y="88" width="264.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="574.0" y="115.0" fill="#8a5806">git add</text><rect x="716.0" y="88" width="264.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="848.0" y="115.0" fill="#8a5806">git restore --staged</text><text class="dg-layer" x="146" y="189.0">OBJECT STORE</text><circle class="dg-tick" cx="160" cy="185.0" r="3"/><rect x="168.0" y="162" width="195.5" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="265.8" y="189.0" fill="#3f6f0c">blob = content</text><rect x="373.5" y="162" width="195.5" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="471.2" y="189.0" fill="#3f6f0c">tree = directory</text><rect x="579.0" y="162" width="195.5" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="676.8" y="189.0" fill="#3f6f0c">commit = snapshot</text><rect x="784.5" y="162" width="195.5" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="882.2" y="189.0" fill="#3f6f0c">tag = named commit</text><text class="dg-layer" x="146" y="263.0">REFS</text><circle class="dg-tick" cx="160" cy="259.0" r="3"/><rect x="168.0" y="236" width="195.5" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="265.8" y="263.0" fill="#5b21b6">HEAD</text><rect x="373.5" y="236" width="195.5" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="471.2" y="263.0" fill="#5b21b6">refs/heads/*</text><rect x="579.0" y="236" width="195.5" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="676.8" y="263.0" fill="#5b21b6">refs/remotes/*</text><rect x="784.5" y="236" width="195.5" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="882.2" y="263.0" fill="#5b21b6">refs/tags/*</text><text class="dg-layer" x="146" y="337.0">SAFETY NET</text><circle class="dg-tick" cx="160" cy="333.0" r="3"/><rect x="168.0" y="310" width="401.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="368.5" y="337.0" fill="#a32b28">reflog — 90 days</text><rect x="579.0" y="310" width="401.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="779.5" y="337.0" fill="#a32b28">git fsck --lost-found</text><text class="dg-layer" x="146" y="411.0">REMOTE</text><circle class="dg-tick" cx="160" cy="407.0" r="3"/><rect x="168.0" y="384" width="264.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="300.0" y="411.0" fill="#6b6860">origin</text><rect x="442.0" y="384" width="264.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="574.0" y="411.0" fill="#6b6860">fetch / push</text><rect x="716.0" y="384" width="264.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="848.0" y="411.0" fill="#6b6860">packfiles</text></svg></div><p class="dg-cap">Nothing in the object store is ever modified — objects are immutable and named by their own hash. Every operation that looks destructive is really just moving a pointer.</p></div></section><section><div class="wrap"><div class="sec-tag">Core</div><h2>CORE CONCEPTS</h2><p class="lede">The model that makes every confusing command obvious.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">01</span>
+    <span class="rc-main"><span class="rc-name">The object model — Git is a content-addressed store</span>
+      <span class="rc-desc">Four object types and a hash. Everything else is a convention on top.</span>
+      <span class="rc-tags"><span class="tg">blob</span><span class="tg">tree</span><span class="tg">commit</span><span class="tg">SHA</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Git is not a diff engine. It stores <strong>snapshots</strong>, addressed by the hash of their
+content, in four object types:</p>
+<ul>
+<li><strong>blob</strong> — the bytes of one file. No name, no permissions, just content. Two
+identical files anywhere in history are one blob.</li>
+<li><strong>tree</strong> — a directory listing: names, modes, and the hashes of the blobs and
+trees inside it.</li>
+<li><strong>commit</strong> — a pointer to one root tree, plus parent commit hashes, author,
+committer and message.</li>
+<li><strong>tag</strong> — an annotated pointer to a commit, with its own message and signature.</li>
+</ul>
+<p>Every object's name <em>is</em> the SHA of its content, which makes the whole history
+tamper-evident: change one byte in one file in one old commit and every commit hash after it
+changes too. That is also why rewriting published history is antisocial — everyone else's hashes
+stop matching.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">looking inside</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">git cat-file -p HEAD</span></div><div class="tl"><span class="to">tree 9d4f2a1c8e7b3f0a5d6c2e1b4a8f7d3c9e0b1a2f</span></div><div class="tl"><span class="to">parent 3c1e8a9f2b7d4c6e0a5f8b3d1c9e7a2f4b6d8c0e</span></div><div class="tl"><span class="to">author Vishal Abhinav &lt;...&gt; 1789012345 +0530</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="to">Fix the writeback stall under load</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git cat-file -p HEAD^{tree}</span></div><div class="tl"><span class="to">100644 blob a3f9...    README.md</span></div><div class="tl"><span class="to">040000 tree 7b2c...    src</span></div><div class="tl"><span class="tc">A commit is one tree plus metadata. That is genuinely all it is.</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">02</span>
+    <span class="rc-main"><span class="rc-name">The three trees</span>
+      <span class="rc-desc">Working tree, index, HEAD — nearly every confusing Git command is moving something between these.</span>
+      <span class="rc-tags"><span class="tg">index</span><span class="tg">HEAD</span><span class="tg">staging</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Git maintains three states of your project simultaneously, and almost every command is defined
+by which of them it touches:</p>
+<ul>
+<li><strong>HEAD</strong> — the commit you're on. What <code>git log</code> starts from.</li>
+<li><strong>Index</strong> (staging area) — the proposed next commit. <code>git add</code> copies
+from working tree to index.</li>
+<li><strong>Working tree</strong> — the files on disk you're actually editing.</li>
+</ul>
+<p>Once you hold that model, the reset modes stop being magic. They differ only in how far down
+they push HEAD's new position:</p>
+<div class="tw"><table class="tbl mono"><thead><tr><th>Command</th><th>HEAD</th><th>Index</th><th>Working tree</th><th>Use when</th></tr></thead><tbody><tr><td><code>git reset --soft X</code></td><td>→ X</td><td>unchanged</td><td>unchanged</td><td>Recommit differently; keep everything staged</td></tr><tr><td><code>git reset --mixed X</code></td><td>→ X</td><td>→ X</td><td>unchanged</td><td>Default. Unstage but keep your edits</td></tr><tr><td><code>git reset --hard X</code></td><td>→ X</td><td>→ X</td><td>→ X</td><td>Throw the work away. Nothing else does this</td></tr><tr><td><code>git checkout X</code></td><td>→ X</td><td>→ X</td><td>→ X</td><td>Move to another commit (detaches HEAD)</td></tr><tr><td><code>git switch B</code></td><td>→ B</td><td>→ B</td><td>→ B</td><td>Move to a branch. The safe, modern spelling</td></tr><tr><td><code>git restore F</code></td><td>—</td><td>—</td><td>→ index</td><td>Discard working-tree edits to one file</td></tr><tr><td><code>git restore --staged F</code></td><td>—</td><td>→ HEAD</td><td>—</td><td>Unstage one file, keep the edit</td></tr></tbody></table></div><div class="note tip"><b>switch and restore exist now</b>
+<p style="margin:0"><code>git checkout</code> was overloaded to do four unrelated jobs, which is
+why it was so easy to lose work with it. Since 2.23 the jobs are split: <code>git switch</code>
+changes branches, <code>git restore</code> changes files. Use them and a whole category of
+accidents disappears.</p></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">03</span>
+    <span class="rc-main"><span class="rc-name">Branches are pointers, and that is the whole trick</span>
+      <span class="rc-desc">17 bytes in a file. Nothing is copied, ever.</span>
+      <span class="rc-tags"><span class="tg">refs</span><span class="tg">HEAD</span><span class="tg">fast-forward</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>A branch is a file under <code>.git/refs/heads/</code> containing one 40-character hash. Making
+a branch writes 41 bytes. Deleting one deletes 41 bytes. Nothing is copied, which is why Git
+branching is instant while it was expensive in the tools Git replaced.</p>
+<p><code>HEAD</code> is a file containing <code>ref: refs/heads/main</code> — a pointer to a
+pointer. Committing updates the branch that HEAD names. <strong>Detached HEAD</strong> just means
+HEAD holds a hash directly instead of a ref: commits you make there belong to no branch, and
+nothing but the reflog remembers them.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">branches are files</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">cat .git/HEAD</span></div><div class="tl"><span class="to">ref: refs/heads/main</span></div><div class="tl"><span class="tp">$</span> <span class="tt">cat .git/refs/heads/main</span></div><div class="tl"><span class="to">3c1e8a9f2b7d4c6e0a5f8b3d1c9e7a2f4b6d8c0e</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git update-ref refs/heads/hotfix 3c1e8a9</span></div><div class="tl"><span class="tc">That is exactly what &#x27;git branch hotfix&#x27; does. No copying.</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">04</span>
+    <span class="rc-main"><span class="rc-name">Merge, rebase, squash — what each actually produces</span>
+      <span class="rc-desc">Not a style argument. Three different histories with three different debugging properties.</span>
+      <span class="rc-tags"><span class="tg">merge</span><span class="tg">rebase</span><span class="tg">squash</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p><strong>Merge</strong> creates one new commit with two parents. Nothing is rewritten, every
+original hash survives, and the history records that two lines of work existed in parallel.</p>
+<p><strong>Rebase</strong> replays your commits onto a new base, one at a time. Each replayed
+commit is a <em>new object with a new hash</em>. The originals are orphaned (still in the reflog).
+History becomes linear and the parallel work is no longer recorded.</p>
+<p><strong>Squash</strong> collapses a branch into one commit on the target. Simplest log, most
+information destroyed.</p>
+<h3>The property that actually matters</h3>
+<p>Choose on the basis of <code>git bisect</code>. Bisect needs every commit in history to build
+and run. A rebased or squashed branch gives you commits that were tested as a unit — good. A merge
+of a branch whose intermediate commits were broken gives you bisect runs that fail to compile, and
+you spend the session marking them <code>skip</code>. That is the real argument for tidying a
+branch before it lands, and it has nothing to do with the log looking pretty.</p>
+<div class="note trap"><b>Never rebase a branch someone else has pulled</b>
+<p style="margin:0">Rebasing makes new commits with new hashes. Anyone who already has the old
+ones will merge both copies back in on their next pull, and the branch grows a duplicate of every
+commit. The rule is simple and absolute: rebase only what lives solely on your machine.</p></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">Advanced</div><h2>ADVANCED</h2><p class="lede">Recovery, bisection, repository weight, and the features worth turning on.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">05</span>
+    <span class="rc-main"><span class="rc-name">The reflog — why nothing is really lost</span>
+      <span class="rc-desc">Ninety days of every position HEAD has held.</span>
+      <span class="rc-tags"><span class="tg">reflog</span><span class="tg">recovery</span><span class="tg">fsck</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Every time HEAD moves — commit, checkout, reset, rebase, merge — Git appends the old position
+to the reflog. Objects stay in the store until garbage collection, and gc will not touch anything
+reachable from a reflog entry. Default expiry is <strong>90 days</strong> for reachable entries
+and 30 for unreachable ones.</p>
+<p>This means <code>git reset --hard</code> almost never actually destroys a commit. It moves a
+pointer. The commit is still there, and the reflog knows where.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">recovering from a hard reset</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">git reset --hard HEAD~3</span></div><div class="tl"><span class="to">HEAD is now at 3c1e8a9 Fix the writeback stall</span></div><div class="tl"><span class="tc">...three commits of work apparently gone.</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git reflog</span></div><div class="tl"><span class="to">3c1e8a9 HEAD@{0}: reset: moving to HEAD~3</span></div><div class="tl"><span class="to">8f2b4d1 HEAD@{1}: commit: Add retry budget to the client</span></div><div class="tl"><span class="to">a91c3e7 HEAD@{2}: commit: Wire up the circuit breaker</span></div><div class="tl"><span class="to">5d0f8b2 HEAD@{3}: commit: Extract the transport interface</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git reset --hard 8f2b4d1</span></div><div class="tl"><span class="tc">All three back. The commits never went anywhere.</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tc">Reflog gone too (fresh clone, or expired)? Objects may still exist:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git fsck --lost-found --no-reflogs</span></div><div class="tl"><span class="to">dangling commit 8f2b4d1c9e0a7f3b2d5c8e1a4f6b9d0c3e7a2f5b</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">06</span>
+    <span class="rc-main"><span class="rc-name">git bisect — binary search over history</span>
+      <span class="rc-desc">Twelve builds to find the bad commit in four thousand.</span>
+      <span class="rc-tags"><span class="tg">bisect</span><span class="tg">regression</span><span class="tg">automation</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>You know it worked in the release three weeks ago and it's broken now. Between them are 4,000
+commits. Bisect does binary search: <code>log₂(4000) ≈ 12</code> builds to find the exact commit
+that introduced the problem.</p>
+<p>The manual form is fine, but the payoff is <code>git bisect run</code> with a script that exits
+0 for good and non-zero for bad. Then it's fully automatic — go and do something else while it
+narrows down.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">automated bisect</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">git bisect start</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git bisect bad HEAD</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git bisect good v2.14.0</span></div><div class="tl"><span class="to">Bisecting: 1994 revisions left to test after this (roughly 11 steps)</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tc">exit 0 = good, 1 = bad, 125 = skip (can&#x27;t build this one)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git bisect run ./scripts/reproduce.sh</span></div><div class="tl"><span class="to">running ./scripts/reproduce.sh</span></div><div class="tl"><span class="to">...</span></div><div class="tl"><span class="to">8f2b4d1c is the first bad commit</span></div><div class="tl"><span class="to">    Add retry budget to the client</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git bisect reset</span></div></div></div><div class="note tip"><b>Make the reproducer fast before you start</b>
+<p style="margin:0">Bisect runs your script a dozen times. A five-minute test suite is an hour;
+a ten-second targeted reproducer is two minutes. Time spent narrowing the test down to the one
+failing case pays for itself immediately.</p></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">07</span>
+    <span class="rc-main"><span class="rc-name">Packfiles, gc, and why the clone is 4 GB</span>
+      <span class="rc-desc">Loose objects, delta compression, and the history you can't delete by deleting files.</span>
+      <span class="rc-tags"><span class="tg">packfile</span><span class="tg">gc</span><span class="tg">filter-repo</span><span class="tg">LFS</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>New objects are written loose — one zlib-compressed file each. <code>git gc</code> packs them
+into a <strong>packfile</strong> with delta compression, storing similar objects as diffs against
+one another. A repo with 200,000 loose objects and the same repo packed can differ by an order of
+magnitude on disk.</p>
+<h3>The thing that catches everyone</h3>
+<p>Deleting a large file in a new commit does <strong>not</strong> shrink the repository. The blob
+is still reachable from every commit that contained it, so it ships with every clone forever. A
+500 MB accidental binary from 2019 is still in everybody's clone today.</p>
+<p>Removing it means rewriting history — <code>git filter-repo</code> (the maintained successor to
+<code>filter-branch</code>) — followed by a force push and every collaborator re-cloning. Doing it
+right is disruptive; the answer is to not commit large binaries in the first place, which is what
+Git LFS is for.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">finding what&#x27;s making the repo heavy</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">git count-objects -vH</span></div><div class="tl"><span class="to">count: 1204</span></div><div class="tl"><span class="to">size-pack: 3.82 GiB</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git rev-list --objects --all |</span></div><div class="tl"><span class="tp">$</span> <span class="tt">  git cat-file --batch-check=&#x27;%(objecttype) %(objectname) %(objectsize) %(rest)&#x27; |</span></div><div class="tl"><span class="tp">$</span> <span class="tt">  awk &#x27;$1==&quot;blob&quot;&#x27; | sort -k3 -n -r | head -5</span></div><div class="tl"><span class="to">blob 7f2a9c1 498237440 assets/demo-recording.mov</span></div><div class="tl"><span class="tc">475 MB in one blob, in every clone, forever.</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">08</span>
+    <span class="rc-main"><span class="rc-name">Hooks, worktrees and the bits that save real time</span>
+      <span class="rc-desc">Three features most people never turn on.</span>
+      <span class="rc-tags"><span class="tg">hooks</span><span class="tg">worktree</span><span class="tg">rerere</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<h3>Hooks</h3>
+<p>Scripts in <code>.git/hooks/</code> that fire at defined points. <code>pre-commit</code> for
+formatting and lint, <code>pre-push</code> for the fast test subset, <code>commit-msg</code> for
+message conventions. They are local and not versioned — which is why teams use a manager like
+pre-commit to install them from a config that <em>is</em> versioned. Server-side hooks are how a
+platform enforces signed commits or protected paths.</p>
+<h3>Worktrees</h3>
+<p><code>git worktree add ../hotfix release-2.14</code> gives you a second working directory on a
+different branch, sharing one object store. No stashing, no second clone, no re-downloading 4 GB
+to fix one line on a release branch while your feature build is still running.</p>
+<h3>rerere</h3>
+<p><em>Reuse recorded resolution.</em> Turn it on and Git remembers how you resolved a given
+conflict, then replays that resolution automatically when the same conflict appears again — which
+it will, on every rebase of a long-running branch.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">worth putting in your global config</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">git config --global rerere.enabled true</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git config --global pull.rebase true</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git config --global fetch.prune true</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git config --global diff.algorithm histogram</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git config --global rebase.autosquash true</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git config --global init.defaultBranch main</span></div><div class="tl"><span class="tc">fetch.prune alone removes a whole class of &#x27;why is this dead branch</span></div><div class="tl"><span class="tc">still in my tab completion&#x27; confusion.</span></div></div></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">In practice</div><h2>TWO COMMON MESSES</h2>
+<p>Two situations that come up constantly, and the shortest correct path through each.</p>
+<h3>You committed to the wrong branch</h3>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">move the last commit to where it belongs</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">git log --oneline -1</span></div><div class="tl"><span class="to">8f2b4d1 Add retry budget to the client</span></div><div class="tl"><span class="tc">This should have been on feature/retries, not main.</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git branch feature/retries          # point a new branch here</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git reset --hard HEAD~1             # rewind main</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git switch feature/retries          # the commit is safely over here</span></div></div></div>
+<h3>You need one commit from another branch</h3>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">cherry-pick, and what to watch for</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">git cherry-pick 8f2b4d1</span></div><div class="tl"><span class="tc">Makes a NEW commit with a new hash and the same change.</span></div><div class="tl"><span class="tc">Both branches now carry the change under different hashes, so the</span></div><div class="tl"><span class="tc">eventual merge may conflict. -x records the origin in the message:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">git cherry-pick -x 8f2b4d1</span></div><div class="tl"><span class="to">    (cherry picked from commit 8f2b4d1c9e0a7f3b2d5c8e1a4f6b9d0c3e7a2f5b)</span></div></div></div><div class="note warn"><b>The one habit worth building</b>
+<p style="margin:0">Before any command that rewrites history — <code>reset --hard</code>,
+<code>rebase</code>, <code>filter-repo</code> — run <code>git reflog</code> once and note the
+current hash. It takes two seconds and turns every subsequent mistake into a one-line
+recovery.</p></div></div></section><section><div class="wrap"><div class="sec-tag">Reference</div><h2>CHEATSHEET</h2><div class="tw"><table class="tbl mono"><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody><tr><td><code>git reflog</code></td><td>Every position HEAD has held. Your undo button</td></tr><tr><td><code>git log --oneline --graph --all</code></td><td>The actual shape of your branches</td></tr><tr><td><code>git log -S'string'</code></td><td>Commits that added or removed that string — pickaxe search</td></tr><tr><td><code>git log -p -- path/to/file</code></td><td>Full history of one file, with diffs</td></tr><tr><td><code>git blame -w -C file</code></td><td>Blame ignoring whitespace and following moved code</td></tr><tr><td><code>git bisect run ./test.sh</code></td><td>Automatic binary search for the breaking commit</td></tr><tr><td><code>git switch -c branch</code></td><td>Create and move to a branch (safe <code>checkout -b</code>)</td></tr><tr><td><code>git restore --staged file</code></td><td>Unstage without touching your edits</td></tr><tr><td><code>git worktree add ../dir branch</code></td><td>Second working directory, one object store</td></tr><tr><td><code>git stash push -m 'msg' -- path</code></td><td>Stash only specific paths, with a label</td></tr><tr><td><code>git rebase -i --autosquash HEAD~5</code></td><td>Tidy a branch before it lands</td></tr><tr><td><code>git commit --fixup HASH</code></td><td>Mark a fix for autosquash to fold in later</td></tr><tr><td><code>git diff --staged</code></td><td>Review exactly what you are about to commit</td></tr><tr><td><code>git fsck --lost-found</code></td><td>Find dangling objects when the reflog can't help</td></tr><tr><td><code>git count-objects -vH</code></td><td>Repo size, packed and loose</td></tr><tr><td><code>git push --force-with-lease</code></td><td>Force push that refuses if someone else pushed first</td></tr></tbody></table></div></div></section>
+
+<section style="border-bottom:0"><div class="wrap"><div class="pager"><a href="../PYTHON/python.html">← Previous<b>Python</b></a><a class="next" href="../../categories/foundation/index.html">Foundation →<b>Hub</b></a></div></div></section>
+
+<footer>
+  <div class="f-in">
+    <div class="f-top">
+      <div>
+        <a class="f-logo" href="../../index.html">PLATFORM OPS</a>
+        <p class="f-tag">Field notes on Kubernetes, SRE, and Platform Engineering —
+          written from production, not slideware.</p>
+      </div>
+      <div class="f-cols">
+        <div><div class="f-col-t">Newsletter</div>
+          <a href="../../index.html#issues">Latest Issues</a>
+          <a href="../../index.html#subscribe">Subscribe</a>
+          <a href="../../feed.xml">RSS Feed</a></div>
+        <div><div class="f-col-t">Explore</div>
+          <a href="../../categories/index.html">All Categories</a>
+          <a href="../../categories/foundation/index.html">Foundation Hub</a>
+          <a href="../../index.html#topics">Knowledge Map</a></div>
+        <div><div class="f-col-t">Connect</div>
+          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="../../index.html#authors">About the Author</a>
+          <a href="#">Back to Top ↑</a></div>
+      </div>
+    </div>
+    <div class="f-bot">
+      <div>© 2026 Vishal Abhinav · Platform Ops — code MIT,
+        <a href="../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+      <div>Built for engineers, by an engineer.</div>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('tt').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});
+document.addEventListener('click',function(e){
+  var h=e.target.closest('.rc-head'); if(!h) return;
+  var c=h.parentElement, open=c.classList.contains('open');
+  c.classList.toggle('open',!open);
+  h.setAttribute('aria-expanded', !open?'true':'false');
+});
+</script>
+</body>
+</html>

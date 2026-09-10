@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shell &amp; Bash · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="How the shell reads, expands and executes a line — and why nearly every shell bug is really a quoting bug at the word-splitting stage.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
+<link rel="canonical" href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/SHELL-AND-BASH/shell-and-bash.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Shell &amp; Bash · Platform Ops">
+<meta property="og:description" content="How the shell reads, expands and executes a line — and why nearly every shell bug is really a quoting bug at the word-splitting stage.">
+<meta property="og:url" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/SHELL-AND-BASH/shell-and-bash.html">
+<meta property="og:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Shell &amp; Bash · Platform Ops">
+<meta name="twitter:description" content="How the shell reads, expands and executes a line — and why nearly every shell bug is really a quoting bug at the word-splitting stage.">
+<meta name="twitter:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="../../feed.xml">
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="stylesheet" href="../../Foundation/topic.css">
+</head>
+<body>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb"><a href="../../index.html">Home</a><span>/</span><a href="../../categories/index.html">Categories</a><span>/</span><a href="../../categories/foundation/index.html">Foundation</a><span>/</span><span class="cur">Shell &amp; Bash</span></div>
+  <div class="nav-right"><button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button><a href="../../index.html#subscribe" class="nav-logo"
+    style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Foundation · Core</div>
+  <h1>Shell &amp; Bash</h1>
+  <p class="sub">How the shell reads, expands and executes a line — and why nearly every shell bug is really a quoting bug at the word-splitting stage.</p>
+  <div class="meta"><span><b>23 min</b> read</span> <span>Level: <b>core → advanced</b></span> <span>Foundation <b>06 / 10</b></span></div>
+</div></header>
+
+<section><div class="wrap"><div class="sec-tag">The model</div><h2>WHAT HAPPENS TO A LINE</h2><p class="lede">Five stages, in a fixed order, before your command ever runs.</p><div class="dg-scroll"><svg class="dg" viewBox="0 0 1000 370" role="img" aria-label="The order the shell does things — and why quoting bugs are always a step-3 problem"><line class="dg-spine" x1="160" y1="14" x2="160" y2="356.0"/><text class="dg-layer" x="146" y="41.0">1 · READ</text><circle class="dg-tick" cx="160" cy="37.0" r="3"/><rect x="168.0" y="14" width="264.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="300.0" y="41.0" fill="#066c77">Read a line</text><rect x="442.0" y="14" width="264.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="574.0" y="41.0" fill="#066c77">Tokenise</text><rect x="716.0" y="14" width="264.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="848.0" y="41.0" fill="#066c77">Parse into commands</text><text class="dg-layer" x="146" y="115.0">2 · EXPAND</text><circle class="dg-tick" cx="160" cy="111.0" r="3"/><rect x="168.0" y="88" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="245.2" y="115.0" fill="#8a5806">Brace {a,b}</text><rect x="332.4" y="88" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="409.6" y="115.0" fill="#8a5806">Tilde ~</text><rect x="496.8" y="88" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="574.0" y="115.0" fill="#8a5806">Parameter $VAR</text><rect x="661.2" y="88" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="738.4" y="115.0" fill="#8a5806">Command $(…)</text><rect x="825.6" y="88" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="902.8" y="115.0" fill="#8a5806">Arithmetic $((…))</text><text class="dg-layer" x="146" y="189.0">3 · SPLIT</text><circle class="dg-tick" cx="160" cy="185.0" r="3"/><rect x="168.0" y="162" width="264.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="300.0" y="189.0" fill="#a32b28">Word splitting on $IFS</text><rect x="442.0" y="162" width="264.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="574.0" y="189.0" fill="#a32b28">Pathname glob *</text><rect x="716.0" y="162" width="264.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="848.0" y="189.0" fill="#a32b28">Quote removal</text><text class="dg-layer" x="146" y="263.0">4 · REDIRECT</text><circle class="dg-tick" cx="160" cy="259.0" r="3"/><rect x="168.0" y="236" width="264.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="300.0" y="263.0" fill="#5b21b6">&lt; &gt; &gt;&gt; 2&gt;&amp;1</text><rect x="442.0" y="236" width="264.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="574.0" y="263.0" fill="#5b21b6">Pipes |</text><rect x="716.0" y="236" width="264.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="848.0" y="263.0" fill="#5b21b6">Here-docs &lt;&lt;EOF</text><text class="dg-layer" x="146" y="337.0">5 · EXECUTE</text><circle class="dg-tick" cx="160" cy="333.0" r="3"/><rect x="168.0" y="310" width="195.5" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="265.8" y="337.0" fill="#3f6f0c">Builtin?</text><rect x="373.5" y="310" width="195.5" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="471.2" y="337.0" fill="#3f6f0c">Function?</text><rect x="579.0" y="310" width="195.5" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="676.8" y="337.0" fill="#3f6f0c">fork + execve</text><rect x="784.5" y="310" width="195.5" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="882.2" y="337.0" fill="#3f6f0c">wait / $?</text></svg></div><p class="dg-cap">Word splitting and globbing happen <em>after</em> variable expansion. Double quotes suppress exactly those two steps — which is the whole reason to use them.</p></div></section><section><div class="wrap"><div class="sec-tag">Core</div><h2>CORE CONCEPTS</h2><p class="lede">Expansion, exit codes, redirection, conditionals.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">01</span>
+    <span class="rc-main"><span class="rc-name">Expansion order — the root of most shell bugs</span>
+      <span class="rc-desc">The shell does eight things to your line, in a fixed order, before anything runs.</span>
+      <span class="rc-tags"><span class="tg">expansion</span><span class="tg">word splitting</span><span class="tg">globbing</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Almost every surprising shell behaviour comes from not knowing this order. The shell performs,
+strictly in sequence:</p>
+<ol>
+<li>Brace expansion — <code>{a,b}</code></li>
+<li>Tilde expansion — <code>~</code></li>
+<li>Parameter and variable expansion — <code>$VAR</code></li>
+<li>Command substitution — <code>$(…)</code></li>
+<li>Arithmetic expansion — <code>$((…))</code></li>
+<li><strong>Word splitting</strong> on <code>$IFS</code></li>
+<li><strong>Pathname expansion</strong> (globbing)</li>
+<li>Quote removal</li>
+</ol>
+<p>Steps 6 and 7 happen <em>after</em> your variable has been substituted. That is the entire
+explanation for the filename-with-spaces bug: the shell substitutes
+<code>my report.pdf</code>, then splits it into two words, then hands <code>rm</code> two
+arguments that don't exist.</p>
+<p><strong>Double quotes suppress steps 6 and 7.</strong> That is what they are for. Quote every
+expansion unless you have a specific reason not to.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">the same command, quoted and not</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">f=&#x27;my report.pdf&#x27;</span></div><div class="tl"><span class="tp">$</span> <span class="tt">rm $f</span></div><div class="tl"><span class="to">rm: cannot remove &#x27;my&#x27;: No such file or directory</span></div><div class="tl"><span class="to">rm: cannot remove &#x27;report.pdf&#x27;: No such file or directory</span></div><div class="tl"><span class="tp">$</span> <span class="tt">rm &quot;$f&quot;</span></div><div class="tl"><span class="tc">One argument. This is the whole lesson.</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tc">Arrays need the same care — &quot;${a[@]}&quot; keeps elements intact:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">files=(&quot;my report.pdf&quot; &quot;notes 2.txt&quot;)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">printf &quot;%s\n&quot; &quot;${files[@]}&quot;</span></div><div class="tl"><span class="to">my report.pdf</span></div><div class="tl"><span class="to">notes 2.txt</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">02</span>
+    <span class="rc-main"><span class="rc-name">Exit codes, pipelines and where failures hide</span>
+      <span class="rc-desc">A pipeline's exit status is the last command's, which is almost never what you want.</span>
+      <span class="rc-tags"><span class="tg">exit code</span><span class="tg">pipefail</span><span class="tg">PIPESTATUS</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p><code>$?</code> holds the exit status of the last command: 0 for success, 1–255 otherwise.
+By convention 1 is a general error, 2 is a usage error, 126 means found but not executable, 127
+means not found, and 128+N means killed by signal N — so 137 is SIGKILL (128+9), which is what an
+OOM kill looks like from the outside.</p>
+<h3>The pipeline trap</h3>
+<p>In <code>a | b | c</code>, <code>$?</code> is <strong>c's</strong> exit status. If
+<code>a</code> fails and <code>c</code> succeeds, the pipeline reports success. A backup script
+of the form <code>pg_dump … | gzip &gt; backup.gz</code> will happily report success while writing
+a perfectly valid gzip of an error message.</p>
+<p><code>set -o pipefail</code> makes the pipeline return the rightmost non-zero status.
+<code>${PIPESTATUS[@]}</code> gives you every stage's status individually.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">the backup that silently wasn&#x27;t</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">pg_dump missing_db | gzip &gt; backup.sql.gz; echo $?</span></div><div class="tl"><span class="to">pg_dump: error: connection to database &quot;missing_db&quot; failed</span></div><div class="tl"><span class="to">0</span></div><div class="tl"><span class="tc">Exit 0. The cron job is &#x27;green&#x27;. The backup is 20 bytes of nothing.</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">set -o pipefail</span></div><div class="tl"><span class="tp">$</span> <span class="tt">pg_dump missing_db | gzip &gt; backup.sql.gz; echo $?</span></div><div class="tl"><span class="to">1</span></div><div class="tl"><span class="tp">$</span> <span class="tt">echo &quot;${PIPESTATUS[@]}&quot;</span></div><div class="tl"><span class="to">1 0</span></div><div class="tl"><span class="tc">Stage 1 failed, stage 2 succeeded. Now you know which.</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">03</span>
+    <span class="rc-main"><span class="rc-name">Redirection and file descriptors</span>
+      <span class="rc-desc">0, 1, 2 — and why 2>&1 has to come after > file.</span>
+      <span class="rc-tags"><span class="tg">stdin</span><span class="tg">stdout</span><span class="tg">stderr</span><span class="tg">fd</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Every process starts with three descriptors: <strong>0 stdin</strong>, <strong>1 stdout</strong>,
+<strong>2 stderr</strong>. Redirection rewires them before the command runs.</p>
+<p>Order matters, and it is the reverse of how people read it. <code>&gt;file 2&gt;&amp;1</code>
+first points 1 at the file, then points 2 at wherever 1 is now — the file. Both go to the file.
+<code>2&gt;&amp;1 &gt;file</code> first points 2 at wherever 1 currently is — the terminal — and
+then moves 1 to the file. stdout goes to the file, stderr still goes to the terminal. This is the
+single most common shell redirection bug.</p>
+<div class="tw"><table class="tbl mono"><thead><tr><th>Form</th><th>Effect</th></tr></thead><tbody><tr><td><code>&gt; f</code></td><td>stdout to f, truncating</td></tr><tr><td><code>&gt;&gt; f</code></td><td>stdout to f, appending</td></tr><tr><td><code>2&gt; f</code></td><td>stderr to f</td></tr><tr><td><code>&amp;&gt; f</code> / <code>&gt; f 2&gt;&amp;1</code></td><td>both to f (bash)</td></tr><tr><td><code>2&gt;&amp;1 &gt; f</code></td><td><strong>stdout to f, stderr to terminal</strong> — usually a bug</td></tr><tr><td><code>&gt; /dev/null 2&gt;&amp;1</code></td><td>discard everything</td></tr><tr><td><code>&lt; f</code></td><td>stdin from f</td></tr><tr><td><code>&lt;&lt;&lt; 'str'</code></td><td>here-string — feed a literal to stdin</td></tr><tr><td><code>&lt;(cmd)</code></td><td>process substitution — a command's output as a filename</td></tr><tr><td><code>exec 3&gt; f</code></td><td>open fd 3 for the rest of the script</td></tr></tbody></table></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">04</span>
+    <span class="rc-main"><span class="rc-name">Test constructs: [ vs [[ vs ((</span>
+      <span class="rc-desc">Three of them, and only one is a real shell keyword.</span>
+      <span class="rc-tags"><span class="tg">test</span><span class="tg">conditionals</span><span class="tg">bash</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p><code>[</code> is a <em>command</em> — historically <code>/usr/bin/[</code>. Its arguments go
+through word splitting and globbing like any other command's, which is why an unquoted empty
+variable turns <code>[ $x = y ]</code> into <code>[ = y ]</code> and a syntax error.</p>
+<p><code>[[ ]]</code> is a bash <strong>keyword</strong>. The shell parses it specially: no word
+splitting, no globbing on the left side, and it adds <code>=~</code> for regex and
+<code>&amp;&amp;</code>/<code>||</code> inside. Use it in bash, always.</p>
+<p><code>(( ))</code> is arithmetic evaluation: bare variable names, C-style operators, and an
+exit status that is 0 when the expression is non-zero — the opposite of every other exit code
+convention, which trips people up exactly once.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">why [[ ]] is worth the non-portability</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">x=</span></div><div class="tl"><span class="tp">$</span> <span class="tt">[ $x = foo ] &amp;&amp; echo yes</span></div><div class="tl"><span class="to">bash: [: =: unary operator expected</span></div><div class="tl"><span class="tp">$</span> <span class="tt">[[ $x = foo ]] &amp;&amp; echo yes</span></div><div class="tl"><span class="tc">No error. No output. Correct.</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">[[ $version =~ ^v([0-9]+)\.([0-9]+) ]] &amp;&amp; echo &quot;major ${BASH_REMATCH[1]}&quot;</span></div><div class="tl"><span class="to">major 2</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">(( count &gt; 10 )) &amp;&amp; echo busy</span></div><div class="tl"><span class="tc">No $ needed, and it reads like arithmetic because it is.</span></div></div></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">Advanced</div><h2>ADVANCED</h2><p class="lede">Strict mode's blind spots, traps, process substitution, parallelism.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">05</span>
+    <span class="rc-main"><span class="rc-name">set -euo pipefail — and where it lies to you</span>
+      <span class="rc-desc">The standard safety preamble, plus the three cases it doesn't cover.</span>
+      <span class="rc-tags"><span class="tg">strict mode</span><span class="tg">errexit</span><span class="tg">traps</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p><code>set -e</code> exits on an unhandled non-zero status. <code>set -u</code> errors on an
+unset variable. <code>set -o pipefail</code> propagates pipeline failures. Together they turn a
+script that limps on after an error into one that stops. Every ops script should start with them.</p>
+<h3>Three places -e does not fire</h3>
+<ul>
+<li><strong>Inside a condition.</strong> <code>if cmd; then</code>, <code>cmd &amp;&amp; …</code>,
+<code>! cmd</code> — the failure is being tested, so it is not an error. Correct, but it means a
+function called from an <code>if</code> loses errexit <em>throughout its body</em>.</li>
+<li><strong>Command substitution in an assignment.</strong> <code>local x=$(failing)</code>
+succeeds, because <code>local</code> succeeded. Split the declaration from the assignment.</li>
+<li><strong>Anything but the last command in a pipeline</strong> — unless pipefail is set.</li>
+</ul>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">the one that gets everyone</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">set -euo pipefail</span></div><div class="tl"><span class="tp">$</span> <span class="tt">get_version() { cat /nonexistent; }</span></div><div class="tl"><span class="tp">$</span> <span class="tt">main() { local v=$(get_version); echo &quot;got [$v]&quot;; }</span></div><div class="tl"><span class="tp">$</span> <span class="tt">main</span></div><div class="tl"><span class="to">cat: /nonexistent: No such file or directory</span></div><div class="tl"><span class="to">got []</span></div><div class="tl"><span class="tc">Still running, with an empty value. &#x27;local&#x27; returned 0.</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tc">Split it, and -e does its job:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">main() { local v; v=$(get_version); echo &quot;got [$v]&quot;; }</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">06</span>
+    <span class="rc-main"><span class="rc-name">Traps, cleanup and signal handling</span>
+      <span class="rc-desc">The difference between a script that leaves a mess and one that doesn't.</span>
+      <span class="rc-tags"><span class="tg">trap</span><span class="tg">EXIT</span><span class="tg">mktemp</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p><code>trap 'handler' EXIT</code> runs the handler however the script ends — normal exit, error
+under <code>set -e</code>, or a caught signal. It is the shell's <code>finally</code>, and it is
+the right place for every temp file, lock and mount you created.</p>
+<p>Trapping <code>INT TERM</code> as well lets you clean up when someone hits Ctrl-C or the
+orchestrator sends SIGTERM. In a container, a script that traps TERM and forwards it to its child
+is the difference between a two-second shutdown and the full 30-second grace period.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">a cleanup that actually runs</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">#!/usr/bin/env bash</span></div><div class="tl"><span class="tp">$</span> <span class="tt">set -euo pipefail</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">tmp=$(mktemp -d)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">cleanup() { rm -rf &quot;$tmp&quot;; [[ -n ${child:-} ]] &amp;&amp; kill &quot;$child&quot; 2&gt;/dev/null || true; }</span></div><div class="tl"><span class="tp">$</span> <span class="tt">trap cleanup EXIT INT TERM</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">long_running_thing &gt; &quot;$tmp/out&quot; &amp;</span></div><div class="tl"><span class="tp">$</span> <span class="tt">child=$!</span></div><div class="tl"><span class="tp">$</span> <span class="tt">wait &quot;$child&quot;</span></div><div class="tl"><span class="tc">Ctrl-C, SIGTERM, an error, or success — the temp dir goes away and</span></div><div class="tl"><span class="tc">the child gets signalled. One trap line covers all four paths.</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">07</span>
+    <span class="rc-main"><span class="rc-name">Process substitution and doing without a temp file</span>
+      <span class="rc-desc"><(cmd) gives you a command's output where a filename is expected.</span>
+      <span class="rc-tags"><span class="tg">process substitution</span><span class="tg">fifo</span><span class="tg">diff</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p><code>&lt;(cmd)</code> runs <code>cmd</code> and substitutes the path of a file descriptor
+(<code>/dev/fd/63</code>) that reads its output. Anything expecting a filename now accepts a
+command. No temp file, no cleanup, no race.</p>
+<p>The classic use is comparing two things that aren't files — the output of a command on two
+hosts, a sorted list against another sorted list, a config as deployed versus as intended.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">comparing two live states</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">diff &lt;(ssh web-1 &#x27;rpm -qa | sort&#x27;) &lt;(ssh web-2 &#x27;rpm -qa | sort&#x27;)</span></div><div class="tl"><span class="to">&gt; nginx-1.24.0-1.el9.x86_64</span></div><div class="tl"><span class="tc">web-2 has a package web-1 doesn&#x27;t. No temp files were involved.</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tc">Also solves the classic subshell-loses-variables problem:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">count=0; find . -name &#x27;*.log&#x27; | while read -r f; do ((count++)); done; echo $count</span></div><div class="tl"><span class="to">0</span></div><div class="tl"><span class="tc">The pipeline put the loop in a subshell — the increment was lost.</span></div><div class="tl"><span class="tp">$</span> <span class="tt">count=0; while read -r f; do ((count++)); done &lt; &lt;(find . -name &#x27;*.log&#x27;); echo $count</span></div><div class="tl"><span class="to">1842</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">08</span>
+    <span class="rc-main"><span class="rc-name">Parallelism without a job scheduler</span>
+      <span class="rc-desc">xargs -P turns a serial loop into a bounded worker pool.</span>
+      <span class="rc-tags"><span class="tg">xargs</span><span class="tg">parallel</span><span class="tg">GNU parallel</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>A <code>for</code> loop over 400 hosts running one SSH command each, serially at two seconds
+apiece, is thirteen minutes. <code>xargs -P 20</code> makes it forty seconds, with a bounded
+concurrency you control.</p>
+<p><code>-P N</code> sets parallelism, <code>-n 1</code> passes one argument per invocation, and
+<code>-0</code> with <code>find -print0</code> handles filenames with spaces and newlines safely.
+For anything more complex, GNU <code>parallel</code> adds per-job output grouping — which matters,
+because interleaved output from 20 concurrent jobs is unreadable.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">bounded parallel work</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">cat hosts.txt | xargs -P 20 -n 1 -I{} ssh {} &#x27;uptime&#x27; </span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tc">Filenames done safely — NUL-separated, never split on whitespace:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">find . -name &#x27;*.log&#x27; -print0 | xargs -0 -P 8 -n 50 gzip</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tc">GNU parallel keeps each job&#x27;s output together instead of interleaved:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">parallel -j 20 --tag ssh {} uptime :::: hosts.txt</span></div></div></div><div class="note warn"><b>Bound it, always</b>
+<p style="margin:0"><code>-P 0</code> means unlimited. Point that at 4,000 hosts and you will
+exhaust file descriptors, fork bomb the box, or get rate-limited by whatever you're talking to.
+Pick a number, and pick it based on what the <em>far</em> side can take.</p></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">In practice</div><h2>A SCRIPT SKELETON</h2>
+<p>The skeleton below is worth keeping as a template. Every line in it exists because of a specific
+class of production failure.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">a script that fails properly</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">#!/usr/bin/env bash</span></div><div class="tl"><span class="tc">env bash, not /bin/bash — macOS and BSD put it elsewhere</span></div><div class="tl"><span class="tp">$</span> <span class="tt">set -euo pipefail</span></div><div class="tl"><span class="tp">$</span> <span class="tt">IFS=$&#x27;\n\t&#x27;</span></div><div class="tl"><span class="tc">drop space from IFS: filenames with spaces stop splitting</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">readonly SCRIPT_DIR=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)&quot; &amp;&amp; pwd)&quot;</span></div><div class="tl"><span class="tp">$</span> <span class="tt">readonly LOG_TAG=&quot;${0##*/}&quot;</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">log() { printf &quot;%s [%s] %s\n&quot; &quot;$(date -Is)&quot; &quot;$LOG_TAG&quot; &quot;$*&quot; &gt;&amp;2; }</span></div><div class="tl"><span class="tp">$</span> <span class="tt">die() { log &quot;FATAL: $*&quot;; exit 1; }</span></div><div class="tl"><span class="tc">log to stderr so stdout stays clean and pipeable</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">tmp=&quot;$(mktemp -d)&quot;</span></div><div class="tl"><span class="tp">$</span> <span class="tt">trap &#x27;rm -rf &quot;$tmp&quot;&#x27; EXIT INT TERM</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">[[ $# -ge 1 ]] || die &quot;usage: $LOG_TAG &lt;target&gt;&quot;</span></div><div class="tl"><span class="tp">$</span> <span class="tt">command -v jq &gt;/dev/null || die &quot;jq is required&quot;</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">main() {</span></div><div class="tl"><span class="tp">$</span> <span class="tt">  local target=&quot;$1&quot;</span></div><div class="tl"><span class="tp">$</span> <span class="tt">  log &quot;starting on $target&quot;</span></div><div class="tl"><span class="tp">$</span> <span class="tt">  ...</span></div><div class="tl"><span class="tp">$</span> <span class="tt">}</span></div><div class="tl"><span class="tp">$</span> <span class="tt">main &quot;$@&quot;</span></div></div></div><div class="note tip"><b>Run shellcheck in CI</b>
+<p style="margin:0">ShellCheck catches unquoted expansions, the <code>2&gt;&amp;1</code> ordering
+bug, useless <code>cat</code>, subshell variable loss, and about two hundred other things — all
+statically, in under a second. There is no reason for a shell script in a repo not to be passing
+it.</p></div></div></section><section><div class="wrap"><div class="sec-tag">Reference</div><h2>CHEATSHEET</h2><div class="tw"><table class="tbl mono"><thead><tr><th>Idiom</th><th>What it does</th></tr></thead><tbody><tr><td><code>set -euo pipefail</code></td><td>Stop on error, on unset var, and on any pipeline stage failing</td></tr><tr><td><code>"${var:-default}"</code></td><td>Value, or a default if unset or empty</td></tr><tr><td><code>"${var:?message}"</code></td><td>Value, or exit with that message if unset</td></tr><tr><td><code>"${var%%.*}"</code></td><td>Strip the longest trailing match — <code>a.b.c</code> → <code>a</code></td></tr><tr><td><code>"${var##*/}"</code></td><td>Strip the longest leading match — basename, without forking</td></tr><tr><td><code>"${var//old/new}"</code></td><td>Replace all occurrences, no sed needed</td></tr><tr><td><code>"${#var}"</code></td><td>String length</td></tr><tr><td><code>"${arr[@]}"</code></td><td>All array elements, each kept as one word</td></tr><tr><td><code>${PIPESTATUS[@]}</code></td><td>Exit status of every stage in the last pipeline</td></tr><tr><td><code>trap 'cleanup' EXIT INT TERM</code></td><td>Run cleanup however the script ends</td></tr><tr><td><code>mktemp -d</code></td><td>Race-free temp directory</td></tr><tr><td><code>&lt;(cmd)</code></td><td>Command output where a filename is expected</td></tr><tr><td><code>while read -r l; do …; done &lt; &lt;(cmd)</code></td><td>Loop without losing variables to a subshell</td></tr><tr><td><code>find … -print0 | xargs -0 -P N</code></td><td>Parallel, safe with any filename</td></tr><tr><td><code>command -v tool &gt;/dev/null</code></td><td>Portable 'is this installed'</td></tr><tr><td><code>exec 200&gt;/var/lock/f; flock -n 200</code></td><td>Don't let two copies run at once</td></tr><tr><td><code>shellcheck script.sh</code></td><td>Static analysis. Run it in CI</td></tr></tbody></table></div></div></section>
+
+<section style="border-bottom:0"><div class="wrap"><div class="pager"><a href="../../Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html">← Previous<b>Linux</b></a><a class="next" href="../PYTHON/python.html">Next →<b>Python</b></a></div></div></section>
+
+<footer>
+  <div class="f-in">
+    <div class="f-top">
+      <div>
+        <a class="f-logo" href="../../index.html">PLATFORM OPS</a>
+        <p class="f-tag">Field notes on Kubernetes, SRE, and Platform Engineering —
+          written from production, not slideware.</p>
+      </div>
+      <div class="f-cols">
+        <div><div class="f-col-t">Newsletter</div>
+          <a href="../../index.html#issues">Latest Issues</a>
+          <a href="../../index.html#subscribe">Subscribe</a>
+          <a href="../../feed.xml">RSS Feed</a></div>
+        <div><div class="f-col-t">Explore</div>
+          <a href="../../categories/index.html">All Categories</a>
+          <a href="../../categories/foundation/index.html">Foundation Hub</a>
+          <a href="../../index.html#topics">Knowledge Map</a></div>
+        <div><div class="f-col-t">Connect</div>
+          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="../../index.html#authors">About the Author</a>
+          <a href="#">Back to Top ↑</a></div>
+      </div>
+    </div>
+    <div class="f-bot">
+      <div>© 2026 Vishal Abhinav · Platform Ops — code MIT,
+        <a href="../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+      <div>Built for engineers, by an engineer.</div>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('tt').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});
+document.addEventListener('click',function(e){
+  var h=e.target.closest('.rc-head'); if(!h) return;
+  var c=h.parentElement, open=c.classList.contains('open');
+  c.classList.toggle('open',!open);
+  h.setAttribute('aria-expanded', !open?'true':'false');
+});
+</script>
+</body>
+</html>

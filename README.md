@@ -45,7 +45,7 @@
 
 This repository *is* the newsletter. Every issue is a self-contained HTML page served straight from GitHub Pages — no build step, no framework, no tracking. Fork it, read it offline, or lift a diagram for your own docs.
 
-**Currently in this repo:** 11 full issue pages, a 190-term Linux & Unix glossary with 12 standalone term pages, 2 section hubs, and a homepage index — 26 pages in total.
+**Currently in this repo:** 11 monthly issue pages, 5 Foundation reference deep-dives, a 190-term Linux & Unix glossary with 12 standalone term pages, 34 category pages, 2 section hubs and a homepage index — 65 pages in total.
 
 ---
 
@@ -58,7 +58,7 @@ of truth, so the numbers here and there can never disagree.
 
 | | Pillar | Categories | ✅ Live | 🔸 Pipeline | · Planned | Total |
 |:--|:--|--:|--:|--:|--:|--:|
-| `01` | **Foundation** | 1 | 3 | 3 | 4 | 10 |
+| `01` | **Foundation** | 1 | 7 | 0 | 3 | 10 |
 | `02` | **Infrastructure** | 3 | 1 | 8 | 29 | 38 |
 | `03` | **Networking** | 1 | 1 | 4 | 26 | 31 |
 | `04` | **Cloud** | 1 | 0 | 4 | 13 | 17 |
@@ -67,8 +67,8 @@ of truth, so the numbers here and there can never disagree.
 | `07` | **Reliability** | 7 | 27 | 25 | 64 | 116 |
 | `08` | **Security** | 2 | 0 | 18 | 28 | 46 |
 | `09` | **Data & Applications** | 4 | 1 | 12 | 47 | 60 |
-| `10` | **Modern Ops** | 5 | 2 | 22 | 45 | 69 |
-| | **Total** | **33** | **65** | **135** | **321** | **521** |
+| `10` | **Modern Ops** | 5 | 3 | 21 | 45 | 69 |
+| | **Total** | **33** | **70** | **131** | **320** | **521** |
 
 **Status meanings**
 
@@ -78,25 +78,26 @@ of truth, so the numbers here and there can never disagree.
 | 🔸 **Pipeline** | Next up — adjacent to a series already running, so it's queued rather than hypothetical. |
 | · **Planned** | On the backlog. No date attached; it moves to pipeline when the series in front of it lands. |
 
-Live topics point at the 11 deep-dives already in this repo, so one issue can light up several
-topics at once — issue #051 alone covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
+Live topics point at the 16 deep-dives already in this repo — 11 monthly issues plus the
+Foundation reference pages — so one page can light up several topics at once. Issue #051 alone
+covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
 
 <br>
 
 <details>
-<summary><b>01 · Foundation</b> — 1 category · 3 live · 3 pipeline · 4 planned</summary>
+<summary><b>01 · Foundation</b> — 1 category · 7 live · 0 pipeline · 3 planned</summary>
 
-**🧱 Foundation** — 3 live · 3 pipeline · 4 planned  
-· Computer Fundamentals &nbsp;
-🔸 Operating Systems &nbsp;
+**🧱 Foundation** — 7 live · 0 pipeline · 3 planned  
+✅ [Computer Fundamentals](./Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html) &nbsp;
+✅ [Operating Systems](./Foundation/OPERATING-SYSTEMS/operating-systems.html) &nbsp;
 ✅ [Linux](./Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html) &nbsp;
 ✅ [Unix](./Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html) &nbsp;
 · Windows Server &nbsp;
-✅ [Shell & Bash](./Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html) &nbsp;
-🔸 Python &nbsp;
+✅ [Shell & Bash](./Foundation/SHELL-AND-BASH/shell-and-bash.html) &nbsp;
+✅ [Python](./Foundation/PYTHON/python.html) &nbsp;
 · Programming Fundamentals &nbsp;
 · Data Structures & Algorithms &nbsp;
-🔸 Git & Version Control &nbsp;
+✅ [Git & Version Control](./Foundation/GIT-VERSION-CONTROL/git-version-control.html) &nbsp;
 
 </details>
 
@@ -637,7 +638,7 @@ topics at once — issue #051 alone covers Prometheus, Grafana, Loki, Jaeger and
 </details>
 
 <details>
-<summary><b>10 · Modern Ops</b> — 5 categories · 2 live · 22 pipeline · 45 planned</summary>
+<summary><b>10 · Modern Ops</b> — 5 categories · 3 live · 21 pipeline · 45 planned</summary>
 
 **🤖 AI Infrastructure** — 0 live · 6 pipeline · 14 planned  
 🔸 AI Infrastructure &nbsp;
@@ -690,10 +691,10 @@ topics at once — issue #051 alone covers Prometheus, Grafana, Loki, Jaeger and
 · Cloud Waste Management &nbsp;
 · Cost Governance &nbsp;
 
-**🔁 Automation** — 2 live · 4 pipeline · 6 planned  
+**🔁 Automation** — 3 live · 3 pipeline · 6 planned  
 ✅ [Shell Automation](./Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html) &nbsp;
-✅ [Bash Automation](./Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html) &nbsp;
-🔸 Python Automation &nbsp;
+✅ [Bash Automation](./Foundation/SHELL-AND-BASH/shell-and-bash.html) &nbsp;
+✅ [Python Automation](./Foundation/PYTHON/python.html) &nbsp;
 🔸 Ansible Automation &nbsp;
 · Terraform Automation &nbsp;
 · API Automation &nbsp;

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Computer Fundamentals · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="What the hardware is actually doing underneath your process — caches, translation, interrupts and the six orders of magnitude between L1 and a disk seek.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
+<link rel="canonical" href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Computer Fundamentals · Platform Ops">
+<meta property="og:description" content="What the hardware is actually doing underneath your process — caches, translation, interrupts and the six orders of magnitude between L1 and a disk seek.">
+<meta property="og:url" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html">
+<meta property="og:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Computer Fundamentals · Platform Ops">
+<meta name="twitter:description" content="What the hardware is actually doing underneath your process — caches, translation, interrupts and the six orders of magnitude between L1 and a disk seek.">
+<meta name="twitter:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="../../feed.xml">
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="stylesheet" href="../../Foundation/topic.css">
+</head>
+<body>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb"><a href="../../index.html">Home</a><span>/</span><a href="../../categories/index.html">Categories</a><span>/</span><a href="../../categories/foundation/index.html">Foundation</a><span>/</span><span class="cur">Computer Fundamentals</span></div>
+  <div class="nav-right"><button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button><a href="../../index.html#subscribe" class="nav-logo"
+    style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Foundation · Core</div>
+  <h1>Computer Fundamentals</h1>
+  <p class="sub">What the hardware is actually doing underneath your process — caches, translation, interrupts and the six orders of magnitude between L1 and a disk seek.</p>
+  <div class="meta"><span><b>22 min</b> read</span> <span>Level: <b>core → advanced</b></span> <span>Foundation <b>01 / 10</b></span></div>
+</div></header>
+
+<section><div class="wrap"><div class="sec-tag">The model</div><h2>THE LATENCY PYRAMID</h2><p class="lede">Every layer below is roughly an order of magnitude slower than the one above it. Most performance work is moving an access up this diagram.</p><div class="dg-scroll"><svg class="dg" viewBox="0 0 1000 518" role="img" aria-label="The latency pyramid — every layer roughly an order of magnitude slower than the one above"><line class="dg-spine" x1="160" y1="14" x2="160" y2="504.0"/><text class="dg-layer" x="146" y="41.0">SOFTWARE</text><circle class="dg-tick" cx="160" cy="37.0" r="3"/><rect x="168.0" y="14" width="264.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="300.0" y="41.0" fill="#066c77">Your process</text><rect x="442.0" y="14" width="264.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="574.0" y="41.0" fill="#066c77">Libraries / runtime</text><rect x="716.0" y="14" width="264.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="848.0" y="41.0" fill="#8a5806">System calls</text><text class="dg-layer" x="146" y="115.0">KERNEL</text><circle class="dg-tick" cx="160" cy="111.0" r="3"/><rect x="168.0" y="88" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="265.8" y="115.0" fill="#8a5806">Scheduler</text><rect x="373.5" y="88" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="471.2" y="115.0" fill="#8a5806">Virtual memory</text><rect x="579.0" y="88" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="676.8" y="115.0" fill="#8a5806">Block layer</text><rect x="784.5" y="88" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="882.2" y="115.0" fill="#8a5806">Net stack</text><text class="dg-layer" x="146" y="189.0">TRANSLATION</text><circle class="dg-tick" cx="160" cy="185.0" r="3"/><rect x="168.0" y="162" width="264.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="300.0" y="189.0" fill="#5b21b6">MMU + TLB</text><rect x="442.0" y="162" width="264.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="574.0" y="189.0" fill="#5b21b6">Page tables</text><rect x="716.0" y="162" width="264.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="848.0" y="189.0" fill="#5b21b6">IOMMU / DMA</text><text class="dg-layer" x="146" y="263.0">CACHE</text><circle class="dg-tick" cx="160" cy="259.0" r="3"/><rect x="168.0" y="236" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="300.0" y="263.0" fill="#3f6f0c">L1d / L1i ~1 ns</text><rect x="442.0" y="236" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="574.0" y="263.0" fill="#3f6f0c">L2 ~4 ns</text><rect x="716.0" y="236" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="848.0" y="263.0" fill="#3f6f0c">L3 shared ~20-40 ns</text><text class="dg-layer" x="146" y="337.0">MEMORY</text><circle class="dg-tick" cx="160" cy="333.0" r="3"/><rect x="168.0" y="310" width="401.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="368.5" y="337.0" fill="#a32b28">DRAM ~80-100 ns</text><rect x="579.0" y="310" width="401.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="779.5" y="337.0" fill="#a32b28">NUMA remote +50%</text><text class="dg-layer" x="146" y="411.0">STORAGE</text><circle class="dg-tick" cx="160" cy="407.0" r="3"/><rect x="168.0" y="384" width="264.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="300.0" y="411.0" fill="#6b6860">NVMe ~20-100 µs</text><rect x="442.0" y="384" width="264.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="574.0" y="411.0" fill="#6b6860">SATA SSD ~150 µs</text><rect x="716.0" y="384" width="264.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="848.0" y="411.0" fill="#6b6860">HDD ~5-10 ms</text><text class="dg-layer" x="146" y="485.0">NETWORK</text><circle class="dg-tick" cx="160" cy="481.0" r="3"/><rect x="168.0" y="458" width="264.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="300.0" y="485.0" fill="#6b6860">Same rack ~0.1 ms</text><rect x="442.0" y="458" width="264.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="574.0" y="485.0" fill="#6b6860">Same region ~1 ms</text><rect x="716.0" y="458" width="264.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="848.0" y="485.0" fill="#6b6860">Cross-continent ~100 ms</text></svg></div><p class="dg-cap">The numbers are for a current x86-64 server. They move slowly — the ratios between layers have been stable for two decades, which is what makes them worth memorising.</p></div></section><section><div class="wrap"><div class="sec-tag">Core</div><h2>CORE CONCEPTS</h2><p class="lede">The four things that explain most of what you'll see on a production box.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">01</span>
+    <span class="rc-main"><span class="rc-name">The execution model</span>
+      <span class="rc-desc">Fetch, decode, execute — and why the CPU is almost never doing just that.</span>
+      <span class="rc-tags"><span class="tg">pipeline</span><span class="tg">IPC</span><span class="tg">branch prediction</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>A modern core does not execute your instructions one at a time in order. It runs a
+<strong>deep pipeline</strong> — typically 14–20 stages — with several instructions in flight
+at once, issues them <strong>out of order</strong>, executes speculatively past branches, and
+retires them back in program order so the result looks sequential.</p>
+<p>That matters operationally because it decouples <em>clock speed</em> from <em>work done</em>.
+The number you actually care about is <strong>IPC — instructions per cycle</strong>. A core at
+3 GHz with IPC 0.4 is doing less work than one at 2 GHz with IPC 1.8. When a service gets slower
+after a deploy and CPU utilisation looks identical, IPC is usually where the answer is: the code
+started missing cache, and the core is spending its cycles stalled rather than retiring work.</p>
+<h3>What actually stalls a core</h3>
+<ul>
+<li><strong>Cache misses</strong> — the biggest one. A last-level miss costs ~200–300 cycles of
+doing nothing useful.</li>
+<li><strong>Branch mispredictions</strong> — the pipeline is flushed and refilled, ~15–20 cycles.
+Unpredictable branches in a hot loop are expensive.</li>
+<li><strong>Dependency chains</strong> — instruction N+1 needs N's result, so out-of-order
+execution has nothing else to run.</li>
+</ul>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">measuring it rather than guessing</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">perf stat -e cycles,instructions,cache-misses,branch-misses ./app</span></div><div class="tl"><span class="to">     41,238,551,102      cycles</span></div><div class="tl"><span class="to">     18,442,190,338      instructions   #  0.45  insn per cycle</span></div><div class="tl"><span class="to">        891,204,116      cache-misses</span></div><div class="tl"><span class="to">         92,441,003      branch-misses</span></div><div class="tl"><span class="tc">IPC 0.45 on a workload that should be compute-bound = memory-bound in disguise</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">02</span>
+    <span class="rc-main"><span class="rc-name">Memory hierarchy and the cache line</span>
+      <span class="rc-desc">Why 64 bytes is the most important number in performance work.</span>
+      <span class="rc-tags"><span class="tg">cache line</span><span class="tg">locality</span><span class="tg">false sharing</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>The CPU never reads one byte from RAM. It reads a <strong>cache line</strong> — 64 bytes on
+every x86-64 and most ARM64 parts — and everything in that line comes along for free. This single
+fact drives most of the performance difference between two implementations of the same algorithm.</p>
+<p>Walking an array of structs sequentially is fast because each miss pulls in the next several
+elements. Chasing pointers through a linked list is slow because every hop is a fresh miss with
+nothing useful alongside it — the same O(n) traversal can differ by 10× in wall time.</p>
+<h3>The two localities</h3>
+<ul>
+<li><strong>Temporal</strong> — you touched it recently, so it's probably still cached. Loop
+counters, hot config, the top of a call stack.</li>
+<li><strong>Spatial</strong> — you touched the neighbour, so it's already in the line. Arrays,
+struct fields accessed together, contiguous file reads.</li>
+</ul>
+<div class="note trap"><b>False sharing</b>
+<p style="margin:0">Two threads on two cores writing to <em>different</em> variables that happen
+to sit in the same 64-byte line will serialise on the cache-coherence protocol as if they shared
+one variable. Throughput collapses and nothing in the code looks wrong. The fix is padding —
+align hot per-thread counters to their own line. This shows up constantly in metrics libraries
+and lock-free queues.</p></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">03</span>
+    <span class="rc-main"><span class="rc-name">Virtual memory, the MMU and the TLB</span>
+      <span class="rc-desc">Every address your process sees is a lie the hardware maintains.</span>
+      <span class="rc-tags"><span class="tg">paging</span><span class="tg">TLB</span><span class="tg">huge pages</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Your process sees a flat virtual address space. The <strong>MMU</strong> translates each virtual
+address to a physical one by walking <strong>page tables</strong> — four levels on x86-64, so an
+untranslated access could cost four extra memory reads. The <strong>TLB</strong> caches recent
+translations to avoid that walk; it holds only a few thousand entries.</p>
+<p>With a 4 KiB page and ~1,500 TLB entries, a core can cover roughly 6 MB of memory before it
+starts missing the TLB on every access. A process with a 40 GB working set that jumps around
+randomly will spend a startling fraction of its time walking page tables.</p>
+<h3>Huge pages</h3>
+<p>A 2 MiB page covers 512× more memory per TLB entry. For databases, JVMs with large heaps, and
+anything with a big random-access working set, huge pages can be a double-digit-percent win.
+Transparent Huge Pages (THP) does it automatically — and is also a classic latency culprit,
+because the compaction it does to find contiguous memory stalls the process that triggered it.
+Most database vendors tell you to turn THP off and use explicit hugepages instead. They are
+right, for that workload.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">checking translation pressure</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">perf stat -e dTLB-load-misses,dTLB-loads ./app</span></div><div class="tl"><span class="tp">$</span> <span class="tt">cat /sys/kernel/mm/transparent_hugepage/enabled</span></div><div class="tl"><span class="to">[always] madvise never</span></div><div class="tl"><span class="tc">databases usually want: madvise (or never), never always</span></div><div class="tl"><span class="tp">$</span> <span class="tt">grep -i huge /proc/meminfo</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">04</span>
+    <span class="rc-main"><span class="rc-name">The storage stack</span>
+      <span class="rc-desc">Six orders of magnitude between the fastest and slowest thing you'll wait on.</span>
+      <span class="rc-tags"><span class="tg">NVMe</span><span class="tg">queue depth</span><span class="tg">IOPS vs latency</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Storage is where the latency pyramid gets steep. An NVMe read is roughly a thousand times slower
+than DRAM; a spinning disk seek is a hundred thousand times slower. Any design decision that turns
+a memory access into a disk access is worth a hundred micro-optimisations elsewhere.</p>
+<h3>IOPS and latency are not the same problem</h3>
+<p>An NVMe device advertising 800k IOPS achieves that at <strong>high queue depth</strong> — many
+requests in flight at once. A single-threaded process issuing one synchronous read at a time gets
+device latency, not device throughput: maybe 12k IOPS from the same hardware. If your benchmark
+says the disk is fine and your application says it isn't, queue depth is usually the gap.</p>
+<div class="tw"><table class="tbl mono"><thead><tr><th>Layer</th><th>Typical latency</th><th>What it means in practice</th></tr></thead><tbody><tr><td>L1 cache</td><td>~1 ns</td><td>Effectively free. 4 cycles.</td></tr><tr><td>L3 cache</td><td>~20–40 ns</td><td>Shared across cores; contention shows here first.</td></tr><tr><td>DRAM (local)</td><td>~80–100 ns</td><td>~250 cycles of doing nothing.</td></tr><tr><td>DRAM (remote NUMA)</td><td>~130–160 ns</td><td>50%+ penalty for crossing a socket.</td></tr><tr><td>NVMe read</td><td>~20–100 µs</td><td>~1,000× DRAM. Queue depth decides throughput.</td></tr><tr><td>SATA SSD read</td><td>~100–200 µs</td><td>Fine for most things, not for a hot index.</td></tr><tr><td>HDD seek + read</td><td>~5–10 ms</td><td>~100,000× DRAM. Sequential only, or don't.</td></tr><tr><td>Same-rack RTT</td><td>~0.1–0.2 ms</td><td>Cheaper than a disk seek. Design accordingly.</td></tr><tr><td>Cross-region RTT</td><td>~50–150 ms</td><td>Physics. No amount of tuning fixes light speed.</td></tr></tbody></table></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">Advanced</div><h2>ADVANCED</h2><p class="lede">Where the simple model stops predicting what you measure.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">05</span>
+    <span class="rc-main"><span class="rc-name">NUMA — when &#x27;the RAM&#x27; is several different RAMs</span>
+      <span class="rc-desc">Two sockets means two memory controllers, and the wrong one costs you 50%.</span>
+      <span class="rc-tags"><span class="tg">NUMA</span><span class="tg">numactl</span><span class="tg">interleave</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>On a multi-socket server, each CPU package has its own memory controller and its own directly
+attached DRAM. Accessing memory on the other socket goes across the interconnect and costs
+roughly 1.5× the latency and less bandwidth. The kernel tries to allocate memory on the node where
+the allocating thread runs — but if the scheduler later migrates that thread, every access becomes
+remote.</p>
+<p>This is why large single-process databases are usually pinned. It's also why a container without
+CPU affinity can show 30% variance run to run on the same hardware for no visible reason.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">seeing and fixing NUMA placement</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">lscpu | grep -i numa</span></div><div class="tl"><span class="to">NUMA node(s):          2</span></div><div class="tl"><span class="to">NUMA node0 CPU(s):     0-23,48-71</span></div><div class="tl"><span class="to">NUMA node1 CPU(s):     24-47,72-95</span></div><div class="tl"><span class="tp">$</span> <span class="tt">numastat -p $(pgrep -f postgres | head -1)</span></div><div class="tl"><span class="tc">high &#x27;other_node&#x27; means the process is reaching across the interconnect</span></div><div class="tl"><span class="tp">$</span> <span class="tt">numactl --cpunodebind=0 --membind=0 ./latency-sensitive-thing</span></div><div class="tl"><span class="tc">or interleave when the working set genuinely exceeds one node:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">numactl --interleave=all ./big-heap-thing</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">06</span>
+    <span class="rc-main"><span class="rc-name">Interrupts, DMA and IRQ affinity</span>
+      <span class="rc-desc">How data actually gets from a NIC into your socket buffer.</span>
+      <span class="rc-tags"><span class="tg">IRQ</span><span class="tg">DMA</span><span class="tg">RSS</span><span class="tg">softirq</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>A NIC receiving a packet does not interrupt the CPU for each byte. It <strong>DMAs</strong> the
+frame straight into a ring buffer in RAM, then raises one interrupt to say "there is work". The
+kernel's top half acknowledges it fast and defers the real processing to a <strong>softirq</strong>,
+which is where most of the network stack actually runs.</p>
+<p>Under load the kernel switches to <strong>NAPI polling</strong> — interrupts off, poll the ring
+— because at a million packets per second, interrupt overhead alone would consume the machine.</p>
+<h3>Where this bites in production</h3>
+<p>By default all NIC interrupts may land on CPU 0. One core saturates handling softirqs while 47
+others idle, and your throughput ceiling has nothing to do with your application. <strong>RSS</strong>
+(receive-side scaling) spreads flows across multiple queues, and IRQ affinity pins each queue to a
+core — ideally one on the same NUMA node as the NIC.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">diagnosing a single-core softirq bottleneck</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">mpstat -P ALL 1 | head -20</span></div><div class="tl"><span class="tc">one CPU at 100% %soft while the rest idle = classic IRQ pinning problem</span></div><div class="tl"><span class="tp">$</span> <span class="tt">cat /proc/interrupts | grep -E &#x27;eth0|ens&#x27;</span></div><div class="tl"><span class="tp">$</span> <span class="tt">cat /proc/softirqs | head -3</span></div><div class="tl"><span class="tp">$</span> <span class="tt">ethtool -l ens5          # how many RX queues does the NIC have?</span></div><div class="tl"><span class="tp">$</span> <span class="tt">ethtool -L ens5 combined 16</span></div><div class="tl"><span class="tc">then let irqbalance spread them, or pin by hand:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">echo 2 &gt; /proc/irq/142/smp_affinity_list</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">07</span>
+    <span class="rc-main"><span class="rc-name">Context switches and what they really cost</span>
+      <span class="rc-desc">The direct cost is a microsecond. The indirect cost is your cache.</span>
+      <span class="rc-tags"><span class="tg">context switch</span><span class="tg">cache pollution</span><span class="tg">scheduling</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Saving registers and swapping page tables takes roughly <strong>1–5 µs</strong>. That number
+is misleading, because the expensive part is what happens afterwards: the incoming process finds
+the L1 and L2 caches full of the outgoing process's data, and the TLB partly flushed. It runs
+slowly for tens of microseconds while it re-warms.</p>
+<p>A machine doing 200k context switches per second is not spending 20% of its time in the switch
+code — it is spending far more than that running cold. This is the real argument for CPU pinning
+on latency-sensitive services, and the reason thread-per-request models fall over at high
+concurrency while event loops don't.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">is switching the problem?</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">vmstat 1 5</span></div><div class="tl"><span class="to">procs -----------memory----------  ---system--- ------cpu-----</span></div><div class="tl"><span class="to"> r  b   swpd   free   buff  cache    in     cs   us sy id wa st</span></div><div class="tl"><span class="to"> 8  0      0 2104832 189232 8814720  48219 241883  62 31  6  1  0</span></div><div class="tl"><span class="tc">cs 241k/s with sy 31% — the kernel is busier than the application</span></div><div class="tl"><span class="tp">$</span> <span class="tt">pidstat -w -p $(pgrep -f myapp) 1</span></div><div class="tl"><span class="tc">cswch/s = voluntary (waiting on I/O or a lock)</span></div><div class="tl"><span class="tc">nvcswch/s = involuntary (preempted — too many runnable threads)</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">08</span>
+    <span class="rc-main"><span class="rc-name">Numbers worth memorising</span>
+      <span class="rc-desc">Order-of-magnitude intuition beats a profiler you haven't run yet.</span>
+      <span class="rc-tags"><span class="tg">latency</span><span class="tg">estimation</span><span class="tg">capacity</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>You will make a hundred design decisions before you ever profile anything. Rough magnitudes are
+what keep those decisions sane — and they are stable, because they are set by physics and by
+hardware generations, not by your code.</p>
+<ul>
+<li><strong>A cache miss to DRAM is ~250 cycles.</strong> If a hot loop misses every iteration,
+you have a memory problem, not a CPU problem.</li>
+<li><strong>An NVMe read is ~1,000× a DRAM read.</strong> Caching a value that costs a disk read
+is worth doing even if the cache hit rate is only 50%.</li>
+<li><strong>A same-region network round trip is cheaper than an HDD seek.</strong> A remote cache
+can genuinely be faster than local spinning disk.</li>
+<li><strong>Cross-region is ~100 ms and unfixable.</strong> Any design with N sequential
+cross-region calls has an N × 100 ms floor. Batch them or move the compute.</li>
+<li><strong>1 Gbps is 125 MB/s.</strong> Divide bits by eight before promising anyone a transfer
+window.</li>
+</ul>
+</div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">In practice</div><h2>ON A REAL BOX</h2>
+<p>Three commands that tell you what kind of machine you are actually on, before you tune anything
+on it. Run them on any box you are about to make promises about.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">machine inventory in ninety seconds</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">lscpu</span></div><div class="tl"><span class="to">Architecture:        x86_64</span></div><div class="tl"><span class="to">CPU(s):              96      Thread(s) per core: 2      Core(s) per socket: 24</span></div><div class="tl"><span class="to">Socket(s):           2       NUMA node(s):       2</span></div><div class="tl"><span class="to">L1d cache: 32K   L1i cache: 32K   L2 cache: 1024K   L3 cache: 36864K</span></div><div class="tl"><span class="tc">96 &#x27;CPUs&#x27; is 48 physical cores. Capacity plan on cores, not threads.</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">lsblk -o NAME,ROTA,SIZE,MODEL,SCHED</span></div><div class="tl"><span class="to">NAME   ROTA   SIZE MODEL              SCHED</span></div><div class="tl"><span class="to">nvme0n1   0   1.8T Samsung PM9A3      none</span></div><div class="tl"><span class="tc">ROTA=0 is solid state. SCHED=none is correct for NVMe — the device</span></div><div class="tl"><span class="tc">reorders better than the kernel can, and mq-deadline just adds latency.</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">ethtool ens5 | grep -E &#x27;Speed|Duplex&#x27;</span></div><div class="tl"><span class="to">Speed: 25000Mb/s</span></div><div class="tl"><span class="tc">25 Gbps = 3.1 GB/s. Now you know the ceiling before you design around it.</span></div></div></div><div class="note tip"><b>The one-minute rule</b>
+<p style="margin:0">Before optimising anything, establish which of the four resources you are out
+of: CPU cycles, memory bandwidth, I/O, or network. <code>perf stat</code> answers the first two,
+<code>iostat -x 1</code> the third, <code>sar -n DEV 1</code> the fourth. Guessing wrong costs a
+week; measuring costs a minute.</p></div></div></section><section><div class="wrap"><div class="sec-tag">Reference</div><h2>CHEATSHEET</h2><div class="tw"><table class="tbl mono"><thead><tr><th>Command</th><th>What it tells you</th></tr></thead><tbody><tr><td><code>lscpu</code></td><td>Cores, sockets, NUMA nodes, cache sizes, flags</td></tr><tr><td><code>lstopo --of txt</code></td><td>Full topology map — which core shares which cache</td></tr><tr><td><code>numactl --hardware</code></td><td>NUMA nodes, memory per node, inter-node distances</td></tr><tr><td><code>numastat -p PID</code></td><td>Local vs remote memory hits for one process</td></tr><tr><td><code>perf stat -e cycles,instructions CMD</code></td><td>IPC — cycles actually spent retiring work</td></tr><tr><td><code>perf stat -e cache-misses,LLC-load-misses CMD</code></td><td>Whether you are memory-bound</td></tr><tr><td><code>perf top</code></td><td>Live symbol-level view of where cycles go</td></tr><tr><td><code>vmstat 1</code></td><td>Context switches, interrupts, run queue, swap activity</td></tr><tr><td><code>pidstat -w -p PID 1</code></td><td>Voluntary vs involuntary switches for one process</td></tr><tr><td><code>mpstat -P ALL 1</code></td><td>Per-CPU breakdown — finds the one saturated core</td></tr><tr><td><code>cat /proc/interrupts</code></td><td>Which CPU is servicing which device</td></tr><tr><td><code>iostat -x 1</code></td><td>Per-device await, queue depth, utilisation</td></tr><tr><td><code>lsblk -o NAME,ROTA,SCHED</code></td><td>Rotational or not, and the I/O scheduler in use</td></tr><tr><td><code>dmidecode -t memory</code></td><td>DIMM population, speed, channel layout</td></tr><tr><td><code>getconf LEVEL1_DCACHE_LINESIZE</code></td><td>Cache line size — 64 on anything you'll meet</td></tr></tbody></table></div></div></section>
+
+<section style="border-bottom:0"><div class="wrap"><div class="pager"><a href="../../categories/foundation/index.html">← Foundation<b>Hub</b></a><a class="next" href="../OPERATING-SYSTEMS/operating-systems.html">Next →<b>Operating Systems</b></a></div></div></section>
+
+<footer>
+  <div class="f-in">
+    <div class="f-top">
+      <div>
+        <a class="f-logo" href="../../index.html">PLATFORM OPS</a>
+        <p class="f-tag">Field notes on Kubernetes, SRE, and Platform Engineering —
+          written from production, not slideware.</p>
+      </div>
+      <div class="f-cols">
+        <div><div class="f-col-t">Newsletter</div>
+          <a href="../../index.html#issues">Latest Issues</a>
+          <a href="../../index.html#subscribe">Subscribe</a>
+          <a href="../../feed.xml">RSS Feed</a></div>
+        <div><div class="f-col-t">Explore</div>
+          <a href="../../categories/index.html">All Categories</a>
+          <a href="../../categories/foundation/index.html">Foundation Hub</a>
+          <a href="../../index.html#topics">Knowledge Map</a></div>
+        <div><div class="f-col-t">Connect</div>
+          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="../../index.html#authors">About the Author</a>
+          <a href="#">Back to Top ↑</a></div>
+      </div>
+    </div>
+    <div class="f-bot">
+      <div>© 2026 Vishal Abhinav · Platform Ops — code MIT,
+        <a href="../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+      <div>Built for engineers, by an engineer.</div>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('tt').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});
+document.addEventListener('click',function(e){
+  var h=e.target.closest('.rc-head'); if(!h) return;
+  var c=h.parentElement, open=c.classList.contains('open');
+  c.classList.toggle('open',!open);
+  h.setAttribute('aria-expanded', !open?'true':'false');
+});
+</script>
+</body>
+</html>

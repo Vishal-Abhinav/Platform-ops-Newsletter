@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="Python for people who run things — the GIL, choosing a concurrency model, streaming instead of loading, and the subprocess and logging patterns that survive production.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
+<link rel="canonical" href="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/PYTHON/python.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Python · Platform Ops">
+<meta property="og:description" content="Python for people who run things — the GIL, choosing a concurrency model, streaming instead of loading, and the subprocess and logging patterns that survive production.">
+<meta property="og:url" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/Foundation/PYTHON/python.html">
+<meta property="og:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Python · Platform Ops">
+<meta name="twitter:description" content="Python for people who run things — the GIL, choosing a concurrency model, streaming instead of loading, and the subprocess and logging patterns that survive production.">
+<meta name="twitter:image" content="https://vishal-abhinav.github.io/Platform-ops-Newsletter/assets/og/home.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="../../feed.xml">
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="stylesheet" href="../../Foundation/topic.css">
+</head>
+<body>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb"><a href="../../index.html">Home</a><span>/</span><a href="../../categories/index.html">Categories</a><span>/</span><a href="../../categories/foundation/index.html">Foundation</a><span>/</span><span class="cur">Python</span></div>
+  <div class="nav-right"><button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button><a href="../../index.html#subscribe" class="nav-logo"
+    style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Foundation · Core</div>
+  <h1>Python</h1>
+  <p class="sub">Python for people who run things — the GIL, choosing a concurrency model, streaming instead of loading, and the subprocess and logging patterns that survive production.</p>
+  <div class="meta"><span><b>25 min</b> read</span> <span>Level: <b>core → advanced</b></span> <span>Foundation <b>07 / 10</b></span></div>
+</div></header>
+
+<section><div class="wrap"><div class="sec-tag">The model</div><h2>CPYTHON, END TO END</h2><p class="lede">Source to bytecode to the eval loop — and the three ways around the one lock in the middle.</p><div class="dg-scroll"><svg class="dg" viewBox="0 0 1000 444" role="img" aria-label="CPython from source to running code, and where each concurrency model actually helps"><line class="dg-spine" x1="160" y1="14" x2="160" y2="430.0"/><text class="dg-layer" x="146" y="41.0">SOURCE</text><circle class="dg-tick" cx="160" cy="37.0" r="3"/><rect x="168.0" y="14" width="401.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="368.5" y="41.0" fill="#066c77">your.py</text><rect x="579.0" y="14" width="401.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="779.5" y="41.0" fill="#066c77">__pycache__/*.pyc</text><text class="dg-layer" x="146" y="115.0">COMPILE</text><circle class="dg-tick" cx="160" cy="111.0" r="3"/><rect x="168.0" y="88" width="401.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="368.5" y="115.0" fill="#8a5806">AST</text><rect x="579.0" y="88" width="401.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="779.5" y="115.0" fill="#8a5806">Bytecode</text><text class="dg-layer" x="146" y="189.0">RUNTIME</text><circle class="dg-tick" cx="160" cy="185.0" r="3"/><rect x="168.0" y="162" width="195.5" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="265.8" y="189.0" fill="#a32b28">Eval loop (ceval)</text><rect x="373.5" y="162" width="195.5" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="471.2" y="189.0" fill="#a32b28">The GIL</text><rect x="579.0" y="162" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="676.8" y="189.0" fill="#8a5806">Reference counting</text><rect x="784.5" y="162" width="195.5" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="882.2" y="189.0" fill="#8a5806">Cycle GC</text><text class="dg-layer" x="146" y="263.0">CONCURRENCY</text><circle class="dg-tick" cx="160" cy="259.0" r="3"/><rect x="168.0" y="236" width="264.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="300.0" y="263.0" fill="#5b21b6">threading — I/O only</text><rect x="442.0" y="236" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="574.0" y="263.0" fill="#3f6f0c">multiprocessing — real cores</text><rect x="716.0" y="236" width="264.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="848.0" y="263.0" fill="#5b21b6">asyncio — one thread</text><text class="dg-layer" x="146" y="337.0">ESCAPE HATCHES</text><circle class="dg-tick" cx="160" cy="333.0" r="3"/><rect x="168.0" y="310" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="300.0" y="337.0" fill="#3f6f0c">C extensions release GIL</text><rect x="442.0" y="310" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="574.0" y="337.0" fill="#3f6f0c">numpy / lxml</text><rect x="716.0" y="310" width="264.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="848.0" y="337.0" fill="#6b6860">subprocess</text><text class="dg-layer" x="146" y="411.0">ENVIRONMENT</text><circle class="dg-tick" cx="160" cy="407.0" r="3"/><rect x="168.0" y="384" width="195.5" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="265.8" y="411.0" fill="#6b6860">venv</text><rect x="373.5" y="384" width="195.5" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="471.2" y="411.0" fill="#6b6860">pip / uv</text><rect x="579.0" y="384" width="195.5" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="676.8" y="411.0" fill="#6b6860">lockfile</text><rect x="784.5" y="384" width="195.5" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="882.2" y="411.0" fill="#6b6860">wheels</text></svg></div><p class="dg-cap">The GIL only guards the eval loop. Everything below it — blocking I/O, C extensions, subprocesses — runs with the lock released, which is why threads still help for the work ops code actually does.</p></div></section><section><div class="wrap"><div class="sec-tag">Core</div><h2>CORE CONCEPTS</h2><p class="lede">Concurrency, environments, and lazy iteration.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">01</span>
+    <span class="rc-main"><span class="rc-name">The GIL — what it does and doesn&#x27;t block</span>
+      <span class="rc-desc">One lock on the interpreter. It does not make Python single-threaded.</span>
+      <span class="rc-tags"><span class="tg">GIL</span><span class="tg">threads</span><span class="tg">CPU-bound</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>CPython's <strong>Global Interpreter Lock</strong> means only one thread executes Python
+bytecode at a time. Two threads doing arithmetic will not use two cores; they will take turns, and
+the switching overhead can make the threaded version <em>slower</em> than the serial one.</p>
+<p>But the GIL is <strong>released around blocking calls</strong>. Every socket read, file read,
+<code>time.sleep()</code> and database round trip drops the lock so other threads run. Threads are
+genuinely effective for I/O-bound work — which, for ops tooling, is most work. Polling 300
+endpoints with 30 threads is a real 30× speedup.</p>
+<p>Well-written C extensions do the same. NumPy releases the GIL for the duration of a large array
+operation, so numeric code can use multiple cores despite it.</p>
+<p>CPython 3.13 shipped an experimental <strong>free-threaded build</strong> (PEP 703) that removes
+the GIL entirely. It is opt-in, carries a single-thread performance cost, and much of the C
+ecosystem is still catching up — worth watching, not yet worth depending on.</p>
+<div class="tw"><table class="tbl "><thead><tr><th>Workload</th><th>Right tool</th><th>Why</th></tr></thead><tbody><tr><td>HTTP calls, DB queries, file I/O</td><td><code>threading</code> or <code>asyncio</code></td><td>GIL is released while blocked</td></tr><tr><td>Thousands of concurrent connections</td><td><code>asyncio</code></td><td>No thread stack per connection</td></tr><tr><td>Parsing, crunching, compression in pure Python</td><td><code>multiprocessing</code></td><td>Only way to get real cores</td></tr><tr><td>Numeric arrays</td><td>NumPy / Polars</td><td>C code releases the GIL for you</td></tr><tr><td>Shelling out to other tools</td><td><code>subprocess</code> + threads</td><td>The work isn't in Python at all</td></tr></tbody></table></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">02</span>
+    <span class="rc-main"><span class="rc-name">Threads, processes, asyncio — picking one</span>
+      <span class="rc-desc">Three concurrency models, three completely different failure modes.</span>
+      <span class="rc-tags"><span class="tg">asyncio</span><span class="tg">multiprocessing</span><span class="tg">concurrency</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p><strong>Threads</strong> share memory, cost ~8 MB of stack each, and are preemptive — you can
+be interrupted between any two bytecodes, so shared mutable state needs locks. Good to a few
+hundred.</p>
+<p><strong>Processes</strong> get their own interpreter and their own GIL, so they use real cores.
+They cost tens of MB each and communication means pickling across a pipe. Use for CPU-bound work,
+and beware: passing large objects can cost more than the computation saves.</p>
+<p><strong>asyncio</strong> runs one thread with an event loop; tasks yield at every
+<code>await</code>. Tens of thousands of concurrent connections on one core, and no locks needed
+because switches only happen at points you can see. The catch is total: <strong>one blocking call
+freezes everything</strong>. A single synchronous <code>requests.get()</code> inside an async
+handler stops the entire loop.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">the mistake that makes async slower than sync</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt"># WRONG — requests is synchronous; the whole loop stops here</span></div><div class="tl"><span class="tp">$</span> <span class="tt">async def fetch(url):</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    return requests.get(url).text</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt"># Right — an async client all the way down</span></div><div class="tl"><span class="tp">$</span> <span class="tt">async def fetch(client, url):</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    r = await client.get(url)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    return r.text</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt"># Or, when the library has no async version, push it off the loop:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">loop = asyncio.get_running_loop()</span></div><div class="tl"><span class="tp">$</span> <span class="tt">text = await loop.run_in_executor(None, lambda: requests.get(url).text)</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">03</span>
+    <span class="rc-main"><span class="rc-name">Environments and dependency resolution</span>
+      <span class="rc-desc">The reason 'it works on my machine' is usually literally true.</span>
+      <span class="rc-tags"><span class="tg">venv</span><span class="tg">pip</span><span class="tg">lockfile</span><span class="tg">uv</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>A virtual environment is a directory with its own <code>site-packages</code> and a
+<code>python</code> symlink. Activating it puts that <code>bin/</code> first on
+<code>PATH</code>. There is no magic — which is why you can also just call
+<code>.venv/bin/python</code> directly and skip activation entirely, and why that is the right
+thing to do in a cron job or a systemd unit.</p>
+<h3>requirements.txt is not a lockfile</h3>
+<p><code>requests&gt;=2.28</code> resolves to whatever is newest at install time. Two installs a
+month apart give two different dependency trees, and a transitive dependency you have never heard
+of can break your build on a Tuesday. Pin transitively — <code>pip-compile</code>, Poetry,
+<code>uv lock</code> — and commit the lock. In a container, install from the lockfile and never
+from a range.</p>
+<p><code>uv</code> is worth knowing about: a Rust-implemented resolver and installer that is
+typically 10–100× faster than pip and speaks the same interfaces. For CI, that difference is real
+minutes per build.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">reproducible, and fast</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">python -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.lock</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tc">or, with uv:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">uv venv &amp;&amp; uv pip sync requirements.lock</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tc">In a Dockerfile — no activation, no ambiguity about which python:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">RUN python -m venv /opt/venv</span></div><div class="tl"><span class="tp">$</span> <span class="tt">ENV PATH=/opt/venv/bin:$PATH</span></div><div class="tl"><span class="tp">$</span> <span class="tt">COPY requirements.lock .</span></div><div class="tl"><span class="tp">$</span> <span class="tt">RUN pip install --no-cache-dir -r requirements.lock</span></div><div class="tl"><span class="tc">requirements.lock copied before the source = the layer caches</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">04</span>
+    <span class="rc-main"><span class="rc-name">Generators and not loading the 40 GB file</span>
+      <span class="rc-desc">Lazy iteration is the difference between a script that runs and one that gets OOMKilled.</span>
+      <span class="rc-tags"><span class="tg">generator</span><span class="tg">yield</span><span class="tg">memory</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p><code>f.readlines()</code> reads the whole file into a list. On a 40 GB log that is 40 GB of
+RSS and an OOM kill. Iterating the file object directly reads a buffer at a time and holds one
+line — constant memory regardless of file size.</p>
+<p>Generators extend that to your own code. A function with <code>yield</code> produces values on
+demand; chain several and you have a streaming pipeline where nothing is ever fully materialised.
+This is the single highest-value Python idiom for ops work, where the input is usually bigger than
+the box.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">streaming, not loading</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt"># 40 GB in memory. Killed.</span></div><div class="tl"><span class="tp">$</span> <span class="tt">lines = open(&#x27;app.log&#x27;).readlines()</span></div><div class="tl"><span class="tp">$</span> <span class="tt">errors = [l for l in lines if &#x27;ERROR&#x27; in l]</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt"># Constant memory, any file size</span></div><div class="tl"><span class="tp">$</span> <span class="tt">def read_lines(path):</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    with open(path) as f:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">        yield from f</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">def only(lines, needle):</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    for l in lines:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">        if needle in l:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">            yield l</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">for line in only(read_lines(&#x27;app.log&#x27;), &#x27;ERROR&#x27;):</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    handle(line)</span></div><div class="tl"><span class="tc">Nothing is materialised. One line is in memory at a time.</span></div></div></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">Advanced</div><h2>ADVANCED</h2><p class="lede">Memory behaviour, subprocess, logging, and making it fast.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">05</span>
+    <span class="rc-main"><span class="rc-name">Memory: refcounting, cycles, and why RSS never drops</span>
+      <span class="rc-desc">Python frees objects eagerly and gives memory back to the OS reluctantly.</span>
+      <span class="rc-tags"><span class="tg">refcount</span><span class="tg">gc</span><span class="tg">arena</span><span class="tg">RSS</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>CPython frees an object the moment its reference count hits zero — deterministic, no pause. A
+cycle detector runs periodically to catch objects that reference each other and would otherwise
+never reach zero.</p>
+<p>But freeing an object does not return memory to the OS. CPython manages memory in
+<strong>arenas</strong> of 1 MB (256 KB in older versions), and an arena is only released when
+<em>every</em> block in it is free. One long-lived object in an arena pins the whole megabyte.
+After processing a large batch, RSS stays high even though Python considers the memory free — it
+will be reused by Python, just not returned.</p>
+<p>Operationally: a worker whose RSS grows and plateaus is normal. One that grows without bound is
+a leak — usually an unbounded cache, a list that's appended to forever, or a logging handler
+holding references. For long-running workers, the pragmatic answer is what gunicorn's
+<code>--max-requests</code> does: recycle the process periodically and stop worrying about it.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">finding a leak</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">python -X tracemalloc=5 app.py</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">import tracemalloc; tracemalloc.start()</span></div><div class="tl"><span class="tp">$</span> <span class="tt">snap1 = tracemalloc.take_snapshot()</span></div><div class="tl"><span class="tp">$</span> <span class="tt">...do the work...</span></div><div class="tl"><span class="tp">$</span> <span class="tt">snap2 = tracemalloc.take_snapshot()</span></div><div class="tl"><span class="tp">$</span> <span class="tt">for s in snap2.compare_to(snap1, &#x27;lineno&#x27;)[:10]: print(s)</span></div><div class="tl"><span class="to">app/cache.py:42: size=812 MiB (+812 MiB), count=2104881 (+2104881)</span></div><div class="tl"><span class="tc">An unbounded dict in cache.py. functools.lru_cache(maxsize=N) exists</span></div><div class="tl"><span class="tc">precisely so you don&#x27;t hand-roll this.</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">06</span>
+    <span class="rc-main"><span class="rc-name">subprocess, done correctly</span>
+      <span class="rc-desc">Where ops scripts go wrong, in four specific ways.</span>
+      <span class="rc-tags"><span class="tg">subprocess</span><span class="tg">shell=True</span><span class="tg">timeout</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Four rules cover almost every subprocess bug:</p>
+<ul>
+<li><strong>Pass a list, never a string.</strong> <code>shell=True</code> hands your string to
+<code>/bin/sh</code>, and any interpolated value becomes shell syntax. It is command injection in
+a script you wrote yourself.</li>
+<li><strong>Always set a timeout.</strong> Without one, a hung child hangs your script forever —
+and in a CI job or a cron, forever means until someone notices.</li>
+<li><strong>Check the return code.</strong> <code>run()</code> does not raise by default. Use
+<code>check=True</code>, or check <code>.returncode</code> yourself.</li>
+<li><strong>Don't use <code>stdout=PIPE</code> with <code>wait()</code>.</strong> If the child
+fills the pipe buffer (~64 KB) it blocks writing while you block waiting. Classic deadlock.
+<code>run()</code> and <code>communicate()</code> handle this; <code>Popen.wait()</code>
+doesn't.</li>
+</ul>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">the safe form</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt"># WRONG — injection, no timeout, no error check</span></div><div class="tl"><span class="tp">$</span> <span class="tt">os.system(f&#x27;kubectl delete pod {name}&#x27;)</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt"># Right</span></div><div class="tl"><span class="tp">$</span> <span class="tt">import subprocess</span></div><div class="tl"><span class="tp">$</span> <span class="tt">try:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    r = subprocess.run(</span></div><div class="tl"><span class="tp">$</span> <span class="tt">        [&#x27;kubectl&#x27;, &#x27;delete&#x27;, &#x27;pod&#x27;, name],</span></div><div class="tl"><span class="tp">$</span> <span class="tt">        capture_output=True, text=True, timeout=30, check=True)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">except subprocess.TimeoutExpired:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    log.error(&#x27;kubectl timed out after 30s&#x27;)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">except subprocess.CalledProcessError as e:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    log.error(&#x27;kubectl failed rc=%s: %s&#x27;, e.returncode, e.stderr.strip())</span></div><div class="tl"><span class="tc">name is one argv element. It cannot become shell syntax.</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">07</span>
+    <span class="rc-main"><span class="rc-name">Logging that survives contact with production</span>
+      <span class="rc-desc">print() has no level, no timestamp, and no way to be turned down at 3am.</span>
+      <span class="rc-tags"><span class="tg">logging</span><span class="tg">structlog</span><span class="tg">JSON</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Use the <code>logging</code> module, get the logger with <code>logging.getLogger(__name__)</code>
+so every message carries its module, and configure handlers once in <code>main()</code> — never at
+import time, which breaks anything importing your module.</p>
+<p>Use <strong>lazy formatting</strong>: <code>log.debug("got %s", expensive())</code> evaluates
+the argument only if DEBUG is enabled. An f-string is evaluated always, even when the message is
+discarded — in a hot loop that is real cost for output nobody sees.</p>
+<p>In containers, log <strong>JSON to stdout</strong>. Every log pipeline — Loki, ELK, CloudWatch
+— parses structured lines natively, and one exception spanning twelve lines of traceback becomes
+one searchable event rather than twelve unrelated ones.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">a logging setup worth copying</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">import logging, sys, json</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">class JsonFormatter(logging.Formatter):</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    def format(self, r):</span></div><div class="tl"><span class="tp">$</span> <span class="tt">        d = {&#x27;ts&#x27;: self.formatTime(r), &#x27;level&#x27;: r.levelname,</span></div><div class="tl"><span class="tp">$</span> <span class="tt">             &#x27;logger&#x27;: r.name, &#x27;msg&#x27;: r.getMessage()}</span></div><div class="tl"><span class="tp">$</span> <span class="tt">        if r.exc_info: d[&#x27;exc&#x27;] = self.formatException(r.exc_info)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">        return json.dumps(d)</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">def setup(level=&#x27;INFO&#x27;):</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    h = logging.StreamHandler(sys.stdout)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    h.setFormatter(JsonFormatter())</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    logging.basicConfig(level=level, handlers=[h], force=True)</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">log = logging.getLogger(__name__)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">log.info(&#x27;processed %d records in %.2fs&#x27;, n, elapsed)</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">08</span>
+    <span class="rc-main"><span class="rc-name">Making Python fast enough</span>
+      <span class="rc-desc">Usually the answer is 'stop writing loops', not 'rewrite it in Go'.</span>
+      <span class="rc-tags"><span class="tg">performance</span><span class="tg">profiling</span><span class="tg">vectorise</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Each bytecode dispatch costs tens of nanoseconds. A Python-level loop over ten million items is
+seconds; the same work inside a C-implemented builtin is milliseconds. The optimisation is almost
+always to push the loop down into C.</p>
+<ul>
+<li><code>sum(x)</code>, <code>any()</code>, <code>max()</code>, <code>''.join()</code>,
+<code>sorted()</code> — all C loops. Prefer them to hand-written equivalents.</li>
+<li>A comprehension beats <code>append</code> in a loop; the append lookup happens once.</li>
+<li><code>set</code> membership is O(1); <code>list</code> membership is O(n). Getting this wrong
+inside a loop is the most common accidental O(n²) in ops scripts.</li>
+<li>NumPy/Polars for numeric work — one operation over a million elements, in C, GIL released.</li>
+<li><code>functools.lru_cache</code> for pure functions called repeatedly with the same arguments.</li>
+</ul>
+<p>And profile before any of it. <code>cProfile</code> for call counts,
+<code>py-spy</code> for a live process you cannot restart — which, on a production box, is usually
+the only option you have.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">profiling without touching the process</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">pip install py-spy</span></div><div class="tl"><span class="tp">$</span> <span class="tt">py-spy top --pid 4412</span></div><div class="tl"><span class="to">Total Samples 4100</span></div><div class="tl"><span class="to">%Own   %Total  OwnTime  TotalTime  Function (filename:line)</span></div><div class="tl"><span class="to">68.00%  71.00%    28.4s     29.7s   _match (app/rules.py:88)</span></div><div class="tl"><span class="to"> 9.00%  92.00%     3.8s     38.4s   process (app/worker.py:41)</span></div><div class="tl"><span class="tc">68% in one function. No restart, no code change, no instrumentation.</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">py-spy record -o profile.svg --pid 4412 --duration 30</span></div><div class="tl"><span class="tc">flame graph of a live production process</span></div></div></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">In practice</div><h2>AN OPS SCRIPT SKELETON</h2>
+<p>Most ops Python is a script that reads something, does something, and has to be safe to run from
+cron at 3am. This skeleton covers the parts that matter when nobody is watching.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">an ops script that behaves</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tt">#!/usr/bin/env python3</span></div><div class="tl"><span class="tp">$</span> <span class="tt">&quot;&quot;&quot;Reconcile pod counts against the expected inventory.&quot;&quot;&quot;</span></div><div class="tl"><span class="tp">$</span> <span class="tt">import argparse, logging, sys, signal</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">log = logging.getLogger(&#x27;reconcile&#x27;)</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">def parse_args(argv=None):</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    p = argparse.ArgumentParser(description=__doc__)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    p.add_argument(&#x27;--namespace&#x27;, required=True)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    p.add_argument(&#x27;--dry-run&#x27;, action=&#x27;store_true&#x27;)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    p.add_argument(&#x27;--log-level&#x27;, default=&#x27;INFO&#x27;)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    return p.parse_args(argv)</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">def main(argv=None) -&gt; int:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    args = parse_args(argv)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    setup_logging(args.log_level)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))</span></div><div class="tl"><span class="tc">    exit 143 = 128+15, the same code the shell reports for SIGTERM</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    try:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">        n = reconcile(args.namespace, dry_run=args.dry_run)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    except Exception:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">        log.exception(&#x27;reconcile failed&#x27;)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">        return 1</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    log.info(&#x27;reconciled %d pods&#x27;, n)</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    return 0</span></div><div class="tl"><span class="to"></span></div><div class="tl"><span class="tp">$</span> <span class="tt">if __name__ == &#x27;__main__&#x27;:</span></div><div class="tl"><span class="tp">$</span> <span class="tt">    sys.exit(main())</span></div></div></div><div class="note tip"><b>Return an int from main, and sys.exit it</b>
+<p style="margin:0">It makes the script testable — <code>assert main(['--namespace','x']) == 0</code>
+runs the whole thing in-process — and it gives cron, systemd and Kubernetes a real exit code to act
+on. <code>log.exception()</code> inside the handler logs the traceback at ERROR without re-raising,
+so the failure is recorded rather than printed to a stderr nobody captured.</p></div></div></section><section><div class="wrap"><div class="sec-tag">Reference</div><h2>CHEATSHEET</h2><div class="tw"><table class="tbl mono"><thead><tr><th>Tool / idiom</th><th>What it's for</th></tr></thead><tbody><tr><td><code>py-spy top --pid N</code></td><td>Profile a running process without restarting it</td></tr><tr><td><code>py-spy dump --pid N</code></td><td>Stack trace of every thread — for a hung process</td></tr><tr><td><code>python -X tracemalloc=5</code></td><td>Allocation tracking with 5 frames of context</td></tr><tr><td><code>python -m cProfile -s cumtime s.py</code></td><td>Where the time goes, by cumulative cost</td></tr><tr><td><code>python -m venv .venv</code></td><td>Isolated environment — no activation needed to use it</td></tr><tr><td><code>uv pip sync requirements.lock</code></td><td>Fast, exact, reproducible install</td></tr><tr><td><code>pip-compile requirements.in</code></td><td>Turn ranges into a transitively pinned lockfile</td></tr><tr><td><code>subprocess.run([...], check=True, timeout=N)</code></td><td>The only correct default form</td></tr><tr><td><code>logging.getLogger(__name__)</code></td><td>Per-module logger, configurable from one place</td></tr><tr><td><code>log.debug('x=%s', v)</code></td><td>Lazy formatting — not evaluated if DEBUG is off</td></tr><tr><td><code>functools.lru_cache(maxsize=N)</code></td><td>Memoise a pure function, bounded</td></tr><tr><td><code>concurrent.futures.ThreadPoolExecutor</code></td><td>I/O parallelism without touching threads directly</td></tr><tr><td><code>concurrent.futures.ProcessPoolExecutor</code></td><td>CPU parallelism across real cores</td></tr><tr><td><code>yield from f</code></td><td>Stream a file instead of loading it</td></tr><tr><td><code>pathlib.Path</code></td><td>Path handling that doesn't break on separators</td></tr><tr><td><code>ruff check . &amp;&amp; ruff format .</code></td><td>Lint and format, fast enough for a pre-commit hook</td></tr><tr><td><code>mypy --strict</code></td><td>Catch the type errors that only show up in the 3am code path</td></tr></tbody></table></div></div></section>
+
+<section style="border-bottom:0"><div class="wrap"><div class="pager"><a href="../SHELL-AND-BASH/shell-and-bash.html">← Previous<b>Shell &amp; Bash</b></a><a class="next" href="../GIT-VERSION-CONTROL/git-version-control.html">Next →<b>Git &amp; Version Control</b></a></div></div></section>
+
+<footer>
+  <div class="f-in">
+    <div class="f-top">
+      <div>
+        <a class="f-logo" href="../../index.html">PLATFORM OPS</a>
+        <p class="f-tag">Field notes on Kubernetes, SRE, and Platform Engineering —
+          written from production, not slideware.</p>
+      </div>
+      <div class="f-cols">
+        <div><div class="f-col-t">Newsletter</div>
+          <a href="../../index.html#issues">Latest Issues</a>
+          <a href="../../index.html#subscribe">Subscribe</a>
+          <a href="../../feed.xml">RSS Feed</a></div>
+        <div><div class="f-col-t">Explore</div>
+          <a href="../../categories/index.html">All Categories</a>
+          <a href="../../categories/foundation/index.html">Foundation Hub</a>
+          <a href="../../index.html#topics">Knowledge Map</a></div>
+        <div><div class="f-col-t">Connect</div>
+          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="../../index.html#authors">About the Author</a>
+          <a href="#">Back to Top ↑</a></div>
+      </div>
+    </div>
+    <div class="f-bot">
+      <div>© 2026 Vishal Abhinav · Platform Ops — code MIT,
+        <a href="../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+      <div>Built for engineers, by an engineer.</div>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('tt').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});
+document.addEventListener('click',function(e){
+  var h=e.target.closest('.rc-head'); if(!h) return;
+  var c=h.parentElement, open=c.classList.contains('open');
+  c.classList.toggle('open',!open);
+  h.setAttribute('aria-expanded', !open?'true':'false');
+});
+</script>
+</body>
+</html>
