@@ -53,6 +53,9 @@ python3 tools/build_feed.py
 say "mega-menu (assets + wiring into every page)"
 python3 tools/build_nav.py
 
+say "global search (index + wiring into every page)"
+python3 tools/build_search.py
+
 say "verify + sitemap"
 python3 tools/verify.py
 
