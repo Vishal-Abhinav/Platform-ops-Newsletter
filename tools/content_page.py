@@ -11,7 +11,7 @@ TOOLS = ROOT / "tools"
 
 import html
 
-BASE = "https://vishal-abhinav.github.io/Platform-ops-Newsletter/"
+from siteconf import BASE           # canonical origin, one source of truth
 
 ACCENT = {  # diagram node roles
     "core":  ("rgba(0,194,212,.14)",  "#00c2d4",              "#066c77"),

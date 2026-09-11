@@ -29,7 +29,7 @@
 **A free, open-source knowledge base for DevOps Engineers, SREs, and Platform Builders.**
 *Deep-dive issues · Architecture diagrams · Runbooks · A 190-term Linux & Unix glossary.*
 
-### 🌐 **[Read it live → vishal-abhinav.github.io/Platform-ops-Newsletter](https://vishal-abhinav.github.io/Platform-ops-Newsletter/)**
+### 🌐 **[Read it live → platform-ops-blog.vishal-abhinav.workers.dev](https://platform-ops-blog.vishal-abhinav.workers.dev/)**
 
 [📚 Issues](#-published-issues) · [🗺️ Knowledge Map](#️-knowledge-map) · [🗂️ Structure](#️-repository-structure) · [🚀 Run Locally](#-quick-start)
 
@@ -1045,6 +1045,6 @@ Use it, fork it, quote it, build on it. Attribution appreciated, not required.
 
 *Built for engineers, by an engineer.*
 
-**[Read the latest issue →](https://vishal-abhinav.github.io/Platform-ops-Newsletter/)**
+**[Read the latest issue →](https://platform-ops-blog.vishal-abhinav.workers.dev/)**
 
 </div>

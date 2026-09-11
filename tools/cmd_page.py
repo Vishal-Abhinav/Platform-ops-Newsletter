@@ -9,7 +9,7 @@ import os
 import pathlib
 
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
-BASE = "https://vishal-abhinav.github.io/Platform-ops-Newsletter/"
+from siteconf import BASE           # canonical origin, one source of truth
 
 
 def esc(s):

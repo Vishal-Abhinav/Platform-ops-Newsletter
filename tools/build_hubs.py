@@ -19,7 +19,7 @@ from taxonomy import PILLARS, cat_stats          # noqa: E402
 from hubs_spec import SPEC                       # noqa: E402
 
 OUT = ROOT / 'categories'
-BASE = "https://vishal-abhinav.github.io/Platform-ops-Newsletter/"
+from siteconf import BASE           # canonical origin, one source of truth
 KEY = {"L": "live", "P": "pipe", "-": "plan"}
 ZONE = {"live": "Live now", "pipe": "In pipeline", "plan": "Planned"}
 

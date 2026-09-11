@@ -13,7 +13,7 @@ import pathlib
 from email.utils import format_datetime
 from datetime import datetime, timezone
 
-BASE = "https://vishal-abhinav.github.io/Platform-ops-Newsletter/"
+from siteconf import BASE           # canonical origin, one source of truth
 
 # (issue, path, title, blurb, published-at)
 # The five September issues went out in the same month; they are staggered by

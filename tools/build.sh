@@ -13,6 +13,7 @@
 #   LinkedIn column <- tools/linkedin_posts.py (hand-kept list of post URLs)
 #   assets/megamenu.* <- build_nav    (nav data, styles, behaviour)
 #   sitemap.xml     <- verify.py
+#   canonical URLs  <- tools/siteconf.py (BASE) via build_canonical.py
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -59,6 +60,9 @@ python3 tools/build_nav.py
 
 say "global search (index + wiring into every page)"
 python3 tools/build_search.py
+
+say "canonical origin (every page -> siteconf.BASE)"
+python3 tools/build_canonical.py
 
 say "verify + sitemap"
 python3 tools/verify.py
