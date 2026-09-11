@@ -161,6 +161,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html</loc>
+    <lastmod>2026-09-11</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/SRE/INCIDENT-MANAGEMENT/incident-management.html</loc>
     <lastmod>2026-09-11</lastmod>
     <priority>0.7</priority>

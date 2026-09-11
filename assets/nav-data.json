@@ -146,9 +146,9 @@
      "name": "OpenShift",
      "icon": "🔴",
      "href": "categories/openshift/index.html",
-     "live": 2,
-     "pipe": 2,
-     "plan": 9
+     "live": 6,
+     "pipe": 1,
+     "plan": 6
     },
     {
      "name": "Service Mesh",
@@ -159,8 +159,8 @@
      "plan": 8
     }
    ],
-   "live": 18,
-   "pipe": 17
+   "live": 22,
+   "pipe": 16
   },
   {
    "name": "Reliability",

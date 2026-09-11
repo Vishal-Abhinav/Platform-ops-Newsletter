@@ -30,6 +30,7 @@ GIT = "Foundation/GIT-VERSION-CONTROL/git-version-control.html"
 CLX = "Commands/LINUX-COMMANDS/linux-commands.html"
 CK8 = "Commands/KUBERNETES-COMMANDS/kubernetes-commands.html"
 CDK = "Commands/DOCKER-COMMANDS/docker-commands.html"
+OCA = "OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html"
 
 # pillar -> [ (category, icon, [ (topic, status, href|None), ... ]) ]
 PILLARS = [
@@ -136,8 +137,8 @@ PILLARS = [
    ("Kubernetes Upgrade","-",None),("Kubernetes Backup","-",None),
    ("Multi-Cluster Kubernetes","-",None),("Kubernetes Disaster Recovery","-",None)]),
  ("OpenShift", "🔴", [
-   ("OpenShift Fundamentals","P",None),("OpenShift Architecture","P",None),
-   ("Projects","-",None),("Routes","-",None),("Operators","-",None),("SCC","L",K8E),
+   ("OpenShift Fundamentals","L",OCA),("OpenShift Architecture","L",OCA),
+   ("Projects","L",OCA),("Routes","P",None),("Operators","L",OCA),("SCC","L",OCA),
    ("OpenShift Networking","-",None),("OpenShift Storage","-",None),
    ("OpenShift Monitoring","-",None),("OpenShift Logging","-",None),
    ("OpenShift Security","-",None),("OpenShift Troubleshooting","L",K8E),

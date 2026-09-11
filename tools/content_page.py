@@ -118,7 +118,7 @@ def term(title, lines):
             out += f'<div class="tl"><span class="to">{esc(text)}</span></div>'
         else:
             out += (f'<div class="tl"><span class="tp">{esc(kind)}</span> '
-                    f'<span class="tt">{esc(text)}</span></div>')
+                    f'<span class="tx">{esc(text)}</span></div>')
     return (f'<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i>'
             f'<i class="d g"></i><span class="tb-t">{esc(title)}</span></div>'
             f'<div class="tb-body">{out}</div></div>')
@@ -250,7 +250,10 @@ html[data-theme="dark"] .dg-node.n-plain{fill:#8a877f!important;}
  overflow-x:auto;}
 .tl{white-space:pre;}
 .tp{color:var(--cyan);}
-.tt{color:#e8e6e1;}
+/* .tx, not .tt — .tt is the theme-toggle button defined above (32px circle,
+   display:flex, border-radius:50%). Sharing the class name laid every command
+   line out inside that box and clipped it on both sides. */
+.tx{color:#e8e6e1;}
 .tc{color:rgba(255,255,255,.32);}
 .to{color:rgba(255,255,255,.6);}
 
@@ -341,7 +344,14 @@ document.addEventListener('click',function(e){
 </script>"""
 
 
-def render(*, slug, title, tagline, eyebrow, crumbs, meta, sections, pager, up="../../"):
+def render(*, slug, title, tagline, eyebrow, crumbs, meta, sections, pager, up="../../",
+           css=None):
+    # The stylesheet used to be hardcoded to Foundation's copy. That still RESOLVED
+    # from other sections — so verify.py passed — but it meant every deep-dive
+    # outside Foundation silently depended on Foundation existing, and its own
+    # topic.css was written and never loaded. Pass the path that belongs to the
+    # section; Foundation stays the default so nothing there changes.
+    css = css or f"{up}Foundation/topic.css"
     crumb = ""
     for i, (label, href) in enumerate(crumbs):
         if i:
@@ -378,7 +388,7 @@ def render(*, slug, title, tagline, eyebrow, crumbs, meta, sections, pager, up="
  if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}}catch(e){{}}}})();
 </script>
 {GC}
-<link rel="stylesheet" href="{up}Foundation/topic.css">
+<link rel="stylesheet" href="{css}">
 </head>
 <body>
 <nav>

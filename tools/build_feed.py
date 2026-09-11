@@ -19,6 +19,13 @@ from siteconf import BASE           # canonical origin, one source of truth
 # The five September issues went out in the same month; they are staggered by
 # issue number so readers order them the way the archive does.
 ISSUES = [
+    (58, "OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html",
+     "OpenShift Architecture & Fundamentals",
+     "What the distribution adds on top of Kubernetes — the Cluster Version Operator "
+     "ownership chain, projects and the project template, the operator pattern under CVO "
+     "and OLM, MachineConfig, SCC admission, image streams and etcd — each with the "
+     "failure mode it actually produces and how to triage it.",
+     datetime(2026, 9, 11, 9, 0, tzinfo=timezone.utc)),
     (57, "Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html",
      "Linux & Unix Glossary",
      "190 terms across 15 categories — fundamentals, permissions, processes, networking, "

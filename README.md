@@ -18,7 +18,7 @@
 
 ---
 
-![Live Issues](https://img.shields.io/badge/Live%20Issues-11-e53935?style=for-the-badge&logo=gitbook&logoColor=white)
+![Live Issues](https://img.shields.io/badge/Live%20Issues-12-e53935?style=for-the-badge&logo=gitbook&logoColor=white)
 ![Glossary](https://img.shields.io/badge/Glossary-190%20Terms-f59e0b?style=for-the-badge)
 ![Stars](https://img.shields.io/github/stars/Vishal-Abhinav/Platform-ops-Newsletter?style=for-the-badge&logo=github&color=00c2d4)
 ![License](https://img.shields.io/badge/License-MIT-84cc16?style=for-the-badge)
@@ -45,7 +45,7 @@
 
 This repository *is* the newsletter. Every issue is a self-contained HTML page served straight from GitHub Pages — no build step, no framework, no tracking. Fork it, read it offline, or lift a diagram for your own docs.
 
-**Currently in this repo:** 11 monthly issue pages, 5 Foundation reference deep-dives, 3 command references covering 253 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 78 pages in total.
+**Currently in this repo:** 12 monthly issue pages, 5 Foundation reference deep-dives, 3 command references covering 253 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 79 pages in total.
 
 ---
 
@@ -63,13 +63,13 @@ of truth, so the numbers here and there can never disagree.
 | `03` | **Networking** | 1 | 1 | 4 | 26 | 31 |
 | `04` | **Cloud** | 1 | 0 | 4 | 13 | 17 |
 | `05` | **Delivery** | 6 | 12 | 22 | 42 | 76 |
-| `06` | **Kubernetes** | 3 | 18 | 17 | 23 | 58 |
+| `06` | **Kubernetes** | 3 | 22 | 16 | 20 | 58 |
 | `07` | **Reliability** | 7 | 27 | 25 | 64 | 116 |
 | `08` | **Security** | 2 | 0 | 18 | 28 | 46 |
 | `09` | **Data & Applications** | 4 | 1 | 12 | 47 | 60 |
 | `10` | **Commands** | 10 | 34 | 41 | 25 | 100 |
 | `11` | **Modern Ops** | 5 | 3 | 21 | 45 | 69 |
-| | **Total** | **43** | **104** | **172** | **345** | **621** |
+| | **Total** | **43** | **108** | **171** | **342** | **621** |
 
 **Status meanings**
 
@@ -79,7 +79,7 @@ of truth, so the numbers here and there can never disagree.
 | 🔸 **Pipeline** | Next up — adjacent to a series already running, so it's queued rather than hypothetical. |
 | · **Planned** | On the backlog. No date attached; it moves to pipeline when the series in front of it lands. |
 
-Live topics point at the 19 deep-dives already in this repo — 11 monthly issues plus the
+Live topics point at the 20 deep-dives already in this repo — 11 monthly issues plus the
 Foundation reference pages — so one page can light up several topics at once. Issue #051 alone
 covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
 
@@ -307,7 +307,7 @@ covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
 </details>
 
 <details>
-<summary><b>06 · Kubernetes</b> — 3 categories · 18 live · 17 pipeline · 23 planned</summary>
+<summary><b>06 · Kubernetes</b> — 3 categories · 22 live · 16 pipeline · 20 planned</summary>
 
 **☸️ Kubernetes** — 16 live · 13 pipeline · 6 planned  
 ✅ [Kubernetes Fundamentals](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
@@ -346,13 +346,13 @@ covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
 · Multi-Cluster Kubernetes &nbsp;
 · Kubernetes Disaster Recovery &nbsp;
 
-**🔴 OpenShift** — 2 live · 2 pipeline · 9 planned  
-🔸 OpenShift Fundamentals &nbsp;
-🔸 OpenShift Architecture &nbsp;
-· Projects &nbsp;
-· Routes &nbsp;
-· Operators &nbsp;
-✅ [SCC](./DevOps/K8/ERROR/K8-error.html) &nbsp;
+**🔴 OpenShift** — 6 live · 1 pipeline · 6 planned  
+✅ [OpenShift Fundamentals](./OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html) &nbsp;
+✅ [OpenShift Architecture](./OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html) &nbsp;
+✅ [Projects](./OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html) &nbsp;
+🔸 Routes &nbsp;
+✅ [Operators](./OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html) &nbsp;
+✅ [SCC](./OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html) &nbsp;
 · OpenShift Networking &nbsp;
 · OpenShift Storage &nbsp;
 · OpenShift Monitoring &nbsp;
@@ -1039,12 +1039,12 @@ The homepage is a single hand-written HTML file with no framework behind it:
 | 🗺️ **Knowledge map** | All 621 topics, grouped into 43 categories under 11 pillars — search by name, filter by status, open a pillar to see what's shipped and what's queued |
 | 🖥️ **Coverage terminal** | Terminal-style `tree` view of the 11 pillars with live-vs-total counts, and a `ls published/` listing that links straight into every issue |
 | 🔔 **Topic requests** | Clicking a pipeline or planned topic queues it; the signup then tells Kit which topics that reader is waiting for |
-| 📡 **RSS** | `feed.xml` carries all 11 issues, and every page advertises it in its `<head>` |
+| 📡 **RSS** | `feed.xml` carries all 12 issues, and every page advertises it in its `<head>` |
 | 📌 **Pinned archive** | On desktop Latest Issues is pinned beside the map and scrolls inside itself, so the issues stay one glance away however far down the map you are |
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
 | 🧭 **Mega-menu** | Cascading browse panel on every page — 11 pillars, 43 categories, with live counts |
 | ⌨️ **Command references** | Searchable, group-filtered command tables — 253 commands so far |
-| 🔍 **Global search** | Centred in the nav of all 78 pages — 936 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
+| 🔍 **Global search** | Centred in the nav of all 79 pages — 936 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
 | 🧩 **Category hubs** | Every one of the 43 categories has its own page with a generated architecture diagram and its full topic list |
 | 💼 **LinkedIn column** | The author section carries the latest posts beside the profile, driven by `tools/linkedin_posts.py` |
 | 🦶 **Shared footer** | One footer across every page, with links rebuilt per directory depth |
@@ -1053,7 +1053,7 @@ The homepage is a single hand-written HTML file with no framework behind it:
 
 ## 🔔 Topic Requests
 
-517 of the 621 topics have no page yet, so a reader who finds one has nowhere to go.
+513 of the 621 topics have no page yet, so a reader who finds one has nowhere to go.
 Clicking a pipeline or planned topic queues it instead. The queue rides along with
 the signup as a Kit custom field, which turns the backlog into a ranked list of what
 people are actually waiting for.

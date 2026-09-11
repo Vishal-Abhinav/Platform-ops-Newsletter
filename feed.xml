@@ -9,13 +9,21 @@
     <language>en</language>
     <managingEditor>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</managingEditor>
     <webMaster>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</webMaster>
-    <lastBuildDate>Wed, 09 Sep 2026 09:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 11 Sep 2026 09:00:00 +0000</lastBuildDate>
     <ttl>1440</ttl>
     <image>
       <url>https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/home.png</url>
       <title>Platform Ops — Tech with Vishal Abhinav</title>
       <link>https://platform-ops-blog.vishal-abhinav.workers.dev/</link>
     </image>
+    <item>
+      <title>#058 — OpenShift Architecture &amp; Fundamentals</title>
+      <link>https://platform-ops-blog.vishal-abhinav.workers.dev/OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html</link>
+      <guid isPermaLink="true">https://platform-ops-blog.vishal-abhinav.workers.dev/OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html</guid>
+      <pubDate>Fri, 11 Sep 2026 09:00:00 +0000</pubDate>
+      <description>What the distribution adds on top of Kubernetes — the Cluster Version Operator ownership chain, projects and the project template, the operator pattern under CVO and OLM, MachineConfig, SCC admission, image streams and etcd — each with the failure mode it actually produces and how to triage it.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
     <item>
       <title>#057 — Linux &amp; Unix Glossary</title>
       <link>https://platform-ops-blog.vishal-abhinav.workers.dev/Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html</link>
