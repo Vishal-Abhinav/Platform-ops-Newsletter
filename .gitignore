@@ -12,3 +12,7 @@ Thumbs.db
 
 # Local scratch — anything staged for inspection rather than publication
 *.bak
+
+# git filter-branch scratch. The whole repo deploys to Pages, so keep any
+# rewrite leftovers out of a commit.
+.git-rewrite/
