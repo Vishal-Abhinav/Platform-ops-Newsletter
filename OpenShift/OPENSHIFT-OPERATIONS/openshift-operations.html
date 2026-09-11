@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenShift Operations · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="Monitoring that is half switched off by default, Loki queries that return before they time out, the four security gates and which one refused you, and the upgrade that stops on one PodDisruptionBudget.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
+<link rel="canonical" href="https://platform-ops-blog.vishal-abhinav.workers.dev/Foundation/OPENSHIFT-OPERATIONS/openshift-operations.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="OpenShift Operations · Platform Ops">
+<meta property="og:description" content="Monitoring that is half switched off by default, Loki queries that return before they time out, the four security gates and which one refused you, and the upgrade that stops on one PodDisruptionBudget.">
+<meta property="og:url" content="https://platform-ops-blog.vishal-abhinav.workers.dev/Foundation/OPENSHIFT-OPERATIONS/openshift-operations.html">
+<meta property="og:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="OpenShift Operations · Platform Ops">
+<meta name="twitter:description" content="Monitoring that is half switched off by default, Loki queries that return before they time out, the four security gates and which one refused you, and the upgrade that stops on one PodDisruptionBudget.">
+<meta name="twitter:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/home.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="../../feed.xml">
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="stylesheet" href="../topic.css">
+<link rel="stylesheet" href="../../assets/megamenu.css">
+<script defer src="../../assets/megamenu.js" data-root="../../"></script>
+<link rel="stylesheet" href="../../assets/search.css">
+<script defer src="../../assets/search.js" data-root="../../"></script>
+</head>
+<body>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb"><a href="../../index.html">Home</a><span>/</span><a href="../../categories/index.html">Categories</a><span>/</span><a href="../../categories/openshift/index.html">OpenShift</a><span>/</span><span class="cur">OpenShift Operations</span></div>
+  <div class="nav-right"><button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button><a href="../../index.html#subscribe" class="nav-logo"
+    style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Kubernetes · OpenShift</div>
+  <h1>OpenShift Operations</h1>
+  <p class="sub">Monitoring that is half switched off by default, Loki queries that return before they time out, the four security gates and which one refused you, and the upgrade that stops on one PodDisruptionBudget.</p>
+  <div class="meta"><span><b>27 min</b> read</span> <span>Level: <b>core → advanced</b></span> <span>OpenShift <b>03 / 03</b></span></div>
+</div></header>
+
+<section><div class="wrap"><div class="sec-tag">The model</div><h2>WHERE OBSERVABILITY DATA ACTUALLY COMES FROM</h2><p class="lede">Two Prometheus instances behind one query endpoint — and the one that scrapes your applications does not exist until you enable it.</p><div class="dg-scroll"><svg class="dg" viewBox="0 0 1000 518" role="img" aria-label="Two Prometheus instances, one query endpoint — and user metrics are off until you turn them on"><line class="dg-spine" x1="160" y1="14" x2="160" y2="504.0"/><text class="dg-layer" x="146" y="41.0">SOURCES</text><circle class="dg-tick" cx="160" cy="37.0" r="3"/><rect x="168.0" y="14" width="195.5" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="265.8" y="41.0" fill="#066c77">kubelet / cAdvisor</text><rect x="373.5" y="14" width="195.5" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="471.2" y="41.0" fill="#066c77">node-exporter</text><rect x="579.0" y="14" width="195.5" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="676.8" y="41.0" fill="#066c77">Operator metrics</text><rect x="784.5" y="14" width="195.5" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="882.2" y="41.0" fill="#066c77">Your /metrics</text><text class="dg-layer" x="146" y="115.0">DISCOVERY</text><circle class="dg-tick" cx="160" cy="111.0" r="3"/><rect x="168.0" y="88" width="401.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="368.5" y="115.0" fill="#8a5806">ServiceMonitor</text><rect x="579.0" y="88" width="401.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="779.5" y="115.0" fill="#8a5806">PodMonitor</text><text class="dg-layer" x="146" y="189.0">PLATFORM</text><circle class="dg-tick" cx="160" cy="185.0" r="3"/><rect x="168.0" y="162" width="812.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="574.0" y="189.0" fill="#a32b28">Prometheus (openshift-monitoring)</text><text class="dg-layer" x="146" y="263.0">WORKLOAD</text><circle class="dg-tick" cx="160" cy="259.0" r="3"/><rect x="168.0" y="236" width="812.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="574.0" y="263.0" fill="#a32b28">Prometheus (user-workload)</text><text class="dg-layer" x="146" y="337.0">RULES</text><circle class="dg-tick" cx="160" cy="333.0" r="3"/><rect x="168.0" y="310" width="401.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="368.5" y="337.0" fill="#5b21b6">PrometheusRule</text><rect x="579.0" y="310" width="401.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="779.5" y="337.0" fill="#5b21b6">Alertmanager</text><text class="dg-layer" x="146" y="411.0">QUERY</text><circle class="dg-tick" cx="160" cy="407.0" r="3"/><rect x="168.0" y="384" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="300.0" y="411.0" fill="#3f6f0c">Thanos Querier</text><rect x="442.0" y="384" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="574.0" y="411.0" fill="#3f6f0c">Console dashboards</text><rect x="716.0" y="384" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="848.0" y="411.0" fill="#3f6f0c">Grafana / external</text><text class="dg-layer" x="146" y="485.0">LONG TERM</text><circle class="dg-tick" cx="160" cy="481.0" r="3"/><rect x="168.0" y="458" width="812.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="574.0" y="485.0" fill="#6b6860">Remote write → Thanos / Mimir / Cortex</text></svg></div><p class="dg-cap">Thanos Querier is what the console and your dashboards talk to; it federates both instances. That is why platform metrics appear immediately and yours do not, from the same URL.</p></div></section><section><div class="wrap"><div class="sec-tag">Core</div><h2>MONITORING, LOGGING &amp; SECURITY</h2><p class="lede">The three things you are asked for after every incident, and the default that quietly prevents each one.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">01</span>
+    <span class="rc-main"><span class="rc-name">The monitoring stack, and the half of it that is off by default</span>
+      <span class="rc-desc">Platform metrics work out of the box. Yours do not, and nothing tells you.</span>
+      <span class="rc-tags"><span class="tg">Prometheus</span><span class="tg">ServiceMonitor</span><span class="tg">user-workload</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>OpenShift ships a complete monitoring stack, but it is deliberately split in two:</p>
+<ul>
+<li><strong>Platform monitoring</strong> (<code>openshift-monitoring</code>) — scrapes the
+cluster itself. Always on, not configurable by you, and it will not scrape your namespaces.</li>
+<li><strong>User workload monitoring</strong> (<code>openshift-user-workload-monitoring</code>)
+— scrapes your applications. <strong>Disabled by default.</strong></li>
+</ul>
+<p>This is the single most common "our metrics don't work" cause on OpenShift. A team writes a
+<code>ServiceMonitor</code>, applies it, sees no error — because a ServiceMonitor with nothing
+watching it is a perfectly valid object — and the metrics never appear. Nothing is broken;
+the second Prometheus simply does not exist yet.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">turning it on, and confirming the target is actually scraped</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">oc -n openshift-monitoring get cm cluster-monitoring-config -o yaml</span></div><div class="tl"><span class="tc">if absent, create it — this one key is the whole switch:</span></div><div class="tl"><span class="to">data:</span></div><div class="tl"><span class="to">  config.yaml: |</span></div><div class="tl"><span class="to">    enableUserWorkload: true</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc -n openshift-user-workload-monitoring get pods</span></div><div class="tl"><span class="to">prometheus-user-workload-0   6/6   Running</span></div><div class="tl"><span class="tc">then verify the TARGET, not the ServiceMonitor — a valid SM can still match nothing</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc -n openshift-user-workload-monitoring exec prometheus-user-workload-0 -c prometheus -- \</span></div><div class="tl"><span class="to">  curl -s localhost:9090/api/v1/targets | jq &#x27;.data.activeTargets[].labels.job&#x27;</span></div></div></div><div class="note warn"><b>A ServiceMonitor matches ports by NAME</b><p><code>spec.endpoints[].port</code> is the Service's <em>port name</em>, not its number. An unnamed port cannot be selected at all, and a mismatched name matches nothing — silently, with the ServiceMonitor still showing as healthy. If the target list is empty, check the port name before anything else.</p></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">02</span>
+    <span class="rc-main"><span class="rc-name">Alerting that pages for the right reasons</span>
+      <span class="rc-desc">Burn rate over threshold, and the silence you forgot to remove.</span>
+      <span class="rc-tags"><span class="tg">Alertmanager</span><span class="tg">PrometheusRule</span><span class="tg">burn rate</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Alerts are <code>PrometheusRule</code> objects. Platform rules ship with the cluster; yours
+live in your namespace and are picked up by user-workload Prometheus.</p>
+<p>The design question is not "what threshold" but <strong>what makes a human get out of
+bed</strong>. A CPU-above-80% alert fires constantly and teaches people to ignore the pager.
+An SLO burn-rate alert fires when you are consuming the error budget fast enough to miss the
+objective — which is the same thing the user is experiencing.</p>
+<p>Multi-window burn rate is the standard shape: a fast window catches sudden severe breakage,
+a slow window catches sustained mild breakage, and requiring both to be hot suppresses the
+one-minute blip that recovered on its own.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">a burn-rate rule that means something</span></div><div class="tb-body"><div class="tl"><span class="to">groups:</span></div><div class="tl"><span class="to">- name: api-slo</span></div><div class="tl"><span class="to">  rules:</span></div><div class="tl"><span class="to">  - alert: APIErrorBudgetBurnFast</span></div><div class="tl"><span class="to">    # 14.4x burn over 1h AND 5m = 2% of a 30-day budget in an hour</span></div><div class="tl"><span class="to">    expr: |</span></div><div class="tl"><span class="to">      (job:slo_errors:ratio_rate1h{job=&quot;api&quot;} &gt; (14.4 * 0.001))</span></div><div class="tl"><span class="to">      and</span></div><div class="tl"><span class="to">      (job:slo_errors:ratio_rate5m{job=&quot;api&quot;} &gt; (14.4 * 0.001))</span></div><div class="tl"><span class="to">    for: 2m</span></div><div class="tl"><span class="to">    labels: { severity: critical }</span></div><div class="tl"><span class="tc">and the thing that actually causes missed incidents:</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc -n openshift-monitoring exec alertmanager-main-0 -c alertmanager -- \</span></div><div class="tl"><span class="to">  amtool silence query --alertmanager.url=http://localhost:9093</span></div><div class="tl"><span class="tc">an expired-in-name-only silence from last month&#x27;s maintenance window</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">03</span>
+    <span class="rc-main"><span class="rc-name">Logging — the stack changed, and the old assumptions did not</span>
+      <span class="rc-desc">Loki not Elasticsearch, three tenants, and retention you must set.</span>
+      <span class="rc-tags"><span class="tg">Loki</span><span class="tg">LokiStack</span><span class="tg">ClusterLogForwarder</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>OpenShift logging moved from Elasticsearch/Kibana to <strong>Loki</strong> with the console
+as the UI. The practical differences matter:</p>
+<ul>
+<li><strong>Loki indexes labels, not content.</strong> Queries filter by label first and then
+grep the stream. A query with no label selector scans everything and will time out on a busy
+cluster. This is the opposite of the Elasticsearch habit.</li>
+<li><strong>Three tenants</strong> — <code>application</code>, <code>infrastructure</code>,
+<code>audit</code> — with separate access. Audit logs are <em>not</em> collected by default.</li>
+<li><strong>Retention is a LokiStack setting</strong>, and the default sizing is far smaller
+than most teams assume. Storage pressure silently drops the oldest streams.</li>
+</ul>
+<p>The collector is Vector, configured by a <code>ClusterLogForwarder</code>. That object is
+also how you ship elsewhere — Splunk, Kafka, an external Loki — and you can forward and store
+locally at the same time.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">LogQL that returns before the timeout</span></div><div class="tb-body"><div class="tl"><span class="tc">bad — no label selector, scans every stream in the tenant</span></div><div class="tl"><span class="to">{} |= &quot;OutOfMemory&quot;</span></div><div class="tl"><span class="tc">good — narrow by label, THEN filter</span></div><div class="tl"><span class="to">{kubernetes_namespace_name=&quot;prod&quot;, kubernetes_container_name=&quot;api&quot;}</span></div><div class="tl"><span class="to">  |= &quot;OutOfMemory&quot; | json | line_format &quot;{{.msg}}&quot;</span></div><div class="tl"><span class="tc">rate of errors per pod, which is what you actually want during an incident</span></div><div class="tl"><span class="to">sum by (kubernetes_pod_name) (</span></div><div class="tl"><span class="to">  rate({kubernetes_namespace_name=&quot;prod&quot;} |= &quot;level=error&quot; [5m]))</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc -n openshift-logging get lokistack logging-loki -o jsonpath=&#x27;{.spec.limits.global.retention}&#x27;</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">04</span>
+    <span class="rc-main"><span class="rc-name">Security — the layers, and which one rejected you</span>
+      <span class="rc-desc">Authentication, RBAC, SCC and NetworkPolicy each say no in a different voice.</span>
+      <span class="rc-tags"><span class="tg">RBAC</span><span class="tg">SCC</span><span class="tg">OAuth</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Four independent gates sit between a request and a running workload. Reading the refusal
+tells you which one, and they are not interchangeable:</p>
+<table class="tbl"><thead><tr><th>Gate</th><th>Answers</th><th>Refusal looks like</th></tr></thead>
+<tbody>
+<tr><td><strong>Authentication</strong></td><td>Who are you?</td><td><code>Unauthorized</code>, 401</td></tr>
+<tr><td><strong>RBAC</strong></td><td>May you perform this verb on this resource?</td><td><code>Forbidden: User "x" cannot get pods</code></td></tr>
+<tr><td><strong>SCC</strong></td><td>May this POD have the privileges it asks for?</td><td><code>unable to validate against any security context constraint</code></td></tr>
+<tr><td><strong>NetworkPolicy</strong></td><td>May this packet arrive?</td><td>Nothing. Timeout.</td></tr>
+</tbody></table>
+<p>The last row is the operationally important one: <strong>NetworkPolicy has no error
+message</strong>. Every other layer tells you it refused. A policy drop is indistinguishable
+from a dead backend, which is why it is worth proving or excluding early rather than late.</p>
+<h3>RBAC, resolved rather than guessed</h3>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">stop reading RoleBindings and ask the API</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">oc auth can-i create deployments -n prod --as=jane</span></div><div class="tl"><span class="to">no</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc auth can-i --list -n prod --as=jane | head</span></div><div class="tl"><span class="tc">and for a service account, which is where this usually bites:</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc auth can-i list secrets -n prod \</span></div><div class="tl"><span class="to">  --as=system:serviceaccount:prod:api-sa</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc adm policy who-can delete pods -n prod</span></div><div class="tl"><span class="tc">the reverse question, and far quicker than auditing bindings by hand</span></div></div></div><div class="note good"><b>Audit logs answer &#x27;who did this&#x27;, but only if you collect them</b><p>The API server writes audit events for every request. They are on the masters at <code>/var/log/kube-apiserver/</code> and reachable with <code>oc adm node-logs --role=master --path=kube-apiserver/audit.log</code>. They are <em>not</em> forwarded to Loki unless the ClusterLogForwarder names the <code>audit</code> input — so the one log you need after a security question is usually the one nobody enabled.</p></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">Advanced</div><h2>UPGRADES</h2><p class="lede">What the cluster already knows before you start, and where the hours go.</p><div class="dg-scroll"><svg class="dg" viewBox="0 0 1000 444" role="img" aria-label="The node phase is the long one — 12 workers at maxUnavailable 1 is 12 sequential reboots"><line class="dg-spine" x1="160" y1="14" x2="160" y2="430.0"/><text class="dg-layer" x="146" y="41.0">DECIDE</text><circle class="dg-tick" cx="160" cy="37.0" r="3"/><rect x="168.0" y="14" width="401.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="368.5" y="41.0" fill="#066c77">Channel: stable / fast / eus</text><rect x="579.0" y="14" width="401.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="779.5" y="41.0" fill="#066c77">Target version</text><text class="dg-layer" x="146" y="115.0">VERIFY</text><circle class="dg-tick" cx="160" cy="111.0" r="3"/><rect x="168.0" y="88" width="264.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="300.0" y="115.0" fill="#8a5806">Release signature</text><rect x="442.0" y="88" width="264.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="574.0" y="115.0" fill="#8a5806">Upgradeable=True</text><rect x="716.0" y="88" width="264.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="848.0" y="115.0" fill="#8a5806">Deprecated API check</text><text class="dg-layer" x="146" y="189.0">CONTROL PLANE</text><circle class="dg-tick" cx="160" cy="185.0" r="3"/><rect x="168.0" y="162" width="401.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="368.5" y="189.0" fill="#a32b28">CVO applies manifests in order</text><rect x="579.0" y="162" width="401.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="779.5" y="189.0" fill="#a32b28">etcd → apiserver → controllers</text><text class="dg-layer" x="146" y="263.0">OPERATORS</text><circle class="dg-tick" cx="160" cy="259.0" r="3"/><rect x="168.0" y="236" width="812.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="574.0" y="263.0" fill="#5b21b6">~30 cluster operators, sequenced</text><text class="dg-layer" x="146" y="337.0">NODES</text><circle class="dg-tick" cx="160" cy="333.0" r="3"/><rect x="168.0" y="310" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="300.0" y="337.0" fill="#3f6f0c">MCO renders config</text><rect x="442.0" y="310" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="574.0" y="337.0" fill="#3f6f0c">cordon → drain → reboot</text><rect x="716.0" y="310" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="848.0" y="337.0" fill="#3f6f0c">one pool at a time</text><text class="dg-layer" x="146" y="411.0">SETTLE</text><circle class="dg-tick" cx="160" cy="407.0" r="3"/><rect x="168.0" y="384" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="368.5" y="411.0" fill="#6b6860">All co Available</text><rect x="579.0" y="384" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="779.5" y="411.0" fill="#6b6860">MCPs Updated</text></svg></div><p class="dg-cap">The CVO applies manifests in a fixed order and stops at the first that will not go ready, so a stalled upgrade always names its blocker in the Progressing message.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">05</span>
+    <span class="rc-main"><span class="rc-name">Upgrades — channels, and the check that prevents the bad ones</span>
+      <span class="rc-desc">Upgradeable=False is the cluster telling you it already knows.</span>
+      <span class="rc-tags"><span class="tg">channel</span><span class="tg">CVO</span><span class="tg">EUS</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Channels decide which versions are offered:</p>
+<ul>
+<li><strong>stable-4.x</strong> — released and soaked. The default for production.</li>
+<li><strong>fast-4.x</strong> — released, less soak. Fine for pre-production.</li>
+<li><strong>eus-4.x</strong> — Extended Update Support, for the even-numbered releases you can
+stay on longer and hop between while skipping a minor.</li>
+<li><strong>candidate-4.x</strong> — pre-release. Never production.</li>
+</ul>
+<p>Before any upgrade, the cluster has already formed an opinion. The
+<code>Upgradeable</code> condition on <code>ClusterVersion</code> is set to <code>False</code>
+by any operator that knows the upgrade will hurt — most often because <strong>a deprecated API
+is still in use</strong> and the next minor removes it. Upgrading anyway is how a workload
+disappears mid-upgrade.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">the pre-upgrade checklist, as commands</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">oc get clusterversion -o jsonpath=&#x27;{.items[0].status.conditions}&#x27; \</span></div><div class="tl"><span class="to">  | jq -r &#x27;.[]|select(.type==&quot;Upgradeable&quot;)|.status + &quot;: &quot; + .message&#x27;</span></div><div class="tl"><span class="to">False: Cluster operator kube-apiserver should not be upgraded between minor</span></div><div class="tl"><span class="to">versions: APIRemovedInNextReleaseInUse: flowcontrol.apiserver.k8s.io/v1beta2</span></div><div class="tl"><span class="tc">find WHO is still calling it, before you go looking through manifests:</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc get apirequestcount flowschemas.v1beta2.flowcontrol.apiserver.k8s.io \</span></div><div class="tl"><span class="to">  -o jsonpath=&#x27;{.status.currentHour.byNode[*].byUser[*].username}&#x27;</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc adm upgrade                     # what is actually on offer</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc adm upgrade --to=4.16.11</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">06</span>
+    <span class="rc-main"><span class="rc-name">What actually happens during an upgrade, and where it stalls</span>
+      <span class="rc-desc">Control plane in minutes, nodes in hours, and one PDB can stop the lot.</span>
+      <span class="rc-tags"><span class="tg">MCO</span><span class="tg">drain</span><span class="tg">PodDisruptionBudget</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>The control plane phase is fast and mostly invisible. The <strong>node phase</strong> is
+where the hours go: the MCO cordons a node, drains it, applies the new OS config, reboots it,
+uncordons, and moves to the next — one at a time per pool by default.</p>
+<p>Draining is where upgrades stop, and the cause is nearly always one of two things:</p>
+<ul>
+<li><strong>A PodDisruptionBudget that cannot be satisfied.</strong> A single-replica Deployment
+with <code>minAvailable: 1</code> can never be evicted. The drain retries forever, politely,
+and the upgrade sits at the same percentage for hours.</li>
+<li><strong>A pod with no controller</strong> — a bare Pod, created by hand — which drain
+refuses to evict because nothing would recreate it.</li>
+</ul>
+<p>Both are the cluster protecting availability exactly as instructed. The fix is the PDB or
+the workload, not forcing the drain.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">finding the PDB that is blocking the upgrade</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">oc get mcp worker -o jsonpath=&#x27;{.status.conditions[?(@.type==&quot;Degraded&quot;)].message}&#x27;</span></div><div class="tl"><span class="to">failed to drain node worker-07 after 1h0m0s: error when evicting pod &quot;legacy-api-0&quot;:</span></div><div class="tl"><span class="to">Cannot evict pod as it would violate the pod&#x27;s disruption budget</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc get pdb -A -o custom-columns=\</span></div><div class="tl"><span class="to">  NS:.metadata.namespace,NAME:.metadata.name,MIN:.spec.minAvailable,ALLOWED:.status.disruptionsAllowed</span></div><div class="tl"><span class="to">prod   legacy-api-pdb   1   0      &lt;- 0 disruptions allowed, 1 replica</span></div><div class="tl"><span class="tc">the real fix is 2 replicas. The unblock-now fix is to relax the PDB:</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc patch pdb legacy-api-pdb -n prod --type=merge \</span></div><div class="tl"><span class="to">  -p &#x27;{&quot;spec&quot;:{&quot;minAvailable&quot;:0}}&#x27;</span></div></div></div><div class="note warn"><b>maxUnavailable is the lever for a 100-node cluster</b><p>At the default of 1, a 100-node pool is 100 sequential reboots — easily a working day. Raising <code>maxUnavailable</code> on the MachineConfigPool to 3 or 5 cuts that proportionally, provided your workloads have enough replicas and spread to survive losing that many nodes at once. Check PDBs and topology spread before you raise it, not after.</p></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">07</span>
+    <span class="rc-main"><span class="rc-name">Compliance, images and the supply chain</span>
+      <span class="rc-desc">The operators that answer the questions an auditor will ask.</span>
+      <span class="rc-tags"><span class="tg">Compliance Operator</span><span class="tg">quay</span><span class="tg">signatures</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Three Red Hat operators cover the security questions that arrive as audit findings:</p>
+<ul>
+<li><strong>Compliance Operator</strong> — runs OpenSCAP against profiles (CIS, PCI-DSS,
+NIST 800-53) and produces <code>ComplianceCheckResult</code> objects. Many findings ship with an
+auto-remediation you can apply as a MachineConfig.</li>
+<li><strong>File Integrity Operator</strong> — AIDE on every node, alerting on unexpected
+changes to system files.</li>
+<li><strong>Quay / Clair</strong> — image vulnerability scanning at the registry.</li>
+</ul>
+<p>Independently: <strong>image signature verification</strong>. A cluster that will pull any
+image from anywhere has no supply chain guarantee, and this is a cluster-wide policy, not a
+per-workload one.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">scoping the image sources a cluster will trust</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">oc edit image.config.openshift.io/cluster</span></div><div class="tl"><span class="to">spec:</span></div><div class="tl"><span class="to">  registrySources:</span></div><div class="tl"><span class="to">    allowedRegistries:</span></div><div class="tl"><span class="to">    - quay.io</span></div><div class="tl"><span class="to">    - registry.redhat.io</span></div><div class="tl"><span class="to">    - image-registry.openshift-image-registry.svc:5000</span></div><div class="tl"><span class="tc">CAUTION: this rolls every node via the MCO. It is a node reboot, not a config reload.</span></div><div class="tl"><span class="tc">and omitting the internal registry breaks every build in the cluster.</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc get compliancecheckresult -n openshift-compliance \</span></div><div class="tl"><span class="to">  --selector compliance.openshift.io/check-status=FAIL</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">08</span>
+    <span class="rc-main"><span class="rc-name">Backup, DR and what &#x27;restore the cluster&#x27; actually means</span>
+      <span class="rc-desc">etcd is the cluster; your data is not in it.</span>
+      <span class="rc-tags"><span class="tg">etcd backup</span><span class="tg">DR</span><span class="tg">OADP</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Two different things get called "backup" and conflating them is how a DR test fails:</p>
+<table class="tbl"><thead><tr><th></th><th>etcd snapshot</th><th>Application backup (OADP/Velero)</th></tr></thead>
+<tbody>
+<tr><td>Contains</td><td>Every API object</td><td>Selected namespaces + PV data</td></tr>
+<tr><td>Restores</td><td>The whole cluster, to that instant</td><td>Namespaces, into this or another cluster</td></tr>
+<tr><td>Granularity</td><td>All or nothing</td><td>Per namespace, per label</td></tr>
+<tr><td>PV contents</td><td><strong>No</strong></td><td>Yes, via snapshots or restic</td></tr>
+<tr><td>Use for</td><td>Control-plane disaster</td><td>Namespace deleted, migration, real DR</td></tr>
+</tbody></table>
+<p>An etcd restore is disruptive by design: you stop the control plane, restore on one master,
+and rebuild the others from it. It is the right tool for "we lost quorum", and the wrong tool
+for "someone deleted the prod namespace" — for which OADP restores in minutes without touching
+anything else.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">both backups, and the check that they ran</span></div><div class="tb-body"><div class="tl"><span class="tc">etcd — on a master, produces a snapshot plus the static pod manifests</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc debug node/master-0 -- chroot /host /usr/local/bin/cluster-backup.sh \</span></div><div class="tl"><span class="to">  /home/core/backup</span></div><div class="tl"><span class="tc">OADP — namespaces AND their volumes</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc get backup -n openshift-adp</span></div><div class="tl"><span class="to">NAME              STATUS      ERRORS   ITEMS   AGE</span></div><div class="tl"><span class="to">prod-daily-0911   Completed   0        1847    6h</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc get backup prod-daily-0911 -n openshift-adp \</span></div><div class="tl"><span class="to">  -o jsonpath=&#x27;{.status.progress}&#x27;</span></div><div class="tl"><span class="tc">restore one namespace without touching the rest of the cluster:</span></div><div class="tl"><span class="tp">$</span> <span class="tx">velero restore create --from-backup prod-daily-0911 --include-namespaces prod</span></div></div></div><div class="note bad"><b>The DR test nobody runs is the one that matters</b><p>An etcd restore rolls every node and takes a cluster down for the duration. If it has never been rehearsed, the first rehearsal will be during an outage, under time pressure, by someone reading the docs for the first time. Schedule it on a cluster you can afford to break, and time it — the number you get is your real RTO.</p></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">In practice</div><h2>ADVANCED TROUBLESHOOTING</h2>
+<p>Operations failures are mostly <em>absences</em>: a metric that never arrived, a log that was
+never collected, an alert that was silenced, an upgrade that stopped. Absences have no error
+message, so each one needs a positive check rather than a glance at a dashboard.</p>
+<div class="tw"><table class="tbl "><thead><tr><th>Symptom</th><th>The absence behind it</th><th>Positive check</th></tr></thead><tbody><tr><td>App metrics missing</td><td>User workload monitoring never enabled</td><td><code>oc -n openshift-user-workload-monitoring get pods</code></td></tr><tr><td>ServiceMonitor exists, no data</td><td>Port name mismatch — it matched nothing</td><td>Prometheus <code>/api/v1/targets</code>, not the ServiceMonitor</td></tr><tr><td>Alert never fired</td><td>An unexpired silence, or the rule is in the wrong namespace</td><td><code>amtool silence query</code>; <code>oc get prometheusrule -A</code></td></tr><tr><td>Logs stop at a date</td><td>LokiStack retention, or storage pressure dropping streams</td><td><code>oc get lokistack -o yaml</code>; the ingester pod's logs</td></tr><tr><td>No audit trail for an incident</td><td>ClusterLogForwarder never included the audit input</td><td><code>oc adm node-logs --role=master --path=kube-apiserver/audit.log</code></td></tr><tr><td>Upgrade at the same % for hours</td><td>A drain blocked by a PDB or a bare pod</td><td><code>oc get mcp -o yaml</code> — the Degraded message names the pod</td></tr><tr><td>Upgrade refuses to start</td><td>Upgradeable=False — a removed API is still in use</td><td><code>oc get apirequestcount</code> names the caller</td></tr><tr><td>Node rebooted unexpectedly</td><td>MCO applying a MachineConfig, as designed</td><td><code>oc get mcp</code>; the node's <code>machineconfiguration</code> annotations</td></tr></tbody></table></div>
+<h3>Collecting evidence while the incident is live</h3>
+<p>Prometheus keeps platform metrics for roughly 15 days and Loki for whatever retention you
+set. Both are shorter than most post-incident reviews take to schedule, so capture the query
+results during the incident rather than planning to look later.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">snapshot the evidence before it ages out</span></div><div class="tb-body"><div class="tl"><span class="tc">range query straight out of Thanos, into a file you keep</span></div><div class="tl"><span class="tp">$</span> <span class="tx">TOKEN=$(oc whoami -t); HOST=$(oc -n openshift-monitoring get route thanos-querier -o jsonpath=&#x27;{.spec.host}&#x27;)</span></div><div class="tl"><span class="tp">$</span> <span class="tx">curl -sk -H &quot;Authorization: Bearer $TOKEN&quot; \</span></div><div class="tl"><span class="to">  &quot;https://$HOST/api/v1/query_range?query=up{job=%22api%22}&amp;start=...&amp;end=...&amp;step=60&quot; \</span></div><div class="tl"><span class="to">  &gt; incident-up.json</span></div><div class="tl"><span class="tc">and the events, which expire in ONE hour by default — always grab these first</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc get events -A --sort-by=.lastTimestamp -o json &gt; incident-events.json</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc adm must-gather --dest-dir=./mg-$(date +%F)</span></div></div></div><div class="note good"><b>Events expire in an hour</b><p>Kubernetes Events have a default TTL of 60 minutes. They hold the scheduling failures, admission rejections, image pull errors and probe failures that explain the incident — and they are gone before most postmortems begin. Capturing them is the first command of an incident, not the last.</p></div></div></section><section><div class="wrap"><div class="sec-tag">Reference</div><h2>CHEATSHEET</h2><div class="tw"><table class="tbl mono"><thead><tr><th>Command</th><th>What it answers</th></tr></thead><tbody><tr><td><code>oc -n openshift-user-workload-monitoring get pods</code></td><td>Whether your metrics are being scraped at all</td></tr><tr><td><code>oc get servicemonitor,podmonitor -A</code></td><td>What has asked to be scraped</td></tr><tr><td><code>oc get prometheusrule -A</code></td><td>Every alert rule, platform and yours</td></tr><tr><td><code>amtool silence query</code></td><td>The silence that stopped the page</td></tr><tr><td><code>oc get lokistack -n openshift-logging -o yaml</code></td><td>Retention and storage sizing</td></tr><tr><td><code>oc get clusterlogforwarder -A</code></td><td>Which log tenants are collected and where they go</td></tr><tr><td><code>oc adm node-logs --role=master --path=kube-apiserver/audit.log</code></td><td>Who did what to the API</td></tr><tr><td><code>oc auth can-i --list -n &lt;ns&gt; --as=&lt;user&gt;</code></td><td>Effective RBAC, resolved</td></tr><tr><td><code>oc adm policy who-can &lt;verb&gt; &lt;res&gt;</code></td><td>The reverse RBAC question</td></tr><tr><td><code>oc adm upgrade</code></td><td>Which versions are on offer right now</td></tr><tr><td><code>oc get apirequestcount</code></td><td>Who is still calling a deprecated API</td></tr><tr><td><code>oc get pdb -A</code></td><td>The budget that will block the next drain</td></tr><tr><td><code>oc get compliancecheckresult -n openshift-compliance</code></td><td>Current compliance failures</td></tr><tr><td><code>oc get backup -n openshift-adp</code></td><td>Whether the application backup actually ran</td></tr><tr><td><code>oc get events -A --sort-by=.lastTimestamp</code></td><td>What just happened — expires in an hour</td></tr></tbody></table></div></div></section>
+
+<section style="border-bottom:0"><div class="wrap"><div class="pager"><a href="../OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html">← Previous<b>OpenShift Networking &amp; Storage</b></a><a class="next" href="../../categories/openshift/index.html">OpenShift →<b>Category hub</b></a></div></div></section>
+
+<footer>
+  <div class="f-in">
+    <div class="f-top">
+      <div>
+        <a class="f-logo" href="../../index.html">PLATFORM OPS</a>
+        <p class="f-tag">Field notes on Kubernetes, SRE, and Platform Engineering —
+          written from production, not slideware.</p>
+      </div>
+      <div class="f-cols">
+        <div><div class="f-col-t">Newsletter</div>
+          <a href="../../index.html#issues">Latest Issues</a>
+          <a href="../../index.html#subscribe">Subscribe</a>
+          <a href="../../feed.xml">RSS Feed</a></div>
+        <div><div class="f-col-t">Explore</div>
+          <a href="../../categories/index.html">All Categories</a>
+          <a href="../../categories/foundation/index.html">Foundation Hub</a>
+          <a href="../../index.html#topics">Knowledge Map</a></div>
+        <div><div class="f-col-t">Connect</div>
+          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="../../index.html#authors">About the Author</a>
+          <a href="#">Back to Top ↑</a></div>
+      </div>
+    </div>
+    <div class="f-bot">
+      <div>© 2026 Vishal Abhinav · Platform Ops — code MIT,
+        <a href="../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+      <div>Built for engineers, by an engineer.</div>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('tt').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});
+document.addEventListener('click',function(e){
+  var h=e.target.closest('.rc-head'); if(!h) return;
+  var c=h.parentElement, open=c.classList.contains('open');
+  c.classList.toggle('open',!open);
+  h.setAttribute('aria-expanded', !open?'true':'false');
+});
+</script>
+</body>
+</html>

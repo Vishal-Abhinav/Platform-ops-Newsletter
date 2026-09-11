@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenShift Networking &amp; Storage · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="Routes and the four TLS modes, OVN-Kubernetes and the MTU fault everybody misdiagnoses, NetworkPolicy isolation that silently blinds monitoring, and the CSI chain where each stage fails in a different log.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
+<link rel="canonical" href="https://platform-ops-blog.vishal-abhinav.workers.dev/Foundation/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="OpenShift Networking &amp; Storage · Platform Ops">
+<meta property="og:description" content="Routes and the four TLS modes, OVN-Kubernetes and the MTU fault everybody misdiagnoses, NetworkPolicy isolation that silently blinds monitoring, and the CSI chain where each stage fails in a different log.">
+<meta property="og:url" content="https://platform-ops-blog.vishal-abhinav.workers.dev/Foundation/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html">
+<meta property="og:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="OpenShift Networking &amp; Storage · Platform Ops">
+<meta name="twitter:description" content="Routes and the four TLS modes, OVN-Kubernetes and the MTU fault everybody misdiagnoses, NetworkPolicy isolation that silently blinds monitoring, and the CSI chain where each stage fails in a different log.">
+<meta name="twitter:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/home.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="../../feed.xml">
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="stylesheet" href="../topic.css">
+<link rel="stylesheet" href="../../assets/megamenu.css">
+<script defer src="../../assets/megamenu.js" data-root="../../"></script>
+<link rel="stylesheet" href="../../assets/search.css">
+<script defer src="../../assets/search.js" data-root="../../"></script>
+</head>
+<body>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb"><a href="../../index.html">Home</a><span>/</span><a href="../../categories/index.html">Categories</a><span>/</span><a href="../../categories/openshift/index.html">OpenShift</a><span>/</span><span class="cur">OpenShift Networking &amp; Storage</span></div>
+  <div class="nav-right"><button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button><a href="../../index.html#subscribe" class="nav-logo"
+    style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Kubernetes · OpenShift</div>
+  <h1>OpenShift Networking &amp; Storage</h1>
+  <p class="sub">Routes and the four TLS modes, OVN-Kubernetes and the MTU fault everybody misdiagnoses, NetworkPolicy isolation that silently blinds monitoring, and the CSI chain where each stage fails in a different log.</p>
+  <div class="meta"><span><b>26 min</b> read</span> <span>Level: <b>core → advanced</b></span> <span>OpenShift <b>02 / 03</b></span></div>
+</div></header>
+
+<section><div class="wrap"><div class="sec-tag">The model</div><h2>HOW A REQUEST REACHES A POD</h2><p class="lede">Eight layers between the browser and the container, each able to drop the packet for its own reason.</p><div class="dg-scroll"><svg class="dg" viewBox="0 0 1000 592" role="img" aria-label="A request crosses eight layers; the one that dropped it is almost never the one you suspect"><line class="dg-spine" x1="160" y1="14" x2="160" y2="578.0"/><text class="dg-layer" x="146" y="41.0">CLIENT</text><circle class="dg-tick" cx="160" cy="37.0" r="3"/><rect x="168.0" y="14" width="812.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="574.0" y="41.0" fill="#066c77">Browser / API client</text><text class="dg-layer" x="146" y="115.0">DNS</text><circle class="dg-tick" cx="160" cy="111.0" r="3"/><rect x="168.0" y="88" width="812.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="574.0" y="115.0" fill="#066c77">*.apps.&lt;cluster&gt;.&lt;domain&gt;</text><text class="dg-layer" x="146" y="189.0">EDGE</text><circle class="dg-tick" cx="160" cy="185.0" r="3"/><rect x="168.0" y="162" width="812.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="574.0" y="189.0" fill="#8a5806">Load balancer / VIP</text><text class="dg-layer" x="146" y="263.0">INGRESS</text><circle class="dg-tick" cx="160" cy="259.0" r="3"/><rect x="168.0" y="236" width="264.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="300.0" y="263.0" fill="#a32b28">Router pods (HAProxy)</text><rect x="442.0" y="236" width="264.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="574.0" y="263.0" fill="#a32b28">Route object</text><rect x="716.0" y="236" width="264.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="848.0" y="263.0" fill="#a32b28">TLS termination</text><text class="dg-layer" x="146" y="337.0">SERVICE</text><circle class="dg-tick" cx="160" cy="333.0" r="3"/><rect x="168.0" y="310" width="401.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="368.5" y="337.0" fill="#5b21b6">ClusterIP</text><rect x="579.0" y="310" width="401.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="779.5" y="337.0" fill="#5b21b6">EndpointSlice</text><text class="dg-layer" x="146" y="411.0">OVERLAY</text><circle class="dg-tick" cx="160" cy="407.0" r="3"/><rect x="168.0" y="384" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="300.0" y="411.0" fill="#3f6f0c">OVN-Kubernetes</text><rect x="442.0" y="384" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="574.0" y="411.0" fill="#3f6f0c">Geneve tunnel</text><rect x="716.0" y="384" width="264.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="848.0" y="411.0" fill="#3f6f0c">NetworkPolicy / ACL</text><text class="dg-layer" x="146" y="485.0">NODE</text><circle class="dg-tick" cx="160" cy="481.0" r="3"/><rect x="168.0" y="458" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="368.5" y="485.0" fill="#6b6860">br-int (OVS)</text><rect x="579.0" y="458" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="779.5" y="485.0" fill="#6b6860">veth pair</text><text class="dg-layer" x="146" y="559.0">POD</text><circle class="dg-tick" cx="160" cy="555.0" r="3"/><rect x="168.0" y="532" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="368.5" y="559.0" fill="#6b6860">Container netns</text><rect x="579.0" y="532" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="779.5" y="559.0" fill="#6b6860">eth0</text></svg></div><p class="dg-cap">The router is the only layer that returns a useful status code. Everything below it fails by dropping, which is why the triage table later works upwards from the pod rather than down from the client.</p></div></section><section><div class="wrap"><div class="sec-tag">Core</div><h2>NETWORKING</h2><p class="lede">Routes, the overlay, service endpoints and the policy model.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">01</span>
+    <span class="rc-main"><span class="rc-name">Routes — the object that predates Ingress</span>
+      <span class="rc-desc">What a Route does that an Ingress does not, and the four TLS modes.</span>
+      <span class="rc-tags"><span class="tg">Route</span><span class="tg">HAProxy</span><span class="tg">TLS</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>A <code>Route</code> is OpenShift's ingress object. It predates the Kubernetes
+<code>Ingress</code> API, and OpenShift supports both — an Ingress is silently converted into
+a Route by the ingress operator, which is worth knowing because the object you debug is the
+Route even when the object you created was an Ingress.</p>
+<p>What a Route gives you that plain Ingress does not: <strong>per-route TLS policy</strong>,
+weighted backends for canary splits, and configuration knobs (timeouts, balance algorithm,
+rate limits) as annotations that the router actually honours.</p>
+<h3>The four TLS modes, and which one you want</h3>
+<table class="tbl"><thead><tr><th>Mode</th><th>Router does</th><th>Pod receives</th><th>Use when</th></tr></thead>
+<tbody>
+<tr><td><strong>edge</strong></td><td>Terminates TLS</td><td>Plain HTTP</td><td>Default. Traffic inside the cluster is on the overlay.</td></tr>
+<tr><td><strong>passthrough</strong></td><td>Forwards bytes, does not decrypt</td><td>TLS</td><td>The app must see the client cert (mTLS), or does its own TLS.</td></tr>
+<tr><td><strong>reencrypt</strong></td><td>Terminates, then opens a new TLS connection</td><td>TLS</td><td>You need the router's cert externally and encryption internally.</td></tr>
+<tr><td><strong>none</strong></td><td>Plain HTTP end to end</td><td>HTTP</td><td>Essentially never in production.</td></tr>
+</tbody></table>
+<p><strong>passthrough cannot do path-based routing.</strong> The router never decrypts, so it
+cannot read the path — it routes on SNI alone. A passthrough Route with a <code>path:</code>
+set is a configuration that silently does not do what it says.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">what the router actually did with your route</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">oc get route app -o jsonpath=&#x27;{.status.ingress[*].conditions[*]}&#x27; | jq</span></div><div class="tl"><span class="to">{ &quot;type&quot;: &quot;Admitted&quot;, &quot;status&quot;: &quot;False&quot;,</span></div><div class="tl"><span class="to">  &quot;reason&quot;: &quot;HostAlreadyClaimed&quot;,</span></div><div class="tl"><span class="to">  &quot;message&quot;: &quot;route app already exposes app.apps.ocp.example.com and is older&quot; }</span></div><div class="tl"><span class="tc">Admitted=False is the single most useful field on a Route. A route that is not</span></div><div class="tl"><span class="tc">admitted returns 503 from the router and looks exactly like a broken backend.</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc -n openshift-ingress rsh deploy/router-default cat haproxy.config | grep -A6 app</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">02</span>
+    <span class="rc-main"><span class="rc-name">The cluster network — OVN-Kubernetes end to end</span>
+      <span class="rc-desc">Overlay, node subnets, and why the packet is fine until it is not.</span>
+      <span class="rc-tags"><span class="tg">OVN</span><span class="tg">Geneve</span><span class="tg">CNI</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>OVN-Kubernetes is the default CNI on modern OpenShift. Each node gets a slice of the cluster
+CIDR; pods get an address from their node's slice; traffic between nodes is encapsulated in
+<strong>Geneve</strong> over the node network.</p>
+<p>Three consequences that matter operationally:</p>
+<ul>
+<li><strong>MTU is not negotiable.</strong> Geneve adds ~100 bytes of header. If the node
+network MTU is 1500, the pod MTU must be ~1400. Get this wrong and small packets work
+perfectly while large ones vanish — which presents as "TLS handshakes fine, large responses
+hang", the single most misdiagnosed cluster networking fault there is.</li>
+<li><strong>NetworkPolicy is enforced in OVS flows</strong>, not iptables. <code>iptables -L</code>
+on the node tells you nothing about why a pod was blocked.</li>
+<li><strong>The cluster CIDR cannot be changed after install.</strong> Sizing it too small is
+permanent; the node subnet size caps pods per node.</li>
+</ul>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">the MTU check that resolves the &#x27;large responses hang&#x27; incident</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">oc get network.operator cluster -o jsonpath=&#x27;{.spec.defaultNetwork.ovnKubernetesConfig.mtu}&#x27;</span></div><div class="tl"><span class="to">1400</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc debug node/worker-01 -- chroot /host ip link show br-ex | grep mtu</span></div><div class="tl"><span class="to">3: br-ex: &lt;BROADCAST,MULTICAST,UP&gt; mtu 1500</span></div><div class="tl"><span class="tc">1500 - 100 (Geneve) = 1400. Correct here. If the underlay is 1450, it is not.</span></div><div class="tl"><span class="tc">prove it from inside a pod — DF set, so it fails rather than fragmenting:</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc rsh deploy/app ping -M do -s 1372 10.128.4.9</span></div><div class="tl"><span class="to">PING 10.128.4.9 1372(1400) bytes of data.</span></div><div class="tl"><span class="to">1380 bytes from 10.128.4.9: icmp_seq=1 ttl=64 time=0.31 ms</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc rsh deploy/app ping -M do -s 1400 10.128.4.9</span></div><div class="tl"><span class="to">ping: local error: message too long, mtu=1400   &lt;- the ceiling, confirmed</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">03</span>
+    <span class="rc-main"><span class="rc-name">Services, EndpointSlices and DNS</span>
+      <span class="rc-desc">Where traffic is actually lost between a Service and a Pod.</span>
+      <span class="rc-tags"><span class="tg">Service</span><span class="tg">EndpointSlice</span><span class="tg">readiness</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>A Service is a stable name and VIP; the real destination list is the
+<code>EndpointSlice</code>. An endpoint appears there only when the pod is <strong>Ready</strong>.
+So the single most common "the service returns 503" cause is not networking at all — it is a
+readiness probe failing, which silently empties the slice.</p>
+<p>Cluster DNS is CoreDNS, and names resolve as
+<code>&lt;service&gt;.&lt;namespace&gt;.svc.cluster.local</code>. Short names work inside the
+same namespace through the search path — which is also why a pod resolving
+<code>db</code> in the wrong namespace gets a confusing answer rather than an error.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">service returning 503 — three commands, in this order</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">oc get endpointslice -l kubernetes.io/service-name=api</span></div><div class="tl"><span class="to">NAME        ADDRESSTYPE   PORTS   ENDPOINTS   AGE</span></div><div class="tl"><span class="to">api-x7k2n   IPv4          8080    &lt;unset&gt;     4d</span></div><div class="tl"><span class="tc">empty ENDPOINTS = no Ready pod. This is a probe problem, not a network problem.</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc get pods -l app=api -o wide</span></div><div class="tl"><span class="to">NAME          READY   STATUS    RESTARTS</span></div><div class="tl"><span class="to">api-7d9f-x2   0/1     Running   0          &lt;- Running but not Ready</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc describe pod api-7d9f-x2 | grep -A3 Readiness</span></div><div class="tl"><span class="to">Readiness probe failed: HTTP probe failed with statuscode: 500</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">04</span>
+    <span class="rc-main"><span class="rc-name">NetworkPolicy — default-allow is the real default</span>
+      <span class="rc-desc">Nothing is isolated until one policy selects a pod, and then everything is.</span>
+      <span class="rc-tags"><span class="tg">NetworkPolicy</span><span class="tg">isolation</span><span class="tg">default-deny</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>An empty cluster allows every pod to reach every other pod, in every namespace. NetworkPolicy
+is <strong>additive allow-listing with an unusual trigger</strong>: a pod is unrestricted until
+at least one policy selects it, and from that moment only traffic explicitly allowed by some
+policy reaches it.</p>
+<p>That produces the classic self-inflicted outage. You add one policy allowing frontend →
+backend. The backend is now isolated, so its <em>egress to the database</em> — never mentioned
+in the policy — is unaffected (egress is a separate policyType) but the <em>monitoring
+scrape</em> from the openshift-monitoring namespace is now blocked, and your dashboards go
+blank without a single error.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">a default-deny baseline that does not break the platform</span></div><div class="tb-body"><div class="tl"><span class="tc">1. deny everything into this namespace</span></div><div class="tl"><span class="to">kind: NetworkPolicy</span></div><div class="tl"><span class="to">spec: { podSelector: {}, policyTypes: [Ingress] }</span></div><div class="tl"><span class="tc">2. re-allow same-namespace traffic</span></div><div class="tl"><span class="to">spec: { podSelector: {}, ingress: [{ from: [{ podSelector: {} }] }] }</span></div><div class="tl"><span class="tc">3. re-allow the router, or every Route in this namespace 503s</span></div><div class="tl"><span class="to">  from: [{ namespaceSelector: { matchLabels:</span></div><div class="tl"><span class="to">    { policy-group.network.openshift.io/ingress: &quot;&quot; } } }]</span></div><div class="tl"><span class="tc">4. re-allow monitoring, or the namespace disappears from Prometheus</span></div><div class="tl"><span class="to">  from: [{ namespaceSelector: { matchLabels:</span></div><div class="tl"><span class="to">    { network.openshift.io/policy-group: monitoring } } }]</span></div></div></div><div class="note warn"><b>Test the policy against the platform, not just your app</b><p>Router, monitoring, and the DNS namespace all need explicit allowances once a namespace is isolated. The failure is silent in each case: a 503 from the router, a gap in Prometheus, and a DNS timeout that looks like a slow dependency.</p></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">Advanced</div><h2>STORAGE</h2><p class="lede">Binding modes, access modes, the CSI chain, and the two settings you cannot change after creation.</p><div class="dg-scroll"><svg class="dg" viewBox="0 0 1000 518" role="img" aria-label="Every PVC failure is one of these arrows not completing — and each arrow logs in a different place"><line class="dg-spine" x1="160" y1="14" x2="160" y2="504.0"/><text class="dg-layer" x="146" y="41.0">WORKLOAD</text><circle class="dg-tick" cx="160" cy="37.0" r="3"/><rect x="168.0" y="14" width="401.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="368.5" y="41.0" fill="#066c77">Pod</text><rect x="579.0" y="14" width="401.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="779.5" y="41.0" fill="#066c77">StatefulSet volumeClaimTemplate</text><text class="dg-layer" x="146" y="115.0">CLAIM</text><circle class="dg-tick" cx="160" cy="111.0" r="3"/><rect x="168.0" y="88" width="812.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="574.0" y="115.0" fill="#8a5806">PersistentVolumeClaim</text><text class="dg-layer" x="146" y="189.0">POLICY</text><circle class="dg-tick" cx="160" cy="185.0" r="3"/><rect x="168.0" y="162" width="195.5" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="265.8" y="189.0" fill="#a32b28">StorageClass</text><rect x="373.5" y="162" width="195.5" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="471.2" y="189.0" fill="#a32b28">reclaimPolicy</text><rect x="579.0" y="162" width="195.5" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="676.8" y="189.0" fill="#a32b28">volumeBindingMode</text><rect x="784.5" y="162" width="195.5" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="882.2" y="189.0" fill="#a32b28">allowVolumeExpansion</text><text class="dg-layer" x="146" y="263.0">CONTROL</text><circle class="dg-tick" cx="160" cy="259.0" r="3"/><rect x="168.0" y="236" width="264.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="300.0" y="263.0" fill="#5b21b6">external-provisioner</text><rect x="442.0" y="236" width="264.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="574.0" y="263.0" fill="#5b21b6">external-attacher</text><rect x="716.0" y="236" width="264.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="848.0" y="263.0" fill="#5b21b6">external-resizer</text><text class="dg-layer" x="146" y="337.0">DRIVER</text><circle class="dg-tick" cx="160" cy="333.0" r="3"/><rect x="168.0" y="310" width="401.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="368.5" y="337.0" fill="#3f6f0c">CSI driver (controller)</text><rect x="579.0" y="310" width="401.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="779.5" y="337.0" fill="#3f6f0c">CSI driver (node)</text><text class="dg-layer" x="146" y="411.0">VOLUME</text><circle class="dg-tick" cx="160" cy="407.0" r="3"/><rect x="168.0" y="384" width="812.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="574.0" y="411.0" fill="#6b6860">PersistentVolume</text><text class="dg-layer" x="146" y="485.0">BACKEND</text><circle class="dg-tick" cx="160" cy="481.0" r="3"/><rect x="168.0" y="458" width="812.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="574.0" y="485.0" fill="#6b6860">Ceph / NetApp / EBS / vSphere</text></svg></div><p class="dg-cap">A PVC that never binds is one of these arrows not completing. Which arrow tells you which log to open.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">05</span>
+    <span class="rc-main"><span class="rc-name">Storage classes and the binding mode that causes stuck pods</span>
+      <span class="rc-desc">WaitForFirstConsumer exists for a reason, and Immediate will bite you in a multi-AZ cluster.</span>
+      <span class="rc-tags"><span class="tg">StorageClass</span><span class="tg">topology</span><span class="tg">binding</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>A <code>StorageClass</code> is the policy: which provisioner, what parameters, what happens
+to the volume when the claim is deleted, and — critically — <strong>when</strong> the volume
+gets created.</p>
+<table class="tbl"><thead><tr><th>volumeBindingMode</th><th>Volume is created</th><th>Failure mode</th></tr></thead>
+<tbody>
+<tr><td><code>Immediate</code></td><td>As soon as the PVC exists</td><td>Volume lands in AZ-a, pod is later scheduled to AZ-b, pod is Pending forever</td></tr>
+<tr><td><code>WaitForFirstConsumer</code></td><td>Once a pod using it is scheduled</td><td>PVC sits Pending until a pod appears — which looks broken but is correct</td></tr>
+</tbody></table>
+<p>On any cluster whose nodes span failure domains, <code>WaitForFirstConsumer</code> is the
+right default and <code>Immediate</code> is a latent scheduling bug.</p>
+<p>Two other fields decide whether you can recover later, and neither can be changed on an
+existing volume: <code>reclaimPolicy</code> (<code>Delete</code> destroys the backend volume
+when the PVC goes; <code>Retain</code> keeps it) and <code>allowVolumeExpansion</code>
+(false means you can never grow it without a migration).</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">the Pending PVC decision tree</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">oc get pvc data-0</span></div><div class="tl"><span class="to">NAME     STATUS    VOLUME   CAPACITY   STORAGECLASS   AGE</span></div><div class="tl"><span class="to">data-0   Pending                       gp3-csi        11m</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc describe pvc data-0 | tail -5</span></div><div class="tl"><span class="to">Normal  WaitForFirstConsumer  waiting for first consumer to be created</span></div><div class="tl"><span class="tc">^ correct and healthy. The pod has not been scheduled yet — look at the POD.</span></div><div class="tl"><span class="to">Warning  ProvisioningFailed   failed to provision volume: rpc error:</span></div><div class="tl"><span class="to">  code = ResourceExhausted desc = volume quota exceeded</span></div><div class="tl"><span class="tc">^ a real failure, and the message comes from the BACKEND, not Kubernetes</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">06</span>
+    <span class="rc-main"><span class="rc-name">Access modes, and the one that does not mean what people think</span>
+      <span class="rc-desc">RWO is per-node, not per-pod — and that changes how rolling updates behave.</span>
+      <span class="rc-tags"><span class="tg">RWO</span><span class="tg">RWX</span><span class="tg">ReadWriteOncePod</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Access modes are a contract the <em>driver</em> enforces, not a lock Kubernetes applies:</p>
+<ul>
+<li><strong>ReadWriteOnce (RWO)</strong> — mountable read-write by <strong>one node</strong>.
+Several pods on that same node can share it. This surprises people in both directions: they
+expect exclusivity and do not get it, or they expect to scale to 2 replicas and the second pod
+hangs in <code>ContainerCreating</code> because it landed elsewhere.</li>
+<li><strong>ReadWriteOncePod (RWOP)</strong> — genuinely one pod. This is the one people
+usually meant.</li>
+<li><strong>ReadWriteMany (RWX)</strong> — many nodes at once. Needs a filesystem that supports
+it (CephFS, NFS, Azure Files). Most block drivers cannot do it at all.</li>
+<li><strong>ReadOnlyMany (ROX)</strong> — many nodes, read-only.</li>
+</ul>
+<h3>Why your Deployment rollout hangs on RWO</h3>
+<p>A <code>Deployment</code> with the default <code>RollingUpdate</code> strategy starts the new
+pod <em>before</em> terminating the old one. With an RWO volume and the new pod on a different
+node, the new pod cannot attach until the old one releases — and the old one will not terminate
+until the new one is ready. It deadlocks until the progress deadline expires.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">recognising the RWO rollout deadlock</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">oc get pods -l app=db</span></div><div class="tl"><span class="to">db-6f8-old   1/1   Running             0    9d</span></div><div class="tl"><span class="to">db-7a1-new   0/1   ContainerCreating   0    6m</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc describe pod db-7a1-new | tail -3</span></div><div class="tl"><span class="to">Warning  FailedAttachVolume  Multi-Attach error for volume &quot;pvc-3c80d&quot;:</span></div><div class="tl"><span class="to">  Volume is already exclusively attached to one node and can&#x27;t be attached to another</span></div><div class="tl"><span class="tc">Fix: strategy Recreate for single-writer workloads, or a StatefulSet.</span></div><div class="tl"><span class="to">spec: { strategy: { type: Recreate } }</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">07</span>
+    <span class="rc-main"><span class="rc-name">CSI — where a storage failure actually logs</span>
+      <span class="rc-desc">Three controllers, two places, and none of them is the kubelet.</span>
+      <span class="rc-tags"><span class="tg">CSI</span><span class="tg">attacher</span><span class="tg">provisioner</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>CSI splits the work across sidecars, and each one fails in its own log. Knowing which is
+which turns a storage incident from an afternoon into ten minutes:</p>
+<table class="tbl"><thead><tr><th>Stage</th><th>Component</th><th>Runs on</th><th>Symptom when it fails</th></tr></thead>
+<tbody>
+<tr><td>Create volume</td><td><code>external-provisioner</code></td><td>Controller pod</td><td>PVC stays Pending, <code>ProvisioningFailed</code> event</td></tr>
+<tr><td>Attach to node</td><td><code>external-attacher</code></td><td>Controller pod</td><td>Pod stuck ContainerCreating, <code>FailedAttachVolume</code></td></tr>
+<tr><td>Mount into pod</td><td>CSI node plugin</td><td>DaemonSet on the node</td><td><code>FailedMount</code>, timeout after 2 minutes</td></tr>
+<tr><td>Grow volume</td><td><code>external-resizer</code></td><td>Controller pod</td><td>PVC capacity never changes, no error on the PVC</td></tr>
+</tbody></table>
+<p>The pattern to internalise: <strong>provisioning and attaching are cluster-level, mounting is
+node-level.</strong> A FailedMount is a node problem — go to that node. A ProvisioningFailed is
+a backend problem — go to the controller and then to the storage system itself.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">following a stuck volume through the layers</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">oc get volumeattachment | grep pvc-3c80d</span></div><div class="tl"><span class="to">csi-9f2...  ebs.csi.aws.com  pvc-3c80d  worker-04  false</span></div><div class="tl"><span class="tc">ATTACHED=false and it has been minutes -&gt; attacher, not the node</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc logs -n openshift-cluster-csi-drivers deploy/aws-ebs-csi-driver-controller \</span></div><div class="tl"><span class="to">  -c csi-attacher --tail=40 | grep pvc-3c80d</span></div><div class="tl"><span class="tc">if attachment IS true but the pod still will not start, it is the node plugin:</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc logs -n openshift-cluster-csi-drivers ds/aws-ebs-csi-driver-node \</span></div><div class="tl"><span class="to">  --field-selector spec.nodeName=worker-04 -c csi-driver --tail=40</span></div></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">08</span>
+    <span class="rc-main"><span class="rc-name">Expanding, migrating and the reclaim policy you set once</span>
+      <span class="rc-desc">Growing a volume is online and easy; shrinking is impossible; Delete is forever.</span>
+      <span class="rc-tags"><span class="tg">expansion</span><span class="tg">reclaimPolicy</span><span class="tg">migration</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p><strong>Expansion</strong> works if <code>allowVolumeExpansion: true</code> was on the
+StorageClass at creation time. Edit the PVC's requested size and the resizer grows the backend
+volume, then the filesystem — online, for most drivers. Some need a pod restart to finish the
+filesystem step, which shows as capacity updated on the PV but not inside the container.</p>
+<p><strong>Shrinking is not supported.</strong> Not by Kubernetes, not by any CSI driver. The
+only route is create-new, copy, swap.</p>
+<p><strong>reclaimPolicy</strong> is the one that ends careers. With <code>Delete</code>, removing
+a PVC destroys the backing volume immediately and irreversibly — including when the PVC is
+removed as a side effect of deleting a namespace or a Helm release. With <code>Retain</code>,
+the PV survives in <code>Released</code> state holding the data, and you can rebind it.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">rebinding a Retained volume to a new claim</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">oc get pv | grep Released</span></div><div class="tl"><span class="to">pvc-3c80d   50Gi   RWO   Retain   Released   prod/data-0   gp3-csi</span></div><div class="tl"><span class="tc">claimRef still points at the deleted PVC — that is what blocks rebinding</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc patch pv pvc-3c80d --type=json \</span></div><div class="tl"><span class="to">  -p &#x27;[{&quot;op&quot;:&quot;remove&quot;,&quot;path&quot;:&quot;/spec/claimRef&quot;}]&#x27;</span></div><div class="tl"><span class="tc">PV goes Available; a new PVC with matching size and class will bind to it</span></div></div></div><div class="note bad"><b>Check reclaimPolicy before you delete a namespace</b><p><code>oc delete project</code> deletes the PVCs in it. On a Delete-policy class that is an irreversible data loss with no confirmation prompt and no undo. For any class holding real data, set <code>Retain</code> — the cost is orphaned volumes you clean up deliberately, which is a much better problem.</p></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">In practice</div><h2>ADVANCED TROUBLESHOOTING</h2>
+<p>Networking and storage failures both present as "the pod is not working", and both have a
+layered path where the failing layer is rarely the one the symptom points at. Walk the path.</p>
+<h3>A request that does not arrive</h3>
+<div class="tw"><table class="tbl "><thead><tr><th>Test</th><th>Command</th><th>If this works, the fault is above</th></tr></thead><tbody><tr><td>Is the Route admitted?</td><td><code>oc get route app -o yaml | grep -A4 conditions</code></td><td>DNS or the load balancer</td></tr><tr><td>Does the router know about it?</td><td><code>oc -n openshift-ingress rsh deploy/router-default cat haproxy.config | grep app</code></td><td>The Route object</td></tr><tr><td>Does the Service have endpoints?</td><td><code>oc get endpointslice -l kubernetes.io/service-name=app</code></td><td>The router</td></tr><tr><td>Is the pod Ready?</td><td><code>oc get pod -l app=app</code></td><td>The Service selector</td></tr><tr><td>Does the pod answer directly?</td><td><code>oc rsh deploy/app curl -s localhost:8080/health</code></td><td>The readiness probe</td></tr><tr><td>Does another pod reach it?</td><td><code>oc run t --rm -it --image=curlimages/curl -- curl app.ns.svc:8080</code></td><td>NetworkPolicy or DNS</td></tr></tbody></table></div>
+<h3>A volume that does not mount</h3>
+<div class="tw"><table class="tbl "><thead><tr><th>Event on the pod</th><th>Layer</th><th>Go to</th></tr></thead><tbody><tr><td><code>WaitForFirstConsumer</code></td><td>Normal — not a failure</td><td>The pod's scheduling, not the PVC</td></tr><tr><td><code>ProvisioningFailed</code></td><td>Backend refused to create it</td><td>external-provisioner logs, then the storage system</td></tr><tr><td><code>FailedAttachVolume</code> / Multi-Attach</td><td>Still attached elsewhere</td><td><code>oc get volumeattachment</code>; likely an RWO rollout</td></tr><tr><td><code>FailedMount</code> after ~2 min</td><td>Node-level mount</td><td>CSI node DaemonSet on that node</td></tr><tr><td>Mounted but read-only</td><td>SCC / fsGroup / filesystem</td><td>The pod's securityContext and the image's ownership</td></tr></tbody></table></div><div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">the one-shot triage script</span></div><div class="tb-body"><div class="tl"><span class="tc">everything unhealthy, in one pass</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc get co | grep -v &#x27;True.*False.*False&#x27;</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc get route -A -o json | jq -r &#x27;.items[] | select(.status.ingress[]?.conditions[]?</span></div><div class="tl"><span class="to">  | select(.type==&quot;Admitted&quot; and .status!=&quot;True&quot;)) | &quot;\(.metadata.namespace)/\(.metadata.name)&quot;&#x27;</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc get pvc -A --field-selector=status.phase=Pending</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc get volumeattachment -o json | jq -r &#x27;.items[]</span></div><div class="tl"><span class="to">  | select(.status.attached!=true) | .metadata.name&#x27;</span></div><div class="tl"><span class="tp">$</span> <span class="tx">oc get endpointslice -A -o json | jq -r &#x27;.items[]</span></div><div class="tl"><span class="to">  | select((.endpoints|length)==0) | &quot;\(.metadata.namespace)/\(.metadata.name)&quot;&#x27;</span></div></div></div><div class="note good"><b>The MTU test first, when it is &#x27;intermittent&#x27;</b><p>If the report is 'some requests work, big ones hang', 'it works from inside the cluster but not from outside', or 'TLS connects then stalls' — check MTU before anything else. It costs one <code>ping -M do</code> and it is the answer far more often than its reputation suggests.</p></div></div></section><section><div class="wrap"><div class="sec-tag">Reference</div><h2>CHEATSHEET</h2><div class="tw"><table class="tbl mono"><thead><tr><th>Command</th><th>What it answers</th></tr></thead><tbody><tr><td><code>oc get route -A</code></td><td>Every route and the host it claims</td></tr><tr><td><code>oc get route r -o yaml | grep -A5 conditions</code></td><td>Whether the router admitted it — a 503's real cause</td></tr><tr><td><code>oc -n openshift-ingress get pods -o wide</code></td><td>Where the routers run</td></tr><tr><td><code>oc -n openshift-ingress rsh deploy/router-default cat haproxy.config</code></td><td>What the router actually configured</td></tr><tr><td><code>oc get endpointslice -l kubernetes.io/service-name=&lt;s&gt;</code></td><td>Whether a Service has any Ready backend</td></tr><tr><td><code>oc get networkpolicy -A</code></td><td>Which namespaces are isolated</td></tr><tr><td><code>oc get network.operator cluster -o yaml</code></td><td>CNI, cluster CIDR and MTU</td></tr><tr><td><code>oc rsh &lt;pod&gt; ping -M do -s 1372 &lt;ip&gt;</code></td><td>The real path MTU</td></tr><tr><td><code>oc get pvc -A --field-selector=status.phase=Pending</code></td><td>Every stuck claim in the cluster</td></tr><tr><td><code>oc get sc</code></td><td>Binding mode, reclaim policy, expansion — before you commit</td></tr><tr><td><code>oc get volumeattachment</code></td><td>Whether a volume is attached and to which node</td></tr><tr><td><code>oc describe pvc &lt;c&gt;</code></td><td>The provisioner's own error message</td></tr><tr><td><code>oc get pv | grep Released</code></td><td>Retained volumes waiting to be rebound</td></tr><tr><td><code>oc adm must-gather -- /usr/bin/gather_network_logs</code></td><td>The supported network dump</td></tr></tbody></table></div></div></section>
+
+<section style="border-bottom:0"><div class="wrap"><div class="pager"><a href="../OPENSHIFT-ARCHITECTURE/openshift-architecture.html">← Previous<b>OpenShift Architecture &amp; Fundamentals</b></a><a class="next" href="../OPENSHIFT-OPERATIONS/openshift-operations.html">Next →<b>OpenShift Operations</b></a></div></div></section>
+
+<footer>
+  <div class="f-in">
+    <div class="f-top">
+      <div>
+        <a class="f-logo" href="../../index.html">PLATFORM OPS</a>
+        <p class="f-tag">Field notes on Kubernetes, SRE, and Platform Engineering —
+          written from production, not slideware.</p>
+      </div>
+      <div class="f-cols">
+        <div><div class="f-col-t">Newsletter</div>
+          <a href="../../index.html#issues">Latest Issues</a>
+          <a href="../../index.html#subscribe">Subscribe</a>
+          <a href="../../feed.xml">RSS Feed</a></div>
+        <div><div class="f-col-t">Explore</div>
+          <a href="../../categories/index.html">All Categories</a>
+          <a href="../../categories/foundation/index.html">Foundation Hub</a>
+          <a href="../../index.html#topics">Knowledge Map</a></div>
+        <div><div class="f-col-t">Connect</div>
+          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="../../index.html#authors">About the Author</a>
+          <a href="#">Back to Top ↑</a></div>
+      </div>
+    </div>
+    <div class="f-bot">
+      <div>© 2026 Vishal Abhinav · Platform Ops — code MIT,
+        <a href="../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+      <div>Built for engineers, by an engineer.</div>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('tt').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});
+document.addEventListener('click',function(e){
+  var h=e.target.closest('.rc-head'); if(!h) return;
+  var c=h.parentElement, open=c.classList.contains('open');
+  c.classList.toggle('open',!open);
+  h.setAttribute('aria-expanded', !open?'true':'false');
+});
+</script>
+</body>
+</html>

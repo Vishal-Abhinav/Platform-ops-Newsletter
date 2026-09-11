@@ -51,7 +51,7 @@ say "topic pages"
 python3 tools/build_foundation.py fnd_a fnd_b
 
 say "OpenShift deep-dives"
-python3 tools/build_openshift.py ocp_a
+python3 tools/build_openshift.py ocp_a ocp_b ocp_c
 
 say "command references"
 python3 tools/build_commands.py

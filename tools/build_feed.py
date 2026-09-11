@@ -19,6 +19,18 @@ from siteconf import BASE           # canonical origin, one source of truth
 # The five September issues went out in the same month; they are staggered by
 # issue number so readers order them the way the archive does.
 ISSUES = [
+    (60, "OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html",
+     "OpenShift Operations",
+     "Monitoring that is half switched off by default, LogQL that returns before it times "
+     "out, the four security gates and which one refused you, and the upgrade that stops on "
+     "one PodDisruptionBudget — with the pre-upgrade checks that prevent the bad ones.",
+     datetime(2026, 9, 11, 11, 0, tzinfo=timezone.utc)),
+    (59, "OpenShift/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html",
+     "OpenShift Networking & Storage",
+     "Routes and the four TLS modes, OVN-Kubernetes and the MTU fault everybody "
+     "misdiagnoses, NetworkPolicy isolation that silently blinds monitoring, storage "
+     "binding and access modes, and the CSI chain where each stage fails in a different log.",
+     datetime(2026, 9, 11, 10, 0, tzinfo=timezone.utc)),
     (58, "OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html",
      "OpenShift Architecture & Fundamentals",
      "What the distribution adds on top of Kubernetes — the Cluster Version Operator "

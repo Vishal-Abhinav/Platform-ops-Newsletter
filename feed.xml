@@ -9,13 +9,29 @@
     <language>en</language>
     <managingEditor>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</managingEditor>
     <webMaster>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</webMaster>
-    <lastBuildDate>Fri, 11 Sep 2026 09:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 11 Sep 2026 11:00:00 +0000</lastBuildDate>
     <ttl>1440</ttl>
     <image>
       <url>https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/home.png</url>
       <title>Platform Ops — Tech with Vishal Abhinav</title>
       <link>https://platform-ops-blog.vishal-abhinav.workers.dev/</link>
     </image>
+    <item>
+      <title>#060 — OpenShift Operations</title>
+      <link>https://platform-ops-blog.vishal-abhinav.workers.dev/OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html</link>
+      <guid isPermaLink="true">https://platform-ops-blog.vishal-abhinav.workers.dev/OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html</guid>
+      <pubDate>Fri, 11 Sep 2026 11:00:00 +0000</pubDate>
+      <description>Monitoring that is half switched off by default, LogQL that returns before it times out, the four security gates and which one refused you, and the upgrade that stops on one PodDisruptionBudget — with the pre-upgrade checks that prevent the bad ones.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#059 — OpenShift Networking &amp; Storage</title>
+      <link>https://platform-ops-blog.vishal-abhinav.workers.dev/OpenShift/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html</link>
+      <guid isPermaLink="true">https://platform-ops-blog.vishal-abhinav.workers.dev/OpenShift/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html</guid>
+      <pubDate>Fri, 11 Sep 2026 10:00:00 +0000</pubDate>
+      <description>Routes and the four TLS modes, OVN-Kubernetes and the MTU fault everybody misdiagnoses, NetworkPolicy isolation that silently blinds monitoring, storage binding and access modes, and the CSI chain where each stage fails in a different log.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
     <item>
       <title>#058 — OpenShift Architecture &amp; Fundamentals</title>
       <link>https://platform-ops-blog.vishal-abhinav.workers.dev/OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html</link>

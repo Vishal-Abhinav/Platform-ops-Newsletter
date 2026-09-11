@@ -31,6 +31,8 @@ CLX = "Commands/LINUX-COMMANDS/linux-commands.html"
 CK8 = "Commands/KUBERNETES-COMMANDS/kubernetes-commands.html"
 CDK = "Commands/DOCKER-COMMANDS/docker-commands.html"
 OCA = "OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html"
+OCN = "OpenShift/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html"
+OCO = "OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html"
 
 # pillar -> [ (category, icon, [ (topic, status, href|None), ... ]) ]
 PILLARS = [
@@ -138,11 +140,11 @@ PILLARS = [
    ("Multi-Cluster Kubernetes","-",None),("Kubernetes Disaster Recovery","-",None)]),
  ("OpenShift", "🔴", [
    ("OpenShift Fundamentals","L",OCA),("OpenShift Architecture","L",OCA),
-   ("Projects","L",OCA),("Routes","P",None),("Operators","L",OCA),("SCC","L",OCA),
-   ("OpenShift Networking","-",None),("OpenShift Storage","-",None),
-   ("OpenShift Monitoring","-",None),("OpenShift Logging","-",None),
-   ("OpenShift Security","-",None),("OpenShift Troubleshooting","L",K8E),
-   ("OpenShift Upgrades","-",None)]),
+   ("Projects","L",OCA),("Routes","L",OCN),("Operators","L",OCA),("SCC","L",OCA),
+   ("OpenShift Networking","L",OCN),("OpenShift Storage","L",OCN),
+   ("OpenShift Monitoring","L",OCO),("OpenShift Logging","L",OCO),
+   ("OpenShift Security","L",OCO),("OpenShift Troubleshooting","L",OCA),
+   ("OpenShift Upgrades","L",OCO)]),
  ("Service Mesh", "🕸️", [
    ("Service Mesh","P",None),("Istio","P",None),("Envoy","-",None),("Linkerd","-",None),
    ("Traffic Management","-",None),("mTLS","-",None),("Service-to-Service Security","-",None),
