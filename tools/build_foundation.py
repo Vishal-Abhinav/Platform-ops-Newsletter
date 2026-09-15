@@ -75,7 +75,8 @@ for i, (name, slug, external) in enumerate(ORDER):
         slug=slug, title=t["title"], tagline=t["tagline"], eyebrow=t["eyebrow"],
         crumbs=[("Home", "../../index.html"), ("Categories", "../../categories/index.html"),
                 ("Foundation", "../../categories/foundation/index.html"), (t["title"], None)],
-        meta=t["meta"], sections=t["sections"], pager=pager)
+        meta=t["meta"], sections=t["sections"], pager=pager,
+        canon=f"Foundation/{slug.upper()}/{slug}.html")
 
     d = OUT / slug.upper()
     d.mkdir(exist_ok=True)

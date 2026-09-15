@@ -281,7 +281,8 @@ html_out = render(
     sections=SECTIONS,
     pager=PAGER,
     up="../",
-    css="topic.css")
+    css="topic.css",
+    canon="colophon/")
 
 (OUT / "index.html").write_text(html_out, encoding="utf-8")
 print(f"  {len(html_out) // 1024:3d} KB  colophon/index.html  "

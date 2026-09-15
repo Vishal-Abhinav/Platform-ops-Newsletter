@@ -389,13 +389,27 @@ document.addEventListener('click',function(e){
 
 
 def render(*, slug, title, tagline, eyebrow, crumbs, meta, sections, pager, up="../../",
-           css=None):
+           css=None, canon=None):
     # The stylesheet used to be hardcoded to Foundation's copy. That still RESOLVED
     # from other sections — so verify.py passed — but it meant every deep-dive
     # outside Foundation silently depended on Foundation existing, and its own
     # topic.css was written and never loaded. Pass the path that belongs to the
     # section; Foundation stays the default so nothing there changes.
     css = css or f"{up}Foundation/topic.css"
+
+    # Same trap the stylesheet had, and it survived that fix: the canonical and
+    # og:url were built as Foundation/<SLUG>/<slug>.html for EVERY page. A
+    # Foundation page happened to match, so nothing looked wrong — but all 3
+    # OpenShift pages, all 7 Kubernetes and Service Mesh pages and the colophon
+    # advertised a canonical that returns 404, which tells a search engine the
+    # real version of the page does not exist. Pass the page's own path; the
+    # Foundation shape stays the default so that builder is unchanged.
+    canon = canon or f"Foundation/{slug.upper()}/{slug}.html"
+    assert not canon.startswith(("/", "http")), (
+        f"render(canon=...) wants a site-relative path like "
+        f"'Kubernetes/FOO/foo.html', got {canon!r}")
+    canon_url = BASE + canon
+
     crumb = ""
     for i, (label, href) in enumerate(crumbs):
         if i:
@@ -412,12 +426,12 @@ def render(*, slug, title, tagline, eyebrow, crumbs, meta, sections, pager, up="
 <meta name="description" content="{esc(tagline)}">
 <meta name="author" content="Vishal Abhinav">
 <meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
-<link rel="canonical" href="{BASE}Foundation/{slug.upper()}/{slug}.html">
+<link rel="canonical" href="{canon_url}">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
 <meta property="og:title" content="{esc(title)} · Platform Ops">
 <meta property="og:description" content="{esc(tagline)}">
-<meta property="og:url" content="{BASE}Foundation/{slug.upper()}/{slug}.html">
+<meta property="og:url" content="{canon_url}">
 <meta property="og:image" content="{BASE}assets/og/home.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">

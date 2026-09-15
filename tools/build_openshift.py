@@ -74,7 +74,8 @@ for i, (name, slug, external) in enumerate(ORDER):
         crumbs=[("Home", "../../index.html"), ("Categories", "../../categories/index.html"),
                 ("OpenShift", "../../categories/openshift/index.html"), (t["title"], None)],
         meta=t["meta"], sections=t["sections"], pager=pager, up="../../",
-        css="../topic.css")     # OpenShift/topic.css, written above
+        css="../topic.css",     # OpenShift/topic.css, written above
+        canon=f'OpenShift/{t["slug"].upper()}/{t["slug"]}.html')
 
     d = OUT / t["slug"].upper()
     d.mkdir(parents=True, exist_ok=True)

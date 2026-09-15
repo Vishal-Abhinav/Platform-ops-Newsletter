@@ -91,7 +91,23 @@ def main():
         if p.errors or p.stack:
             fails.append(f"unbalanced   {rel}: {p.errors[:2]} unclosed={p.stack[:3]}")
 
-        # 3. required chrome
+        # 3. the canonical must point at THIS page
+        #
+        # Added after all 3 OpenShift pages, all 7 Kubernetes and Service Mesh
+        # pages and the colophon shipped with a canonical of
+        # Foundation/<SLUG>/<slug>.html — a URL that 404s — because
+        # content_page.render() built that path for every page regardless of
+        # where it was written. Nothing caught it: the links checker skips
+        # absolute URLs, and a Foundation page happens to match the pattern.
+        # A canonical pointing at a 404 tells a search engine the real version
+        # of the page does not exist, which is worse than having none at all.
+        m = re.search(r'<link rel="canonical" href="([^"]+)"', src)
+        if m:
+            want = BASE + (rel[:-len("index.html")] if rel.endswith("index.html") else rel)
+            if m.group(1) != want:
+                fails.append(f"canonical    {rel}: says {m.group(1)}, should be {want}")
+
+        # 4. required chrome
         for needle, label in (("var PO_GC=", "analytics loader"),
                               ('type="application/rss+xml"', "RSS link"),
                               ('name="copyright"', "copyright meta")):

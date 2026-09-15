@@ -75,7 +75,8 @@ for i, (name, slug, cat, cat_slug) in enumerate(ORDER):
         crumbs=[("Home", "../../index.html"), ("Categories", "../../categories/index.html"),
                 (cat, f"../../categories/{cat_slug}/index.html"), (t["title"], None)],
         meta=t["meta"], sections=t["sections"], pager=pager, up="../../",
-        css="../topic.css")
+        css="../topic.css",
+        canon=f'Kubernetes/{t["slug"].upper()}/{t["slug"]}.html')
 
     d = OUT / t["slug"].upper()
     d.mkdir(parents=True, exist_ok=True)
