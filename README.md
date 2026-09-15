@@ -18,7 +18,7 @@
 
 ---
 
-![Live Issues](https://img.shields.io/badge/Live%20Issues-14-e53935?style=for-the-badge&logo=gitbook&logoColor=white)
+![Live Issues](https://img.shields.io/badge/Live%20Issues-60-e53935?style=for-the-badge&logo=gitbook&logoColor=white)
 ![Glossary](https://img.shields.io/badge/Glossary-190%20Terms-f59e0b?style=for-the-badge)
 ![Stars](https://img.shields.io/github/stars/Vishal-Abhinav/Platform-ops-Newsletter?style=for-the-badge&logo=github&color=00c2d4)
 ![License](https://img.shields.io/badge/License-MIT-84cc16?style=for-the-badge)
