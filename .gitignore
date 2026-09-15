@@ -16,3 +16,11 @@ Thumbs.db
 # git filter-branch scratch. The whole repo deploys to Pages, so keep any
 # rewrite leftovers out of a commit.
 .git-rewrite/
+
+# Build caches for the two scripts that are NOT part of build.sh.
+# make_og_card.py needs the three webfonts; make_arch_svg.py needs Mermaid,
+# which is ~3 MB on its own. Both are inputs to a manual regeneration step,
+# not site content — and the whole repo deploys to Pages, so a committed
+# cache is also a public URL, the same mistake as the bytecode above.
+tools/.fontcache/
+tools/.mermaid/
