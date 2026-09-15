@@ -14,6 +14,7 @@ TOOLS = ROOT / "tools"
 
 import sys                                    # noqa: E402
 sys.path.insert(0, str(TOOLS))
+from siteconf import skip_page   # noqa: E402
 from taxonomy import PILLARS, cat_stats       # noqa: E402
 from hubs_spec import SPEC                    # noqa: E402
 
@@ -274,7 +275,7 @@ def depth_prefix(rel):
 
 added, already = 0, 0
 for f in sorted(ROOT.rglob("*.html")):
-    if ".git" in f.parts or "tools" in f.parts or f.name == "kit-template.html":
+    if ".git" in f.parts or "tools" in f.parts or skip_page(f.name):
         continue
     rel = str(f.relative_to(ROOT)).replace("\\", "/")
     s = f.read_text(encoding="utf-8")

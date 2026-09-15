@@ -20,8 +20,8 @@ import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
-from siteconf import BASE           # canonical origin, one source of truth
-SKIP_NAMES = {"kit-template.html"}
+from siteconf import BASE, skip_page   # canonical origin + the non-page filter
+# skip list now lives in siteconf
 
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source',
         'track', 'wbr', 'path', 'circle', 'rect', 'line', 'polygon', 'polyline', 'ellipse',
@@ -57,7 +57,7 @@ class Nesting(HTMLParser):
 def pages():
     """Published pages only — tools/ holds templates, not deployable pages."""
     for f in sorted(ROOT.rglob("*.html")):
-        if ".git" in f.parts or "tools" in f.parts or f.name in SKIP_NAMES:
+        if ".git" in f.parts or "tools" in f.parts or skip_page(f.name):
             continue
         yield f
 

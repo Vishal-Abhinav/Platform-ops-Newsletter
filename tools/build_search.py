@@ -15,6 +15,7 @@ import sys
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
 TOOLS = ROOT / "tools"
 sys.path.insert(0, str(TOOLS))
+from siteconf import skip_page   # noqa: E402
 
 from taxonomy import PILLARS          # noqa: E402
 from hubs_spec import SPEC            # noqa: E402
@@ -284,7 +285,7 @@ JS = """var PO_SEARCH = __INDEX__;
 
 added, already = 0, 0
 for f in sorted(ROOT.rglob("*.html")):
-    if ".git" in f.parts or "tools" in f.parts or f.name == "kit-template.html":
+    if ".git" in f.parts or "tools" in f.parts or skip_page(f.name):
         continue
     rel = str(f.relative_to(ROOT)).replace("\\", "/")
     s = f.read_text(encoding="utf-8")

@@ -37,12 +37,12 @@ import sys
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
 sys.path.insert(0, str(ROOT / "tools"))
 
-from siteconf import BASE                      # noqa: E402
+from siteconf import BASE, skip_page           # noqa: E402
 from build_feed import ISSUES                  # noqa: E402
 
 MARK_OPEN = "<!-- seo:jsonld -->"
 MARK_CLOSE = "<!-- /seo:jsonld -->"
-SKIP_NAMES = {"kit-template.html"}
+# skip list now lives in siteconf
 
 AUTHOR = {
     "@type": "Person",
@@ -191,7 +191,7 @@ def apply_meta(src, rel):
 count, with_article, with_crumbs = 0, 0, 0
 
 for f in sorted(ROOT.rglob("*.html")):
-    if "tools" in f.parts or f.name in SKIP_NAMES:
+    if "tools" in f.parts or skip_page(f.name):
         continue
     rel = f.relative_to(ROOT).as_posix()
     src = f.read_text(encoding="utf-8")
@@ -224,7 +224,7 @@ print(f"structured data -> {count} pages "
 # error makes a search engine discard the whole page's structured data.
 bad = []
 for f in sorted(ROOT.rglob("*.html")):
-    if "tools" in f.parts or f.name in SKIP_NAMES:
+    if "tools" in f.parts or skip_page(f.name):
         continue
     for m in re.finditer(r'<script type="application/ld\+json">(.*?)</script>',
                          f.read_text(encoding="utf-8"), re.S):

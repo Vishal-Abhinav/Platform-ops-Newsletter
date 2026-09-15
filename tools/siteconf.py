@@ -30,3 +30,43 @@ BASE = "https://platform-ops-blog.vishal-abhinav.workers.dev/"
 PAGES_ORIGIN = "https://vishal-abhinav.github.io/Platform-ops-Newsletter/"
 
 assert BASE.endswith("/"), "BASE must end with a slash — URLs are built by concatenation"
+
+# ── Google Search Console ───────────────────────────────────────────────────
+# Paste ONLY the token from the meta tag Search Console gives you — the value
+# of content=, not the whole <meta> element. Empty means nothing is emitted,
+# which is the right default: an empty verification tag on a live page is
+# noise, and a wrong one is a failed verification you have to debug.
+#
+#   Search Console → Add property → URL prefix → HTML tag
+#   <meta name="google-site-verification" content="PASTE_THIS_PART" />
+#
+# It goes on the homepage only, which is what a URL-prefix property at the
+# root is checked against. The tag has to be LIVE before you press Verify:
+# build, commit, push, confirm it is actually being served, then verify.
+GOOGLE_SITE_VERIFICATION = "s61EBMJcPkY5s2v1Bj8qxP2uiosu7H6G831MqA0WCWk"
+
+assert "<" not in GOOGLE_SITE_VERIFICATION, (
+    "GOOGLE_SITE_VERIFICATION wants just the token, not the whole <meta> tag")
+
+
+# ── files that are NOT pages ────────────────────────────────────────────────
+# Five build stages walk ROOT.rglob("*.html") — build_nav, build_search,
+# build_seo, build_canonical and verify — and each kept its own copy of this
+# list, two of them as a bare string comparison. That was survivable with one
+# entry. It stopped being survivable when Search Console's verification file
+# arrived: it is a one-line text file that happens to end in .html, and every
+# one of those stages would have injected a mega-menu, a search index and
+# JSON-LD into it, leaving Google a file that no longer says what it must say.
+#
+# Google's verification files are always google<hex>.html, so the pattern is
+# matched rather than the specific token — re-verifying later with a different
+# file needs no code change.
+import re as _re                                       # noqa: E402
+
+SKIP_NAMES = {"kit-template.html"}
+_GOOGLE_VERIFY = _re.compile(r"google[0-9a-f]{8,}\.html\Z")
+
+
+def skip_page(name):
+    """True for a file that ends in .html but is not one of our pages."""
+    return name in SKIP_NAMES or bool(_GOOGLE_VERIFY.match(name))

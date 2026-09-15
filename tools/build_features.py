@@ -13,6 +13,10 @@ TOOLS = ROOT / "tools"
 
 import pathlib
 import re
+import sys
+
+sys.path.insert(0, str(TOOLS))
+from siteconf import GOOGLE_SITE_VERIFICATION   # noqa: E402
 
 SRC = ROOT / 'index.html'
 src = SRC.read_text(encoding='utf-8')
@@ -33,7 +37,15 @@ HEAD = """
 <link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="feed.xml">
 """
 
-src = src.replace('</head>', HEAD + '</head>', 1)
+# Search Console ownership, homepage only — that is the URL a URL-prefix
+# property is checked against. Emitted only when a token is set, so the
+# default build ships no empty tag.
+verify_tag = ""
+if GOOGLE_SITE_VERIFICATION:
+    verify_tag = ('<meta name="google-site-verification" content="'
+                  f'{GOOGLE_SITE_VERIFICATION}">\n')
+
+src = src.replace('</head>', verify_tag + HEAD + '</head>', 1)
 
 # ── 2. CSS ───────────────────────────────────────────────────────────────────
 CSS = """

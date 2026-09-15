@@ -21,7 +21,7 @@ import sys
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
 sys.path.insert(0, str(ROOT / "tools"))
 
-from siteconf import BASE, PAGES_ORIGIN     # noqa: E402
+from siteconf import BASE, PAGES_ORIGIN, skip_page   # noqa: E402
 
 # Every origin this site has ever been served from. A page carrying any of
 # these gets moved to BASE.
@@ -30,11 +30,11 @@ KNOWN = [
     "https://platform-ops-blog.vishal-abhinav.workers.dev/",
 ]
 
-SKIP_NAMES = {"kit-template.html"}
+# skip list now lives in siteconf
 touched = []
 
 for f in sorted(ROOT.rglob("*.html")):
-    if "tools" in f.parts or f.name in SKIP_NAMES:
+    if "tools" in f.parts or skip_page(f.name):
         continue
     s = f.read_text(encoding="utf-8")
     out = s
@@ -49,7 +49,7 @@ for f in sorted(ROOT.rglob("*.html")):
 # reporting success over it.
 stale = []
 for f in sorted(ROOT.rglob("*.html")):
-    if "tools" in f.parts or f.name in SKIP_NAMES:
+    if "tools" in f.parts or skip_page(f.name):
         continue
     text = f.read_text(encoding="utf-8")
     for origin in KNOWN:

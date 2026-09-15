@@ -45,7 +45,7 @@
 
 This repository *is* the newsletter. Every issue is a self-contained HTML page served straight from GitHub Pages — no build step, no framework, no tracking. Fork it, read it offline, or lift a diagram for your own docs.
 
-**Currently in this repo:** 21 monthly issue pages, 5 Foundation reference deep-dives, 4 command references covering 362 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 90 pages in total.
+**Currently in this repo:** 21 monthly issue pages, 5 Foundation reference deep-dives, 4 command references covering 362 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 91 pages in total.
 
 ---
 
@@ -1240,7 +1240,7 @@ The homepage is a single hand-written HTML file with no framework behind it:
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
 | 🧭 **Mega-menu** | Cascading browse panel on every page — 11 pillars, 43 categories, with live counts |
 | ⌨️ **Command references** | Searchable, group-filtered command tables — 362 commands so far |
-| 🔍 **Global search** | Centred in the nav of all 90 pages — 1056 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
+| 🔍 **Global search** | Centred in the nav of all 91 pages — 1056 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
 | 🧩 **Category hubs** | Every one of the 43 categories has its own page with a generated architecture diagram and its full topic list |
 | 💼 **LinkedIn column** | The author section carries the latest posts beside the profile, driven by `tools/linkedin_posts.py` |
 | 🦶 **Shared footer** | One footer across every page, with links rebuilt per directory depth |
