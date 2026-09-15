@@ -64,7 +64,7 @@ of truth, so the numbers here and there can never disagree.
 | `04` | **Networking** | 1 | 1 | 4 | 26 | 31 |
 | `05` | **Cloud** | 1 | 0 | 4 | 13 | 17 |
 | `06` | **Delivery** | 6 | 12 | 22 | 42 | 76 |
-| `07` | **Kubernetes** | 3 | 58 | 0 | 0 | 58 |
+| `07` | **Kubernetes & OpenShift** | 3 | 58 | 0 | 0 | 58 |
 | `08` | **Reliability** | 7 | 27 | 25 | 64 | 116 |
 | `09` | **Security** | 2 | 0 | 18 | 28 | 46 |
 | `10` | **Data & Applications** | 4 | 1 | 12 | 47 | 60 |
@@ -335,7 +335,7 @@ Secrets, Namespaces and RBAC.
 </details>
 
 <details>
-<summary><b>07 · Kubernetes</b> — 3 categories · 58 live · 0 pipeline · 0 planned</summary>
+<summary><b>07 · Kubernetes & OpenShift</b> — 3 categories · 58 live · 0 pipeline · 0 planned</summary>
 
 **☸️ Kubernetes** — 35 live · 0 pipeline · 0 planned  
 ✅ [Kubernetes Fundamentals](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;

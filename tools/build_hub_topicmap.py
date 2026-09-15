@@ -31,13 +31,21 @@ SPLIT_TITLE = "OpenShift Fundamentals"   # group 25 — everything before this i
 _titles = [t for t, _ in GROUPS]
 SPLIT_AT = _titles.index(SPLIT_TITLE)
 
-ANCHOR = '<a class="req-pill" id="pill"'   # unique per hub page, right before the footer
+END_ANCHOR = '<a class="req-pill" id="pill"'   # unique per hub page, right before the footer
+TOPICS_ANCHOR = '<!-- topic-checklist-anchor -->'   # right after the "ALL n TOPICS" chips section
 
 HUBS = [
+    # Kubernetes: inserted right after the "ALL 35 TOPICS" chips (build_hubs.py
+    # moved that section up specifically so this lands next to it) — reader
+    # asked for this page specifically to be reorganized so the curated chips
+    # and the full checklist read together instead of being split by the
+    # sibling-pillar nav strip.
     ("kubernetes", ROOT / "categories" / "kubernetes" / "index.html",
-     "KUBERNETES", 0, SPLIT_AT),
+     "KUBERNETES", 0, SPLIT_AT, TOPICS_ANCHOR),
+    # OpenShift: left at the end, unchanged — only the Kubernetes page was
+    # asked to be reorganized so far.
     ("openshift", ROOT / "categories" / "openshift" / "index.html",
-     "OPENSHIFT", SPLIT_AT, len(GROUPS)),
+     "OPENSHIFT", SPLIT_AT, len(GROUPS), END_ANCHOR),
 ]
 
 
@@ -82,7 +90,7 @@ def section_for(name_upper, groups_slice, other_slug, other_label):
 def build():
     groups, _live, _pipe, _plan = classify()
 
-    for slug_name, path, upper, lo, hi in HUBS:
+    for slug_name, path, upper, lo, hi, anchor in HUBS:
         if not path.exists():
             print(f"  !! {path.relative_to(ROOT)} does not exist — run build_hubs.py first")
             continue
@@ -94,17 +102,23 @@ def build():
         marker_end = "<!-- complete-topic-list:end -->"
         block = f"\n{marker}\n{section}{marker_end}\n"
 
+        # Always strip any previously-inserted block first, then re-insert
+        # fresh at the current anchor. Replacing in place (instead of always
+        # re-anchoring) would leave the block stuck at whatever position an
+        # earlier run used, even after build_hubs.py moves the anchor —
+        # exactly the bug that would've kept this stuck at the bottom of the
+        # Kubernetes page after the reorder below.
         if marker in src:
-            # idempotent: replace the previously-inserted block, not append a second one
             start = src.index(marker)
             end = src.index(marker_end) + len(marker_end)
-            src = src[:start] + block.strip("\n") + src[end:]
-        else:
-            if ANCHOR not in src:
-                print(f"  !! anchor not found in {path.relative_to(ROOT)} — page structure changed")
-                continue
-            at = src.index(ANCHOR)
-            src = src[:at] + block + "\n" + src[at:]
+            src = src[:start] + src[end:]
+
+        if anchor not in src:
+            print(f"  !! anchor not found in {path.relative_to(ROOT)} — page structure changed")
+            continue
+        at = src.index(anchor)
+        at += len(anchor) if anchor == TOPICS_ANCHOR else 0
+        src = src[:at] + block + "\n" + src[at:]
 
         path.write_text(src, encoding="utf-8")
         n_items = hi - lo

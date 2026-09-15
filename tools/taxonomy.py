@@ -145,7 +145,7 @@ PILLARS = [
    ("Platform Automation","-",None),("Platform Security","-",None)]),
 ]),
 
-("Kubernetes", [
+("Kubernetes & OpenShift", [
  ("Kubernetes", "☸️", [
    ("Kubernetes Fundamentals","L",K8A),("Kubernetes Architecture","L",K8A),("Pods","L",K8A),
    ("Deployments","L",K8A),("ReplicaSets","L",KWL),("DaemonSets","L",KWL),

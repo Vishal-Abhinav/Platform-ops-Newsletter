@@ -24,6 +24,28 @@ import chrome                       # the one nav and the one footer
 KEY = {"L": "live", "P": "pipe", "-": "plan"}
 ZONE = {"live": "Live now", "pipe": "In pipeline", "plan": "Planned"}
 
+# Reader's 942-item Kubernetes+OpenShift checklist total, split the same way
+# build_hub_topicmap.py splits it (groups 1-24 Kubernetes, 25-46 OpenShift),
+# so categories/index.html's Kubernetes row can show that total too, not
+# just the small curated cat_stats() count. classify() is the same function
+# build_topicmap.py and build_hub_topicmap.py use — one status per item
+# site-wide, never a second opinion computed here.
+from build_topicmap import classify as _tm_classify, GROUPS as _TM_GROUPS  # noqa: E402
+_tm_titles = [t for t, _ in _TM_GROUPS]
+_tm_split = _tm_titles.index("OpenShift Fundamentals")
+_tm_groups, _, _, _ = _tm_classify()
+
+
+def _tm_totals(lo, hi):
+    rows = [r for _, grp in _tm_groups[lo:hi] for r in grp]
+    L = sum(1 for _, s, _ in rows if s == "L")
+    P = sum(1 for _, s, _ in rows if s == "P")
+    N = sum(1 for _, s, _ in rows if s == "-")
+    return L, P, N, L + P + N
+
+
+K8S_CHECKLIST_TOTALS = _tm_totals(0, _tm_split)   # (live, pipe, planned, total)
+
 # Which issue each live page is, for the article cards.
 PAGES = {
  "DevOps/K8/ARCHITECTURE/k8-architecture.html": ("#048", "Kubernetes Architecture Deep-Dive",
@@ -618,6 +640,38 @@ for idx, cname in enumerate(ORDER):
             "and you'll get an email the day one lands — that queue is also how the running "
             'order gets decided.</p></div></section>')
 
+    sec_topics = (
+        '<section id="topics-checklist"><div class="wrap">'
+        f'<h2>ALL {total} TOPICS</h2>'
+        '<div class="hint"><b>Click</b> any pipeline or planned topic to be told when it lands</div>'
+        f'{chips}'
+        '</div></section>\n<!-- topic-checklist-anchor -->'
+    )
+    sec_pillar = (
+        '<section style="border-bottom:0"><div class="wrap">'
+        f'<h2>{esc(info["pillar"].upper())} PILLAR</h2>'
+        '<p class="lede">The other categories sitting alongside this one.</p>'
+        f'<div class="siblings">{sib_html}</div>'
+        f'{pager}'
+        '</div></section>'
+    )
+
+    if cname == "Kubernetes":
+        # Reader-reported: the 492-item checklist this page also carries (via
+        # build_hub_topicmap.py, injected at <!-- topic-checklist-anchor -->)
+        # used to land after the sibling-pillar nav strip and the pager — the
+        # last thing before the footer, disconnected from the "ALL 35 TOPICS"
+        # section it's a superset of. Moved the topics chips (and the anchor
+        # that follows them) right after ARCHITECTURE instead, so everything
+        # about "what topics exist and their status" reads together, and the
+        # supporting material (published issues, the command-reference
+        # cross-link, sibling-category nav) comes after, not interleaved.
+        TOPICS_SECTION = sec_topics
+        OTHER_SECTIONS = f"{published_block}\n\n{companion_block(cname)}\n\n{sec_pillar}"
+    else:
+        TOPICS_SECTION = f"{published_block}\n\n{companion_block(cname)}\n\n{sec_topics}"
+        OTHER_SECTIONS = sec_pillar
+
     body = f"""
 <header class="hero"><div class="wrap">
   <div class="eyebrow">{esc(info['pillar'])} · Category {idx + 1:02d} of {len(ORDER)}</div>
@@ -650,22 +704,8 @@ for idx, cname in enumerate(ORDER):
   </div>
 </div></section>
 
-{published_block}
-
-{companion_block(cname)}
-
-<section><div class="wrap">
-  <h2>ALL {total} TOPICS</h2>
-  <div class="hint"><b>Click</b> any pipeline or planned topic to be told when it lands</div>
-  {chips}
-</div></section>
-
-<section style="border-bottom:0"><div class="wrap">
-  <h2>{esc(info['pillar'].upper())} PILLAR</h2>
-  <p class="lede">The other categories sitting alongside this one.</p>
-  <div class="siblings">{sib_html}</div>
-  {pager}
-</div></section>
+{TOPICS_SECTION}
+{OTHER_SECTIONS}
 """
 
     title = f"{cname} · Platform Ops · Vishal Abhinav"
@@ -688,9 +728,24 @@ for pname, cats in PILLARS:
     for cname, icon, topics in cats:
         cl, cp, cn = cat_stats(topics)
         pl += cl; pp += cp; pn += cn
+        # Kubernetes' curated cl/cp/cn only count topics already tied to a
+        # published issue. The reader's full 942-item checklist (folded onto
+        # categories/kubernetes/index.html by build_hub_topicmap.py) is a much
+        # bigger, separate count, so show it as a second line on this one
+        # category's card rather than conflating the two totals — same scope
+        # as every other Kubernetes-only change this round.
+        checklist_line = ""
+        if cname == "Kubernetes":
+            k_live, k_pipe, k_plan, k_total = K8S_CHECKLIST_TOTALS
+            checklist_line = (
+                f'<span class="c" style="display:block;margin-top:2px">'
+                f'{k_total} in the complete checklist — {k_live} live · '
+                f'{k_pipe} pipeline · {k_plan} planned</span>'
+            )
         rows += (f'<a class="sib" href="{SPEC[cname][0]}/index.html">'
                  f'<span class="n">{icon} {esc(cname)}</span>'
-                 f'<span class="c">{cl} live · {cp} pipe · {cn} planned</span></a>')
+                 f'<span class="c">{cl} live · {cp} pipe · {cn} planned</span>'
+                 f'{checklist_line}</a>')
     anchor = pname.lower().replace(" & ", "-").replace(" ", "-")
     groups += (f'<section id="{anchor}"><div class="wrap"><h2>{esc(pname.upper())}</h2>'
                f'<p class="lede">{len(cats)} categor{"y" if len(cats) == 1 else "ies"} · '
