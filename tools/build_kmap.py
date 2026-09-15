@@ -16,6 +16,7 @@ import sys
 
 sys.path.insert(0, str(TOOLS))
 from taxonomy import PILLARS, cat_stats  # noqa: E402
+from build_feed import ISSUES            # noqa: E402  the issue register
 
 SRC = ROOT / 'index.html'
 
@@ -26,20 +27,28 @@ def _slug(name):
 SLUG = {p: _slug(p) for p, _ in PILLARS}
 SLUG["Data & Applications"] = "data-and-apps"   # keeps the existing anchor
 
-# Published pages, in issue order — the tree's "published/" listing.
-PUBLISHED = [
-    ("DevOps/K8/Networking/k8-networking.html", "k8-networking.html", "#047"),
-    ("DevOps/K8/ARCHITECTURE/k8-architecture.html", "k8-architecture.html", "#048"),
-    ("DevOps/K8/ERROR/K8-error.html", "k8-error-runbook.html", "#049"),
-    ("DevOps/K8/STORAGE/k8-storage.html", "k8-storage.html", "#050"),
-    ("DevOps/K8/OBSERVABILITY/k8-observability.html", "k8-observability.html", "#051"),
-    ("DevOps/CICD/cicd-pipelines.html", "cicd-gitops.html", "#052"),
-    ("SRE/INCIDENT-MANAGEMENT/incident-management.html", "incident-management.html", "#053"),
-    ("Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html", "linux-fundamentals.html", "#054"),
-    ("Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html", "linux-advanced.html", "#055"),
-    ("Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html", "linux-troubleshooting.html", "#056"),
-    ("Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html", "linux-unix-glossary.html", "#057"),
-]
+# ── the "published/" listing, newest first ───────────────────────────────────
+# This was a hand-kept copy of the issue register and it stopped at #057 while
+# the register ran on to #067 — so the terminal announced "11 deep-dives online"
+# under a feed carrying 21. It is now the register itself, sorted newest first
+# the way `ls -1t` would.
+#
+# Two pages sit at a filename that isn't the one a reader would expect. The old
+# list papered over that by hand; the map keeps that, and asserts each entry
+# still exists so a rename can't leave a silent mislabel behind.
+LABEL = {
+    "DevOps/K8/ERROR/K8-error.html":   "k8-error-runbook.html",
+    "DevOps/CICD/cicd-pipelines.html": "cicd-gitops.html",
+}
+_paths = {path for _n, path, *_ in ISSUES}
+for _p in LABEL:
+    assert _p in _paths, f"build_kmap LABEL: {_p} is no longer an issue path"
+
+PUBLISHED = [(path, LABEL.get(path, path.rsplit("/", 1)[-1]), f"#{num:03d}")
+             for num, path, *_ in sorted(ISSUES, key=lambda i: -i[0])]
+
+# The newest issue drives the hero: the counter and the "New — Issue #NNN" pill.
+LATEST_NUM, LATEST_PATH = PUBLISHED[0][2].lstrip("#"), PUBLISHED[0][0]
 
 KEY = {"L": "live", "P": "pipe", "-": "plan"}
 ZONE = {"live": "Live now", "pipe": "In pipeline", "plan": "Planned"}
@@ -285,7 +294,7 @@ for i, (pname, pl, pp, pn, tot, _cats) in enumerate(pillar_stats):
     tree.append(row_split(left, f'[ {pl} live / {tot} ]', cls))
 
 tree.append(row(' '))
-tree.append(row('<span class="tl-prompt">❯</span> <span class="tl-cmd">ls -1 published/</span>'))
+tree.append(row('<span class="tl-prompt">❯</span> <span class="tl-cmd">ls -1t published/</span>'))
 for j, (href, label, issue) in enumerate(PUBLISHED):
     b = '└── ' if j == len(PUBLISHED) - 1 else '├── '
     tree.append(row(f'<span class="tl-branch">{b}</span>'
@@ -545,7 +554,35 @@ src = src.replace("'a,button,.topic-card,.issue-card",
 src = src.replace(".kr-topics .topics-grid { grid-template-columns: 1fr; }\n", "")
 src = src.replace("  .topics-grid{grid-template-columns:1fr;}\n", "")
 
+
+# 6. hero: the issue counter and the "New" pill ───────────────────────────────
+# Both were typed into index.base.html and both were still on #057 three issues
+# after #060 shipped. They now come off the register like everything else.
+def _one(pattern, repl, why):
+    """repl is a callable, never a template — a \\g<1> in a string replacement
+    is silently eaten by the backslash-escaping these helpers elsewhere do, and
+    lands "\\g<1>67" in the page instead of the number."""
+    global src
+    new, n = re.subn(pattern, repl, src, count=1)
+    assert n == 1, f"index.html: {why} — matched {n} times, expected 1:\n  {pattern}"
+    src = new
+
+
+_one(r'(<span class="count-up" data-target=")\d+(">)',
+     lambda m: f"{m.group(1)}{int(LATEST_NUM)}{m.group(2)}", "hero issue counter")
+
+_one(r'<a href="[^"]*" class="hero-new-badge">[^<]*</a>',
+     lambda m: (f'<a href="{LATEST_PATH}" class="hero-new-badge">'
+                f'📖 New — Issue #{LATEST_NUM}</a>'), "hero new-issue pill")
+
+# The footer's Newsletter column carries the same "newest" claim, and it had
+# drifted with the other two.
+_one(r'<a href="[^"]*">Newest — Issue #\d+</a>',
+     lambda m: f'<a href="{LATEST_PATH}">Newest — Issue #{LATEST_NUM}</a>',
+     "footer newest-issue link")
+
 SRC.write_text(src, encoding='utf-8')
 print(f"pillars={N_PILL} categories={N_CATS} topics={T_ALL} "
       f"live={T_LIVE} pipe={T_PIPE} plan={T_PLAN}")
+print(f"published={len(PUBLISHED)} newest=#{LATEST_NUM} -> {LATEST_PATH}")
 print(f"index.html -> {len(src)} bytes")

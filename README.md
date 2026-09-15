@@ -45,7 +45,7 @@
 
 This repository *is* the newsletter. Every issue is a self-contained HTML page served straight from GitHub Pages — no build step, no framework, no tracking. Fork it, read it offline, or lift a diagram for your own docs.
 
-**Currently in this repo:** 21 monthly issue pages, 5 Foundation reference deep-dives, 4 command references covering 362 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 82 pages in total.
+**Currently in this repo:** 21 monthly issue pages, 5 Foundation reference deep-dives, 4 command references covering 362 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 89 pages in total.
 
 ---
 
@@ -79,9 +79,10 @@ of truth, so the numbers here and there can never disagree.
 | 🔸 **Pipeline** | Next up — adjacent to a series already running, so it's queued rather than hypothetical. |
 | · **Planned** | On the backlog. No date attached; it moves to pipeline when the series in front of it lands. |
 
-Live topics point at the 30 deep-dives already in this repo — 11 monthly issues plus the
+Live topics point at the 30 deep-dives already in this repo — 21 monthly issues plus the
 Foundation reference pages — so one page can light up several topics at once. Issue #051 alone
-covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
+covers Prometheus, Grafana, Loki, Jaeger and distributed tracing; #062 covers ConfigMaps,
+Secrets, Namespaces and RBAC.
 
 <br>
 
@@ -981,7 +982,7 @@ Platform-ops-Newsletter/
 │
 ├── assets/                          ← shared components injected into every page
 │   ├── megamenu.css  megamenu.js    ← cascading Browse panel
-│   └── search.css    search.js      ← global search, 1049-entry index
+│   └── search.css    search.js      ← global search, 1056-entry index
 │
 ├── categories/                       ← 44 pages · 43 category hubs + index
 ├── Foundation/                       ← 5 pages · reference deep-dives
@@ -1028,6 +1029,199 @@ opened from disk, from a local server, or from GitHub Pages.
 
 ---
 
+## 🏛️ Architecture
+
+### The one rule
+
+**`tools/` is the source. Everything else in this repo is output.**
+
+There is no framework, no bundler, no runtime, and no server. The site is a tree of
+self-contained HTML files — but almost none of them are written by hand. They are printed
+by Python from a handful of data files, and `./tools/build.sh` prints all of them in one pass.
+
+That is the whole architecture, and it exists to solve one specific problem: a site with
+621 topics, 43 categories and a growing issue count has the *same number* in a dozen places —
+the hero counter, the pillar bars, the terminal tree, the mega-menu, the search index, the
+category hubs, the feed, the sitemap, this README. Maintained by hand, those drift apart
+within two issues. Derived from one list, they cannot.
+
+> If you find yourself editing `index.html` or `README.md`, stop — the next build overwrites it.
+> Edit `tools/index.base.html` or `tools/README.base.md` instead.
+
+<br>
+
+### Data flow
+
+```mermaid
+flowchart LR
+    TAX["taxonomy.py<br/>pillars · categories · topics + status"]
+    FEED["build_feed.py<br/>the issue register"]
+    CMD["cmd_data.py<br/>the command corpus"]
+    SPEC["hubs_spec.py<br/>hub copy + diagrams"]
+    PROSE["k8s_*.py · ocp_*.py · fnd_*.py<br/>deep-dive prose, as data"]
+    CONF["siteconf.py<br/>BASE — the canonical origin"]
+    BASES["index.base.html<br/>README.base.md"]
+
+    TAX   --> B
+    FEED  --> B
+    CMD   --> B
+    SPEC  --> B
+    PROSE --> B
+    CONF  --> B
+    BASES --> B
+
+    B{{"build.sh<br/>18 stages"}}
+
+    B --> HOME["index.html"]
+    B --> RM["README.md"]
+    B --> HUBS["categories/<br/>43 hubs"]
+    B --> PAGES["Kubernetes/ · OpenShift/<br/>Foundation/ · Commands/"]
+    B --> DATA["feed.xml · sitemap.xml<br/>robots.txt · assets/"]
+
+    HOME  --> V
+    RM    --> V
+    HUBS  --> V
+    PAGES --> V
+    DATA  --> V
+
+    V["verify.py<br/>links · nesting · counts"] --> GH["GitHub Pages"]
+    V --> CFW["Cloudflare Worker<br/>canonical origin"]
+```
+
+<br>
+
+### Build stages
+
+`./tools/build.sh` runs these in order. The first thing it does is throw away the two
+generated files and copy their bases back over them, so every build starts from a clean slate
+and a half-applied edit can never accumulate.
+
+| # | Stage | Reads | Writes |
+|:--|:--|:--|:--|
+| 0 | *reset* | `index.base.html`, `README.base.md` | `index.html`, `README.md` |
+| 1 | `build_kmap.py` | taxonomy + issue register | knowledge map, coverage terminal, hero counter, "newest issue" links |
+| 2 | `build_features.py` | — | topic-request queue, analytics loader, RSS discovery |
+| 3 | `build_wire.py` | taxonomy | category-hub links, nav, licence line |
+| 4 | `build_readme.py` | taxonomy + register + commands | the README map, badge, inventory, feature table, repo tree |
+| 5 | `build_library.py` | taxonomy | the reference-library listing |
+| 6 | `build_sticky.py` | — | pins the Latest Issues panel beside the map |
+| 7 | `build_author.py` | `linkedin_posts.py` | author profile + LinkedIn column |
+| 8 | `build_hubs.py` | taxonomy + `hubs_spec.py` | 43 category hubs, their diagrams and cross-links |
+| 9 | `build_foundation.py` | `fnd_a.py`, `fnd_b.py` | the Foundation deep-dives |
+| 10 | `build_openshift.py` | `ocp_a.py`–`ocp_c.py` | the OpenShift deep-dives |
+| 11 | `build_k8s.py` | `k8s_a.py`, `k8s_b.py`, `mesh_a.py` | the Kubernetes and Service Mesh deep-dives |
+| 12 | `build_commands.py` | `cmd_data.py` | the command references |
+| 13 | `build_feed.py` | the register | `feed.xml` |
+| 14 | `build_nav.py` | taxonomy | mega-menu assets, wired into every page |
+| 15 | `build_search.py` | everything on disk | the search index, wired into every page |
+| 16 | `build_seo.py` | each page + register | JSON-LD, article dates, per-issue `og:image` |
+| 17 | `build_canonical.py` | `siteconf.BASE` | rewrites every origin to the canonical one |
+| 18 | `verify.py` | the built site | `sitemap.xml`, **and a non-zero exit if anything is wrong** |
+
+Stages 14–17 are whole-site passes: they walk every page that exists at that point and inject
+the same chrome into all of them. That is why a new page needs no wiring of its own — it is
+picked up by the passes that run after it is written.
+
+<br>
+
+### Anatomy of a page
+
+A deep-dive is never typed as HTML. It is a Python list of section dictionaries — prose,
+cards, tables, terminal blocks, diagrams, notes, further-reading links — handed to
+`content_page.render()`, which returns one finished file:
+
+```
+k8s_b.py                      content_page.py                 Kubernetes/…/page.html
+┌────────────────────┐        ┌────────────────────┐          ┌────────────────────┐
+│ TOPICS = [         │        │ CSS      (one copy │          │ <head>             │
+│   { slug, title,   │──────→ │           per dir) │ ───────→ │   meta · JSON-LD   │
+│     eyebrow, meta, │        │ render() sections  │          │   canonical · og   │
+│     sections: [    │        │ refs()   sources   │          │ <body>             │
+│       {t:'cards'}, │        │ esc()    escaping  │          │   crumbs · content │
+│       {t:'table'}, │        └────────────────────┘          │   pager · footer   │
+│       {t:'term'},  │                  │                     └────────────────────┘
+│       {t:'refs'} ] │                  │  build_k8s.py supplies
+│   }, … ]           │                  └─ crumb trail, prev/next pager, css depth
+└────────────────────┘
+```
+
+Three consequences worth knowing:
+
+- **The CSS lives in one place.** `content_page.CSS` is written once per output directory as
+  `topic.css`; the page links to it with the right number of `../` for its depth. Change a
+  rule there and every deep-dive in that section changes with it.
+- **The pager is built from the reading order, not from the page.** `ORDER` in each builder is
+  the sequence; a topic that has no module yet simply drops out of the chain rather than
+  producing a dead link.
+- **Relative links, always.** Every `href` counts `../` from the page's own depth, so the site
+  works opened from disk, from `python3 -m http.server`, from GitHub Pages and from the
+  Worker — with no base URL configured anywhere.
+
+<br>
+
+### In the browser
+
+There is no client-side framework and nothing to hydrate. Every interactive part is plain DOM:
+
+| Behaviour | How |
+|:--|:--|
+| Theme | Read from `localStorage` and applied to `<html>` **before first paint**, so there is no flash of the wrong theme |
+| Knowledge map | A two-level accordion over static markup; search filters chips by `textContent`, the status pills by `data-s` |
+| Global search | One JSON array inlined in `assets/search.js`, filtered in memory — no request, no index server |
+| Mega-menu | One markup block injected into every page by `build_nav.py`, with the depth-correct links baked in |
+| Command tables | Group filter + substring match over rows already in the document |
+| Topic requests | Queued in `sessionStorage`, posted to Kit as a custom field on signup |
+| Analytics | GoatCounter, loaded only if a site code is set — empty by default, so nothing is sent |
+
+The only external requests a page makes are Google Fonts and, if enabled, GoatCounter.
+No CDN, no analytics beyond that, no third-party JavaScript.
+
+<br>
+
+### Deployment
+
+```
+git push origin main
+        │
+        └──→ .github/workflows/static.yml ──→ GitHub Pages
+                                              vishal-abhinav.github.io/Platform-ops-Newsletter/
+
+                        Cloudflare Worker ──→ platform-ops-blog.vishal-abhinav.workers.dev
+                                              ← the canonical origin: what every
+                                                <link rel="canonical"> on the site points at
+```
+
+Both serve the same static files; nothing is compiled at deploy time, so what is committed is
+exactly what is served. `tools/siteconf.py` holds the canonical origin as a single constant,
+and `build_canonical.py` rewrites every known origin to it on each build, then asserts none
+survived — which is what keeps the Pages mirror from competing with the Worker in search
+results.
+
+<br>
+
+### Why the build fails instead of drifting
+
+Every derivation in `tools/` asserts that it actually matched what it expected to match.
+This is deliberate, and it is the part worth copying if you fork this repo:
+
+- Each README rewrite is `re.subn(..., count=1)` followed by `assert n == 1` — a reworded
+  sentence fails the build rather than silently going unmaintained.
+- `build_canonical.py` asserts no foreign origin survives the rewrite.
+- `make_og_card.py` asserts the three webfonts actually loaded, because a missing font falls
+  back silently and bakes the wrong typography into a PNG.
+- `build_kmap.py` asserts each hand-kept label still names a real issue path.
+- `verify.py` gates everything: it resolves every relative `href` and `src` against the
+  filesystem, checks tag balance on every page, checks each page carries its analytics loader,
+  RSS link and copyright meta, and compares the counts the homepage *states* against the chips
+  it actually *renders*.
+
+Two of the worst bugs this repo has had were caught by exactly these checks rather than by
+review: a non-greedy regex that marked 49 topics live against the wrong page, and a CSS class
+defined twice — `.tt` as both a 32px theme-toggle button and the terminal text — which clipped
+every command line on 53 pages. Neither was visible in a diff.
+
+---
+
 ## ✨ Site Features
 
 The homepage is a single hand-written HTML file with no framework behind it:
@@ -1044,7 +1238,7 @@ The homepage is a single hand-written HTML file with no framework behind it:
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
 | 🧭 **Mega-menu** | Cascading browse panel on every page — 11 pillars, 43 categories, with live counts |
 | ⌨️ **Command references** | Searchable, group-filtered command tables — 362 commands so far |
-| 🔍 **Global search** | Centred in the nav of all 82 pages — 1049 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
+| 🔍 **Global search** | Centred in the nav of all 89 pages — 1056 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
 | 🧩 **Category hubs** | Every one of the 43 categories has its own page with a generated architecture diagram and its full topic list |
 | 💼 **LinkedIn column** | The author section carries the latest posts beside the profile, driven by `tools/linkedin_posts.py` |
 | 🦶 **Shared footer** | One footer across every page, with links rebuilt per directory depth |

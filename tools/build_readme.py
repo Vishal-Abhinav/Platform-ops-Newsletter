@@ -9,6 +9,7 @@ import sys
 
 sys.path.insert(0, str(TOOLS))
 from taxonomy import PILLARS, cat_stats  # noqa: E402
+from build_feed import ISSUES as _ISSUES  # noqa: E402
 
 R = ROOT / 'README.md'
 MARK = {"L": "✅", "P": "🔸", "-": "·"}
@@ -59,9 +60,10 @@ of truth, so the numbers here and there can never disagree.
 | 🔸 **Pipeline** | Next up — adjacent to a series already running, so it's queued rather than hypothetical. |
 | · **Planned** | On the backlog. No date attached; it moves to pipeline when the series in front of it lands. |
 
-Live topics point at the {n_pages} deep-dives already in this repo — 11 monthly issues plus the
+Live topics point at the {n_pages} deep-dives already in this repo — {len(_ISSUES)} monthly issues plus the
 Foundation reference pages — so one page can light up several topics at once. Issue #051 alone
-covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
+covers Prometheus, Grafana, Loki, Jaeger and distributed tracing; #062 covers ConfigMaps,
+Secrets, Namespaces and RBAC.
 
 <br>
 
@@ -265,6 +267,21 @@ src = src[:o] + "```\n" + TREE_TEXT + "\n```" + src[c:]
 # ── 5. the topic-request count ──────────────────────────────────────────────
 sub(r"\d+ of the \d+ topics have no page yet",
     f"{TP + TN} of the {N_TOPICS} topics have no page yet", "topic-request count")
+
+# ── 6. the Architecture section's stage table, against build.sh ─────────────
+# The table is prose, so nothing regenerates it — but a build stage added,
+# renamed or dropped without the table following would make the one document
+# that explains this repo quietly wrong. Cheapest possible guard: the set of
+# scripts build.sh runs must equal the set the table names.
+_sh = (TOOLS / "build.sh").read_text(encoding="utf-8")
+_ran = set(re.findall(r"^\s*python3 tools/(\w+)\.py", _sh, re.M))
+_a = src.index("### Build stages")
+_documented = set(re.findall(r"\|\s*`(\w+)\.py`\s*\|",
+                             src[_a:src.index("### Anatomy of a page", _a)]))
+assert _ran == _documented, (
+    "README Architecture: the build-stage table and build.sh disagree.\n"
+    f"  only in build.sh : {sorted(_ran - _documented)}\n"
+    f"  only in the table: {sorted(_documented - _ran)}")
 
 R.write_text(src, encoding="utf-8")
 print(f"README -> {len(src)} bytes | {N_PAGES} pages, {N_ISSUES} issues, "
