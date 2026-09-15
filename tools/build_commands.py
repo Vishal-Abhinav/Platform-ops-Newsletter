@@ -20,6 +20,7 @@ CAT_SLUG = {
     "linux-commands": "linux-commands",
     "kubernetes-commands": "kubernetes-commands",
     "docker-commands": "docker-commands",
+    "openshift-commands": "openshift-commands",
 }
 
 built = []

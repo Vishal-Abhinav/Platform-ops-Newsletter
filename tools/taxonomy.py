@@ -33,6 +33,7 @@ CDK = "Commands/DOCKER-COMMANDS/docker-commands.html"
 OCA = "OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html"
 OCN = "OpenShift/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html"
 OCO = "OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html"
+COC = "Commands/OPENSHIFT-COMMANDS/openshift-commands.html"
 
 # pillar -> [ (category, icon, [ (topic, status, href|None), ... ]) ]
 PILLARS = [
@@ -281,10 +282,10 @@ PILLARS = [
    ("Output & Scripting","L",CK8),("kustomize","P",None),
    ("Helm","P",None),("krew Plugins","-",None)]),
  ("OpenShift Commands", "🔴", [
-   ("oc login & Projects","P",None),("oc new-app","P",None),("Routes","P",None),
-   ("oc adm","P",None),("Security Context Constraints","P",None),
-   ("must-gather","P",None),("Image Streams","-",None),("BuildConfigs","-",None),
-   ("oc debug node","P",None),("Cluster Operators","-",None)]),
+   ("oc login & Projects","L",COC),("oc new-app","L",COC),("Routes","L",COC),
+   ("oc adm","L",COC),("Security Context Constraints","L",COC),
+   ("must-gather","L",COC),("Image Streams","L",COC),("BuildConfigs","L",COC),
+   ("oc debug node","L",COC),("Cluster Operators","L",COC)]),
  ("Ansible Commands", "🔧", [
    ("Ad-hoc Commands","P",None),("ansible-playbook","P",None),
    ("Inventory & Limits","P",None),("ansible-vault","P",None),

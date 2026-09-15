@@ -372,4 +372,155 @@ DOCKER = dict(
  ]),
 ])
 
-ALL = [LINUX, KUBECTL, DOCKER]
+
+# ═══════════════════════════════════════════════════════════════════════════
+OPENSHIFT = dict(
+    slug="openshift-commands", icon="⛑️", title="OpenShift Commands",
+    tagline=("The oc set, grouped by what you are trying to find out. Every kubectl "
+             "command works here too — these are the ones that only exist on OpenShift, "
+             "or that answer an OpenShift question faster."),
+    groups=[
+ ("auth", "Login, context & projects", "A Project is a namespace with a template and a "
+  "lifecycle. <code>oc project</code> switches the active one, which is what most "
+  "<q>resource not found</q> confusion comes down to — you are looking in the wrong namespace.", [
+  ("<b>oc login</b> -u user --server=URL", "Authenticate; writes context into ~/.kube/config", "oc login -u kubeadmin --server=https://api.ocp.example.com:6443"),
+  ("<b>oc login</b> --token=...", "Log in with a token rather than a password", "oc login --token=sha256~xxx --server=https://api.ocp:6443"),
+  ("<b>oc whoami</b>", "Which identity is this context using", "oc whoami"),
+  ("<b>oc whoami</b> -t", "Print the current token — for curl against the API", "TOKEN=$(oc whoami -t)"),
+  ("<b>oc whoami</b> --show-console", "The web console URL for this cluster", "oc whoami --show-console"),
+  ("<b>oc whoami</b> --show-server", "The API endpoint you are actually talking to", "oc whoami --show-server"),
+  ("<b>oc project</b>", "Which project is active right now", "oc project"),
+  ("<b>oc project</b> &lt;name&gt;", "Switch the active project", "oc project prod"),
+  ("<b>oc projects</b>", "Every project you can see — never leaks ones you cannot", "oc projects"),
+  ("<b>oc new-project</b>", "Create a project THROUGH the template, with its quota and policy", "oc new-project prod --description='Production'"),
+  ("<b>oc delete project</b>", "Delete a project and everything in it, PVCs included", "oc delete project scratch"),
+  ("<b>oc status</b>", "A readable summary of what is running in this project", "oc status -n prod"),
+  ("<b>oc config get-contexts</b>", "Every cluster/user/namespace combination you have", "oc config get-contexts"),
+  ("<b>oc config use-context</b>", "Switch clusters without logging in again", "oc config use-context prod/api-ocp:6443/admin"),
+ ]),
+
+ ("deploy", "Deploying, builds & image streams", "S2I builds an image from source without a "
+  "Dockerfile. An ImageStream is a pointer with history — which is what gives you a rollback "
+  "target and a redeploy trigger.", [
+  ("<b>oc new-app</b>", "Create a full application from source, image or template", "oc new-app python:3.11~https://github.com/org/app.git"),
+  ("<b>oc new-app</b> --name=x --image=", "From an existing image rather than source", "oc new-app --name=api --image=quay.io/org/api:v2"),
+  ("<b>oc new-app</b> --dry-run -o yaml", "See what it WOULD create before it creates it", "oc new-app nginx --dry-run -o yaml"),
+  ("<b>oc new-app</b> -e KEY=value", "Set environment variables at creation", "oc new-app mysql -e MYSQL_ROOT_PASSWORD=x"),
+  ("<b>oc new-build</b>", "A BuildConfig without deploying it", "oc new-build --binary --name=api -l app=api"),
+  ("<b>oc start-build</b>", "Run a build now", "oc start-build api"),
+  ("<b>oc start-build</b> --from-dir=. --follow", "Binary build from a local directory, streaming logs", "oc start-build api --from-dir=. --follow"),
+  ("<b>oc start-build</b> --from-file=", "Build from a single local file", "oc start-build api --from-file=app.jar"),
+  ("<b>oc logs</b> -f bc/&lt;name&gt;", "Follow the latest build's logs", "oc logs -f bc/api"),
+  ("<b>oc cancel-build</b>", "Stop a running build", "oc cancel-build api-7"),
+  ("<b>oc get bc,builds</b>", "BuildConfigs and the builds they produced", "oc get bc,builds -n prod"),
+  ("<b>oc get is</b>", "Image streams and the tags they expose", "oc get is -n prod"),
+  ("<b>oc describe is</b>", "Tag history — every digest this tag has pointed at", "oc describe is/api"),
+  ("<b>oc tag</b> src:tag dst:tag", "Move or copy a tag; this is how you promote a build", "oc tag api:latest api:prod"),
+  ("<b>oc tag</b> --scheduled", "Re-check an external image periodically. Without it, imported once, never again", "oc tag quay.io/org/api:latest api:latest --scheduled"),
+  ("<b>oc import-image</b> --confirm", "Force an import check right now", "oc import-image api:latest --confirm"),
+  ("<b>oc rollout latest</b>", "Trigger a new deployment from the current image", "oc rollout latest deploy/api"),
+  ("<b>oc rollout undo</b>", "Roll back to the previous revision", "oc rollout undo deploy/api"),
+  ("<b>oc rollout status</b>", "Block until the rollout finishes or fails", "oc rollout status deploy/api --timeout=5m"),
+  ("<b>oc set image</b>", "Change a container image in place", "oc set image deploy/api api=quay.io/org/api:v3"),
+  ("<b>oc set env</b>", "Add, change or list environment variables", "oc set env deploy/api LOG_LEVEL=debug"),
+  ("<b>oc set env</b> --from=secret/x", "Inject a whole secret as environment variables", "oc set env deploy/api --from=secret/db-creds"),
+ ]),
+
+ ("route", "Routes & exposing services", "A Route is OpenShift's ingress object. "
+  "<code>Admitted=False</code> is the single most useful field on one — an unadmitted route "
+  "returns 503 from the router and looks exactly like a broken backend.", [
+  ("<b>oc expose svc</b>", "Create a Route for a Service", "oc expose svc/api"),
+  ("<b>oc expose svc</b> --hostname=", "Route with a specific host", "oc expose svc/api --hostname=api.example.com"),
+  ("<b>oc create route edge</b>", "TLS terminated at the router, HTTP to the pod", "oc create route edge api --service=api"),
+  ("<b>oc create route passthrough</b>", "Router forwards bytes; the pod terminates TLS", "oc create route passthrough api --service=api"),
+  ("<b>oc create route reencrypt</b>", "Terminate, then re-encrypt to the pod", "oc create route reencrypt api --service=api --dest-ca-cert=ca.crt"),
+  ("<b>oc get route</b>", "Every route and the host it claims", "oc get route -n prod"),
+  ("<b>oc get route</b> -o jsonpath status", "Whether the router admitted it — check this before anything else", "oc get route api -o jsonpath='{.status.ingress[*].conditions[*].reason}'"),
+  ("<b>oc annotate route</b> timeout", "Per-route backend timeout", "oc annotate route api haproxy.router.openshift.io/timeout=60s"),
+  ("<b>oc annotate route</b> rate-limit", "Per-route connection limiting", "oc annotate route api haproxy.router.openshift.io/rate-limit-connections=true"),
+  ("<b>oc set route-backends</b>", "Weighted backends — canary splits at the router", "oc set route-backends api api=90 api-next=10"),
+  ("<b>oc -n openshift-ingress get pods</b>", "Where the routers actually run", "oc -n openshift-ingress get pods -o wide"),
+  ("<b>oc -n openshift-ingress rsh</b> ... haproxy.config", "What the router configured for real", "oc -n openshift-ingress rsh deploy/router-default cat haproxy.config"),
+ ]),
+
+ ("scc", "Security context constraints & RBAC", "SCC decides what a POD may ask for; RBAC "
+  "decides what a USER may do. Both refuse in writing, and the wording tells you which one it was.", [
+  ("<b>oc get scc</b>", "Every constraint on the cluster, and what it permits", "oc get scc"),
+  ("<b>oc describe scc restricted-v2</b>", "The default: no root, dropped capabilities, random UID", "oc describe scc restricted-v2"),
+  ("<b>oc get pod</b> -o jsonpath scc", "Which SCC actually admitted this pod", "oc get pod api-7d9f -o jsonpath='{.metadata.annotations.openshift\\.io/scc}'"),
+  ("<b>oc adm policy scc-subject-review</b>", "Which SCC WOULD admit this workload — before granting anything", "oc adm policy scc-subject-review -z api-sa -f deploy.yaml"),
+  ("<b>oc adm policy scc-review</b>", "Which service accounts could run this pod spec", "oc adm policy scc-review -f deploy.yaml"),
+  ("<b>oc adm policy add-scc-to-user</b>", "Grant an SCC. Prefer a custom SCC over anyuid", "oc adm policy add-scc-to-user anyuid -z build-sa"),
+  ("<b>oc adm policy remove-scc-from-user</b>", "Take it away again", "oc adm policy remove-scc-from-user anyuid -z build-sa"),
+  ("<b>oc auth can-i</b>", "Can this identity do this, resolved rather than guessed", "oc auth can-i create deploy -n prod --as=jane"),
+  ("<b>oc auth can-i</b> --list", "Everything an identity can do in a namespace", "oc auth can-i --list -n prod --as=jane"),
+  ("<b>oc auth can-i</b> --as=system:serviceaccount:", "The service-account form, where this usually bites", "oc auth can-i list secrets --as=system:serviceaccount:prod:api-sa"),
+  ("<b>oc adm policy who-can</b>", "The reverse question — who can do this?", "oc adm policy who-can delete pods -n prod"),
+  ("<b>oc adm policy add-role-to-user</b>", "Grant a namespace role", "oc adm policy add-role-to-user edit jane -n prod"),
+  ("<b>oc adm policy add-cluster-role-to-user</b>", "Grant a cluster role", "oc adm policy add-cluster-role-to-user cluster-reader auditor"),
+  ("<b>oc adm groups new</b>", "Create a group to bind roles to, rather than to users", "oc adm groups new platform-team jane bob"),
+  ("<b>oc adm policy remove-cluster-role-from-group</b>", "Stop everyone self-provisioning projects", "oc adm policy remove-cluster-role-from-group self-provisioner system:authenticated:oauth"),
+ ]),
+
+ ("cluster", "Cluster operators, version & upgrades", "The ownership chain is ClusterVersion → "
+  "ClusterOperator → the operator's workload. Start at the top: a degraded cluster operator "
+  "names its own problem in a way a pod list never will.", [
+  ("<b>oc get clusteroperators</b>", "The first command of any OpenShift incident", "oc get co"),
+  ("<b>oc get co</b> | grep -v 'True.*False.*False'", "Only the unhealthy ones", "oc get co | grep -v 'True.*False.*False'"),
+  ("<b>oc describe co</b> &lt;name&gt;", "The Degraded condition names the failing resource", "oc describe co/ingress"),
+  ("<b>oc get clusterversion</b>", "Current version, and what an upgrade is waiting on", "oc get clusterversion"),
+  ("<b>oc adm upgrade</b>", "Which versions are actually on offer", "oc adm upgrade"),
+  ("<b>oc adm upgrade</b> --to=", "Start an upgrade to a specific version", "oc adm upgrade --to=4.16.11"),
+  ("<b>oc adm upgrade channel</b>", "Change the update channel", "oc adm upgrade channel stable-4.16"),
+  ("<b>oc get clusterversion</b> Upgradeable", "The cluster's own opinion, before you start", "oc get clusterversion -o jsonpath='{.items[0].status.conditions[?(@.type==\"Upgradeable\")].message}'"),
+  ("<b>oc get apirequestcount</b>", "Who is still calling a deprecated API", "oc get apirequestcount | grep -v ' 0 '"),
+  ("<b>oc get mcp</b>", "Whether node config is mid-rollout or wedged", "oc get mcp"),
+  ("<b>oc get machineconfig</b>", "Every node-level config object", "oc get mc"),
+  ("<b>oc get nodes</b> -o wide", "Node state, roles, kernel and runtime versions", "oc get nodes -o wide"),
+  ("<b>oc adm top nodes</b>", "Actual node CPU and memory pressure", "oc adm top nodes"),
+  ("<b>oc adm cordon</b> / <b>uncordon</b>", "Stop or resume scheduling on a node", "oc adm cordon worker-04"),
+  ("<b>oc adm drain</b>", "Evict everything, respecting PodDisruptionBudgets", "oc adm drain worker-04 --ignore-daemonsets --delete-emptydir-data"),
+  ("<b>oc get pdb</b> -A", "The budget that will block the next drain", "oc get pdb -A"),
+  ("<b>oc get subscription,installplan,csv</b> -A", "OLM operator state, end to end", "oc get sub,ip,csv -A"),
+  ("<b>oc get installplan</b> -A", "The unapproved plan keeping an operator on an old version", "oc get installplan -A"),
+ ]),
+
+ ("debug", "Debugging, must-gather & node access", "must-gather is the supported dump. Scope it "
+  "when you already know the area — the full collection runs to several GB and 15+ minutes.", [
+  ("<b>oc adm must-gather</b>", "The full supported cluster dump", "oc adm must-gather --dest-dir=./mg"),
+  ("<b>oc adm must-gather</b> -- gather_network_logs", "Network only, in a fraction of the time", "oc adm must-gather --dest-dir=./mg -- /usr/bin/gather_network_logs"),
+  ("<b>oc adm must-gather</b> -- gather_audit_logs", "API audit logs only", "oc adm must-gather -- /usr/bin/gather_audit_logs"),
+  ("<b>oc adm must-gather</b> --image=", "One operator's deep state instead of everything", "oc adm must-gather --image=registry.redhat.io/openshift-logging/cluster-logging-rhel9-operator:latest"),
+  ("<b>oc adm inspect</b>", "Everything about one namespace or resource, structured", "oc adm inspect ns/openshift-ingress"),
+  ("<b>oc debug node/</b>&lt;node&gt;", "A root shell on a node without SSH", "oc debug node/worker-04"),
+  ("<b>oc debug node/</b> -- chroot /host", "Run a host command directly", "oc debug node/worker-04 -- chroot /host journalctl -u kubelet -n 200"),
+  ("<b>oc debug</b> deploy/&lt;name&gt;", "A copy of the pod with the entrypoint replaced by a shell", "oc debug deploy/api"),
+  ("<b>oc debug</b> --as-root", "Debug pod as root, when the SCC allows it", "oc debug deploy/api --as-root"),
+  ("<b>oc adm node-logs</b> --role=master", "Journal or file logs from every master", "oc adm node-logs --role=master -u kubelet"),
+  ("<b>oc adm node-logs</b> --path=", "Read a log file off the node, e.g. the audit log", "oc adm node-logs --role=master --path=kube-apiserver/audit.log"),
+  ("<b>oc get events</b> -A --sort-by=", "What the cluster just complained about. Expires in an hour", "oc get events -A --sort-by=.lastTimestamp | tail -40"),
+  ("<b>oc logs</b> -f --tail=100", "Follow a pod's logs", "oc logs -f deploy/api --tail=100"),
+  ("<b>oc logs</b> -p", "The PREVIOUS container — what a CrashLoop actually said", "oc logs -p api-7d9f"),
+  ("<b>oc rsh</b>", "Shell into a running container", "oc rsh deploy/api"),
+  ("<b>oc port-forward</b>", "Reach a pod's port locally without a Route", "oc port-forward svc/api 8080:8080"),
+  ("<b>oc cp</b>", "Copy a file in or out of a container", "oc cp api-7d9f:/tmp/heap.hprof ./heap.hprof"),
+  ("<b>oc rsync</b>", "Sync a directory in or out", "oc rsync ./config api-7d9f:/etc/app/"),
+ ]),
+
+ ("storage", "Storage, quota & limits", "A Pending PVC is either waiting for a consumer, which "
+  "is correct, or the backend refused — and only <code>describe</code> tells you which.", [
+  ("<b>oc get pvc</b> -A --field-selector", "Every stuck claim on the cluster", "oc get pvc -A --field-selector=status.phase=Pending"),
+  ("<b>oc describe pvc</b>", "The provisioner's own error message", "oc describe pvc data-0"),
+  ("<b>oc get sc</b>", "Binding mode, reclaim policy and expansion — check before committing", "oc get sc -o custom-columns=NAME:.metadata.name,BIND:.volumeBindingMode,RECLAIM:.reclaimPolicy"),
+  ("<b>oc get pv</b> | grep Released", "Retained volumes still holding data, waiting to be rebound", "oc get pv | grep Released"),
+  ("<b>oc get volumeattachment</b>", "Whether a volume is attached, and to which node", "oc get volumeattachment"),
+  ("<b>oc set volume</b> deploy/x --add", "Attach a new volume to a workload", "oc set volume deploy/api --add --name=data --claim-name=data-0 --mount-path=/data"),
+  ("<b>oc set volume</b> deploy/x", "What is mounted where, in one line per volume", "oc set volume deploy/api"),
+  ("<b>oc get quota,limitrange</b>", "The project's ceilings — a common cause of Pending", "oc get quota,limitrange -n prod"),
+  ("<b>oc describe quota</b>", "Used versus hard, per resource", "oc describe quota -n prod"),
+  ("<b>oc adm top pods</b>", "Live CPU and memory per pod", "oc adm top pods -n prod --sort-by=memory"),
+ ]),
+])
+
+ALL = [LINUX, KUBECTL, DOCKER, OPENSHIFT]
+

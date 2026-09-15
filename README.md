@@ -45,7 +45,7 @@
 
 This repository *is* the newsletter. Every issue is a self-contained HTML page served straight from GitHub Pages — no build step, no framework, no tracking. Fork it, read it offline, or lift a diagram for your own docs.
 
-**Currently in this repo:** 14 monthly issue pages, 5 Foundation reference deep-dives, 3 command references covering 253 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 81 pages in total.
+**Currently in this repo:** 14 monthly issue pages, 5 Foundation reference deep-dives, 4 command references covering 362 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 81 pages in total.
 
 ---
 
@@ -67,9 +67,9 @@ of truth, so the numbers here and there can never disagree.
 | `07` | **Reliability** | 7 | 27 | 25 | 64 | 116 |
 | `08` | **Security** | 2 | 0 | 18 | 28 | 46 |
 | `09` | **Data & Applications** | 4 | 1 | 12 | 47 | 60 |
-| `10` | **Commands** | 10 | 34 | 41 | 25 | 100 |
+| `10` | **Commands** | 10 | 44 | 34 | 22 | 100 |
 | `11` | **Modern Ops** | 5 | 3 | 21 | 45 | 69 |
-| | **Total** | **43** | **115** | **170** | **336** | **621** |
+| | **Total** | **43** | **125** | **163** | **333** | **621** |
 
 **Status meanings**
 
@@ -79,7 +79,7 @@ of truth, so the numbers here and there can never disagree.
 | 🔸 **Pipeline** | Next up — adjacent to a series already running, so it's queued rather than hypothetical. |
 | · **Planned** | On the backlog. No date attached; it moves to pipeline when the series in front of it lands. |
 
-Live topics point at the 22 deep-dives already in this repo — 11 monthly issues plus the
+Live topics point at the 23 deep-dives already in this repo — 11 monthly issues plus the
 Foundation reference pages — so one page can light up several topics at once. Issue #051 alone
 covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
 
@@ -639,7 +639,7 @@ covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
 </details>
 
 <details>
-<summary><b>10 · Commands</b> — 10 categories · 34 live · 41 pipeline · 25 planned</summary>
+<summary><b>10 · Commands</b> — 10 categories · 44 live · 34 pipeline · 22 planned</summary>
 
 **🐧 Linux Commands** — 10 live · 0 pipeline · 0 planned  
 ✅ [Files & Navigation](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
@@ -689,17 +689,17 @@ covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
 🔸 Helm &nbsp;
 · krew Plugins &nbsp;
 
-**🔴 OpenShift Commands** — 0 live · 7 pipeline · 3 planned  
-🔸 oc login & Projects &nbsp;
-🔸 oc new-app &nbsp;
-🔸 Routes &nbsp;
-🔸 oc adm &nbsp;
-🔸 Security Context Constraints &nbsp;
-🔸 must-gather &nbsp;
-· Image Streams &nbsp;
-· BuildConfigs &nbsp;
-🔸 oc debug node &nbsp;
-· Cluster Operators &nbsp;
+**🔴 OpenShift Commands** — 10 live · 0 pipeline · 0 planned  
+✅ [oc login & Projects](./Commands/OPENSHIFT-COMMANDS/openshift-commands.html) &nbsp;
+✅ [oc new-app](./Commands/OPENSHIFT-COMMANDS/openshift-commands.html) &nbsp;
+✅ [Routes](./Commands/OPENSHIFT-COMMANDS/openshift-commands.html) &nbsp;
+✅ [oc adm](./Commands/OPENSHIFT-COMMANDS/openshift-commands.html) &nbsp;
+✅ [Security Context Constraints](./Commands/OPENSHIFT-COMMANDS/openshift-commands.html) &nbsp;
+✅ [must-gather](./Commands/OPENSHIFT-COMMANDS/openshift-commands.html) &nbsp;
+✅ [Image Streams](./Commands/OPENSHIFT-COMMANDS/openshift-commands.html) &nbsp;
+✅ [BuildConfigs](./Commands/OPENSHIFT-COMMANDS/openshift-commands.html) &nbsp;
+✅ [oc debug node](./Commands/OPENSHIFT-COMMANDS/openshift-commands.html) &nbsp;
+✅ [Cluster Operators](./Commands/OPENSHIFT-COMMANDS/openshift-commands.html) &nbsp;
 
 **🔧 Ansible Commands** — 0 live · 6 pipeline · 4 planned  
 🔸 Ad-hoc Commands &nbsp;
@@ -985,7 +985,7 @@ Platform-ops-Newsletter/
 │
 ├── categories/                       ← 44 pages · 43 category hubs + index
 ├── Foundation/                       ← 5 pages · reference deep-dives
-├── Commands/                         ← 3 pages · 253 commands
+├── Commands/                         ← 3 pages · 362 commands
 │
 ├── DevOps/
 │   ├── CICD/
@@ -1043,7 +1043,7 @@ The homepage is a single hand-written HTML file with no framework behind it:
 | 📌 **Pinned archive** | On desktop Latest Issues is pinned beside the map and scrolls inside itself, so the issues stay one glance away however far down the map you are |
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
 | 🧭 **Mega-menu** | Cascading browse panel on every page — 11 pillars, 43 categories, with live counts |
-| ⌨️ **Command references** | Searchable, group-filtered command tables — 253 commands so far |
+| ⌨️ **Command references** | Searchable, group-filtered command tables — 362 commands so far |
 | 🔍 **Global search** | Centred in the nav of all 81 pages — 939 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
 | 🧩 **Category hubs** | Every one of the 43 categories has its own page with a generated architecture diagram and its full topic list |
 | 💼 **LinkedIn column** | The author section carries the latest posts beside the profile, driven by `tools/linkedin_posts.py` |
@@ -1053,7 +1053,7 @@ The homepage is a single hand-written HTML file with no framework behind it:
 
 ## 🔔 Topic Requests
 
-506 of the 621 topics have no page yet, so a reader who finds one has nowhere to go.
+496 of the 621 topics have no page yet, so a reader who finds one has nowhere to go.
 Clicking a pipeline or planned topic queues it instead. The queue rides along with
 the signup as a Kit custom field, which turns the backlog into a ranked list of what
 people are actually waiting for.
