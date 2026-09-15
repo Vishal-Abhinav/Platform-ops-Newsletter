@@ -22,14 +22,55 @@ engine is concerned. Pointing every canonical at ONE of them is what resolves
 that; the other host then reads as a mirror rather than a competing copy.
 """
 
-# Canonical origin. Must end with a slash.
-BASE = "https://platform-ops-blog.vishal-abhinav.workers.dev/"
+# ── where the site is served from ───────────────────────────────────────────
+# One entry per host this site can be canonical at. Switching between them is
+# changing ACTIVE below and rebuilding — nothing else, because every absolute
+# URL in the repo is derived from whichever profile is active.
+#
+# Each profile carries its OWN Search Console token. Those are issued per
+# property, not per site, so a single global token would silently be the wrong
+# one the moment the origin changed — which reads as a broken deploy and is
+# not. An empty token emits no verification tag at all, which is the correct
+# state for a property that does not exist yet.
+SITES = {
+    "workers": {
+        "base": "https://platform-ops-blog.vishal-abhinav.workers.dev/",
+        "gsc": "bderTx4lj4QRZNCauyzfCdi3rV2LbGqO4NMazuHoa0Y",
+        "note": "the Cloudflare Worker mirror — canonical today",
+    },
+    "platformops": {
+        "base": "https://platformops.srivantechnologies.com/",
+        "gsc": "",          # fill in after adding the property in Search Console
+        "note": "the custom subdomain; not live until DNS points at the Worker",
+    },
+}
+
+# ── the active profile ──────────────────────────────────────────────────────
+# Flip this ONLY once the new host actually resolves and serves the site.
+# Pointing 93 canonicals at a host that 404s tells a search engine the real
+# version of every page does not exist, which is worse than the wrong host.
+ACTIVE = "workers"
+
+assert ACTIVE in SITES, f"ACTIVE={ACTIVE!r} is not a profile in SITES"
+
+BASE = SITES[ACTIVE]["base"]
 
 # The Pages origin the repo deploys to. Kept so the mirror can be named
 # accurately where that matters; never used to build a canonical URL.
 PAGES_ORIGIN = "https://vishal-abhinav.github.io/Platform-ops-Newsletter/"
 
+# Every origin this site has ever been, or could be, served from. A page
+# carrying any of these gets rewritten to BASE — which is what makes the
+# switch work in BOTH directions rather than stranding pages on an old host.
+KNOWN_ORIGINS = [PAGES_ORIGIN] + [s["base"] for s in SITES.values()]
+
 assert BASE.endswith("/"), "BASE must end with a slash — URLs are built by concatenation"
+assert all(o.endswith("/") for o in KNOWN_ORIGINS), "every origin must end with a slash"
+
+# The bare host of the active origin, for prose that names it in running text
+# rather than linking it. Derived, so the README and the colophon cannot go on
+# advertising a host the site is no longer served from.
+BASE_HOST = BASE.split("//", 1)[1].rstrip("/")
 
 # ── Google Search Console ───────────────────────────────────────────────────
 # Paste ONLY the token from the meta tag Search Console gives you — the value
@@ -50,7 +91,7 @@ assert BASE.endswith("/"), "BASE must end with a slash — URLs are built by con
 # It goes on the homepage only, which is what a URL-prefix property at the
 # root is checked against. The tag has to be LIVE before you press Verify:
 # build, commit, push, confirm it is actually being served, then verify.
-GOOGLE_SITE_VERIFICATION = "bderTx4lj4QRZNCauyzfCdi3rV2LbGqO4NMazuHoa0Y"
+GOOGLE_SITE_VERIFICATION = SITES[ACTIVE]["gsc"]
 
 assert "<" not in GOOGLE_SITE_VERIFICATION, (
     "GOOGLE_SITE_VERIFICATION wants just the token, not the whole <meta> tag")

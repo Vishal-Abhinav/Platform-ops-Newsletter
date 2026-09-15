@@ -28,6 +28,7 @@ import re                                                     # noqa: E402
 from content_page import CSS, render, section, table, note, term, esc   # noqa: E402
 from taxonomy import PILLARS, cat_stats                        # noqa: E402
 from build_feed import ISSUES                                  # noqa: E402
+from siteconf import BASE_HOST                                 # noqa: E402
 from cmd_data import ALL as CMD_SPECS                          # noqa: E402
 
 OUT = ROOT / "colophon"
@@ -232,7 +233,7 @@ SECTIONS = "".join([
                 ("#", ".github/workflows/static.yml uploads the repo as the Pages artifact"),
                 ("", "→ vishal-abhinav.github.io/Platform-ops-Newsletter/"),
                 ("#", "a Cloudflare Worker serves the same files at the canonical origin"),
-                ("", "→ platform-ops-blog.vishal-abhinav.workers.dev"),
+                ("", f"→ {BASE_HOST}"),
             ])
             + "<p><code>tools/siteconf.py</code> holds the canonical origin as a single "
               "constant, and <code>build_canonical.py</code> rewrites every known origin to "

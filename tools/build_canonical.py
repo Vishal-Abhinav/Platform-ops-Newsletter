@@ -21,14 +21,13 @@ import sys
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
 sys.path.insert(0, str(ROOT / "tools"))
 
-from siteconf import BASE, PAGES_ORIGIN, skip_page   # noqa: E402
+from siteconf import BASE, BASE_HOST, KNOWN_ORIGINS, SITES, skip_page  # noqa: E402
 
-# Every origin this site has ever been served from. A page carrying any of
-# these gets moved to BASE.
-KNOWN = [
-    PAGES_ORIGIN,
-    "https://platform-ops-blog.vishal-abhinav.workers.dev/",
-]
+# Every origin this site has ever been, or could be, served from. A page
+# carrying any of these gets moved to BASE. The list lives in siteconf beside
+# the profiles themselves — kept here it would have to be edited a second time
+# on every host change, which is the same trap the hardcoded BASE was.
+KNOWN = KNOWN_ORIGINS
 
 # skip list now lives in siteconf
 touched = []
@@ -67,6 +66,55 @@ assert not stale, f"origins still pointing away from BASE: {stale[:5]}"
     "\n"
     f"Sitemap: {BASE}sitemap.xml\n",
     encoding="utf-8")
+
+# ── prose that NAMES the host ───────────────────────────────────────────────
+# The README links the live site three times and also writes the bare host in
+# running text and in an ASCII diagram. Rewriting the links while the words
+# beside them still name the old host is the same lie in a different font, so
+# both forms move together.
+#
+# Only PROFILE hosts are rewritten. The GitHub Pages origin is a real, separate
+# mirror that is always accurately named, and collapsing it into BASE would
+# make the README claim the Worker is the Pages origin.
+PROFILE_HOSTS = [s["base"].split("//", 1)[1].rstrip("/") for s in SITES.values()]
+
+
+def retarget(text):
+    """Move every stale origin — URL form and bare-host form — onto the live one."""
+    for origin in KNOWN:
+        if origin != BASE:
+            text = text.replace(origin, BASE)
+    for host in PROFILE_HOSTS:
+        if host != BASE_HOST:
+            text = text.replace(host, BASE_HOST)
+    return text
+
+
+for name in ("README.md",):
+    f = ROOT / name
+    if not f.exists():
+        continue
+    t = f.read_text(encoding="utf-8")
+    out = retarget(t)
+    if out != t:
+        f.write_text(out, encoding="utf-8")
+        touched.append(name)
+
+# The colophon writes the host into a terminal block. build_colophon derives it
+# from BASE_HOST, so this is a backstop for any page that still spells it out.
+for f in sorted(ROOT.rglob("*.html")):
+    if "tools" in f.parts or skip_page(f.name):
+        continue
+    t = f.read_text(encoding="utf-8")
+    out = t
+    for host in PROFILE_HOSTS:
+        if host != BASE_HOST:
+            out = out.replace(host, BASE_HOST)
+    if out != t:
+        f.write_text(out, encoding="utf-8")
+        rel = f.relative_to(ROOT).as_posix()
+        if rel not in touched:
+            touched.append(rel)
 
 # The licence and notice name the work by its public URL.
 for name in ("LICENSE", "NOTICE"):
