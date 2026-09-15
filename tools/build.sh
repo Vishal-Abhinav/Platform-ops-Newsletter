@@ -11,6 +11,8 @@
 #   Commands/       <- build_commands   (command references + commands.css)
 #   OpenShift/      <- build_openshift  (deep-dives + topic.css)
 #   Kubernetes/     <- build_k8s        (K8s + Service Mesh deep-dives)
+#   3 legacy pages  <- build_legacy_dg  (injects a .dg diagram, idempotent)
+#   colophon/       <- build_colophon   (how the site is built; SVG from make_arch_svg)
 #   feed.xml        <- build_feed
 #   LinkedIn column <- tools/linkedin_posts.py (hand-kept list of post URLs)
 #   assets/megamenu.* <- build_nav    (nav data, styles, behaviour)
@@ -60,6 +62,12 @@ python3 tools/build_k8s.py k8s_a k8s_b mesh_a
 
 say "command references"
 python3 tools/build_commands.py
+
+say "diagrams for the hand-written pages"
+python3 tools/build_legacy_dg.py
+
+say "colophon"
+python3 tools/build_colophon.py
 
 say "feed"
 python3 tools/build_feed.py
