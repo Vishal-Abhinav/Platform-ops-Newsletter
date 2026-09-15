@@ -10,6 +10,8 @@
 #   categories/kubernetes-openshift-map/ <- build_topicmap (46-group reader topic list, live/pipe/planned)
 #   categories/kubernetes/, categories/openshift/ <- build_hub_topicmap also appends the
 #     reader's list (split 1-24 / 25-46) onto the end of each hub page, idempotently
+#   categories/kubernetes-openshift-map/topics/ <- build_topic_pages, one honest page per
+#     checklist item that isn't Live yet (stale ones removed when an item goes Live)
 #   Foundation/     <- build_foundation (topic pages + topic.css)
 #   Commands/       <- build_commands   (command references + commands.css)
 #   OpenShift/      <- build_openshift  (deep-dives + topic.css)
@@ -61,6 +63,9 @@ python3 tools/build_topicmap.py
 
 say "folding the topic list into the Kubernetes and OpenShift hub pages"
 python3 tools/build_hub_topicmap.py
+
+say "a page for every checklist item that isn't live yet"
+python3 tools/build_topic_pages.py
 
 say "topic pages"
 python3 tools/build_foundation.py fnd_a fnd_b

@@ -19,9 +19,9 @@ html[data-theme="dark"]{--page-bg:#0c0e12;--panel-bg:#14161c;--card-bg:#181b22;-
 :root{--n-live-bg:rgba(132,204,22,.16);--n-live-br:#84cc16;--n-live-fg:#3f6f0c;--n-live-dot:#84cc16;
   --n-pipe-bg:rgba(245,158,11,.13);--n-pipe-br:rgba(245,158,11,.55);--n-pipe-fg:#8a5806;
   --n-plan-bg:transparent;--n-plan-br:rgba(0,0,0,.2);--n-plan-fg:#8d8981;}
-  --n-live-bg:rgba(132,204,22,.16);--n-live-fg:#a7e137;
+html[data-theme="dark"]{--n-live-bg:rgba(132,204,22,.16);--n-live-fg:#a7e137;
   --n-pipe-bg:rgba(245,158,11,.14);--n-pipe-fg:#f5b544;
-  --n-plan-br:rgba(255,255,255,.2);--n-plan-fg:#8a877f;}}
+  --n-plan-br:rgba(255,255,255,.2);--n-plan-fg:#8a877f;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--page-bg);color:var(--page-fg);font-family:'Manrope',system-ui,sans-serif;
  -webkit-font-smoothing:antialiased;}

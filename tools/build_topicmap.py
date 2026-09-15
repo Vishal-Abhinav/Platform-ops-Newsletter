@@ -191,10 +191,10 @@ def classify():
                 rows.append((it, "L", link))
                 live += 1
             elif fh or fe:
-                rows.append((it, "P", None))
+                rows.append((it, "P", UP + topic_page_rel(title, it)))
                 pipe += 1
             else:
-                rows.append((it, "-", None))
+                rows.append((it, "-", UP + topic_page_rel(title, it)))
                 plan += 1
         out.append((title, rows))
     return out, live, pipe, plan
@@ -206,6 +206,28 @@ def esc(s):
 
 def slug(title):
     return re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+
+
+# ── per-item pages for everything that isn't Live yet ───────────────────────
+# A Live item already has a real page — that's what earned it the badge — so
+# it keeps linking straight there. A Pipeline/Planned item used to have no
+# link at all (a plain <span>, dead end). Each one now gets a real, stable
+# URL of its own via build_topic_pages.py, an honest "not written yet" page
+# rather than a duplicate or a guess — and the moment a real page covers it,
+# classify() above stops calling topic_href() for that item and it becomes a
+# normal Live link instead. One slug function, reused by both this module and
+# build_topic_pages.py, so the two can never disagree on a path.
+def topic_href(group_title, item):
+    gslug = slug(group_title)
+    islug = slug(item) or "item"
+    return f"{gslug}-{islug}"
+
+
+TOPICS_REL = "categories/kubernetes-openshift-map/topics"
+
+
+def topic_page_rel(group_title, item):
+    return f"{TOPICS_REL}/{topic_href(group_title, item)}/index.html"
 
 
 def zone_block(status_class, label, rows):

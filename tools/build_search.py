@@ -20,6 +20,14 @@ from siteconf import skip_page   # noqa: E402
 from taxonomy import PILLARS          # noqa: E402
 from hubs_spec import SPEC            # noqa: E402
 from cmd_data import ALL as COMMANDS  # noqa: E402
+# The reader's 942-item Kubernetes+OpenShift checklist (topicmap_data.py) is
+# a completely separate list from taxonomy.PILLARS above — it was never fed
+# into this index, so none of those 942 items were findable through global
+# search even though 492 of them are folded right onto the Kubernetes hub
+# page. classify() is the one place status/links are decided; reused here,
+# not re-derived, so search never disagrees with what the page itself shows.
+from build_topicmap import (classify as tm_classify, slug as tm_slug,  # noqa: E402
+                             UP as TM_UP)
 
 ASSETS = ROOT / "assets"
 ASSETS.mkdir(exist_ok=True)
@@ -53,10 +61,25 @@ for href in sorted(seen_pages):
 STANDALONE = [
     ("terminal/index.html", "Practice Terminal", "Practice"),
     ("colophon/index.html", "Colophon", "About"),
+    ("categories/kubernetes-openshift-map/index.html",
+     "Kubernetes & OpenShift — Complete Topic Map", "Reference"),
 ]
 for href, title, group in STANDALONE:
     if (ROOT / href).exists():
         rows.append([2, title, href, group, ""])
+
+# The reader's 942-item checklist, grouped exactly as classify() marks it
+# everywhere else. A live item links straight to the page that earns that
+# badge; a pipeline/planned item links to its own page under
+# categories/kubernetes-openshift-map/topics/ (build_topic_pages.py) — an
+# honest "not written yet" page rather than a dead end. classify() always
+# hands back a real href either way, so search never has to guess one.
+_tm_groups, _, _, _ = tm_classify()
+for _title, _items in _tm_groups:
+    for _name, _status, _href in _items:
+        _target = _href[len(TM_UP):] if _href.startswith(TM_UP) else _href
+        rows.append([1, _name, _target, _title,
+                     {"L": "live", "P": "pipe", "-": "plan"}[_status]])
 
 for spec in COMMANDS:
     page = f"Commands/{spec['slug'].upper()}/{spec['slug']}.html"
