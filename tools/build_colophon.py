@@ -117,6 +117,8 @@ STAGE_NOTE = {
     "build_legacy_dg": ("hub.css + the Kubernetes hub",
                         "injects a diagram into the hand-written pages that have none"),
     "build_colophon": ("everything above", "this page"),
+    "build_terminal": ("terminal_fs.py",
+                       "the practice terminal: a shell simulated over an in-memory tree"),
     "build_feed": ("the issue register", "feed.xml"),
     "build_nav": ("taxonomy", "mega-menu assets, wired into every page"),
     "build_search": ("everything on disk", "the search index, wired into every page"),

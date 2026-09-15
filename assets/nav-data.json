@@ -10,6 +10,14 @@
      "live": 7,
      "pipe": 0,
      "plan": 3
+    },
+    {
+     "name": "Roadmaps",
+     "icon": "🧭",
+     "href": "categories/roadmaps/index.html",
+     "live": 0,
+     "pipe": 0,
+     "plan": 18
     }
    ],
    "live": 7,
@@ -282,6 +290,14 @@
      "live": 1,
      "pipe": 2,
      "plan": 11
+    },
+    {
+     "name": "System Design",
+     "icon": "📐",
+     "href": "categories/system-design/index.html",
+     "live": 0,
+     "pipe": 0,
+     "plan": 46
     }
    ],
    "live": 1,

@@ -50,6 +50,18 @@ PILLARS = [
    ("Linux","L",LXF),("Unix","L",GLO),("Windows Server","-",None),
    ("Shell & Bash","L",SHB),("Python","L",PYT),("Programming Fundamentals","-",None),
    ("Data Structures & Algorithms","-",None),("Git & Version Control","L",GIT)]),
+ # Career paths rather than technologies — the "where do I start, and what
+ # comes next" question this newsletter gets asked more than any other.
+ ("Roadmaps", "🧭", [
+   ("Linux / Systems Administrator","-",None),("DevOps Engineer","-",None),
+   ("Site Reliability Engineer","-",None),("Platform Engineer","-",None),
+   ("Cloud Engineer","-",None),("Cloud Architect","-",None),
+   ("Kubernetes Administrator","-",None),("Network Engineer","-",None),
+   ("Security Engineer","-",None),("DevSecOps Engineer","-",None),
+   ("Database Administrator","-",None),("Data Engineer","-",None),
+   ("MLOps Engineer","-",None),("Observability Engineer","-",None),
+   ("Release / Build Engineer","-",None),("FinOps Engineer","-",None),
+   ("Solutions Architect","-",None),("NOC / Support Engineer","-",None)]),
 ]),
 
 ("Infrastructure", [
@@ -262,6 +274,29 @@ PILLARS = [
    ("Distributed Transactions","-",None),("Caching","-",None),("Distributed Locking","-",None),
    ("Partition Tolerance","-",None),("CAP Theorem","P",None),("Failure Domains","-",None),
    ("Quorum","L",K8E),("Distributed Coordination","-",None)]),
+ ("System Design", "📐", [
+   ("System Design Fundamentals","-",None),("Scalability","-",None),
+   ("Latency & Throughput","-",None),("Back-of-the-Envelope Estimation","-",None),
+   ("Availability & SLOs","-",None),("Consistency Models","-",None),
+   ("Sharding","-",None),("Partitioning","-",None),("Read Replicas","-",None),
+   ("Indexing Strategy","-",None),("Caching Strategies","-",None),
+   ("Cache Invalidation","-",None),("Data Modeling","-",None),
+   ("OLTP vs OLAP","-",None),("Change Data Capture","-",None),
+   ("REST API Design","-",None),("gRPC","-",None),("GraphQL","-",None),
+   ("Message Queues","-",None),("Publish / Subscribe","-",None),
+   ("Event Streaming","-",None),("Webhooks","-",None),
+   ("WebSockets & Long Polling","-",None),("Idempotency","-",None),
+   ("Load Balancing","-",None),("Reverse Proxy","-",None),
+   ("Content Delivery Networks","-",None),("Rate Limiting","-",None),
+   ("Connection Pooling","-",None),("Backpressure","-",None),
+   ("Monolith vs Microservices","-",None),("Event-Driven Architecture","-",None),
+   ("CQRS","-",None),("Saga Pattern","-",None),("Circuit Breaker","-",None),
+   ("Bulkhead Pattern","-",None),("Sidecar Pattern","-",None),
+   ("Graceful Degradation","-",None),("Multi-Region Design","-",None),
+   ("Failover Design","-",None),("Design: URL Shortener","-",None),
+   ("Design: Rate Limiter","-",None),("Design: News Feed","-",None),
+   ("Design: Chat System","-",None),("Design: Notification Service","-",None),
+   ("Design: Log Pipeline","-",None)]),
 ]),
 
 ("Commands", [

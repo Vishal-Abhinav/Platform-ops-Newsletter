@@ -171,6 +171,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/categories/roadmaps/</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/categories/security/</loc>
     <lastmod>2026-09-15</lastmod>
     <priority>0.6</priority>
@@ -197,6 +202,11 @@
   </url>
   <url>
     <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/categories/supply-chain-security/</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/categories/system-design/</loc>
     <lastmod>2026-09-15</lastmod>
     <priority>0.6</priority>
   </url>
@@ -447,6 +457,11 @@
   </url>
   <url>
     <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/SRE/INCIDENT-MANAGEMENT/incident-management.html</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/terminal/</loc>
     <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
   </url>

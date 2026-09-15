@@ -13,6 +13,7 @@
 #   Kubernetes/     <- build_k8s        (K8s + Service Mesh deep-dives)
 #   3 legacy pages  <- build_legacy_dg  (injects a .dg diagram, idempotent)
 #   colophon/       <- build_colophon   (how the site is built; SVG from make_arch_svg)
+#   terminal/       <- build_terminal   (simulated shell; FS + exercises in terminal_fs)
 #   feed.xml        <- build_feed
 #   LinkedIn column <- tools/linkedin_posts.py (hand-kept list of post URLs)
 #   assets/megamenu.* <- build_nav    (nav data, styles, behaviour)
@@ -68,6 +69,9 @@ python3 tools/build_legacy_dg.py
 
 say "colophon"
 python3 tools/build_colophon.py
+
+say "practice terminal"
+python3 tools/build_terminal.py
 
 say "feed"
 python3 tools/build_feed.py
