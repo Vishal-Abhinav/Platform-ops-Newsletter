@@ -18,7 +18,7 @@
 
 ---
 
-![Live Issues](https://img.shields.io/badge/Live%20Issues-11-e53935?style=for-the-badge&logo=gitbook&logoColor=white)
+![Live Issues](https://img.shields.io/badge/Live%20Issues-21-e53935?style=for-the-badge&logo=gitbook&logoColor=white)
 ![Glossary](https://img.shields.io/badge/Glossary-190%20Terms-f59e0b?style=for-the-badge)
 ![Stars](https://img.shields.io/github/stars/Vishal-Abhinav/Platform-ops-Newsletter?style=for-the-badge&logo=github&color=00c2d4)
 ![License](https://img.shields.io/badge/License-MIT-84cc16?style=for-the-badge)
@@ -31,7 +31,7 @@
 
 ### 🌐 **[Read it live → platform-ops-blog.vishal-abhinav.workers.dev](https://platform-ops-blog.vishal-abhinav.workers.dev/)**
 
-[📚 Issues](#-published-issues) · [🗺️ Knowledge Map](#️-knowledge-map) · [🗂️ Structure](#️-repository-structure) · [🚀 Run Locally](#-quick-start)
+[📚 Issues](#-published-issues) · [📖 Library](#-reference-library) · [🗺️ Knowledge Map](#️-knowledge-map) · [🗂️ Structure](#️-repository-structure) · [🚀 Run Locally](#-quick-start)
 
 </div>
 
@@ -45,7 +45,7 @@
 
 This repository *is* the newsletter. Every issue is a self-contained HTML page served straight from GitHub Pages — no build step, no framework, no tracking. Fork it, read it offline, or lift a diagram for your own docs.
 
-**Currently in this repo:** 11 monthly issue pages, 5 Foundation reference deep-dives, 3 command references covering 253 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 78 pages in total.
+**Currently in this repo:** 21 monthly issue pages, 5 Foundation reference deep-dives, 4 command references covering 362 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 47 category pages, 2 section hubs and a homepage index — 95 pages in total.
 
 ---
 
@@ -958,6 +958,90 @@ editions of the newsletter that have not been migrated here yet.
 
 ---
 
+## 📖 Reference Library
+
+Standing deep-dives, separate from the monthly issues. Each is an architecture diagram, a
+**core** section, an **advanced** section, worked terminal examples, a decision table and a
+cheatsheet. They carry no issue number and are not mailed out — they are the reference the
+issues link back to.
+
+| Page | Read | Sections | Covers |
+|:--|:--|:--|:--|
+| **[Computer Fundamentals](./Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html)** | 22 min | 4 core · 4 advanced | What the hardware is actually doing underneath your process |
+| **[Operating Systems](./Foundation/OPERATING-SYSTEMS/operating-systems.html)** | 26 min | 4 core · 4 advanced | The kernel as an operator sees it |
+| **[Shell & Bash](./Foundation/SHELL-AND-BASH/shell-and-bash.html)** | 23 min | 4 core · 4 advanced | How the shell reads, expands and executes a line |
+| **[Python](./Foundation/PYTHON/python.html)** | 25 min | 4 core · 4 advanced | Python for people who run things |
+| **[Git & Version Control](./Foundation/GIT-VERSION-CONTROL/git-version-control.html)** | 24 min | 4 core · 4 advanced | Git as a content-addressed object store |
+
+Expand any of them for the full contents:
+
+<details>
+<summary><b>Computer Fundamentals</b> — 22 min read, 4 core + 4 advanced sections</summary>
+
+*What the hardware is actually doing underneath your process — caches, translation, interrupts and the six orders of magnitude between L1 and a disk seek.*
+
+**The model:** Software → Kernel → Translation → Cache → Memory → Storage → Network
+
+<table><tr><th align="left">Core</th><th align="left">Advanced</th></tr>
+<tr><td valign="top"><ul><li>The execution model</li><li>Memory hierarchy and the cache line</li><li>Virtual memory, the MMU and the TLB</li><li>The storage stack</li></ul></td><td valign="top"><ul><li>NUMA — when &#x27;the RAM&#x27; is several different RAMs</li><li>Interrupts, DMA and IRQ affinity</li><li>Context switches and what they really cost</li><li>Numbers worth memorising</li></ul></td></tr></table>
+
+[Read it →](./Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html)
+</details>
+
+<details>
+<summary><b>Operating Systems</b> — 26 min read, 4 core + 4 advanced sections</summary>
+
+*The kernel as an operator sees it — the syscall boundary, the scheduler, the page cache, cgroups, and the failure modes each one produces in production.*
+
+**The model:** User Space → The Boundary → Kernel: Process → Kernel: Memory → Kernel: I/O → Drivers → Hardware
+
+<table><tr><th align="left">Core</th><th align="left">Advanced</th></tr>
+<tr><td valign="top"><ul><li>The user / kernel boundary</li><li>Processes, threads and what the scheduler sees</li><li>Virtual memory, the page cache and writeback</li><li>File descriptors, VFS and everything-is-a-file</li></ul></td><td valign="top"><ul><li>cgroups and namespaces — containers, demystified</li><li>The OOM killer and cgroup memory accounting</li><li>Signals, and why your container ignores SIGTERM</li><li>I/O paths: buffered, direct, and io_uring</li></ul></td></tr></table>
+
+[Read it →](./Foundation/OPERATING-SYSTEMS/operating-systems.html)
+</details>
+
+<details>
+<summary><b>Shell &amp; Bash</b> — 23 min read, 4 core + 4 advanced sections</summary>
+
+*How the shell reads, expands and executes a line — and why nearly every shell bug is really a quoting bug at the word-splitting stage.*
+
+**The model:** 1 · Read → 2 · Expand → 3 · Split → 4 · Redirect → 5 · Execute
+
+<table><tr><th align="left">Core</th><th align="left">Advanced</th></tr>
+<tr><td valign="top"><ul><li>Expansion order — the root of most shell bugs</li><li>Exit codes, pipelines and where failures hide</li><li>Redirection and file descriptors</li><li>Test constructs: [ vs [[ vs ((</li></ul></td><td valign="top"><ul><li>set -euo pipefail — and where it lies to you</li><li>Traps, cleanup and signal handling</li><li>Process substitution and doing without a temp file</li><li>Parallelism without a job scheduler</li></ul></td></tr></table>
+
+[Read it →](./Foundation/SHELL-AND-BASH/shell-and-bash.html)
+</details>
+
+<details>
+<summary><b>Python</b> — 25 min read, 4 core + 4 advanced sections</summary>
+
+*Python for people who run things — the GIL, choosing a concurrency model, streaming instead of loading, and the subprocess and logging patterns that survive production.*
+
+**The model:** Source → Compile → Runtime → Concurrency → Escape Hatches → Environment
+
+<table><tr><th align="left">Core</th><th align="left">Advanced</th></tr>
+<tr><td valign="top"><ul><li>The GIL — what it does and doesn&#x27;t block</li><li>Threads, processes, asyncio — picking one</li><li>Environments and dependency resolution</li><li>Generators and not loading the 40 GB file</li></ul></td><td valign="top"><ul><li>Memory: refcounting, cycles, and why RSS never drops</li><li>subprocess, done correctly</li><li>Logging that survives contact with production</li><li>Making Python fast enough</li></ul></td></tr></table>
+
+[Read it →](./Foundation/PYTHON/python.html)
+</details>
+
+<details>
+<summary><b>Git &amp; Version Control</b> — 24 min read, 4 core + 4 advanced sections</summary>
+
+*Git as a content-addressed object store — the four object types, the three trees, and the recovery paths that mean you have almost certainly not lost that work.*
+
+**The model:** Your Edits → Staging → Object Store → Refs → Safety Net → Remote
+
+<table><tr><th align="left">Core</th><th align="left">Advanced</th></tr>
+<tr><td valign="top"><ul><li>The object model — Git is a content-addressed store</li><li>The three trees</li><li>Branches are pointers, and that is the whole trick</li><li>Merge, rebase, squash — what each actually produces</li></ul></td><td valign="top"><ul><li>The reflog — why nothing is really lost</li><li>git bisect — binary search over history</li><li>Packfiles, gc, and why the clone is 4 GB</li><li>Hooks, worktrees and the bits that save real time</li></ul></td></tr></table>
+
+[Read it →](./Foundation/GIT-VERSION-CONTROL/git-version-control.html)
+</details>
+
+---
+
 ## 🗂️ Repository Structure
 
 Content is organised by **topic**, not by date — the folder path is the taxonomy.
@@ -965,43 +1049,58 @@ Content is organised by **topic**, not by date — the folder path is the taxono
 ```
 Platform-ops-Newsletter/
 │
-├── index.html                          ← Homepage: hero, knowledge map, archive, author
-├── README.md                           ← You are here
-├── LICENSE                             ← MIT
+├── index.html                       ← Homepage: hero, knowledge map, archive, author
+├── README.md                        ← You are here (generated — edit tools/README.base.md)
+├── LICENSE                          ← MIT for the code, CC BY-NC-ND 4.0 for the writing
+├── NOTICE                           ← what that dual licence means, in one page
+├── feed.xml   sitemap.xml           ← generated by build_feed.py and verify.py
 │
-├── .github/workflows/
-│   └── static.yml                      ← Deploys the whole repo to GitHub Pages
+├── tools/                           ← THE SOURCE. Everything else here is generated.
+│   ├── taxonomy.py                  ← 13 pillars, 45 categories, 685 topics — single source of truth
+│   ├── build.sh                     ← one command rebuilds the whole site
+│   └── verify.py                    ← gates the build; refuses a broken link or a wrong count
+│
+├── assets/                          ← shared components injected into every page
+│   ├── megamenu.css  megamenu.js    ← cascading Browse panel
+│   └── search.css    search.js      ← global search, 1124-entry index
+│
+├── categories/                       ← 47 pages · 46 category hubs + index
+├── Foundation/                       ← 5 pages · reference deep-dives
+├── Commands/                         ← 4 pages · 362 commands
 │
 ├── DevOps/
-│   ├── CICD/cicd-pipelines.html                        #052
+│   ├── CICD/
+│   │   └── cicd-pipelines.html                   #052
 │   └── K8/
-│       ├── index.html                                  ← Kubernetes hub
-│       ├── ARCHITECTURE/k8-architecture.html           #048
-│       ├── ERROR/K8-error.html                         #049
-│       ├── Networking/k8-networking.html               #047
-│       ├── OBSERVABILITY/k8-observability.html         #051
-│       └── STORAGE/k8-storage.html                     #050
+│       ├── index.html
+│       ├── ARCHITECTURE/
+│       │   └── k8-architecture.html              #048
+│       ├── ERROR/
+│       │   └── K8-error.html                     #049
+│       ├── Networking/
+│       │   └── k8-networking.html                #047
+│       ├── OBSERVABILITY/
+│       │   └── k8-observability.html             #051
+│       └── STORAGE/
+│           └── k8-storage.html                   #050
 │
 ├── Infrastructure/
 │   └── OS/
-│       ├── index.html                                  ← OS / Linux hub
+│       ├── index.html
 │       └── LINUX/
-│           ├── FUNDAMENTALS/linux-fundamentals.html    #054
-│           ├── ADVANCED/linux-advanced.html            #055
-│           ├── TROUBLESHOOTING/linux-troubleshooting.html  #056
-│           └── GLOSSARY/
-│               ├── linux-unix-glossary.html            #057 — 190 terms
-│               └── TERMS/fundamentals/                 ← 12 standalone term pages
-│                   ├── bash.html          ├── proc.html
-│                   ├── init.html          ├── shell.html
-│                   ├── kernel-modules.html├── sys.html
-│                   ├── linux-commands.html├── sysctl.html
-│                   ├── linux-distributions.html
-│                   ├── linux-kernel.html  ├── terminal-cli.html
-│                   └── linux-unix-fundamentals.html
+│           ├── ADVANCED/
+│           │   └── linux-advanced.html           #055
+│           ├── FUNDAMENTALS/
+│           │   └── linux-fundamentals.html       #054
+│           ├── GLOSSARY/
+│           │   ├── linux-unix-glossary.html      #057
+│           │   └── TERMS/                         ← 12 pages
+│           └── TROUBLESHOOTING/
+│               └── linux-troubleshooting.html    #056
 │
-└── SRE/
-    └── INCIDENT-MANAGEMENT/incident-management.html    #053
+├── SRE/
+│   └── INCIDENT-MANAGEMENT/
+│       └── incident-management.html              #053
 ```
 
 **Convention:** each issue is one self-contained `.html` file — inline CSS, inline JS, no external
@@ -1088,20 +1187,21 @@ and a half-applied edit can never accumulate.
 | 6 | `build_sticky.py` | — | pins the Latest Issues panel beside the map |
 | 7 | `build_author.py` | `linkedin_posts.py` | author profile + LinkedIn column |
 | 8 | `build_hubs.py` | taxonomy + `hubs_spec.py` | 43 category hubs, their diagrams and cross-links |
-| 9 | `build_foundation.py` | `fnd_a.py`, `fnd_b.py` | the Foundation deep-dives |
-| 10 | `build_openshift.py` | `ocp_a.py`–`ocp_c.py` | the OpenShift deep-dives |
-| 11 | `build_k8s.py` | `k8s_a.py`, `k8s_b.py`, `mesh_a.py` | the Kubernetes and Service Mesh deep-dives |
-| 12 | `build_commands.py` | `cmd_data.py` | the command references |
-| 13 | `build_legacy_dg.py` | `categories/hub.css` + the built Kubernetes hub | injects a `.dg` diagram into the 3 hand-written pages that have none |
-| 14 | `build_legacy_chrome.py` | `chrome.py` + the register | one nav, one footer and a theme toggle on the 25 hand-written pages, which had twenty-three different bars between them |
-| 15 | `build_colophon.py` | everything above + the rendered SVGs | `colophon/index.html` — how the site is built, on the site |
-| 16 | `build_terminal.py` | `terminal_fs.py` | `terminal/index.html` — a Unix shell simulated over an in-memory filesystem |
-| 17 | `build_feed.py` | the register | `feed.xml` |
-| 18 | `build_nav.py` | taxonomy | mega-menu assets, wired into every page |
-| 19 | `build_search.py` | everything on disk | the search index, wired into every page |
-| 20 | `build_seo.py` | each page + register | JSON-LD, article dates, per-issue `og:image` |
-| 21 | `build_canonical.py` | `siteconf.BASE` | rewrites every origin to the canonical one |
-| 22 | `verify.py` | the built site | `sitemap.xml`, **and a non-zero exit if anything is wrong** |
+| 9 | `build_topicmap.py` | `topicmap_data.py` (46-group reader topic list) | the Kubernetes & OpenShift Complete Topic Map — every item marked live / pipeline / planned |
+| 10 | `build_foundation.py` | `fnd_a.py`, `fnd_b.py` | the Foundation deep-dives |
+| 11 | `build_openshift.py` | `ocp_a.py`–`ocp_c.py` | the OpenShift deep-dives |
+| 12 | `build_k8s.py` | `k8s_a.py`, `k8s_b.py`, `mesh_a.py` | the Kubernetes and Service Mesh deep-dives |
+| 13 | `build_commands.py` | `cmd_data.py` | the command references |
+| 14 | `build_legacy_dg.py` | `categories/hub.css` + the built Kubernetes hub | injects a `.dg` diagram into the 3 hand-written pages that have none |
+| 15 | `build_legacy_chrome.py` | `chrome.py` | wires the shared nav, footer, and theme toggle onto the 25 hand-written pages |
+| 16 | `build_colophon.py` | everything above + the rendered SVGs | `colophon/index.html` — how the site is built, on the site |
+| 17 | `build_terminal.py` | `terminal_fs.py` | `terminal/index.html` — a Unix shell simulated over an in-memory filesystem |
+| 18 | `build_feed.py` | the register | `feed.xml` |
+| 19 | `build_nav.py` | taxonomy | mega-menu assets, wired into every page |
+| 20 | `build_search.py` | everything on disk | the search index, wired into every page |
+| 21 | `build_seo.py` | each page + register | JSON-LD, article dates, per-issue `og:image` |
+| 22 | `build_canonical.py` | `siteconf.BASE` | rewrites every origin to the canonical one |
+| 23 | `verify.py` | the built site | `sitemap.xml`, **and a non-zero exit if anything is wrong** |
 
 Stages 17–20 are whole-site passes: they walk every page that exists at that point and inject
 the same chrome into all of them. That is why a new page needs no wiring of its own — it is
@@ -1215,16 +1315,16 @@ The homepage is a single hand-written HTML file with no framework behind it:
 |:--------|:-------------|
 | 🌓 **Dark / light toggle** | Theme switch in the nav, remembered via `localStorage`, applied before first paint so there's no flash |
 | ♾️ **Animated DevOps loop** | SVG infinity loop with the eight lifecycle stages and a light pulse racing the path |
-| 🗺️ **Knowledge map** | All 521 topics, grouped into 33 categories under 10 pillars — search by name, filter by status, open a pillar to see what's shipped and what's queued |
-| 🖥️ **Coverage terminal** | Terminal-style `tree` view of the ten pillars with live-vs-total counts, and a `ls published/` listing that links straight into every issue |
+| 🗺️ **Knowledge map** | All 685 topics, grouped into 45 categories under 13 pillars — search by name, filter by status, open a pillar to see what's shipped and what's queued |
+| 🖥️ **Coverage terminal** | Terminal-style `tree` view of the 13 pillars with live-vs-total counts, and a `ls published/` listing that links straight into every issue |
 | 🔔 **Topic requests** | Clicking a pipeline or planned topic queues it; the signup then tells Kit which topics that reader is waiting for |
-| 📡 **RSS** | `feed.xml` carries all 11 issues, and every page advertises it in its `<head>` |
+| 📡 **RSS** | `feed.xml` carries all 21 issues, and every page advertises it in its `<head>` |
 | 📌 **Pinned archive** | On desktop Latest Issues is pinned beside the map and scrolls inside itself, so the issues stay one glance away however far down the map you are |
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
-| 🧭 **Mega-menu** | Cascading browse panel on every page — 11 pillars, 43 categories, with live counts |
-| ⌨️ **Command references** | Searchable, group-filtered command tables — 253 commands so far |
-| 🔍 **Global search** | Centred in the nav of every page — 0 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
-| 🧩 **Category hubs** | Every one of the 0 categories has its own page with a generated architecture diagram and its full topic list |
+| 🧭 **Mega-menu** | Cascading browse panel on every page — 13 pillars, 45 categories, with live counts |
+| ⌨️ **Command references** | Searchable, group-filtered command tables — 362 commands so far |
+| 🔍 **Global search** | Centred in the nav of all 95 pages — 1124 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
+| 🧩 **Category hubs** | Every one of the 45 categories has its own page with a generated architecture diagram and its full topic list |
 | 💼 **LinkedIn column** | The author section carries the latest posts beside the profile, driven by `tools/linkedin_posts.py` |
 | 🦶 **Shared footer** | One footer across every page, with links rebuilt per directory depth |
 
@@ -1232,7 +1332,7 @@ The homepage is a single hand-written HTML file with no framework behind it:
 
 ## 🔔 Topic Requests
 
-456 of the 521 topics have no page yet, so a reader who finds one has nowhere to go.
+531 of the 685 topics have no page yet, so a reader who finds one has nowhere to go.
 Clicking a pipeline or planned topic queues it instead. The queue rides along with
 the signup as a Kit custom field, which turns the backlog into a ranked list of what
 people are actually waiting for.

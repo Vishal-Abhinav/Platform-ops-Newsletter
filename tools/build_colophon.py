@@ -111,6 +111,9 @@ STAGE_NOTE = {
     "build_sticky": ("—", "pins the Latest Issues panel beside the map"),
     "build_author": ("linkedin_posts.py", "author profile + LinkedIn column"),
     "build_hubs": ("taxonomy + hubs_spec.py", "the category hubs, diagrams and cross-links"),
+    "build_topicmap": ("topicmap_data.py (46-group reader topic list)",
+                       "the Kubernetes & OpenShift Complete Topic Map, every item marked "
+                       "live / pipeline / planned"),
     "build_foundation": ("fnd_a.py, fnd_b.py", "the Foundation deep-dives"),
     "build_openshift": ("ocp_a.py – ocp_c.py", "the OpenShift deep-dives"),
     "build_k8s": ("k8s_a.py, k8s_b.py, mesh_a.py", "the Kubernetes and Service Mesh deep-dives"),
