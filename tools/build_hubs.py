@@ -48,6 +48,42 @@ PAGES = {
    "High load, memory and OOM, disk and I/O, network, and boot failures."),
  "Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html": ("#057", "Linux & Unix Glossary",
    "190 terms across 15 categories, searchable, with deep-dive term pages."),
+ # #058-#067 — added late; this dict duplicates build_feed.ISSUES instead of
+ # importing it, and nobody updated it when these ten issues went out, so
+ # every hub card for them fell back to (path, "") — a blank issue number and
+ # the raw file path standing in for a title. Titles/blurbs below match
+ # build_feed.ISSUES verbatim, not reworded, so the two registers agree.
+ "OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html": ("#058", "OpenShift Architecture & Fundamentals",
+   "What the distribution adds on top of Kubernetes — CVO, projects, the operator pattern, "
+   "MachineConfig, SCC admission, image streams and etcd."),
+ "OpenShift/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html": ("#059", "OpenShift Networking & Storage",
+   "Routes and the four TLS modes, OVN-Kubernetes and the MTU fault everybody misdiagnoses, "
+   "NetworkPolicy isolation, storage binding and access modes, and the CSI chain."),
+ "OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html": ("#060", "OpenShift Operations",
+   "Monitoring that is half switched off by default, LogQL that returns before it times out, "
+   "the four security gates, and the upgrade that stops on one PodDisruptionBudget."),
+ "Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html": ("#061", "Kubernetes Workloads",
+   "ReplicaSets and why a stuck rollout is legible, DaemonSets and the update strategy that "
+   "silently never rolls, Jobs and CronJobs, and the liveness probe that causes a restart storm."),
+ "Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html": ("#062", "Kubernetes Config & Access",
+   "ConfigMaps that update in place except when they do not, Secrets that are encoded rather "
+   "than encrypted, namespace isolation, and RBAC's one purely-additive rule."),
+ "Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html": ("#063", "Kubernetes Scheduling",
+   "Taints as the node's veto and the NoExecute effect that evicts running pods, affinity as "
+   "the pod's request, the topologyKey anti-affinity needs, and why Pending reads verbatim."),
+ "Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html": ("#064", "Kubernetes Autoscaling",
+   "The HPA algorithm and the missing resource request that silently disables it, VPA as a "
+   "measuring tool first, why the two fight on CPU, and the pod that pins a node against scale-down."),
+ "Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html": ("#065", "Kubernetes Cluster Operations",
+   "Pod Security's warn-before-enforce rollout, the removed API that takes workloads with it "
+   "on upgrade, etcd snapshot vs. real backup, and the three cluster failures that stay silent."),
+ "Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html": ("#066", "Service Mesh Fundamentals",
+   "What a sidecar mesh actually buys and what it costs, the four Envoy objects every mesh CRD "
+   "renders into, what service discovery adds on top of kube-dns, and the silent L7 footgun."),
+ "Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html": ("#067", "Service Mesh Operations",
+   "mTLS identity that turns policy into a statement about services, the AuthorizationPolicy "
+   "default that flips one workload to deny, retries that multiply through a call graph, "
+   "and the trace headers your application still has to forward itself."),
  # Reference deep-dives — not monthly issues, so they carry no issue number.
  "Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html": ("Reference", "Computer Fundamentals",
    "Caches, translation, interrupts, and the six orders of magnitude between L1 and a disk seek."),
@@ -65,6 +101,8 @@ PAGES = {
    "62 kubectl commands by task — inspect, apply, debug, roll out, and script the output."),
  "Commands/DOCKER-COMMANDS/docker-commands.html": ("Reference", "Docker Commands",
    "59 commands — run, build, inspect, network, compose, and reclaim the disk."),
+ "Commands/OPENSHIFT-COMMANDS/openshift-commands.html": ("Reference", "OpenShift Commands",
+   "109 oc commands in 7 groups — projects, routes, builds, operators, and debug."),
 }
 
 STATUS_FILL = {"live": "var(--n-live-bg)", "pipe": "var(--n-pipe-bg)", "plan": "var(--n-plan-bg)"}
@@ -593,6 +631,11 @@ for idx, cname in enumerate(ORDER):
     <div class="stat"><b>{len(pages)}</b><i>Issues</i></div>
   </div>
   <div class="progress">{flexes(l, p, n)}</div>
+  {f'<p class="lede" style="margin-top:14px">These {total} count only topics already tied to a '
+    f'published issue in this curated set — that is why it can read {l} of {total} live. For every '
+    f'topic a reader might actually search for, including what is still pending, see '
+    f'<a href="#complete-topic-list">the complete topic &amp; error list</a> below.</p>'
+    if cname in ("Kubernetes", "OpenShift") else ''}
 </div></header>
 
 <section><div class="wrap">
