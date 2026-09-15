@@ -15,6 +15,7 @@
 #   assets/megamenu.* <- build_nav    (nav data, styles, behaviour)
 #   sitemap.xml     <- verify.py
 #   canonical URLs  <- tools/siteconf.py (BASE) via build_canonical.py
+#   JSON-LD         <- build_seo       (schema.org, from each page + build_feed)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -64,6 +65,9 @@ python3 tools/build_nav.py
 
 say "global search (index + wiring into every page)"
 python3 tools/build_search.py
+
+say "structured data (JSON-LD + article dates)"
+python3 tools/build_seo.py
 
 say "canonical origin (every page -> siteconf.BASE)"
 python3 tools/build_canonical.py

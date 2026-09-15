@@ -981,7 +981,7 @@ Platform-ops-Newsletter/
 │
 ├── assets/                          ← shared components injected into every page
 │   ├── megamenu.css  megamenu.js    ← cascading Browse panel
-│   └── search.css    search.js      ← global search, 937-entry index
+│   └── search.css    search.js      ← global search, 939-entry index
 │
 ├── categories/                       ← 44 pages · 43 category hubs + index
 ├── Foundation/                       ← 5 pages · reference deep-dives
@@ -1044,7 +1044,7 @@ The homepage is a single hand-written HTML file with no framework behind it:
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
 | 🧭 **Mega-menu** | Cascading browse panel on every page — 11 pillars, 43 categories, with live counts |
 | ⌨️ **Command references** | Searchable, group-filtered command tables — 253 commands so far |
-| 🔍 **Global search** | Centred in the nav of all 81 pages — 937 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
+| 🔍 **Global search** | Centred in the nav of all 81 pages — 939 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
 | 🧩 **Category hubs** | Every one of the 43 categories has its own page with a generated architecture diagram and its full topic list |
 | 💼 **LinkedIn column** | The author section carries the latest posts beside the profile, driven by `tools/linkedin_posts.py` |
 | 🦶 **Shared footer** | One footer across every page, with links rebuilt per directory depth |
