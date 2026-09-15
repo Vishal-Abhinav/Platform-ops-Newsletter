@@ -10,6 +10,7 @@
 #   Foundation/     <- build_foundation (topic pages + topic.css)
 #   Commands/       <- build_commands   (command references + commands.css)
 #   OpenShift/      <- build_openshift  (deep-dives + topic.css)
+#   Kubernetes/     <- build_k8s        (K8s + Service Mesh deep-dives)
 #   feed.xml        <- build_feed
 #   LinkedIn column <- tools/linkedin_posts.py (hand-kept list of post URLs)
 #   assets/megamenu.* <- build_nav    (nav data, styles, behaviour)
@@ -53,6 +54,9 @@ python3 tools/build_foundation.py fnd_a fnd_b
 
 say "OpenShift deep-dives"
 python3 tools/build_openshift.py ocp_a ocp_b ocp_c
+
+say "Kubernetes + Service Mesh deep-dives"
+python3 tools/build_k8s.py k8s_a k8s_b mesh_a
 
 say "command references"
 python3 tools/build_commands.py

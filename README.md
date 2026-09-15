@@ -18,7 +18,7 @@
 
 ---
 
-![Live Issues](https://img.shields.io/badge/Live%20Issues-60-e53935?style=for-the-badge&logo=gitbook&logoColor=white)
+![Live Issues](https://img.shields.io/badge/Live%20Issues-21-e53935?style=for-the-badge&logo=gitbook&logoColor=white)
 ![Glossary](https://img.shields.io/badge/Glossary-190%20Terms-f59e0b?style=for-the-badge)
 ![Stars](https://img.shields.io/github/stars/Vishal-Abhinav/Platform-ops-Newsletter?style=for-the-badge&logo=github&color=00c2d4)
 ![License](https://img.shields.io/badge/License-MIT-84cc16?style=for-the-badge)
@@ -45,7 +45,7 @@
 
 This repository *is* the newsletter. Every issue is a self-contained HTML page served straight from GitHub Pages — no build step, no framework, no tracking. Fork it, read it offline, or lift a diagram for your own docs.
 
-**Currently in this repo:** 14 monthly issue pages, 5 Foundation reference deep-dives, 4 command references covering 362 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 81 pages in total.
+**Currently in this repo:** 21 monthly issue pages, 5 Foundation reference deep-dives, 4 command references covering 362 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 82 pages in total.
 
 ---
 
@@ -63,13 +63,13 @@ of truth, so the numbers here and there can never disagree.
 | `03` | **Networking** | 1 | 1 | 4 | 26 | 31 |
 | `04` | **Cloud** | 1 | 0 | 4 | 13 | 17 |
 | `05` | **Delivery** | 6 | 12 | 22 | 42 | 76 |
-| `06` | **Kubernetes** | 3 | 29 | 15 | 14 | 58 |
+| `06` | **Kubernetes** | 3 | 58 | 0 | 0 | 58 |
 | `07` | **Reliability** | 7 | 27 | 25 | 64 | 116 |
 | `08` | **Security** | 2 | 0 | 18 | 28 | 46 |
 | `09` | **Data & Applications** | 4 | 1 | 12 | 47 | 60 |
 | `10` | **Commands** | 10 | 44 | 34 | 22 | 100 |
 | `11` | **Modern Ops** | 5 | 3 | 21 | 45 | 69 |
-| | **Total** | **43** | **125** | **163** | **333** | **621** |
+| | **Total** | **43** | **154** | **148** | **319** | **621** |
 
 **Status meanings**
 
@@ -79,7 +79,7 @@ of truth, so the numbers here and there can never disagree.
 | 🔸 **Pipeline** | Next up — adjacent to a series already running, so it's queued rather than hypothetical. |
 | · **Planned** | On the backlog. No date attached; it moves to pipeline when the series in front of it lands. |
 
-Live topics point at the 23 deep-dives already in this repo — 11 monthly issues plus the
+Live topics point at the 30 deep-dives already in this repo — 11 monthly issues plus the
 Foundation reference pages — so one page can light up several topics at once. Issue #051 alone
 covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
 
@@ -307,44 +307,44 @@ covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
 </details>
 
 <details>
-<summary><b>06 · Kubernetes</b> — 3 categories · 29 live · 15 pipeline · 14 planned</summary>
+<summary><b>06 · Kubernetes</b> — 3 categories · 58 live · 0 pipeline · 0 planned</summary>
 
-**☸️ Kubernetes** — 16 live · 13 pipeline · 6 planned  
+**☸️ Kubernetes** — 35 live · 0 pipeline · 0 planned  
 ✅ [Kubernetes Fundamentals](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
 ✅ [Kubernetes Architecture](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
 ✅ [Pods](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
 ✅ [Deployments](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
-🔸 ReplicaSets &nbsp;
-🔸 DaemonSets &nbsp;
+✅ [ReplicaSets](./Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html) &nbsp;
+✅ [DaemonSets](./Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html) &nbsp;
 ✅ [StatefulSets](./DevOps/K8/STORAGE/k8-storage.html) &nbsp;
-· Jobs / CronJobs &nbsp;
+✅ [Jobs / CronJobs](./Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html) &nbsp;
 ✅ [Services](./DevOps/K8/Networking/k8-networking.html) &nbsp;
 ✅ [Ingress](./DevOps/K8/Networking/k8-networking.html) &nbsp;
-🔸 ConfigMaps &nbsp;
-🔸 Secrets &nbsp;
+✅ [ConfigMaps](./Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html) &nbsp;
+✅ [Secrets](./Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html) &nbsp;
 ✅ [Volumes](./DevOps/K8/STORAGE/k8-storage.html) &nbsp;
 ✅ [Persistent Volumes](./DevOps/K8/STORAGE/k8-storage.html) &nbsp;
 ✅ [Storage Classes](./DevOps/K8/STORAGE/k8-storage.html) &nbsp;
-🔸 RBAC &nbsp;
-🔸 Namespaces &nbsp;
+✅ [RBAC](./Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html) &nbsp;
+✅ [Namespaces](./Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html) &nbsp;
 ✅ [Resource Requests/Limits](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
-🔸 Probes &nbsp;
+✅ [Probes](./Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html) &nbsp;
 ✅ [Scheduling](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
-🔸 Taints / Tolerations &nbsp;
-🔸 Affinity / Anti-Affinity &nbsp;
-🔸 Autoscaling &nbsp;
-🔸 HPA &nbsp;
-🔸 VPA &nbsp;
-· Cluster Autoscaling &nbsp;
+✅ [Taints / Tolerations](./Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html) &nbsp;
+✅ [Affinity / Anti-Affinity](./Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html) &nbsp;
+✅ [Autoscaling](./Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html) &nbsp;
+✅ [HPA](./Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html) &nbsp;
+✅ [VPA](./Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html) &nbsp;
+✅ [Cluster Autoscaling](./Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html) &nbsp;
 ✅ [Kubernetes Networking](./DevOps/K8/Networking/k8-networking.html) &nbsp;
 ✅ [CNI](./DevOps/K8/Networking/k8-networking.html) &nbsp;
 ✅ [CSI](./DevOps/K8/STORAGE/k8-storage.html) &nbsp;
-🔸 Kubernetes Security &nbsp;
+✅ [Kubernetes Security](./Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html) &nbsp;
 ✅ [Kubernetes Troubleshooting](./DevOps/K8/ERROR/K8-error.html) &nbsp;
-· Kubernetes Upgrade &nbsp;
-· Kubernetes Backup &nbsp;
-· Multi-Cluster Kubernetes &nbsp;
-· Kubernetes Disaster Recovery &nbsp;
+✅ [Kubernetes Upgrade](./Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html) &nbsp;
+✅ [Kubernetes Backup](./Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html) &nbsp;
+✅ [Multi-Cluster Kubernetes](./Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html) &nbsp;
+✅ [Kubernetes Disaster Recovery](./Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html) &nbsp;
 
 **🔴 OpenShift** — 13 live · 0 pipeline · 0 planned  
 ✅ [OpenShift Fundamentals](./OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html) &nbsp;
@@ -361,17 +361,17 @@ covers Prometheus, Grafana, Loki, Jaeger and distributed tracing.
 ✅ [OpenShift Troubleshooting](./OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html) &nbsp;
 ✅ [OpenShift Upgrades](./OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html) &nbsp;
 
-**🕸️ Service Mesh** — 0 live · 2 pipeline · 8 planned  
-🔸 Service Mesh &nbsp;
-🔸 Istio &nbsp;
-· Envoy &nbsp;
-· Linkerd &nbsp;
-· Traffic Management &nbsp;
-· mTLS &nbsp;
-· Service-to-Service Security &nbsp;
-· Service Discovery &nbsp;
-· Observability in Service Mesh &nbsp;
-· Multi-Cluster Service Mesh &nbsp;
+**🕸️ Service Mesh** — 10 live · 0 pipeline · 0 planned  
+✅ [Service Mesh](./Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html) &nbsp;
+✅ [Istio](./Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html) &nbsp;
+✅ [Envoy](./Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html) &nbsp;
+✅ [Linkerd](./Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html) &nbsp;
+✅ [Traffic Management](./Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html) &nbsp;
+✅ [mTLS](./Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html) &nbsp;
+✅ [Service-to-Service Security](./Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html) &nbsp;
+✅ [Service Discovery](./Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html) &nbsp;
+✅ [Observability in Service Mesh](./Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html) &nbsp;
+✅ [Multi-Cluster Service Mesh](./Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html) &nbsp;
 
 </details>
 
@@ -981,11 +981,11 @@ Platform-ops-Newsletter/
 │
 ├── assets/                          ← shared components injected into every page
 │   ├── megamenu.css  megamenu.js    ← cascading Browse panel
-│   └── search.css    search.js      ← global search, 939-entry index
+│   └── search.css    search.js      ← global search, 1049-entry index
 │
 ├── categories/                       ← 44 pages · 43 category hubs + index
 ├── Foundation/                       ← 5 pages · reference deep-dives
-├── Commands/                         ← 3 pages · 362 commands
+├── Commands/                         ← 4 pages · 362 commands
 │
 ├── DevOps/
 │   ├── CICD/
@@ -1039,12 +1039,12 @@ The homepage is a single hand-written HTML file with no framework behind it:
 | 🗺️ **Knowledge map** | All 621 topics, grouped into 43 categories under 11 pillars — search by name, filter by status, open a pillar to see what's shipped and what's queued |
 | 🖥️ **Coverage terminal** | Terminal-style `tree` view of the 11 pillars with live-vs-total counts, and a `ls published/` listing that links straight into every issue |
 | 🔔 **Topic requests** | Clicking a pipeline or planned topic queues it; the signup then tells Kit which topics that reader is waiting for |
-| 📡 **RSS** | `feed.xml` carries all 14 issues, and every page advertises it in its `<head>` |
+| 📡 **RSS** | `feed.xml` carries all 21 issues, and every page advertises it in its `<head>` |
 | 📌 **Pinned archive** | On desktop Latest Issues is pinned beside the map and scrolls inside itself, so the issues stay one glance away however far down the map you are |
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
 | 🧭 **Mega-menu** | Cascading browse panel on every page — 11 pillars, 43 categories, with live counts |
 | ⌨️ **Command references** | Searchable, group-filtered command tables — 362 commands so far |
-| 🔍 **Global search** | Centred in the nav of all 81 pages — 939 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
+| 🔍 **Global search** | Centred in the nav of all 82 pages — 1049 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
 | 🧩 **Category hubs** | Every one of the 43 categories has its own page with a generated architecture diagram and its full topic list |
 | 💼 **LinkedIn column** | The author section carries the latest posts beside the profile, driven by `tools/linkedin_posts.py` |
 | 🦶 **Shared footer** | One footer across every page, with links rebuilt per directory depth |
@@ -1053,7 +1053,7 @@ The homepage is a single hand-written HTML file with no framework behind it:
 
 ## 🔔 Topic Requests
 
-496 of the 621 topics have no page yet, so a reader who finds one has nowhere to go.
+467 of the 621 topics have no page yet, so a reader who finds one has nowhere to go.
 Clicking a pipeline or planned topic queues it instead. The queue rides along with
 the signup as a Kit custom field, which turns the backlog into a ranked list of what
 people are actually waiting for.

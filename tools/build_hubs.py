@@ -296,6 +296,17 @@ button.chip{cursor:pointer;line-height:1.5;font-family:'DM Mono',monospace;}
 .hint b{color:var(--crimson);font-weight:400;}
 
 .siblings{display:flex;flex-wrap:wrap;gap:2px;background:var(--line-1);border:1px solid var(--line-1);}
+.mates{display:flex;flex-wrap:wrap;gap:2px;background:var(--line-1);border:1px solid var(--line-1);}
+.mate{flex:1 1 280px;background:var(--card-bg);padding:20px 22px;text-decoration:none;
+ display:flex;flex-direction:column;gap:5px;transition:background .18s;}
+.mate:hover{background:var(--panel-bg);}
+.mate .k{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.8px;
+ text-transform:uppercase;color:var(--crimson);}
+.mate .n{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;
+ color:var(--heading-fg);}
+.mate .c{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.2px;color:var(--muted);}
+.mate .go{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.4px;
+ color:var(--crimson);margin-top:6px;}
 .sib{flex:1 1 200px;background:var(--card-bg);padding:16px 18px;text-decoration:none;
  transition:background .2s;}
 .sib:hover{background:var(--panel-bg);}
@@ -502,6 +513,64 @@ OUT.mkdir(parents=True)
 pillar_of = {c: CATS[c]["pillar"] for c in ORDER}
 built = []
 
+# ── concept hub <-> command reference ──────────────────────────────────────
+# Two hubs can cover the same subject — "OpenShift" explains it, "OpenShift
+# Commands" lists the commands you run — and neither linked to the other. A
+# reader on one had no route to the other, which is the hub's whole job.
+#
+# Most pairs match by name (Kubernetes / Kubernetes Commands). The rest need
+# saying, because the concept category is named for the idea and the reference
+# for the tool. Pairing is derived, so a command reference written later is
+# cross-linked the day its category appears — no list to remember to update.
+COMMAND_ALIAS = {
+    "Docker Commands":      "Containers",
+    "Ansible Commands":     "Configuration Management",
+    "Terraform Commands":   "Infrastructure as Code",
+    "Performance Commands": "Performance Engineering",
+    "Linux Commands":       "Foundation",
+    "systemd Commands":     "Foundation",
+}
+SUFFIX = " Commands"
+
+
+def _concept_for(cmd_cat):
+    """The concept category a '<X> Commands' hub belongs with, if it exists."""
+    base = COMMAND_ALIAS.get(cmd_cat) or cmd_cat[:-len(SUFFIX)]
+    return base if base in ORDER and base != cmd_cat else None
+
+
+def companions_of(cname):
+    """Hubs on the same subject as this one. Both directions."""
+    if cname.endswith(SUFFIX):
+        mate = _concept_for(cname)
+        return [mate] if mate else []
+    # a concept category can have more than one reference — Foundation covers
+    # both the Linux and systemd command sets
+    return [c for c in ORDER if c.endswith(SUFFIX) and _concept_for(c) == cname]
+
+
+def companion_block(cname):
+    mates = companions_of(cname)
+    if not mates:
+        return ""
+    to_commands = not cname.endswith(SUFFIX)
+    lead = ("The commands for this, in a searchable reference."
+            if to_commands else
+            "The concepts behind these commands — architecture, failure modes and "
+            "how to reason about them.")
+    links = ""
+    for m in mates:
+        ml, mp, mn = cat_stats(CATS[m]["topics"])
+        links += (f'<a class="mate" href="../{SPEC[m][0]}/index.html">'
+                  f'<span class="k">{"Command reference" if to_commands else "Deep dives"}</span>'
+                  f'<span class="n">{CATS[m]["icon"]} {esc(m)}</span>'
+                  f'<span class="c">{ml} live · {mp} pipe · {mn} planned</span>'
+                  f'<span class="go">Open →</span></a>')
+    return ('<section><div class="wrap"><h2>ALSO ON THIS SUBJECT</h2>'
+            f'<p class="lede">{lead}</p>'
+            f'<div class="mates">{links}</div></div></section>')
+
+
 for idx, cname in enumerate(ORDER):
     info = CATS[cname]
     slug, tagline, _layers = SPEC[cname]
@@ -601,6 +670,8 @@ for idx, cname in enumerate(ORDER):
 </div></section>
 
 {published_block}
+
+{companion_block(cname)}
 
 <section><div class="wrap">
   <h2>ALL {total} TOPICS</h2>

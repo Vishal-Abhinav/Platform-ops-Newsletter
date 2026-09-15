@@ -123,6 +123,17 @@ button.chip{cursor:pointer;line-height:1.5;font-family:'DM Mono',monospace;}
 .hint b{color:var(--crimson);font-weight:400;}
 
 .siblings{display:flex;flex-wrap:wrap;gap:2px;background:var(--line-1);border:1px solid var(--line-1);}
+.mates{display:flex;flex-wrap:wrap;gap:2px;background:var(--line-1);border:1px solid var(--line-1);}
+.mate{flex:1 1 280px;background:var(--card-bg);padding:20px 22px;text-decoration:none;
+ display:flex;flex-direction:column;gap:5px;transition:background .18s;}
+.mate:hover{background:var(--panel-bg);}
+.mate .k{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.8px;
+ text-transform:uppercase;color:var(--crimson);}
+.mate .n{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;
+ color:var(--heading-fg);}
+.mate .c{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.2px;color:var(--muted);}
+.mate .go{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.4px;
+ color:var(--crimson);margin-top:6px;}
 .sib{flex:1 1 200px;background:var(--card-bg);padding:16px 18px;text-decoration:none;
  transition:background .2s;}
 .sib:hover{background:var(--panel-bg);}

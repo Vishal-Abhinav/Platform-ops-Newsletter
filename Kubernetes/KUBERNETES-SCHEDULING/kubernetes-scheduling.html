@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes Scheduling · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="Taints as the node&#x27;s veto and the NoExecute effect that evicts what is already running, affinity as the pod&#x27;s request, the topologyKey that gives anti-affinity its meaning, and why Pending is always a filtering result you can read verbatim.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
+<meta property="article:published_time" content="2026-09-15T11:00:00+00:00">
+<meta property="article:modified_time" content="2026-09-15T11:00:00+00:00">
+<meta property="article:author" content="Vishal Abhinav">
+<link rel="canonical" href="https://platform-ops-blog.vishal-abhinav.workers.dev/Foundation/KUBERNETES-SCHEDULING/kubernetes-scheduling.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Kubernetes Scheduling · Platform Ops">
+<meta property="og:description" content="Taints as the node&#x27;s veto and the NoExecute effect that evicts what is already running, affinity as the pod&#x27;s request, the topologyKey that gives anti-affinity its meaning, and why Pending is always a filtering result you can read verbatim.">
+<meta property="og:url" content="https://platform-ops-blog.vishal-abhinav.workers.dev/Foundation/KUBERNETES-SCHEDULING/kubernetes-scheduling.html">
+<meta property="og:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/i063.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Kubernetes Scheduling · Platform Ops">
+<meta name="twitter:description" content="Taints as the node&#x27;s veto and the NoExecute effect that evicts what is already running, affinity as the pod&#x27;s request, the topologyKey that gives anti-affinity its meaning, and why Pending is always a filtering result you can read verbatim.">
+<meta name="twitter:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/i063.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="../../feed.xml">
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="stylesheet" href="../topic.css">
+<link rel="stylesheet" href="../../assets/megamenu.css">
+<script defer src="../../assets/megamenu.js" data-root="../../"></script>
+<link rel="stylesheet" href="../../assets/search.css">
+<script defer src="../../assets/search.js" data-root="../../"></script>
+<!-- seo:jsonld -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kubernetes Scheduling","description":"Taints as the node's veto and the NoExecute effect that evicts what is already running, affinity as the pod's request, the topologyKey that gives anti-affinity its meaning, and why Pending is always a filtering result you can read verbatim.","url":"https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html","mainEntityOfPage":{"@type":"WebPage","@id":"https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html"},"datePublished":"2026-09-15T11:00:00+00:00","dateModified":"2026-09-15T11:00:00+00:00","author":{"@type":"Person","name":"Vishal Abhinav","url":"https://www.linkedin.com/in/vishal-abhinav/","jobTitle":"Platform Ops Engineer","sameAs":["https://www.linkedin.com/in/vishal-abhinav/","https://github.com/Vishal-Abhinav","https://www.researchgate.net/profile/Vishal-Abhinav/research","https://www.hackerrank.com/Vishal_Abhinav"]},"publisher":{"@type":"Organization","name":"Platform Ops","url":"https://platform-ops-blog.vishal-abhinav.workers.dev/","logo":{"@type":"ImageObject","url":"https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/home.png"}},"image":"https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/i063.png","inLanguage":"en","isAccessibleForFree":true,"articleSection":"Platform Engineering"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://platform-ops-blog.vishal-abhinav.workers.dev/"},{"@type":"ListItem","position":2,"name":"Categories","item":"https://platform-ops-blog.vishal-abhinav.workers.dev/categories/index.html"},{"@type":"ListItem","position":3,"name":"Kubernetes","item":"https://platform-ops-blog.vishal-abhinav.workers.dev/categories/kubernetes/index.html"},{"@type":"ListItem","position":4,"name":"Kubernetes Scheduling","item":"https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html"}]}</script>
+<!-- /seo:jsonld -->
+</head>
+<body>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb"><a href="../../index.html">Home</a><span>/</span><a href="../../categories/index.html">Categories</a><span>/</span><a href="../../categories/kubernetes/index.html">Kubernetes</a><span>/</span><span class="cur">Kubernetes Scheduling</span></div>
+  <div class="nav-right"><button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button><a href="../../index.html#subscribe" class="nav-logo"
+    style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Kubernetes · Core</div>
+  <h1>Kubernetes Scheduling</h1>
+  <p class="sub">Taints as the node&#x27;s veto and the NoExecute effect that evicts what is already running, affinity as the pod&#x27;s request, the topologyKey that gives anti-affinity its meaning, and why Pending is always a filtering result you can read verbatim.</p>
+  <div class="meta"><span><b>22 min</b> read</span> <span>Level: <b>core → advanced</b></span> <span>Kubernetes <b>03 / 05</b></span></div>
+</div></header>
+
+<section><div class="wrap"><div class="sec-tag">The model</div><h2>HOW A POD PICKS A NODE</h2><p class="lede">Filter, then score. Every Pending pod is a filter that emptied the list, and the scheduler tells you which one.</p><div class="dg-scroll"><svg class="dg" viewBox="0 0 1000 444" role="img" aria-label="Filter is a hard yes/no; score only ranks what survived. Pending always means filtering emptied the list"><line class="dg-spine" x1="160" y1="14" x2="160" y2="430.0"/><text class="dg-layer" x="146" y="41.0">POD CREATED</text><circle class="dg-tick" cx="160" cy="37.0" r="3"/><rect x="168.0" y="14" width="812.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="574.0" y="41.0" fill="#066c77">spec.nodeName empty</text><text class="dg-layer" x="146" y="115.0">FILTER</text><circle class="dg-tick" cx="160" cy="111.0" r="3"/><rect x="168.0" y="88" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="245.2" y="115.0" fill="#8a5806">resource fit</text><rect x="332.4" y="88" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="409.6" y="115.0" fill="#8a5806">nodeSelector</text><rect x="496.8" y="88" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="574.0" y="115.0" fill="#8a5806">taints vs tolerations</text><rect x="661.2" y="88" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="738.4" y="109.0" fill="#8a5806">node/pod affinity</text><text class="dg-node n-warm" x="738.4" y="121.0" fill="#8a5806">(required)</text><rect x="825.6" y="88" width="154.4" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="902.8" y="115.0" fill="#8a5806">volume topology</text><text class="dg-layer" x="146" y="189.0">FEASIBLE NODES</text><circle class="dg-tick" cx="160" cy="185.0" r="3"/><rect x="168.0" y="162" width="812.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="574.0" y="189.0" fill="#a32b28">survivors, or none → Pending</text><text class="dg-layer" x="146" y="263.0">SCORE</text><circle class="dg-tick" cx="160" cy="259.0" r="3"/><rect x="168.0" y="236" width="195.5" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="265.8" y="263.0" fill="#5b21b6">affinity (preferred)</text><rect x="373.5" y="236" width="195.5" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="471.2" y="263.0" fill="#5b21b6">topology spread skew</text><rect x="579.0" y="236" width="195.5" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="676.8" y="263.0" fill="#5b21b6">least/most allocated</text><rect x="784.5" y="236" width="195.5" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="882.2" y="263.0" fill="#5b21b6">image locality</text><text class="dg-layer" x="146" y="337.0">BIND</text><circle class="dg-tick" cx="160" cy="333.0" r="3"/><rect x="168.0" y="310" width="812.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="574.0" y="337.0" fill="#3f6f0c">highest score wins</text><text class="dg-layer" x="146" y="411.0">AFTER BINDING</text><circle class="dg-tick" cx="160" cy="407.0" r="3"/><rect x="168.0" y="384" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="368.5" y="411.0" fill="#6b6860">taint added later → eviction, if NoExecute</text><rect x="579.0" y="384" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="779.5" y="411.0" fill="#6b6860">preemption by higher priority</text></svg></div><p class="dg-cap">Scoring never rescues a pod that failed filtering — it only ranks the survivors. That is why "add more nodes" does not fix an affinity rule no node can satisfy.</p></div></section><section><div class="wrap"><div class="sec-tag">Core</div><h2>THE TWO PLACEMENT MECHANISMS</h2><p class="lede">One belongs to the node and one to the pod; they are routinely confused for each other.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">01</span>
+    <span class="rc-main"><span class="rc-name">Taints and tolerations — the node&#x27;s veto</span>
+      <span class="rc-desc">Repel by default, and the three effects that behave nothing alike.</span>
+      <span class="rc-tags"><span class="tg">taint</span><span class="tg">toleration</span><span class="tg">NoExecute</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>A <strong>taint</strong> is on the node and repels pods. A <strong>toleration</strong> is on
+the pod and says "this one is allowed anyway". Note the direction: a toleration does not
+<em>attract</em> a pod to a node — it only removes an objection. Wanting a pod to land on
+specific nodes needs <code>nodeSelector</code> or affinity as well.</p>
+<table class="tbl"><thead><tr><th>Effect</th><th>New pods</th><th>Already-running pods</th></tr></thead>
+<tbody>
+<tr><td><code>NoSchedule</code></td><td>Rejected unless tolerating</td><td>Left alone</td></tr>
+<tr><td><code>PreferNoSchedule</code></td><td>Avoided if possible</td><td>Left alone</td></tr>
+<tr><td><code>NoExecute</code></td><td>Rejected unless tolerating</td><td><strong>Evicted</strong> unless tolerating</td></tr>
+</tbody></table>
+<p>That last row is the one that causes surprise outages: adding a <code>NoExecute</code> taint
+to a node evicts everything on it that does not tolerate it, immediately.</p>
+<h3>The taints the cluster adds by itself</h3>
+<p>Kubernetes taints nodes automatically on conditions — <code>not-ready</code>,
+<code>unreachable</code>, <code>memory-pressure</code>, <code>disk-pressure</code>,
+<code>pid-pressure</code>, <code>unschedulable</code>. The first two are
+<code>NoExecute</code> with a default 300-second toleration injected into every pod, which is
+why a node going unreachable takes five minutes to shed its pods. Shortening that
+<code>tolerationSeconds</code> for latency-sensitive workloads is a real tuning knob, and one of
+the few places where a default is too conservative rather than too aggressive.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">why the pod will not schedule, or just got evicted</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints</span></div><div class="tl"><span class="to">NAME        TAINTS</span></div><div class="tl"><span class="to">gpu-01      [map[effect:NoSchedule key:nvidia.com/gpu value:true]]</span></div><div class="tl"><span class="tp">$</span> <span class="tx">kubectl describe pod trainer | grep -A4 Events</span></div><div class="tl"><span class="to">0/12 nodes are available: 11 node(s) had untolerated taint</span></div><div class="tl"><span class="to">{nvidia.com/gpu: true}, 1 Insufficient nvidia.com/gpu.</span></div><div class="tl"><span class="tc">toleration alone does not PULL it there — pair with a selector:</span></div><div class="tl"><span class="to">tolerations: [{key: nvidia.com/gpu, operator: Exists, effect: NoSchedule}]</span></div><div class="tl"><span class="to">nodeSelector: { accelerator: nvidia }</span></div><div class="tl"><span class="tc">faster failover than the 300s default, per pod:</span></div><div class="tl"><span class="to">tolerations:</span></div><div class="tl"><span class="to">- key: node.kubernetes.io/unreachable</span></div><div class="tl"><span class="to">  operator: Exists</span></div><div class="tl"><span class="to">  effect: NoExecute</span></div><div class="tl"><span class="to">  tolerationSeconds: 30</span></div></div></div><div class="refs"><div class="refs-h">Further reading</div><div class="refs-l"><a class="ref" href="https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/" target="_blank" rel="noopener noreferrer"><span class="ref-m">kubernetes.io</span><span class="ref-t">Taints and Tolerations</span><span class="ref-w">The three effects, the automatic condition taints, and tolerationSeconds.</span><span class="ref-x" aria-hidden="true">↗</span></a></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">02</span>
+    <span class="rc-main"><span class="rc-name">Affinity and anti-affinity — the pod&#x27;s preference</span>
+      <span class="rc-desc">required versus preferred, and the topologyKey that makes anti-affinity mean anything.</span>
+      <span class="rc-tags"><span class="tg">affinity</span><span class="tg">topologyKey</span><span class="tg">spread</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Where taints are the node's veto, affinity is the pod's request. Two families:</p>
+<ul>
+<li><strong>nodeAffinity</strong> — about node labels. A richer <code>nodeSelector</code>, with
+operators (<code>In</code>, <code>NotIn</code>, <code>Exists</code>, <code>Gt</code>,
+<code>Lt</code>).</li>
+<li><strong>podAffinity / podAntiAffinity</strong> — about other pods. "Near the cache" or, far
+more commonly, "not on the same node as my other replicas".</li>
+</ul>
+<p>Each comes in two strengths, and the names are long enough that people copy them without
+reading: <code>requiredDuringSchedulingIgnoredDuringExecution</code> is a hard filter — unmet
+means Pending forever. <code>preferredDuringSchedulingIgnoredDuringExecution</code> is a
+scoring hint — unmet just means a lower score. <strong>IgnoredDuringExecution</strong> in both
+names is a promise: once bound, a pod is never moved because the rule stopped holding.</p>
+<h3>topologyKey is the whole meaning of anti-affinity</h3>
+<p>Anti-affinity says "not co-located", and <code>topologyKey</code> defines co-located.
+<code>kubernetes.io/hostname</code> means one per node. <code>topology.kubernetes.io/zone</code>
+means one per zone — which, with three replicas and three zones, is exactly what you want, and
+with four replicas leaves one Pending forever if the rule is <code>required</code>.</p>
+<h3>Prefer topologySpreadConstraints for the common case</h3>
+<p>"Spread my replicas evenly" is better expressed with
+<code>topologySpreadConstraints</code> than with anti-affinity: it takes a
+<code>maxSkew</code>, so it degrades gracefully instead of wedging, and
+<code>whenUnsatisfiable: ScheduleAnyway</code> gives you best-effort spreading that cannot cause
+a Pending pod.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">spread that degrades instead of wedging</span></div><div class="tb-body"><div class="tl"><span class="tc">brittle: 4 replicas, 3 zones, required -&gt; one Pending forever</span></div><div class="tl"><span class="to">podAntiAffinity:</span></div><div class="tl"><span class="to">  requiredDuringSchedulingIgnoredDuringExecution:</span></div><div class="tl"><span class="to">  - topologyKey: topology.kubernetes.io/zone</span></div><div class="tl"><span class="to">    labelSelector: { matchLabels: { app: api } }</span></div><div class="tl"><span class="tc">better: even spread, tolerates imbalance rather than failing</span></div><div class="tl"><span class="to">topologySpreadConstraints:</span></div><div class="tl"><span class="to">- maxSkew: 1</span></div><div class="tl"><span class="to">  topologyKey: topology.kubernetes.io/zone</span></div><div class="tl"><span class="to">  whenUnsatisfiable: ScheduleAnyway</span></div><div class="tl"><span class="to">  labelSelector: { matchLabels: { app: api } }</span></div><div class="tl"><span class="tc">where did they actually land?</span></div><div class="tl"><span class="tp">$</span> <span class="tx">kubectl get pods -l app=api -o custom-columns=\</span></div><div class="tl"><span class="to">  POD:.metadata.name,NODE:.spec.nodeName --no-headers | sort -k2</span></div><div class="tl"><span class="tp">$</span> <span class="tx">kubectl get pods -l app=api -o json | jq -r &#x27;.items[].spec.nodeName&#x27; \</span></div><div class="tl"><span class="to">  | xargs -I{} kubectl get node {} -o jsonpath=&#x27;{.metadata.labels.topology\.kubernetes\.io/zone}{&quot;\n&quot;}&#x27; | sort | uniq -c</span></div></div></div><div class="note warn"><b>IgnoredDuringExecution means drift is permanent</b><p>Scheduling rules are evaluated once, at binding. If all three replicas end up in one zone because the other two were briefly full, they stay there after capacity returns — nothing rebalances them. A rolling restart is the rebalance, and <code>descheduler</code> is the tool if you want it continuous.</p></div><div class="refs"><div class="refs-h">Further reading</div><div class="refs-l"><a class="ref" href="https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/" target="_blank" rel="noopener noreferrer"><span class="ref-m">kubernetes.io</span><span class="ref-t">Assigning Pods to Nodes</span><span class="ref-w">nodeSelector, node affinity, pod affinity and anti-affinity with full syntax.</span><span class="ref-x" aria-hidden="true">↗</span></a><a class="ref" href="https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/" target="_blank" rel="noopener noreferrer"><span class="ref-m">kubernetes.io</span><span class="ref-t">Pod Topology Spread Constraints</span><span class="ref-w">maxSkew, whenUnsatisfiable, and how spreading interacts with affinity.</span><span class="ref-x" aria-hidden="true">↗</span></a><a class="ref" href="https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/" target="_blank" rel="noopener noreferrer"><span class="ref-m">kubernetes.io</span><span class="ref-t">Kubernetes Scheduler</span><span class="ref-w">The filter-then-score model the Pending message comes from.</span><span class="ref-x" aria-hidden="true">↗</span></a></div></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">In practice</div><h2>ADVANCED TROUBLESHOOTING</h2>
+<p><code>Pending</code> always means the same thing: <strong>filtering produced an empty list</strong>.
+The scheduler says which predicate failed and on how many nodes, and that sentence is the entire
+diagnosis — it is just easy to skim past.</p>
+<div class="tw"><table class="tbl "><thead><tr><th>Message fragment</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td><code>Insufficient cpu</code> / <code>memory</code></td><td>No node has that much free — requests, not usage</td><td>Lower requests, or add capacity</td></tr><tr><td><code>had untolerated taint</code></td><td>Node repels it</td><td>Add the toleration, and a selector to attract it</td></tr><tr><td><code>didn't match Pod's node affinity/selector</code></td><td>No node carries the label</td><td><code>kubectl get nodes --show-labels</code></td></tr><tr><td><code>didn't match pod anti-affinity rules</code></td><td>Its own replicas are in the way</td><td>Relax to preferred, or use topology spread</td></tr><tr><td><code>node(s) had volume node affinity conflict</code></td><td>The PV is in another zone</td><td><code>WaitForFirstConsumer</code> on the StorageClass</td></tr><tr><td><code>node(s) were unschedulable</code></td><td>Cordoned</td><td><code>kubectl uncordon</code></td></tr><tr><td><code>exceeded quota</code></td><td>ResourceQuota refused it before scheduling</td><td><code>kubectl describe quota -n &lt;ns&gt;</code></td></tr></tbody></table></div>
+<h3>Requests are what scheduling uses — not usage</h3>
+<p>A node showing 30% CPU in <code>top</code> can be 100% <em>allocated</em> and refuse new pods,
+because the scheduler adds up <code>requests</code>, not actual consumption. That gap is the most
+common "we have plenty of capacity, why is it Pending" confusion, and
+<code>kubectl describe node</code> shows both numbers side by side.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">allocated versus used, which are different numbers</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">kubectl describe node worker-04 | grep -A8 &#x27;Allocated resources&#x27;</span></div><div class="tl"><span class="to">  Resource   Requests      Limits</span></div><div class="tl"><span class="to">  cpu        7800m (97%)   14 (175%)</span></div><div class="tl"><span class="to">  memory     29Gi (92%)    48Gi (152%)</span></div><div class="tl"><span class="tc">97% ALLOCATED. Meanwhile actual usage:</span></div><div class="tl"><span class="tp">$</span> <span class="tx">kubectl top node worker-04</span></div><div class="tl"><span class="to">NAME        CPU(cores)   CPU%   MEMORY   MEMORY%</span></div><div class="tl"><span class="to">worker-04   2410m        30%    11Gi     34%</span></div><div class="tl"><span class="tc">-&gt; over-requested workloads, not a capacity problem. Right-size the requests.</span></div><div class="tl"><span class="tp">$</span> <span class="tx">kubectl get pods -A -o json | jq -r &#x27;.items[]</span></div><div class="tl"><span class="to">  | select(.spec.nodeName==&quot;worker-04&quot;)</span></div><div class="tl"><span class="to">  | &quot;\(.spec.containers[].resources.requests.cpu // &quot;-&quot;)\t\(.metadata.name)&quot;&#x27; | sort -rn | head</span></div></div></div><div class="note good"><b>The Events tail is the answer, verbatim</b><p><code>kubectl describe pod</code> ends with a line of the form <code>0/12 nodes are available: 8 Insufficient cpu, 4 node(s) had untolerated taint</code>. That accounts for every node in the cluster and why each one was excluded. There is rarely anything to deduce beyond reading it.</p></div></div></section><section><div class="wrap"><div class="sec-tag">Reference</div><h2>CHEATSHEET</h2><div class="tw"><table class="tbl mono"><thead><tr><th>Command</th><th>What it answers</th></tr></thead><tbody><tr><td><code>kubectl describe pod &lt;p&gt;</code></td><td>Which predicate failed, on how many nodes</td></tr><tr><td><code>kubectl get nodes --show-labels</code></td><td>What affinity rules can actually match</td></tr><tr><td><code>kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints</code></td><td>Every taint in one view</td></tr><tr><td><code>kubectl describe node &lt;n&gt; | grep -A8 Allocated</code></td><td>Requested versus capacity — what scheduling uses</td></tr><tr><td><code>kubectl top node</code></td><td>Actual usage, for contrast</td></tr><tr><td><code>kubectl taint node &lt;n&gt; key=value:NoSchedule</code></td><td>Repel new pods</td></tr><tr><td><code>kubectl taint node &lt;n&gt; key-</code></td><td>Remove a taint (trailing dash)</td></tr><tr><td><code>kubectl cordon</code> / <code>uncordon</code></td><td>Stop or resume scheduling</td></tr><tr><td><code>kubectl get pods -o wide --sort-by=.spec.nodeName</code></td><td>Where everything landed</td></tr><tr><td><code>kubectl get pods --field-selector status.phase=Pending -A</code></td><td>Everything stuck, cluster-wide</td></tr><tr><td><code>kubectl get priorityclass</code></td><td>What can preempt what</td></tr></tbody></table></div></div></section>
+
+<section style="border-bottom:0"><div class="wrap"><div class="pager"><a href="../KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html">← Previous<b>Kubernetes Config &amp; Access</b></a><a class="next" href="../KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html">Next →<b>Kubernetes Autoscaling</b></a></div></div></section>
+
+<footer>
+  <div class="f-in">
+    <div class="f-top">
+      <div>
+        <a class="f-logo" href="../../index.html">PLATFORM OPS</a>
+        <p class="f-tag">Field notes on Kubernetes, SRE, and Platform Engineering —
+          written from production, not slideware.</p>
+      </div>
+      <div class="f-cols">
+        <div><div class="f-col-t">Newsletter</div>
+          <a href="../../index.html#issues">Latest Issues</a>
+          <a href="../../index.html#subscribe">Subscribe</a>
+          <a href="../../feed.xml">RSS Feed</a></div>
+        <div><div class="f-col-t">Explore</div>
+          <a href="../../categories/index.html">All Categories</a>
+          <a href="../../categories/foundation/index.html">Foundation Hub</a>
+          <a href="../../index.html#topics">Knowledge Map</a></div>
+        <div><div class="f-col-t">Connect</div>
+          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="../../index.html#authors">About the Author</a>
+          <a href="#">Back to Top ↑</a></div>
+      </div>
+    </div>
+    <div class="f-bot">
+      <div>© 2026 Vishal Abhinav · Platform Ops — code MIT,
+        <a href="../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+      <div>Built for engineers, by an engineer.</div>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('tt').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});
+document.addEventListener('click',function(e){
+  var h=e.target.closest('.rc-head'); if(!h) return;
+  var c=h.parentElement, open=c.classList.contains('open');
+  c.classList.toggle('open',!open);
+  h.setAttribute('aria-expanded', !open?'true':'false');
+});
+</script>
+</body>
+</html>

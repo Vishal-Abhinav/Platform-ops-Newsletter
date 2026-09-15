@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Mesh Fundamentals · Platform Ops · Vishal Abhinav</title>
+<meta name="description" content="What a sidecar mesh actually buys and what it costs, the four Envoy objects every mesh CRD renders into, what discovery adds on top of kube-dns, and the port name that silently disables every L7 feature.">
+<meta name="author" content="Vishal Abhinav">
+<meta name="copyright" content="© 2026 Vishal Abhinav. Text and diagrams CC BY-NC-ND 4.0.">
+<meta property="article:published_time" content="2026-09-15T14:00:00+00:00">
+<meta property="article:modified_time" content="2026-09-15T14:00:00+00:00">
+<meta property="article:author" content="Vishal Abhinav">
+<link rel="canonical" href="https://platform-ops-blog.vishal-abhinav.workers.dev/Foundation/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Platform Ops · Tech with Vishal Abhinav">
+<meta property="og:title" content="Service Mesh Fundamentals · Platform Ops">
+<meta property="og:description" content="What a sidecar mesh actually buys and what it costs, the four Envoy objects every mesh CRD renders into, what discovery adds on top of kube-dns, and the port name that silently disables every L7 feature.">
+<meta property="og:url" content="https://platform-ops-blog.vishal-abhinav.workers.dev/Foundation/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html">
+<meta property="og:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/i066.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Service Mesh Fundamentals · Platform Ops">
+<meta name="twitter:description" content="What a sidecar mesh actually buys and what it costs, the four Envoy objects every mesh CRD renders into, what discovery adds on top of kube-dns, and the port name that silently disables every L7 feature.">
+<meta name="twitter:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/i066.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="Platform Ops — new issues" href="../../feed.xml">
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
+     quotes on the PO_GC line below; left empty, nothing loads and nothing is
+     sent. The README has a one-liner that sets it across every page at once. -->
+<script>
+(function(){var PO_GC='';
+ if(!PO_GC) return;
+ var s=document.createElement('script');
+ s.async=true; s.src='https://gc.zgo.at/count.js';
+ s.setAttribute('data-goatcounter','https://'+PO_GC+'.goatcounter.com/count');
+ document.head.appendChild(s);})();
+</script>
+<link rel="stylesheet" href="../topic.css">
+<link rel="stylesheet" href="../../assets/megamenu.css">
+<script defer src="../../assets/megamenu.js" data-root="../../"></script>
+<link rel="stylesheet" href="../../assets/search.css">
+<script defer src="../../assets/search.js" data-root="../../"></script>
+<!-- seo:jsonld -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Service Mesh Fundamentals","description":"What a sidecar mesh actually buys and what it costs, the four Envoy objects every mesh CRD renders into, what discovery adds on top of kube-dns, and the port name that silently disables every L7 feature.","url":"https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html","mainEntityOfPage":{"@type":"WebPage","@id":"https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html"},"datePublished":"2026-09-15T14:00:00+00:00","dateModified":"2026-09-15T14:00:00+00:00","author":{"@type":"Person","name":"Vishal Abhinav","url":"https://www.linkedin.com/in/vishal-abhinav/","jobTitle":"Platform Ops Engineer","sameAs":["https://www.linkedin.com/in/vishal-abhinav/","https://github.com/Vishal-Abhinav","https://www.researchgate.net/profile/Vishal-Abhinav/research","https://www.hackerrank.com/Vishal_Abhinav"]},"publisher":{"@type":"Organization","name":"Platform Ops","url":"https://platform-ops-blog.vishal-abhinav.workers.dev/","logo":{"@type":"ImageObject","url":"https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/home.png"}},"image":"https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/i066.png","inLanguage":"en","isAccessibleForFree":true,"articleSection":"Platform Engineering"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://platform-ops-blog.vishal-abhinav.workers.dev/"},{"@type":"ListItem","position":2,"name":"Categories","item":"https://platform-ops-blog.vishal-abhinav.workers.dev/categories/index.html"},{"@type":"ListItem","position":3,"name":"Service Mesh","item":"https://platform-ops-blog.vishal-abhinav.workers.dev/categories/service-mesh/index.html"},{"@type":"ListItem","position":4,"name":"Service Mesh Fundamentals","item":"https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html"}]}</script>
+<!-- /seo:jsonld -->
+</head>
+<body>
+<nav>
+  <a href="../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb"><a href="../../index.html">Home</a><span>/</span><a href="../../categories/index.html">Categories</a><span>/</span><a href="../../categories/service-mesh/index.html">Service Mesh</a><span>/</span><span class="cur">Service Mesh Fundamentals</span></div>
+  <div class="nav-right"><button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button><a href="../../index.html#subscribe" class="nav-logo"
+    style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Kubernetes · Service Mesh</div>
+  <h1>Service Mesh Fundamentals</h1>
+  <p class="sub">What a sidecar mesh actually buys and what it costs, the four Envoy objects every mesh CRD renders into, what discovery adds on top of kube-dns, and the port name that silently disables every L7 feature.</p>
+  <div class="meta"><span><b>25 min</b> read</span> <span>Level: <b>core → advanced</b></span> <span>Service Mesh <b>01 / 02</b></span></div>
+</div></header>
+
+<section><div class="wrap"><div class="sec-tag">The model</div><h2>HOW A REQUEST GETS INTO THE MESH</h2><p class="lede">The application opens an ordinary connection. Everything after that is interception the app never sees.</p><div class="dg-scroll"><svg class="dg" viewBox="0 0 1000 518" role="img" aria-label="The app opens a plain connection to a Service; iptables redirects it into the proxy, which does the rest"><line class="dg-spine" x1="160" y1="14" x2="160" y2="504.0"/><text class="dg-layer" x="146" y="41.0">CONTROL PLANE</text><circle class="dg-tick" cx="160" cy="37.0" r="3"/><rect x="168.0" y="14" width="264.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="300.0" y="41.0" fill="#066c77">istiod / linkerd-destination</text><rect x="442.0" y="14" width="264.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="574.0" y="41.0" fill="#066c77">config → xDS</text><rect x="716.0" y="14" width="264.0" height="46" rx="4" fill="rgba(0,194,212,.14)" stroke="#00c2d4" stroke-width="1"/><text class="dg-node n-core" x="848.0" y="41.0" fill="#066c77">CA issues workload certs</text><text class="dg-layer" x="146" y="115.0">INJECTION</text><circle class="dg-tick" cx="160" cy="111.0" r="3"/><rect x="168.0" y="88" width="812.0" height="46" rx="4" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.6)" stroke-width="1"/><text class="dg-node n-warm" x="574.0" y="115.0" fill="#8a5806">webhook adds the sidecar at admission</text><text class="dg-layer" x="146" y="189.0">POD A</text><circle class="dg-tick" cx="160" cy="185.0" r="3"/><rect x="168.0" y="162" width="401.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="368.5" y="189.0" fill="#a32b28">app container</text><rect x="579.0" y="162" width="401.0" height="46" rx="4" fill="rgba(229,57,53,.13)" stroke="rgba(229,57,53,.55)" stroke-width="1"/><text class="dg-node n-hot" x="779.5" y="189.0" fill="#a32b28">sidecar proxy</text><text class="dg-layer" x="146" y="263.0">CAPTURE</text><circle class="dg-tick" cx="160" cy="259.0" r="3"/><rect x="168.0" y="236" width="812.0" height="46" rx="4" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.45)" stroke-width="1"/><text class="dg-node n-calm" x="574.0" y="263.0" fill="#5b21b6">iptables / CNI plugin redirects all traffic</text><text class="dg-layer" x="146" y="337.0">WIRE</text><circle class="dg-tick" cx="160" cy="333.0" r="3"/><rect x="168.0" y="310" width="812.0" height="46" rx="4" fill="rgba(132,204,22,.16)" stroke="#84cc16" stroke-width="1"/><text class="dg-node n-go" x="574.0" y="337.0" fill="#3f6f0c">mTLS, identity = SPIFFE ID</text><text class="dg-layer" x="146" y="411.0">POD B</text><circle class="dg-tick" cx="160" cy="407.0" r="3"/><rect x="168.0" y="384" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="368.5" y="411.0" fill="#6b6860">sidecar proxy</text><rect x="579.0" y="384" width="401.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="779.5" y="411.0" fill="#6b6860">app container</text><text class="dg-layer" x="146" y="485.0">TELEMETRY</text><circle class="dg-tick" cx="160" cy="481.0" r="3"/><rect x="168.0" y="458" width="812.0" height="46" rx="4" fill="transparent" stroke="rgba(0,0,0,.2)" stroke-dasharray="3 3" stroke-width="1"/><text class="dg-node n-plain" x="574.0" y="485.0" fill="#6b6860">every hop reported: latency, code, identity</text></svg></div><p class="dg-cap">Because capture is transparent, the app cannot tell you what the mesh did. That is why every debugging path here goes through the proxy rather than the application log.</p></div></section><section><div class="wrap"><div class="sec-tag">Core</div><h2>MESH, PROXY AND DISCOVERY</h2><p class="lede">What the parts are, and which decisions actually matter.</p><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">01</span>
+    <span class="rc-main"><span class="rc-name">What a mesh actually is, and when it earns its place</span>
+      <span class="rc-desc">A proxy beside every pod, and one control plane configuring all of them.</span>
+      <span class="rc-tags"><span class="tg">sidecar</span><span class="tg">data plane</span><span class="tg">control plane</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>A service mesh is two things: a <strong>data plane</strong> of proxies — one per pod, or one
+per node — that every request passes through, and a <strong>control plane</strong> that
+configures them. The application is not modified and usually does not know the proxy is there.</p>
+<p>What you get, and the reason it is worth the weight: <strong>mTLS everywhere without touching
+application code</strong>, retries and timeouts and circuit breaking as policy rather than as
+library code in six languages, traffic splitting for canaries, and uniform golden-signal
+telemetry for every hop in the system.</p>
+<h3>The honest costs</h3>
+<ul>
+<li><strong>Latency.</strong> Two extra proxy hops per request. Single-digit milliseconds, but
+not zero, and it compounds across a deep call graph.</li>
+<li><strong>Resources.</strong> A sidecar per pod. At a thousand pods that is a meaningful slice
+of the cluster spent on proxies.</li>
+<li><strong>A new failure domain.</strong> The mesh can now break your traffic in ways that have
+nothing to do with your code, and debugging moves from "read the app log" to "read the proxy
+config".</li>
+</ul>
+<h3>When you do not need one</h3>
+<p>Ten services, one language, one team: a shared HTTP client library with retries and timeouts
+gets most of the benefit at none of the cost. The mesh wins when the count of services and
+languages is high enough that "put it in the library" stops being one change and becomes six.</p>
+<p><strong>Ambient / sidecar-less modes</strong> change this calculation. Istio's ambient mode
+moves mTLS and L4 telemetry to a per-node component and makes the L7 proxy opt-in per namespace,
+which removes the per-pod sidecar cost for workloads that only need encryption and metrics.</p>
+<div class="refs"><div class="refs-h">Further reading</div><div class="refs-l"><a class="ref" href="https://istio.io/latest/docs/concepts/what-is-istio/" target="_blank" rel="noopener noreferrer"><span class="ref-m">istio.io</span><span class="ref-t">What is Istio?</span><span class="ref-w">The data-plane / control-plane split, and what the project sets out to solve.</span><span class="ref-x" aria-hidden="true">↗</span></a><a class="ref" href="https://linkerd.io/2.18/overview/" target="_blank" rel="noopener noreferrer"><span class="ref-m">linkerd.io</span><span class="ref-t">Linkerd Overview</span><span class="ref-w">The same model with a deliberately smaller surface — a useful contrast.</span><span class="ref-x" aria-hidden="true">↗</span></a></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">02</span>
+    <span class="rc-main"><span class="rc-name">Envoy — the proxy under most of it</span>
+      <span class="rc-desc">Listeners, routes, clusters, endpoints — and xDS, which is how they arrive.</span>
+      <span class="rc-tags"><span class="tg">Envoy</span><span class="tg">xDS</span><span class="tg">listener</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Istio, Gloo, Consul, Gateway API implementations and most of the ecosystem use
+<strong>Envoy</strong> as the data plane. Understanding four of its objects makes mesh debugging
+tractable, because every mesh CRD ultimately renders into them:</p>
+<table class="tbl"><thead><tr><th>Object</th><th>Answers</th></tr></thead>
+<tbody>
+<tr><td><strong>Listener</strong></td><td>What port am I accepting on?</td></tr>
+<tr><td><strong>Route</strong></td><td>Given this request, which cluster?</td></tr>
+<tr><td><strong>Cluster</strong></td><td>A named upstream, with its load-balancing and outlier policy</td></tr>
+<tr><td><strong>Endpoint</strong></td><td>The actual pod IPs behind that cluster</td></tr>
+</tbody></table>
+<p><strong>xDS</strong> is the protocol that streams these from the control plane to every proxy.
+When someone says "the config has not propagated", they mean a proxy's xDS state is stale — and
+that is directly observable rather than a matter of opinion.</p>
+<h3>The debugging move that skips all the guessing</h3>
+<p>Do not reason about what the CRDs should have produced. Ask the proxy what it actually has.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">asking the proxy instead of theorising</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">istioctl proxy-status</span></div><div class="tl"><span class="to">NAME                 CDS       LDS       EDS       RDS</span></div><div class="tl"><span class="to">api-7d9f.prod        SYNCED    SYNCED    SYNCED    SYNCED</span></div><div class="tl"><span class="to">web-5c8a.prod        SYNCED    STALE     SYNCED    SYNCED   &lt;- here</span></div><div class="tl"><span class="tc">what does this proxy think the routes are?</span></div><div class="tl"><span class="tp">$</span> <span class="tx">istioctl proxy-config route api-7d9f.prod --name 8080 -o json | jq &#x27;.[0].virtualHosts&#x27;</span></div><div class="tl"><span class="tp">$</span> <span class="tx">istioctl proxy-config cluster api-7d9f.prod --fqdn payments.prod.svc.cluster.local</span></div><div class="tl"><span class="tp">$</span> <span class="tx">istioctl proxy-config endpoint api-7d9f.prod --cluster &#x27;outbound|8080||payments.prod.svc.cluster.local&#x27;</span></div><div class="tl"><span class="tc">and the single most useful command in the whole toolkit:</span></div><div class="tl"><span class="tp">$</span> <span class="tx">istioctl analyze -n prod</span></div><div class="tl"><span class="to">Warning [IST0101] (VirtualService prod/api) Referenced host not found: &quot;paymnets&quot;</span></div></div></div><div class="refs"><div class="refs-h">Further reading</div><div class="refs-l"><a class="ref" href="https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/intro" target="_blank" rel="noopener noreferrer"><span class="ref-m">envoyproxy.io</span><span class="ref-t">Envoy architecture overview</span><span class="ref-w">Listeners, filters, clusters and the threading model.</span><span class="ref-x" aria-hidden="true">↗</span></a><a class="ref" href="https://www.envoyproxy.io/docs/envoy/latest/intro/life_of_a_request" target="_blank" rel="noopener noreferrer"><span class="ref-m">envoyproxy.io</span><span class="ref-t">Life of a Request</span><span class="ref-w">Exactly what happens between accept and upstream — worth reading once, properly.</span><span class="ref-x" aria-hidden="true">↗</span></a></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">03</span>
+    <span class="rc-main"><span class="rc-name">Service discovery — what the mesh adds to kube-dns</span>
+      <span class="rc-desc">Kubernetes already resolves names. The mesh changes what happens after resolution.</span>
+      <span class="rc-tags"><span class="tg">discovery</span><span class="tg">EndpointSlice</span><span class="tg">locality</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<p>Kubernetes service discovery is already complete: CoreDNS resolves
+<code>svc.ns.svc.cluster.local</code> to a ClusterIP, and kube-proxy load-balances to the
+EndpointSlice. A mesh does not replace that — it <em>intercepts</em> after it.</p>
+<p>What changes: the proxy has the full endpoint list rather than an iptables rule, so it can do
+things kube-proxy cannot — least-request instead of random, <strong>locality-aware</strong>
+routing that prefers same-zone endpoints and fails over to another zone only when the local ones
+are unhealthy, <strong>outlier detection</strong> that ejects an endpoint returning 5xx, and
+per-request retries with a budget.</p>
+<h3>Locality routing is usually the biggest single win</h3>
+<p>Cross-zone traffic costs money and latency in every cloud. With zone labels on the nodes and
+locality load balancing on, same-zone requests stay in-zone — often a double-digit percentage of
+inter-AZ transfer removed for one config change.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">locality-aware routing with automatic failover</span></div><div class="tb-body"><div class="tl"><span class="to">apiVersion: networking.istio.io/v1</span></div><div class="tl"><span class="to">kind: DestinationRule</span></div><div class="tl"><span class="to">spec:</span></div><div class="tl"><span class="to">  host: payments.prod.svc.cluster.local</span></div><div class="tl"><span class="to">  trafficPolicy:</span></div><div class="tl"><span class="to">    loadBalancer:</span></div><div class="tl"><span class="to">      localityLbSetting:</span></div><div class="tl"><span class="to">        enabled: true</span></div><div class="tl"><span class="to">        failover: [{from: us-east-1a, to: us-east-1b}]</span></div><div class="tl"><span class="to">    outlierDetection:            # eject endpoints that start failing</span></div><div class="tl"><span class="to">      consecutive5xxErrors: 5</span></div><div class="tl"><span class="to">      interval: 10s</span></div><div class="tl"><span class="to">      baseEjectionTime: 30s</span></div><div class="tl"><span class="tc">verify the proxy has endpoints in more than one locality:</span></div><div class="tl"><span class="tp">$</span> <span class="tx">istioctl proxy-config endpoint api-7d9f.prod \</span></div><div class="tl"><span class="to">  --cluster &#x27;outbound|8080||payments.prod.svc.cluster.local&#x27; -o json \</span></div><div class="tl"><span class="to">  | jq -r &#x27;.[].hostStatuses[].locality&#x27;</span></div></div></div><div class="refs"><div class="refs-h">Further reading</div><div class="refs-l"><a class="ref" href="https://kubernetes.io/docs/concepts/services-networking/service/" target="_blank" rel="noopener noreferrer"><span class="ref-m">kubernetes.io</span><span class="ref-t">Service</span><span class="ref-w">What Kubernetes already gives you, before any mesh.</span><span class="ref-x" aria-hidden="true">↗</span></a><a class="ref" href="https://istio.io/latest/docs/concepts/traffic-management/" target="_blank" rel="noopener noreferrer"><span class="ref-m">istio.io</span><span class="ref-t">Istio traffic management</span><span class="ref-w">DestinationRule, VirtualService, and where discovery fits.</span><span class="ref-x" aria-hidden="true">↗</span></a></div></div></div></div>
+</div><div class="rc" data-rc>
+  <button class="rc-head" type="button" aria-expanded="false">
+    <span class="rc-n">04</span>
+    <span class="rc-main"><span class="rc-name">Istio or Linkerd — and how to decide without a bake-off</span>
+      <span class="rc-desc">Scope versus simplicity. Both are CNCF-graduated and production-grade.</span>
+      <span class="rc-tags"><span class="tg">Istio</span><span class="tg">Linkerd</span><span class="tg">Gateway API</span></span></span>
+    <span class="rc-chev" aria-hidden="true">⌄</span>
+  </button>
+  <div class="rc-body"><div class="rc-inner">
+<table class="tbl"><thead><tr><th></th><th>Istio</th><th>Linkerd</th></tr></thead>
+<tbody>
+<tr><td>Proxy</td><td>Envoy (C++), very configurable</td><td>linkerd2-proxy (Rust), purpose-built, small</td></tr>
+<tr><td>Surface</td><td>Large — many CRDs, many knobs</td><td>Deliberately small</td></tr>
+<tr><td>Resource cost</td><td>Higher per sidecar</td><td>Notably lower</td></tr>
+<tr><td>Sidecar-less</td><td>Ambient mode</td><td>—</td></tr>
+<tr><td>Strength</td><td>Anything you can express, you can configure</td><td>Fewer ways to get it wrong</td></tr>
+</tbody></table>
+<p>The decision is rarely about capability, because both do the core job. It is about whether you
+want the configurability and will staff for it, or want the smallest thing that provides mTLS,
+retries and golden signals.</p>
+<h3>Gateway API is where both are heading</h3>
+<p>The Kubernetes <strong>Gateway API</strong> is the successor to Ingress and now has a
+service-mesh profile (GAMMA). Both Istio and Linkerd implement it. For new configuration it is
+worth preferring Gateway API resources over vendor CRDs where they cover your case — the config
+outlives the mesh you picked.</p>
+<div class="refs"><div class="refs-h">Further reading</div><div class="refs-l"><a class="ref" href="https://gateway-api.sigs.k8s.io/" target="_blank" rel="noopener noreferrer"><span class="ref-m">gateway-api.sigs.k8s.io</span><span class="ref-t">Gateway API</span><span class="ref-w">The standard replacing Ingress, and the mesh profile both projects implement.</span><span class="ref-x" aria-hidden="true">↗</span></a><a class="ref" href="https://istio.io/latest/docs/concepts/security/" target="_blank" rel="noopener noreferrer"><span class="ref-m">istio.io</span><span class="ref-t">Istio security concepts</span><span class="ref-w">Identity, certificates and the policy model.</span><span class="ref-x" aria-hidden="true">↗</span></a></div></div></div></div>
+</div></div></section><section><div class="wrap"><div class="sec-tag">In practice</div><h2>ADVANCED TROUBLESHOOTING</h2>
+<p>Mesh debugging has one rule: <strong>stop reasoning about the CRDs and ask the proxy</strong>.
+The CRDs are intent; the proxy's xDS state is what is actually happening, and the gap between
+them is where the bug lives.</p>
+<div class="tw"><table class="tbl "><thead><tr><th>Symptom</th><th>Likely cause</th><th>Command</th></tr></thead><tbody><tr><td>503 with <code>UC</code>/<code>UF</code> flags</td><td>Upstream refused or unreachable</td><td><code>istioctl proxy-config endpoint</code> — is the list empty?</td></tr><tr><td>503 <code>NR</code> (no route)</td><td>No VirtualService matches this host/port</td><td><code>istioctl proxy-config route</code></td></tr><tr><td>Works without the sidecar, fails with it</td><td>Port naming, or a protocol the mesh mis-detected</td><td>Service port must be named <code>http</code>, <code>grpc</code>, <code>tcp</code>…</td></tr><tr><td>mTLS handshake failures</td><td>PeerAuthentication STRICT with a non-mesh client</td><td><code>istioctl x describe pod &lt;p&gt;</code></td></tr><tr><td>Config change did nothing</td><td>Proxy has stale xDS</td><td><code>istioctl proxy-status</code> — anything not SYNCED</td></tr><tr><td>Some pods not meshed</td><td>Injection label missing, or the pod predates it</td><td><code>kubectl get ns -L istio-injection</code>; then restart</td></tr><tr><td>Intermittent 503 on deploy</td><td>No graceful drain — in-flight requests cut</td><td><code>terminationGracePeriodSeconds</code> and a preStop sleep</td></tr></tbody></table></div>
+<h3>Port naming is the one that wastes a whole afternoon</h3>
+<p>Istio infers protocol from the <strong>Service port name</strong>. A port named
+<code>web</code> is treated as plain TCP, so HTTP routing, retries, and L7 telemetry silently do
+nothing — no error, just features that are quietly absent. Name it <code>http</code>, or use
+<code>appProtocol</code>.</p>
+<div class="tb"><div class="tb-bar"><i class="d r"></i><i class="d y"></i><i class="d g"></i><span class="tb-t">the checks, in the order worth running them</span></div><div class="tb-body"><div class="tl"><span class="tp">$</span> <span class="tx">istioctl analyze -A</span></div><div class="tl"><span class="tc">1. is every proxy current?</span></div><div class="tl"><span class="tp">$</span> <span class="tx">istioctl proxy-status | grep -v SYNCED</span></div><div class="tl"><span class="tc">2. what does THIS pod believe about mTLS and policy?</span></div><div class="tl"><span class="tp">$</span> <span class="tx">istioctl x describe pod api-7d9f.prod</span></div><div class="tl"><span class="tc">3. the actual request flags — 15 seconds of proxy log beats an hour of theory</span></div><div class="tl"><span class="tp">$</span> <span class="tx">kubectl logs api-7d9f -c istio-proxy --tail=50 | grep -v &#x27;&quot; 200 &#x27;</span></div><div class="tl"><span class="to">[2026-09-15T09:12:44Z] &quot;GET /v1/charge HTTP/1.1&quot; 503 UF,URX</span></div><div class="tl"><span class="tc">   UF = upstream connection failure. Endpoints, not routes.</span></div><div class="tl"><span class="tc">4. are there any endpoints at all?</span></div><div class="tl"><span class="tp">$</span> <span class="tx">istioctl proxy-config endpoint api-7d9f.prod | grep payments</span></div><div class="tl"><span class="tc">5. the port-name check that explains &#x27;L7 features do nothing&#x27;</span></div><div class="tl"><span class="tp">$</span> <span class="tx">kubectl get svc -A -o json | jq -r &#x27;.items[] | .metadata.namespace as $ns</span></div><div class="tl"><span class="to">  | .metadata.name as $n | .spec.ports[]</span></div><div class="tl"><span class="to">  | select((.name//&quot;&quot;)|test(&quot;^(http|https|grpc|tcp|tls|mongo|redis)&quot;)|not)</span></div><div class="tl"><span class="to">  | &quot;\($ns)/\($n) port \(.port) name=\(.name // &quot;UNNAMED&quot;)&quot;&#x27;</span></div></div></div><div class="note good"><b>The proxy access log has the answer in two characters</b><p>Envoy tags every request with response flags — <code>UF</code> upstream failure, <code>UH</code> no healthy upstream, <code>NR</code> no route, <code>UO</code> outlier-ejected, <code>URX</code> retry limit. They distinguish 'nothing to send it to' from 'nowhere to route it' immediately, which is the fork you would otherwise spend twenty minutes narrowing by hand.</p></div></div></section><section><div class="wrap"><div class="sec-tag">Reference</div><h2>CHEATSHEET</h2><div class="tw"><table class="tbl mono"><thead><tr><th>Command</th><th>What it answers</th></tr></thead><tbody><tr><td><code>istioctl analyze -A</code></td><td>Misconfiguration, before it becomes an incident</td></tr><tr><td><code>istioctl proxy-status</code></td><td>Which proxies have stale config</td></tr><tr><td><code>istioctl x describe pod &lt;p&gt;</code></td><td>Policies, mTLS mode and routes for one pod</td></tr><tr><td><code>istioctl proxy-config route &lt;p&gt;</code></td><td>The routes this proxy actually has</td></tr><tr><td><code>istioctl proxy-config cluster &lt;p&gt;</code></td><td>Upstreams it knows about</td></tr><tr><td><code>istioctl proxy-config endpoint &lt;p&gt;</code></td><td>Real pod IPs — empty means 503</td></tr><tr><td><code>istioctl proxy-config listener &lt;p&gt;</code></td><td>Ports it is accepting on</td></tr><tr><td><code>kubectl logs &lt;p&gt; -c istio-proxy</code></td><td>Response flags — the two-character diagnosis</td></tr><tr><td><code>kubectl get ns -L istio-injection</code></td><td>Which namespaces are meshed</td></tr><tr><td><code>linkerd check</code></td><td>Linkerd's equivalent end-to-end health check</td></tr><tr><td><code>linkerd viz stat deploy -n &lt;ns&gt;</code></td><td>Success rate, RPS and latency per workload</td></tr></tbody></table></div></div></section>
+
+<section style="border-bottom:0"><div class="wrap"><div class="pager"><a href="../KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html">← Previous<b>Kubernetes Cluster Operations</b></a><a class="next" href="../SERVICE-MESH-OPERATIONS/service-mesh-operations.html">Next →<b>Service Mesh Operations</b></a></div></div></section>
+
+<footer>
+  <div class="f-in">
+    <div class="f-top">
+      <div>
+        <a class="f-logo" href="../../index.html">PLATFORM OPS</a>
+        <p class="f-tag">Field notes on Kubernetes, SRE, and Platform Engineering —
+          written from production, not slideware.</p>
+      </div>
+      <div class="f-cols">
+        <div><div class="f-col-t">Newsletter</div>
+          <a href="../../index.html#issues">Latest Issues</a>
+          <a href="../../index.html#subscribe">Subscribe</a>
+          <a href="../../feed.xml">RSS Feed</a></div>
+        <div><div class="f-col-t">Explore</div>
+          <a href="../../categories/index.html">All Categories</a>
+          <a href="../../categories/foundation/index.html">Foundation Hub</a>
+          <a href="../../index.html#topics">Knowledge Map</a></div>
+        <div><div class="f-col-t">Connect</div>
+          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="../../index.html#authors">About the Author</a>
+          <a href="#">Back to Top ↑</a></div>
+      </div>
+    </div>
+    <div class="f-bot">
+      <div>© 2026 Vishal Abhinav · Platform Ops — code MIT,
+        <a href="../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+      <div>Built for engineers, by an engineer.</div>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('tt').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});
+document.addEventListener('click',function(e){
+  var h=e.target.closest('.rc-head'); if(!h) return;
+  var c=h.parentElement, open=c.classList.contains('open');
+  c.classList.toggle('open',!open);
+  h.setAttribute('aria-expanded', !open?'true':'false');
+});
+</script>
+</body>
+</html>

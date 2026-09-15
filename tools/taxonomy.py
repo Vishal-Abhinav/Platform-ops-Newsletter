@@ -34,6 +34,13 @@ OCA = "OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html"
 OCN = "OpenShift/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html"
 OCO = "OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html"
 COC = "Commands/OPENSHIFT-COMMANDS/openshift-commands.html"
+KWL = "Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html"
+KCA = "Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html"
+KSC = "Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html"
+KAS = "Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html"
+KOP = "Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html"
+SMF = "Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html"
+SMO = "Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html"
 
 # pillar -> [ (category, icon, [ (topic, status, href|None), ... ]) ]
 PILLARS = [
@@ -128,17 +135,17 @@ PILLARS = [
 ("Kubernetes", [
  ("Kubernetes", "☸️", [
    ("Kubernetes Fundamentals","L",K8A),("Kubernetes Architecture","L",K8A),("Pods","L",K8A),
-   ("Deployments","L",K8A),("ReplicaSets","P",None),("DaemonSets","P",None),
-   ("StatefulSets","L",K8S),("Jobs / CronJobs","-",None),("Services","L",K8N),
-   ("Ingress","L",K8N),("ConfigMaps","P",None),("Secrets","P",None),("Volumes","L",K8S),
-   ("Persistent Volumes","L",K8S),("Storage Classes","L",K8S),("RBAC","P",None),
-   ("Namespaces","P",None),("Resource Requests/Limits","L",K8A),("Probes","P",None),
-   ("Scheduling","L",K8A),("Taints / Tolerations","P",None),("Affinity / Anti-Affinity","P",None),
-   ("Autoscaling","P",None),("HPA","P",None),("VPA","P",None),("Cluster Autoscaling","-",None),
+   ("Deployments","L",K8A),("ReplicaSets","L",KWL),("DaemonSets","L",KWL),
+   ("StatefulSets","L",K8S),("Jobs / CronJobs","L",KWL),("Services","L",K8N),
+   ("Ingress","L",K8N),("ConfigMaps","L",KCA),("Secrets","L",KCA),("Volumes","L",K8S),
+   ("Persistent Volumes","L",K8S),("Storage Classes","L",K8S),("RBAC","L",KCA),
+   ("Namespaces","L",KCA),("Resource Requests/Limits","L",K8A),("Probes","L",KWL),
+   ("Scheduling","L",K8A),("Taints / Tolerations","L",KSC),("Affinity / Anti-Affinity","L",KSC),
+   ("Autoscaling","L",KAS),("HPA","L",KAS),("VPA","L",KAS),("Cluster Autoscaling","L",KAS),
    ("Kubernetes Networking","L",K8N),("CNI","L",K8N),("CSI","L",K8S),
-   ("Kubernetes Security","P",None),("Kubernetes Troubleshooting","L",K8E),
-   ("Kubernetes Upgrade","-",None),("Kubernetes Backup","-",None),
-   ("Multi-Cluster Kubernetes","-",None),("Kubernetes Disaster Recovery","-",None)]),
+   ("Kubernetes Security","L",KOP),("Kubernetes Troubleshooting","L",K8E),
+   ("Kubernetes Upgrade","L",KOP),("Kubernetes Backup","L",KOP),
+   ("Multi-Cluster Kubernetes","L",KOP),("Kubernetes Disaster Recovery","L",KOP)]),
  ("OpenShift", "🔴", [
    ("OpenShift Fundamentals","L",OCA),("OpenShift Architecture","L",OCA),
    ("Projects","L",OCA),("Routes","L",OCN),("Operators","L",OCA),("SCC","L",OCA),
@@ -147,10 +154,10 @@ PILLARS = [
    ("OpenShift Security","L",OCO),("OpenShift Troubleshooting","L",OCA),
    ("OpenShift Upgrades","L",OCO)]),
  ("Service Mesh", "🕸️", [
-   ("Service Mesh","P",None),("Istio","P",None),("Envoy","-",None),("Linkerd","-",None),
-   ("Traffic Management","-",None),("mTLS","-",None),("Service-to-Service Security","-",None),
-   ("Service Discovery","-",None),("Observability in Service Mesh","-",None),
-   ("Multi-Cluster Service Mesh","-",None)]),
+   ("Service Mesh","L",SMF),("Istio","L",SMF),("Envoy","L",SMF),("Linkerd","L",SMF),
+   ("Traffic Management","L",SMO),("mTLS","L",SMO),("Service-to-Service Security","L",SMO),
+   ("Service Discovery","L",SMF),("Observability in Service Mesh","L",SMO),
+   ("Multi-Cluster Service Mesh","L",SMO)]),
 ]),
 
 ("Reliability", [

@@ -9,13 +9,69 @@
     <language>en</language>
     <managingEditor>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</managingEditor>
     <webMaster>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</webMaster>
-    <lastBuildDate>Fri, 11 Sep 2026 11:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 15 Sep 2026 15:00:00 +0000</lastBuildDate>
     <ttl>1440</ttl>
     <image>
       <url>https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/home.png</url>
       <title>Platform Ops — Tech with Vishal Abhinav</title>
       <link>https://platform-ops-blog.vishal-abhinav.workers.dev/</link>
     </image>
+    <item>
+      <title>#067 — Service Mesh Operations</title>
+      <link>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html</link>
+      <guid isPermaLink="true">https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html</guid>
+      <pubDate>Tue, 15 Sep 2026 15:00:00 +0000</pubDate>
+      <description>mTLS identity that turns policy into a statement about services rather than subnets, the AuthorizationPolicy default that flips one workload to deny while its neighbours stay open, retries that multiply through a call graph, and the trace headers your application still has to forward itself.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#066 — Service Mesh Fundamentals</title>
+      <link>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html</link>
+      <guid isPermaLink="true">https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html</guid>
+      <pubDate>Tue, 15 Sep 2026 14:00:00 +0000</pubDate>
+      <description>What a sidecar mesh actually buys and what it costs, the four Envoy objects every mesh CRD renders into, what service discovery adds on top of kube-dns, and the Service port name that silently disables every L7 feature.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#065 — Kubernetes Cluster Operations</title>
+      <link>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html</link>
+      <guid isPermaLink="true">https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html</guid>
+      <pubDate>Tue, 15 Sep 2026 13:00:00 +0000</pubDate>
+      <description>Pod Security rolled out with warn before enforce, the removed API that takes workloads with it on upgrade, the difference between an etcd snapshot and a real backup, and the three cluster failures that stay silent until they are outages.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#064 — Kubernetes Autoscaling</title>
+      <link>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html</link>
+      <guid isPermaLink="true">https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html</guid>
+      <pubDate>Tue, 15 Sep 2026 12:00:00 +0000</pubDate>
+      <description>The HPA algorithm in one line and the missing resource request that silently disables it, VPA as a measuring tool before it is an actuator, why the two fight on CPU, and the single pod that pins a node against every scale-down.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#063 — Kubernetes Scheduling</title>
+      <link>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html</link>
+      <guid isPermaLink="true">https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html</guid>
+      <pubDate>Tue, 15 Sep 2026 11:00:00 +0000</pubDate>
+      <description>Taints as the node's veto and the NoExecute effect that evicts what is already running, affinity as the pod's request, the topologyKey that gives anti-affinity its meaning, and why Pending is always a filtering result you can read verbatim.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#062 — Kubernetes Config &amp; Access</title>
+      <link>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html</link>
+      <guid isPermaLink="true">https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html</guid>
+      <pubDate>Tue, 15 Sep 2026 10:00:00 +0000</pubDate>
+      <description>ConfigMaps that update in place except when they do not, Secrets that are encoded rather than encrypted, namespaces that isolate far less than people assume, and RBAC's one rule — purely additive, no deny — that explains every access surprise.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
+    <item>
+      <title>#061 — Kubernetes Workloads</title>
+      <link>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html</link>
+      <guid isPermaLink="true">https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html</guid>
+      <pubDate>Tue, 15 Sep 2026 09:00:00 +0000</pubDate>
+      <description>ReplicaSets and why a stuck rollout is legible, DaemonSets and the update strategy that silently never rolls, Jobs and CronJobs that pile up on their own schedule, and the liveness probe that turns a dependency blip into a restart storm.</description>
+      <author>vishalabhinav.co.in@gmail.com (Vishal Abhinav)</author>
+    </item>
     <item>
       <title>#060 — OpenShift Operations</title>
       <link>https://platform-ops-blog.vishal-abhinav.workers.dev/OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html</link>

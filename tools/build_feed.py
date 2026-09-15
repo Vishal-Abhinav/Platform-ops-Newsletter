@@ -19,6 +19,49 @@ from siteconf import BASE           # canonical origin, one source of truth
 # The five September issues went out in the same month; they are staggered by
 # issue number so readers order them the way the archive does.
 ISSUES = [
+    (67, "Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html",
+     "Service Mesh Operations",
+     "mTLS identity that turns policy into a statement about services rather than subnets, the "
+     "AuthorizationPolicy default that flips one workload to deny while its neighbours stay "
+     "open, retries that multiply through a call graph, and the trace headers your application "
+     "still has to forward itself.",
+     datetime(2026, 9, 15, 15, 0, tzinfo=timezone.utc)),
+    (66, "Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html",
+     "Service Mesh Fundamentals",
+     "What a sidecar mesh actually buys and what it costs, the four Envoy objects every mesh "
+     "CRD renders into, what service discovery adds on top of kube-dns, and the Service port "
+     "name that silently disables every L7 feature.",
+     datetime(2026, 9, 15, 14, 0, tzinfo=timezone.utc)),
+    (65, "Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html",
+     "Kubernetes Cluster Operations",
+     "Pod Security rolled out with warn before enforce, the removed API that takes workloads "
+     "with it on upgrade, the difference between an etcd snapshot and a real backup, and the "
+     "three cluster failures that stay silent until they are outages.",
+     datetime(2026, 9, 15, 13, 0, tzinfo=timezone.utc)),
+    (64, "Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html",
+     "Kubernetes Autoscaling",
+     "The HPA algorithm in one line and the missing resource request that silently disables it, "
+     "VPA as a measuring tool before it is an actuator, why the two fight on CPU, and the single "
+     "pod that pins a node against every scale-down.",
+     datetime(2026, 9, 15, 12, 0, tzinfo=timezone.utc)),
+    (63, "Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html",
+     "Kubernetes Scheduling",
+     "Taints as the node's veto and the NoExecute effect that evicts what is already running, "
+     "affinity as the pod's request, the topologyKey that gives anti-affinity its meaning, and "
+     "why Pending is always a filtering result you can read verbatim.",
+     datetime(2026, 9, 15, 11, 0, tzinfo=timezone.utc)),
+    (62, "Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html",
+     "Kubernetes Config & Access",
+     "ConfigMaps that update in place except when they do not, Secrets that are encoded rather "
+     "than encrypted, namespaces that isolate far less than people assume, and RBAC's one rule "
+     "\u2014 purely additive, no deny \u2014 that explains every access surprise.",
+     datetime(2026, 9, 15, 10, 0, tzinfo=timezone.utc)),
+    (61, "Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html",
+     "Kubernetes Workloads",
+     "ReplicaSets and why a stuck rollout is legible, DaemonSets and the update strategy that "
+     "silently never rolls, Jobs and CronJobs that pile up on their own schedule, and the "
+     "liveness probe that turns a dependency blip into a restart storm.",
+     datetime(2026, 9, 15, 9, 0, tzinfo=timezone.utc)),
     (60, "OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html",
      "OpenShift Operations",
      "Monitoring that is half switched off by default, LogQL that returns before it times "

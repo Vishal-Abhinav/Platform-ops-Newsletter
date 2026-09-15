@@ -138,9 +138,9 @@
      "name": "Kubernetes",
      "icon": "☸️",
      "href": "categories/kubernetes/index.html",
-     "live": 16,
-     "pipe": 13,
-     "plan": 6
+     "live": 35,
+     "pipe": 0,
+     "plan": 0
     },
     {
      "name": "OpenShift",
@@ -154,13 +154,13 @@
      "name": "Service Mesh",
      "icon": "🕸️",
      "href": "categories/service-mesh/index.html",
-     "live": 0,
-     "pipe": 2,
-     "plan": 8
+     "live": 10,
+     "pipe": 0,
+     "plan": 0
     }
    ],
-   "live": 29,
-   "pipe": 15
+   "live": 58,
+   "pipe": 0
   },
   {
    "name": "Reliability",

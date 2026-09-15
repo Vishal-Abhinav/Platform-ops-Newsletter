@@ -391,6 +391,41 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://platform-ops-blog.vishal-abhinav.workers.dev/OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html</loc>
     <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>

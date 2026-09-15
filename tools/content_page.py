@@ -135,6 +135,30 @@ def note(kind, title, body):
     return f'<div class="note {kind}"><b>{esc(title)}</b>{body}</div>'
 
 
+def refs(items, heading="Further reading"):
+    """Links to the primary sources. items: [(label, url, one-line why)].
+
+    Only upstream documentation belongs here — kubernetes.io, istio.io, the
+    project's own repo. A deep-dive that cannot point at the spec it is
+    describing is asking to be taken on faith, and the reader who wants the
+    exhaustive flag list should be sent to the place that maintains it rather
+    than to a copy of it that goes stale here.
+
+    External, so rel="noopener noreferrer" and an explicit new tab: the reader
+    is mid-page and losing their place to a docs site is a bad trade.
+    """
+    rows = ""
+    for label, url, why in items:
+        host = url.split("//", 1)[1].split("/", 1)[0].replace("www.", "")
+        rows += (f'<a class="ref" href="{esc(url)}" target="_blank" rel="noopener noreferrer">'
+                 f'<span class="ref-m">{esc(host)}</span>'
+                 f'<span class="ref-t">{esc(label)}</span>'
+                 f'<span class="ref-w">{esc(why)}</span>'
+                 f'<span class="ref-x" aria-hidden="true">↗</span></a>')
+    return (f'<div class="refs"><div class="refs-h">{esc(heading)}</div>'
+            f'<div class="refs-l">{rows}</div></div>')
+
+
 # ── stylesheet (one file, shared by every topic page) ────────────────────────
 CSS = """
 :root{--ink:#08090c;--paper:#f2f0eb;--smoke:#e4e0d8;--ash:#b8b2a7;--coal:#1c1f26;
@@ -254,6 +278,26 @@ html[data-theme="dark"] .dg-node.n-plain{fill:#8a877f!important;}
    display:flex, border-radius:50%). Sharing the class name laid every command
    line out inside that box and clipped it on both sides. */
 .tx{color:#e8e6e1;}
+
+/* ─── FURTHER READING ─── */
+.refs{margin:26px 0 8px;border-top:1px solid var(--line-2);padding-top:22px;}
+.refs-h{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;
+ text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.refs-l{display:grid;gap:2px;background:var(--line-1);border:1px solid var(--line-1);}
+.ref{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:4px 14px;
+ background:var(--card-bg);padding:13px 16px;text-decoration:none;transition:background .16s;}
+.ref:hover{background:var(--wash-1);}
+.ref-m{grid-row:1;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.2px;
+ color:var(--crimson);white-space:nowrap;}
+.ref-t{grid-row:1;font-size:14.5px;color:var(--heading-fg);font-weight:500;}
+.ref-x{grid-row:1;color:var(--muted);font-size:12px;}
+.ref-w{grid-column:2;grid-row:2;font-size:12.5px;color:var(--muted);line-height:1.5;}
+@media(max-width:620px){
+ .ref{grid-template-columns:1fr auto;}
+ .ref-m{grid-row:1;grid-column:1;}
+ .ref-t{grid-row:2;grid-column:1/-1;}
+ .ref-w{grid-row:3;grid-column:1/-1;}
+}
 .tc{color:rgba(255,255,255,.32);}
 .to{color:rgba(255,255,255,.6);}
 

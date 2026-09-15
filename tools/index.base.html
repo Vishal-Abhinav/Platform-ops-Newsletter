@@ -1400,50 +1400,134 @@ a.footer-logo:hover{color:#fff;}
     <p class="section-lead">Every issue is a deep-dive with architecture diagrams, code samples, and battle-tested insights.</p>
 
     <!-- ── NEW FEATURED: Issue #057 Linux & Unix Glossary ── -->
-    <a href="OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html" class="issue-featured-new">
+    <a href="Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html" class="issue-featured-new">
       <div>
         <div class="ifn-new-badge"><span class="ifn-dot"></span> New Issue</div>
-        <div class="ifn-issue-meta">September 2026 · #060</div>
-        <div class="ifn-title">OpenShift Operations</div>
+        <div class="ifn-issue-meta">September 2026 · #067</div>
+        <div class="ifn-title">Service Mesh Operations</div>
         <div class="ifn-desc">
-          Monitoring that is half switched off by default, LogQL that returns before it times out, the four security gates and which one refused you, and the upgrade that stops on one PodDisruptionBudget — with the pre-upgrade checks that prevent the bad ones.
+          mTLS identity that turns policy into a statement about services rather than subnets, the AuthorizationPolicy default that flips one workload to deny while its neighbours stay open, retries that multiply through a call graph, and the trace headers your application still has to forward itself.
         </div>
         <div class="ifn-tags">
-          <span class="ifn-tag r">Monitoring</span>
-          <span class="ifn-tag a">Loki</span>
-          <span class="ifn-tag c">RBAC</span>
-          <span class="ifn-tag c">Upgrades</span>
-          <span class="ifn-tag l">Backup / DR</span>
-          <span class="ifn-tag l">Compliance</span>
+          <span class="ifn-tag r">mTLS</span>
+          <span class="ifn-tag a">Istio</span>
+          <span class="ifn-tag c">AuthorizationPolicy</span>
+          <span class="ifn-tag c">Retries</span>
+          <span class="ifn-tag l">Multi-Cluster</span>
+          <span class="ifn-tag l">Tracing</span>
         </div>
       </div>
       <div class="ifn-cta">Read Now →</div>
-      <div class="ifn-num">60</div>
+      <div class="ifn-num">67</div>
     </a>
 
-    <!-- ── PREVIOUS FEATURED: Issue #059 OpenShift Networking & Storage ── -->
-    <a href="OpenShift/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html" class="issue-featured">
+    <!-- ── PREVIOUS FEATURED: Issue #066 Service Mesh Fundamentals ── -->
+    <a href="Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html" class="issue-featured">
       <div>
         <div class="if-new-badge"><span class="if-new-badge-dot"></span> Previous Issue</div>
-        <div class="if-issue-meta">September 2026 · #059</div>
-        <div class="if-title">OpenShift Networking &amp; Storage</div>
-        <div class="if-desc">Routes and the four TLS modes, OVN-Kubernetes and the MTU fault everybody misdiagnoses, NetworkPolicy isolation that silently blinds monitoring, and the CSI chain where each stage fails in a different log.</div>
+        <div class="if-issue-meta">September 2026 · #066</div>
+        <div class="if-title">Service Mesh Fundamentals</div>
+        <div class="if-desc">What a sidecar mesh actually buys and what it costs, the four Envoy objects every mesh CRD renders into, what service discovery adds on top of kube-dns, and the Service port name that silently disables every L7 feature.</div>
         <div class="if-tags">
-          <span class="if-tag r">Routes</span>
-          <span class="if-tag a">OVN</span>
-          <span class="if-tag c">MTU</span>
-          <span class="if-tag l">CSI</span>
-          <span class="if-tag p">NetworkPolicy</span>
+          <span class="if-tag r">Envoy</span>
+          <span class="if-tag a">Istio</span>
+          <span class="if-tag c">Linkerd</span>
+          <span class="if-tag l">xDS</span>
+          <span class="if-tag p">Discovery</span>
         </div>
       </div>
       <div class="if-cta">Read Now →</div>
-      <div class="if-num">59</div>
+      <div class="if-num">66</div>
     </a>
 
     <!-- ── GRID: Previous issues (scrollable) ── -->
     <div class="issues-scroll-wrap">
     <div class="issues-scroll" id="issuesScroll">
     <div class="issues-grid">
+
+      <a href="Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html" class="issue-card">
+        <div class="ic-issue">September 2026 · #065</div>
+        <div class="ic-title">Kubernetes Cluster Operations</div>
+        <div class="ic-desc">Pod Security rolled out with warn before enforce, the removed API that takes workloads with it on upgrade, and the difference between an etcd snapshot and a real backup.</div>
+        <div class="ic-tags">
+          <span class="ic-tag a">Upgrades</span>
+          <span class="ic-tag c">etcd</span>
+          <span class="ic-tag l">Velero</span>
+        </div>
+        <div class="ic-num">65</div>
+      </a>
+
+      <a href="Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html" class="issue-card">
+        <div class="ic-issue">September 2026 · #064</div>
+        <div class="ic-title">Kubernetes Autoscaling</div>
+        <div class="ic-desc">The HPA algorithm in one line, the missing resource request that silently disables it, why VPA and HPA fight on CPU, and the pod that pins a node against scale-down.</div>
+        <div class="ic-tags">
+          <span class="ic-tag r">HPA</span>
+          <span class="ic-tag a">VPA</span>
+          <span class="ic-tag c">Cluster Autoscaler</span>
+        </div>
+        <div class="ic-num">64</div>
+      </a>
+
+      <a href="Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html" class="issue-card">
+        <div class="ic-issue">September 2026 · #063</div>
+        <div class="ic-title">Kubernetes Scheduling</div>
+        <div class="ic-desc">Taints as the node's veto, affinity as the pod's request, the topologyKey that gives anti-affinity its meaning, and why Pending is a filtering result you can read verbatim.</div>
+        <div class="ic-tags">
+          <span class="ic-tag a">Taints</span>
+          <span class="ic-tag c">Affinity</span>
+          <span class="ic-tag l">Topology Spread</span>
+        </div>
+        <div class="ic-num">63</div>
+      </a>
+
+      <a href="Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html" class="issue-card">
+        <div class="ic-issue">September 2026 · #062</div>
+        <div class="ic-title">Kubernetes Config &amp; Access</div>
+        <div class="ic-desc">ConfigMaps that update in place except when they do not, Secrets that are encoded rather than encrypted, and RBAC's one rule — purely additive, no deny.</div>
+        <div class="ic-tags">
+          <span class="ic-tag r">RBAC</span>
+          <span class="ic-tag a">Secrets</span>
+          <span class="ic-tag c">Namespaces</span>
+        </div>
+        <div class="ic-num">62</div>
+      </a>
+
+      <a href="Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html" class="issue-card">
+        <div class="ic-issue">September 2026 · #061</div>
+        <div class="ic-title">Kubernetes Workloads</div>
+        <div class="ic-desc">ReplicaSets and why a stuck rollout is legible, DaemonSets that silently never roll, CronJobs that pile up, and the liveness probe that turns a blip into a restart storm.</div>
+        <div class="ic-tags">
+          <span class="ic-tag a">ReplicaSets</span>
+          <span class="ic-tag c">Probes</span>
+          <span class="ic-tag l">CronJobs</span>
+        </div>
+        <div class="ic-num">61</div>
+      </a>
+
+      <a href="OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html" class="issue-card">
+        <div class="ic-issue">September 2026 · #060</div>
+        <div class="ic-title">OpenShift Operations</div>
+        <div class="ic-desc">Monitoring that is half switched off by default, LogQL that returns before it times out, the four security gates, and the upgrade that stops on one PodDisruptionBudget.</div>
+        <div class="ic-tags">
+          <span class="ic-tag r">Monitoring</span>
+          <span class="ic-tag a">Loki</span>
+          <span class="ic-tag c">Upgrades</span>
+        </div>
+        <div class="ic-num">60</div>
+      </a>
+
+      <a href="OpenShift/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html" class="issue-card">
+        <div class="ic-issue">September 2026 · #059</div>
+        <div class="ic-title">OpenShift Networking &amp; Storage</div>
+        <div class="ic-desc">Routes and the four TLS modes, the OVN MTU fault everybody misdiagnoses, and the CSI chain where each stage fails in a different log.</div>
+        <div class="ic-tags">
+          <span class="ic-tag a">Routes</span>
+          <span class="ic-tag c">OVN</span>
+          <span class="ic-tag l">CSI</span>
+        </div>
+        <div class="ic-num">59</div>
+      </a>
 
       <a href="OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html" class="issue-card">
         <div class="ic-issue">September 2026 · #058</div>
