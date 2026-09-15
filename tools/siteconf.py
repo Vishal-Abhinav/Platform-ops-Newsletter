@@ -40,8 +40,8 @@ SITES = {
     },
     "platformops": {
         "base": "https://platformops.srivantechnologies.com/",
-        "gsc": "",          # fill in after adding the property in Search Console
-        "note": "the custom subdomain; not live until DNS points at the Worker",
+        "gsc": "Dsw5vFDfgmwABqWL4QXxsmxA8ZfH5kh2SrutfB10C6k",
+        "note": "the custom subdomain, now bound to the Worker as a custom domain",
     },
 }
 
@@ -91,10 +91,26 @@ BASE_HOST = BASE.split("//", 1)[1].rstrip("/")
 # It goes on the homepage only, which is what a URL-prefix property at the
 # root is checked against. The tag has to be LIVE before you press Verify:
 # build, commit, push, confirm it is actually being served, then verify.
-GOOGLE_SITE_VERIFICATION = SITES[ACTIVE]["gsc"]
+#
+# Every profile's token is emitted, not just ACTIVE's — deliberately. Right
+# now every profile in SITES is the SAME Worker answering on multiple
+# hostnames, so whichever URL Google actually fetches gets the identical
+# homepage HTML back. A Search Console property for platformops needs its
+# tag live on https://platformops.srivantechnologies.com/ *before* ACTIVE is
+# ever flipped to it — waiting for the flip would mean verifying a property
+# that is not allowed to be canonical yet just to prove it can be. Multiple
+# google-site-verification meta tags on one page is explicitly supported by
+# Google: each one verifies its own property independently, and a tag for a
+# property you are not currently canonical for is inert, not wrong.
+GOOGLE_SITE_VERIFICATION = SITES[ACTIVE]["gsc"]      # kept for anything reading the active token alone
 
-assert "<" not in GOOGLE_SITE_VERIFICATION, (
-    "GOOGLE_SITE_VERIFICATION wants just the token, not the whole <meta> tag")
+GOOGLE_SITE_VERIFICATIONS = list(dict.fromkeys(     # de-duplicated, order preserved
+    s["gsc"] for s in SITES.values() if s.get("gsc")
+))
+
+for _tok in GOOGLE_SITE_VERIFICATIONS:
+    assert "<" not in _tok, (
+        "a gsc token wants just the value, not the whole <meta> tag")
 
 
 # ── files that are NOT pages ────────────────────────────────────────────────

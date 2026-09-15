@@ -192,6 +192,7 @@ def footer(up=""):
         <div><div class="f-col-t">Explore</div>
           <a href="{up}categories/index.html">All Categories</a>
           <a href="{up}index.html#topics">Knowledge Map</a>
+          <a href="{up}categories/kubernetes-openshift-map/index.html">K8s &amp; OpenShift Topic Map</a>
           <a href="{up}terminal/index.html">Practice Terminal ↗</a>
           <a href="{up}colophon/index.html">Colophon</a></div>
         <div><div class="f-col-t">Connect</div>

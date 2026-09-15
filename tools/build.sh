@@ -7,6 +7,7 @@
 #   index.html      <- index.base.html + build_kmap/features/wire/library
 #   README.md       <- README.base.md  + build_readme/library
 #   categories/     <- build_hubs      (33 hubs + index + hub.css)
+#   categories/kubernetes-openshift-map/ <- build_topicmap (46-group reader topic list, live/pipe/planned)
 #   Foundation/     <- build_foundation (topic pages + topic.css)
 #   Commands/       <- build_commands   (command references + commands.css)
 #   OpenShift/      <- build_openshift  (deep-dives + topic.css)
@@ -52,6 +53,9 @@ python3 tools/build_author.py
 
 say "category hubs"
 python3 tools/build_hubs.py
+
+say "Kubernetes + OpenShift complete topic map"
+python3 tools/build_topicmap.py
 
 say "topic pages"
 python3 tools/build_foundation.py fnd_a fnd_b

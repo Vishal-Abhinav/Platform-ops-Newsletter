@@ -16,7 +16,7 @@ import re
 import sys
 
 sys.path.insert(0, str(TOOLS))
-from siteconf import GOOGLE_SITE_VERIFICATION   # noqa: E402
+from siteconf import GOOGLE_SITE_VERIFICATIONS   # noqa: E402
 
 SRC = ROOT / 'index.html'
 src = SRC.read_text(encoding='utf-8')
@@ -38,12 +38,13 @@ HEAD = """
 """
 
 # Search Console ownership, homepage only — that is the URL a URL-prefix
-# property is checked against. Emitted only when a token is set, so the
-# default build ships no empty tag.
-verify_tag = ""
-if GOOGLE_SITE_VERIFICATION:
-    verify_tag = ('<meta name="google-site-verification" content="'
-                  f'{GOOGLE_SITE_VERIFICATION}">\n')
+# property is checked against. One tag per registered property (see
+# siteconf.GOOGLE_SITE_VERIFICATIONS) so a property can be verified before
+# it is ever made canonical; emits nothing when no token is set anywhere.
+verify_tag = "".join(
+    f'<meta name="google-site-verification" content="{tok}">\n'
+    for tok in GOOGLE_SITE_VERIFICATIONS
+)
 
 src = src.replace('</head>', verify_tag + HEAD + '</head>', 1)
 
