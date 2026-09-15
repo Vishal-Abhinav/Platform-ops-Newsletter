@@ -10,14 +10,21 @@ import pathlib
 
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
 from siteconf import BASE           # canonical origin, one source of truth
-import chrome                       # the one nav and the one footer
 
 
 def esc(s):
     return html.escape(str(s), quote=True)
 
 
-CSS = "\n" + chrome.TOKENS + """
+CSS = """
+:root{--paper:#f2f0eb;--coal:#1c1f26;--cyan:#00c2d4;--amber:#f59e0b;--crimson:#e53935;
+ --lime:#84cc16;--ash:#b8b2a7;--page-bg:#f2f0eb;--panel-bg:#e4e0d8;--card-bg:#f8f7f4;
+ --page-fg:#1c1f26;--heading-fg:#1c1f26;--muted:#6b6860;--line-1:rgba(0,0,0,.06);
+ --line-2:rgba(0,0,0,.1);--line-3:rgba(0,0,0,.16);--wash:rgba(0,0,0,.04);
+ --nav-bg:rgba(242,240,235,.9);--code-bg:#0d0f14;}
+html[data-theme="dark"]{--page-bg:#0c0e12;--panel-bg:#14161c;--card-bg:#181b22;--page-fg:#e7e5df;
+ --heading-fg:#eeece6;--muted:#9a978e;--line-1:rgba(255,255,255,.07);--line-2:rgba(255,255,255,.11);
+ --line-3:rgba(255,255,255,.18);--wash:rgba(255,255,255,.05);--nav-bg:rgba(12,14,18,.9);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--page-bg);color:var(--page-fg);font-family:'Manrope',system-ui,sans-serif;
  -webkit-font-smoothing:antialiased;line-height:1.6;}
@@ -76,12 +83,27 @@ html[data-theme="dark"] .gf.on{background:var(--paper);color:var(--coal);border-
  color:var(--muted);flex-basis:100%;}
 .cres b{color:var(--crimson);font-weight:400;}
 
-.grp{padding:40px 0 0;}
-.grp-h{display:flex;align-items:baseline;gap:12px;margin-bottom:4px;}
+.grp{padding:28px 0 0;border-bottom:1px solid var(--line-1);}
+.grp:last-of-type{border-bottom:0;}
+/* Every group used to render fully expanded — with 362 commands across the
+   four reference pages, that's a wall of tables a visitor scrolls past to
+   find the one they want. Same accordion mechanics as content_page.py's
+   .rc cards (grid-template-rows 0fr->1fr) so a reader moving between a
+   deep-dive and a command page meets the same interaction twice, not two
+   different ones. The first group starts open; the rest open on click, or
+   automatically the moment a search/filter matches something inside them. */
+.grp-h{display:flex;align-items:baseline;gap:12px;width:100%;padding:12px 0;background:none;
+ border:0;cursor:pointer;text-align:left;font:inherit;color:inherit;}
 .grp-h h2{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:.8px;color:var(--heading-fg);}
 .grp-h .cnt{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.4px;color:var(--muted);
  text-transform:uppercase;}
-.grp-d{font-size:13.5px;color:var(--muted);max-width:720px;margin-bottom:16px;}
+.grp-chev{margin-left:auto;font-family:'DM Mono',monospace;font-size:15px;color:var(--ash);
+ transition:transform .3s;flex-shrink:0;}
+.grp.open .grp-chev{transform:rotate(-180deg);color:var(--crimson);}
+.grp-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s cubic-bezier(.25,.46,.45,.94);}
+.grp.open .grp-body{grid-template-rows:1fr;}
+.grp-body>div{overflow:hidden;min-height:0;}
+.grp-d{font-size:13.5px;color:var(--muted);max-width:720px;margin:2px 0 16px;}
 .grp[hidden]{display:none;}
 
 .tw{overflow-x:auto;}
@@ -116,11 +138,19 @@ html[data-theme="dark"] .note b{color:var(--amber);}
 .pager a b{display:block;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.5px;
  color:var(--heading-fg);font-weight:400;margin-top:4px;}
 
-/* The bar and the footer come from chrome.py so these pages cannot drift
-   away from the other 89. Only the wider max-width is local. */
-""" + chrome.BAR_CSS + "\n" + chrome.FOOT_CSS + """
-footer{margin-top:56px;}
-.f-in{max-width:1120px;}
+footer{background:var(--coal);color:var(--paper);padding:48px 40px 24px;margin-top:56px;}
+.f-in{max-width:1120px;margin:0 auto;display:flex;flex-wrap:wrap;gap:24px;
+ justify-content:space-between;align-items:flex-end;}
+.f-logo{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:3px;color:#fff;
+ text-decoration:none;}
+.f-links{display:flex;flex-wrap:wrap;gap:18px;font-family:'DM Mono',monospace;font-size:10px;
+ letter-spacing:1.3px;text-transform:uppercase;}
+.f-links a{color:rgba(255,255,255,.65);text-decoration:none;}
+.f-links a:hover{color:var(--cyan);}
+.f-bot{max-width:1120px;margin:26px auto 0;padding-top:16px;
+ border-top:1px solid rgba(255,255,255,.1);font-family:'DM Mono',monospace;font-size:9.5px;
+ letter-spacing:1.2px;color:rgba(255,255,255,.35);}
+.f-bot a{color:rgba(255,255,255,.5);}
 """
 
 JS = """<script>
@@ -139,19 +169,31 @@ document.getElementById('tt').addEventListener('click',function(){
   rows.forEach(function(r){ r.dataset.q=r.textContent.toLowerCase(); });
 
   function apply(){
-    var term=(q.value||'').trim().toLowerCase(), shown=0;
+    var term=(q.value||'').trim().toLowerCase(), shown=0, active=!!term||group!=='all';
     rows.forEach(function(r){
       var ok=(!term||r.dataset.q.indexOf(term)!==-1) &&
              (group==='all'||r.closest('.grp').dataset.g===group);
       r.hidden=!ok; if(ok) shown++;
     });
-    groups.forEach(function(g){
-      g.hidden=!g.querySelector('tbody tr:not([hidden])');
+    groups.forEach(function(g,i){
+      var hasVisible=!!g.querySelector('tbody tr:not([hidden])');
+      g.hidden=!hasVisible;
+      // A search or a group filter is the reader telling us what they want —
+      // open every section that still has a match so they never have to
+      // click through an accordion to see the row that matched. With no
+      // active search or filter, only the first group is expanded, same as
+      // the page loaded.
+      setOpen(g, active ? hasVisible : i===0);
     });
-    res.innerHTML = (term||group!=='all')
+    res.innerHTML = active
       ? '<b>'+shown+'</b> of '+TOTAL+' commands'
       : TOTAL+' commands across '+groups.length+' groups';
     empty.hidden = shown!==0;
+  }
+  function setOpen(g, open){
+    g.classList.toggle('open', open);
+    var h=g.querySelector('.grp-h');
+    if(h) h.setAttribute('aria-expanded', open?'true':'false');
   }
   var t; q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(apply,110);});
   q.addEventListener('search',apply);
@@ -161,11 +203,21 @@ document.getElementById('tt').addEventListener('click',function(){
       b.classList.add('on'); group=b.dataset.g; apply();
     });
   });
+  document.querySelectorAll('.grp-h').forEach(function(h){
+    h.addEventListener('click',function(){
+      setOpen(h.closest('.grp'), !h.closest('.grp').classList.contains('open'));
+    });
+  });
   apply();
 })();
 </script>"""
 
-TOGGLE = chrome.TOGGLE          # one definition, in chrome.py
+TOGGLE = ('<button class="tt" id="tt" type="button" aria-label="Toggle dark mode">'
+          '<svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/>'
+          '<path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2'
+          'M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
+          '<svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>'
+          '</svg></button>')
 
 FONTS = ('<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&'
          'family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&'
@@ -193,17 +245,24 @@ def render(*, slug, title, icon, tagline, groups, category_slug, pager, up="../.
                        for g in groups)
 
     body = ""
-    for gid, heading, desc, rows in groups:
+    for gi, (gid, heading, desc, rows) in enumerate(groups):
         trs = ""
         for cmd, what, example in rows:
             trs += (f'<tr><td class="c">{cmd}</td><td class="w">{what}</td>'
                     f'<td class="e">{example}</td></tr>')
+        open_cls = " open" if gi == 0 else ""
+        expanded = "true" if gi == 0 else "false"
         body += f"""
-  <section class="grp" data-g="{esc(gid)}"><div class="wrap">
-    <div class="grp-h"><h2>{esc(heading)}</h2><span class="cnt">{len(rows)} commands</span></div>
-    <p class="grp-d">{desc}</p>
-    <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
-      <th>Typical use</th></tr></thead><tbody>{trs}</tbody></table></div>
+  <section class="grp{open_cls}" data-g="{esc(gid)}"><div class="wrap">
+    <button type="button" class="grp-h" aria-expanded="{expanded}">
+      <h2>{esc(heading)}</h2><span class="cnt">{len(rows)} commands</span>
+      <span class="grp-chev" aria-hidden="true">⌄</span>
+    </button>
+    <div class="grp-body"><div>
+      <p class="grp-d">{desc}</p>
+      <div class="tw"><table><thead><tr><th>Command</th><th>What it does</th>
+        <th>Typical use</th></tr></thead><tbody>{trs}</tbody></table></div>
+    </div></div>
   </div></section>"""
 
     return f"""<!DOCTYPE html>
@@ -238,7 +297,16 @@ def render(*, slug, title, icon, tagline, groups, category_slug, pager, up="../.
 <link rel="stylesheet" href="{up}Commands/commands.css">
 </head>
 <body>
-{chrome.nav(up, f'<a href="{up}index.html">Home</a><span>/</span>' f'<a href="{up}categories/index.html">Categories</a><span>/</span>' f'<a href="{up}categories/{esc(category_slug)}/index.html">Commands</a><span>/</span>' f'<span class="cur">{esc(title)}</span>', toggle=TOGGLE)}
+<nav>
+  <a href="{up}index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb">
+    <a href="{up}index.html">Home</a><span>/</span>
+    <a href="{up}categories/index.html">Categories</a><span>/</span>
+    <a href="{up}categories/{esc(category_slug)}/index.html">Commands</a><span>/</span>
+    <span class="cur">{esc(title)}</span>
+  </div>
+  {TOGGLE}
+</nav>
 
 <header class="hero"><div class="wrap">
   <div class="eyebrow">Commands · Reference</div>
@@ -263,7 +331,21 @@ def render(*, slug, title, icon, tagline, groups, category_slug, pager, up="../.
 
 <div class="wrap">{pager}</div>
 
-{chrome.footer(up)}
+<footer>
+  <div class="f-in">
+    <a class="f-logo" href="{up}index.html">PLATFORM OPS</a>
+    <div class="f-links">
+      <a href="{up}categories/{esc(category_slug)}/index.html">Commands Hub</a>
+      <a href="{up}categories/index.html">All Categories</a>
+      <a href="{up}index.html#library">Reference Library</a>
+      <a href="{up}index.html#subscribe">Subscribe</a>
+      <a href="{up}feed.xml">RSS</a>
+      <a href="https://srivantechnologies.com/" target="_blank" rel="noopener">Srivan Technologies ↗</a>
+    </div>
+  </div>
+  <div class="f-bot">© 2026 Vishal Abhinav · Platform Ops — code MIT,
+    <a href="{up}LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+</footer>
 {JS}
 </body>
 </html>

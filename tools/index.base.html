@@ -268,6 +268,24 @@ nav.scrolled {
   opacity: 0; transform: translateY(20px);
   animation: fadeUp 0.7s ease 0.8s forwards;
 }
+/* Masthead credit line — the newsletter never named who runs it or that
+   there's a studio behind it, the same gap the Tier-1 footer link closed
+   sitewide, but visible on arrival this time, not just in the footer. */
+.hero-maintainer {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 22px;
+  font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 1.3px;
+  text-transform: uppercase; color: var(--muted);
+  opacity: 0; transform: translateY(20px);
+  animation: fadeUp 0.7s ease 0.92s forwards;
+}
+.hero-maintainer b { color: var(--heading-fg); font-weight: 400; }
+.hero-maintainer .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+.hero-maintainer a {
+  color: var(--muted); text-decoration: none; border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.hero-maintainer a:hover { color: var(--crimson); border-color: var(--crimson); }
 @keyframes fadeUp {
   to { opacity: 1; transform: translateY(0); }
 }
@@ -446,6 +464,43 @@ nav.scrolled {
 
 /* ─── SECTION FRAMEWORK ─── */
 .section { padding: 100px 64px; max-width: 1200px; margin: 0 auto; }
+
+/* ─── DOCS RAIL ───
+   Sticky left-hand "on this page" nav, added alongside the existing
+   sections below the hero (Tier 3). It wraps Topics/Issues/Authors/
+   Subscribe without touching any of them — .docs-shell is a 2-col grid,
+   .docs-content is just the same stack of sections that was here before.
+   "Library" has no on-page section of its own (build_library.py moved that
+   listing to the README on purpose — Foundation content is reached through
+   its category hub), so that one link navigates off-page instead of
+   scroll-spying like the rest. */
+.docs-shell { display: grid; grid-template-columns: 212px minmax(0,1fr); align-items: start; }
+.docs-content { min-width: 0; }
+.docs-rail {
+  position: sticky; top: 84px; align-self: start;
+  padding: 56px 8px 56px 48px; max-height: calc(100vh - 84px); overflow-y: auto;
+}
+.docs-rail-label {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+}
+.docs-rail-nav { display: flex; flex-direction: column; border-left: 1px solid var(--hairline-2); }
+.docs-rail-nav a {
+  display: block; padding: 8px 0 8px 18px; margin-left: -1px;
+  border-left: 1.5px solid transparent;
+  font-family: 'DM Mono', monospace; font-size: 12.5px; letter-spacing: 0.4px;
+  color: var(--muted); text-decoration: none;
+  transition: color 0.2s, border-color 0.2s;
+}
+.docs-rail-nav a:hover { color: var(--heading-fg); }
+.docs-rail-nav a.is-active { color: var(--cyan); border-left-color: var(--cyan); }
+/* Same breakpoint the two-pane knowledge-row below already stacks at — past
+   that width a fixed rail only steals the one column of space the reader
+   has left, for a nav they can already reach at the top of the page. */
+@media (max-width: 1100px) {
+  .docs-shell { display: block; }
+  .docs-rail { display: none; }
+}
 
 /* ─── KNOWLEDGE ROW (Topics + Latest Issues side by side) ─── */
 .knowledge-row { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; }
@@ -1043,6 +1098,11 @@ a.footer-logo:hover{color:#fff;}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
       </a>
     </div>
+    <div class="hero-maintainer">
+      <span>Maintained by <b>Vishal Abhinav</b> — Platform Engineer</span>
+      <span class="dot" aria-hidden="true"></span>
+      <a href="https://srivantechnologies.com/" target="_blank" rel="noopener">Srivan Technologies ↗</a>
+    </div>
     <div class="hero-stats">
       <div class="stat-item">
         <div class="stat-num"><span class="count-up" data-target="57">0</span></div>
@@ -1207,6 +1267,22 @@ a.footer-logo:hover{color:#fff;}
     <span class="ticker-item"><span class="ticker-dot"></span> SRE Practices</span>
   </div>
 </div>
+
+<!-- ═══════════ DOCS RAIL + CONTENT (Tier 3) ═══════════ -->
+<div class="docs-shell">
+<aside class="docs-rail" aria-label="On this page">
+  <div class="docs-rail-inner">
+    <div class="docs-rail-label">On this page</div>
+    <nav class="docs-rail-nav">
+      <a href="#issues" data-rail="issues">Issues</a>
+      <a href="#topics" data-rail="topics">Topics</a>
+      <a href="categories/foundation/index.html">Library</a>
+      <a href="#subscribe" data-rail="subscribe">Subscribe</a>
+      <a href="#authors" data-rail="authors">Authors</a>
+    </nav>
+  </div>
+</aside>
+<div class="docs-content">
 
 <!-- ═══════════ TOPICS ═══════════ -->
 <div class="knowledge-row">
@@ -1808,6 +1884,10 @@ a.footer-logo:hover{color:#fff;}
   </div>
 </div>
 
+</div>
+</div>
+<!-- ═══════════ /DOCS RAIL + CONTENT ═══════════ -->
+
 <!-- ═══════════ FOOTER ═══════════ -->
 <footer>
   <div class="footer-inner">
@@ -1836,6 +1916,7 @@ a.footer-logo:hover{color:#fff;}
         <div class="footer-col">
           <div class="footer-col-title">Connect</div>
           <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="https://srivantechnologies.com/" target="_blank" rel="noopener">Srivan Technologies ↗</a>
           <a href="#">Back to Top ↑</a>
         </div>
       </div>
@@ -2044,6 +2125,26 @@ document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 setTimeout(()=>{
   document.querySelectorAll('.reveal:not(.visible)').forEach(el=>el.classList.add('visible'));
 }, 3000);
+
+/* ── Docs rail: scroll-spy ──
+   Highlights whichever rail link matches the section currently in view.
+   Only 4 of the 5 rail links track a real on-page section — "Library"
+   points off-page (see the CSS comment above) and is never toggled here.
+   rootMargin pulls the trigger line up near the fixed nav so a section
+   is marked active as soon as it's actually the one under the header,
+   not only once it's fully on screen. */
+const railLinks = document.querySelectorAll('.docs-rail-nav a[data-rail]');
+if (railLinks.length) {
+  const railTargets = ['topics', 'issues', 'authors', 'subscribe']
+    .map(id => document.getElementById(id)).filter(Boolean);
+  const setActive = id => {
+    railLinks.forEach(a => a.classList.toggle('is-active', a.dataset.rail === id));
+  };
+  const railObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); });
+  }, { threshold: 0, rootMargin: '-96px 0px -70% 0px' });
+  railTargets.forEach(el => railObs.observe(el));
+}
 
 /* ── Knowledge-map tree: staggered terminal-typing reveal ── */
 /* Capped, for the same reason as the typewriter stagger below. */

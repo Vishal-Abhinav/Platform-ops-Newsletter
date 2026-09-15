@@ -10,7 +10,9 @@ import sys
 
 sys.path.insert(0, str(TOOLS))
 import content_page                                  # noqa: E402
-from content_page import CSS, render, esc            # noqa: E402
+from content_page import CSS, render, esc, section   # noqa: E402
+import diagrams                                       # noqa: E402
+import topic_diagrams                                 # noqa: E402
 
 OUT = ROOT / 'Foundation'
 
@@ -36,7 +38,9 @@ for mod in MODULES:
         topics[t["slug"]] = t
 
 OUT.mkdir(parents=True, exist_ok=True)
-(OUT / "topic.css").write_text(CSS.strip() + "\n", encoding='utf-8')
+# See build_k8s.py's comment on the same line — diagrams.CSS ships alongside
+# content_page.CSS by design; it only had no caller until now.
+(OUT / "topic.css").write_text(CSS.strip() + "\n\n" + diagrams.CSS.strip() + "\n", encoding='utf-8')
 
 built = []
 for i, (name, slug, external) in enumerate(ORDER):
@@ -71,11 +75,26 @@ for i, (name, slug, external) in enumerate(ORDER):
               else '<a class="next" href="../../categories/foundation/index.html">Foundation →<b>Hub</b></a>')
     pager += '</div>'
 
+    # Everything else in this series the pager doesn't already surface —
+    # a reader who finishes one topic shouldn't have to go back to the hub
+    # to find the rest of the sequence.
+    related = [l for j in range(len(ORDER)) if j != i
+               for l in [link(j)] if l and l not in (prev_l, next_l)]
+
+    # See build_k8s.py's comment on the same lines.
+    t_sections = t["sections"]
+    if slug in topic_diagrams.SPEC:
+        t_sections += section(
+            "System views", "What's actually inside it, and where the request goes",
+            "The diagram above shows the pieces. These two open one of them up and "
+            "follow a single request through it.",
+            diagrams.figures(topic_diagrams.SPEC[slug]))
+
     html_out = render(
         slug=slug, title=t["title"], tagline=t["tagline"], eyebrow=t["eyebrow"],
         crumbs=[("Home", "../../index.html"), ("Categories", "../../categories/index.html"),
                 ("Foundation", "../../categories/foundation/index.html"), (t["title"], None)],
-        meta=t["meta"], sections=t["sections"], pager=pager,
+        meta=t["meta"], sections=t_sections, pager=pager, related=related,
         canon=f"Foundation/{slug.upper()}/{slug}.html")
 
     d = OUT / slug.upper()

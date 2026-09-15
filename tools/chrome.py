@@ -44,6 +44,14 @@ LATEST_NUM = f"{_NEWEST[0]:03d}"
 LATEST_PATH = _NEWEST[1]
 LATEST_TITLE = _NEWEST[2]
 
+# Srivan Technologies' own site links out to this newsletter everywhere (the
+# footer, a featured-work band on every page, a whole Writing page) — this
+# newsletter never linked back. A reader who finishes an issue had no way to
+# discover who wrote it or that there's a studio site at all. One line in the
+# footer's existing Connect column closes that loop, same pattern as the
+# GitHub Repo link right above it.
+STUDIO = "https://srivantechnologies.com/"
+
 
 # ── the theme control, in three pieces ──────────────────────────────────────
 # The button, the script that reads the saved choice BEFORE first paint (so a
@@ -198,6 +206,7 @@ def footer(up=""):
         <div><div class="f-col-t">Connect</div>
           <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
           <a href="{up}index.html#authors">About the Author</a>
+          <a href="{STUDIO}" target="_blank" rel="noopener">Srivan Technologies ↗</a>
           <a href="#">Back to Top ↑</a></div>
       </div>
     </div>

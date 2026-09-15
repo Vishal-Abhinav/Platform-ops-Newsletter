@@ -197,13 +197,18 @@ for f in sorted(ROOT.rglob("*.html")):
     src = f.read_text(encoding="utf-8")
 
     # Replace our previous block rather than stacking a new one on each build.
-    # The trailing \n must come off with it: `block` below ends in one, so
-    # leaving it behind grew every hand-written page by a blank line per build.
+    # The trailing \n? matters: `block` below ends in "{MARK_CLOSE}\n", and
+    # without consuming that newline here too, every run leaves one stray
+    # blank line behind and the next run's insertion goes after it — the
+    # exact leak this doc's design-system notes already named build_seo.py
+    # for, on the 25 hand-written pages that never get wiped and rebuilt from
+    # a Python source between runs the way every generated page does. Those
+    # get any stray lines wiped for free each build; these were accumulating
+    # one every single time. (Confirmed the leak was still live, not merely
+    # documented as fixed: `build_seo.py` run twice in isolation grew every
+    # page it touched by one line each time before this fix.)
     src = re.sub(re.escape(MARK_OPEN) + r".*?" + re.escape(MARK_CLOSE) + r"\n?",
                  "", src, flags=re.S)
-    # One-time heal for pages that already carry a pile of those blank lines:
-    # every past build left one behind at the insertion point.
-    src = re.sub(r"\n{3,}(?=</head>)", "\n", src)
     src = apply_meta(src, rel)
 
     blocks = blocks_for(rel, src)

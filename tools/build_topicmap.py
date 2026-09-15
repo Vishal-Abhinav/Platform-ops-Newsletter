@@ -265,12 +265,28 @@ def build():
         zones = (zone_block("L", "Live now", rows)
                  + zone_block("P", "In pipeline", rows)
                  + zone_block("-", "Planned", rows))
+        # 942 items rendered flat, 46 groups deep, used to mean landing on this
+        # page (or on one of the 785 placeholder pages' "Back to <group>"
+        # links) dropped you into the middle of a single enormous scroll. Same
+        # accordion mechanics as content_page.py's .rc cards and cmd_page.py's
+        # .grp sections — collapsed by default (first group open, so the page
+        # isn't blank on arrival), expanding on click or the moment the URL's
+        # #anchor names this group (openFromHash() below; every existing link
+        # into this page, including the TOC right above, is a plain #anchor
+        # href, so nothing pointing here needed to change).
+        open_cls = " open" if n == 1 else ""
+        expanded = "true" if n == 1 else "false"
         sections.append(
-            f'<section id="{anchor}"><div class="wrap">'
-            f'<div class="eyebrow">{n:02d} / 46</div>'
-            f'<h2>{esc(title)}</h2>'
-            f'<p class="lede">{len(rows)} items · {g_live} live · {g_pipe} pipeline · {g_plan} planned</p>'
+            f'<section id="{anchor}" class="tm-grp{open_cls}"><div class="wrap">'
+            f'<button type="button" class="tm-h" aria-expanded="{expanded}" aria-controls="{anchor}-body">'
+            f'<span class="tm-h-l"><span class="eyebrow small">{n:02d} / 46</span><h2>{esc(title)}</h2></span>'
+            f'<span class="tm-h-r"><span class="tm-counts">{g_live} live · {g_pipe} pipeline · '
+            f'{g_plan} planned</span><span class="tm-chev" aria-hidden="true">⌄</span></span>'
+            f'</button>'
+            f'<div class="tm-body" id="{anchor}-body"><div>'
+            f'<p class="lede">{len(rows)} items in this group.</p>'
             f'{zones}'
+            f'</div></div>'
             f'</div></section>'
         )
 
@@ -314,7 +330,28 @@ def build():
 <link rel="stylesheet" href="../hub.css">
 <style>
 .toc{{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:2px;margin-top:26px;}}
-.eyebrow.small{{margin-top:0;}}
+.eyebrow.small{{margin:0;flex-shrink:0;}}
+
+/* Accordion for the 46 groups below — see the comment in build() for why. */
+.tm-grp{{border-bottom:1px solid var(--line-1);}}
+.tm-grp:last-of-type{{border-bottom:0;}}
+.tm-h{{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;
+ padding:22px 0;background:none;border:0;cursor:pointer;text-align:left;font:inherit;color:inherit;}}
+.tm-h-l{{display:flex;align-items:baseline;gap:14px;min-width:0;}}
+.tm-h-l h2{{margin:0;}}
+.tm-h-r{{display:flex;align-items:center;gap:14px;flex-shrink:0;}}
+.tm-counts{{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;
+ color:var(--muted);white-space:nowrap;}}
+.tm-chev{{font-family:'DM Mono',monospace;font-size:16px;color:var(--ash);transition:transform .3s;
+ flex-shrink:0;}}
+.tm-grp.open .tm-chev{{transform:rotate(-180deg);color:var(--crimson);}}
+.tm-body{{display:grid;grid-template-rows:0fr;
+ transition:grid-template-rows .35s cubic-bezier(.25,.46,.45,.94);}}
+.tm-grp.open .tm-body{{grid-template-rows:1fr;}}
+.tm-body>div{{overflow:hidden;min-height:0;}}
+.tm-grp.open .tm-body>div{{padding-bottom:28px;}}
+@media(max-width:640px){{.tm-h{{flex-wrap:wrap;padding:18px 0;}}
+  .tm-h-r{{width:100%;justify-content:space-between;}}}}
 </style>
 </head>
 <body>
@@ -369,10 +406,33 @@ def build():
     }) + '</script>')
     head = head.replace("</head>", GC + "\n" + jsonld1 + "\n" + jsonld2 + "\n</head>")
 
+    accordion_js = """<script>
+document.querySelectorAll('.tm-h').forEach(function(h){
+  h.addEventListener('click', function(){
+    var g = h.closest('.tm-grp'), open = g.classList.contains('open');
+    g.classList.toggle('open', !open);
+    h.setAttribute('aria-expanded', !open ? 'true' : 'false');
+  });
+});
+function tmOpenFromHash(){
+  var id = location.hash.slice(1);
+  if(!id) return;
+  var g = document.getElementById(id);
+  if(!g || !g.classList.contains('tm-grp')) return;
+  g.classList.add('open');
+  var h = g.querySelector('.tm-h');
+  if(h) h.setAttribute('aria-expanded', 'true');
+  g.scrollIntoView({block:'start'});
+}
+tmOpenFromHash();
+window.addEventListener('hashchange', tmOpenFromHash);
+</script>"""
+
     body_end = f"""
 {"".join(sections)}
 {chrome.footer(UP)}
 {chrome.TOGGLE_JS}
+{accordion_js}
 </body>
 </html>"""
 

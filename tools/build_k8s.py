@@ -17,7 +17,9 @@ import importlib
 import sys
 
 sys.path.insert(0, str(TOOLS))
-from content_page import CSS, render, esc            # noqa: E402
+from content_page import CSS, render, esc, section   # noqa: E402
+import diagrams                                       # noqa: E402
+import topic_diagrams                                 # noqa: E402
 
 OUT = ROOT / 'Kubernetes'
 
@@ -39,7 +41,11 @@ for mod in MODULES:
         topics[t["slug"]] = t
 
 OUT.mkdir(parents=True, exist_ok=True)
-(OUT / "topic.css").write_text(CSS.strip() + "\n", encoding='utf-8')
+# diagrams.CSS is written "on top of" content_page.CSS by design (its own
+# docstring says so) — it only styles .dg-detail/.dg-flow/.dgset, classes
+# content_page.CSS doesn't define. Both were always meant to ship together;
+# topic_diagrams.py just had no caller wiring it in until now (see below).
+(OUT / "topic.css").write_text(CSS.strip() + "\n\n" + diagrams.CSS.strip() + "\n", encoding='utf-8')
 
 built = []
 for i, (name, slug, cat, cat_slug) in enumerate(ORDER):
@@ -70,11 +76,31 @@ for i, (name, slug, cat, cat_slug) in enumerate(ORDER):
               f'<a class="next" href="../../categories/{cat_slug}/index.html">{esc(cat)} →<b>Category hub</b></a>')
     pager += '</div>'
 
+    # Everything else in this series the pager doesn't already surface. This
+    # crosses the Kubernetes/Service Mesh boundary the same way the pager
+    # already does — ORDER is one reading sequence, not two.
+    related = [l for j in range(len(ORDER)) if j != i
+               for l in [link(j)] if l and l not in (prev_l, next_l)]
+
+    # topic_diagrams.py has held a low-level ("what's actually inside it") and
+    # a connection ("where does the request go") diagram for every one of
+    # these topics for a while — but nothing ever imported the module, so
+    # every real page only ever showed the single high-level diagram each
+    # topic file draws inline. Append both extra views as their own section
+    # when this slug has them; topics without an entry are unaffected.
+    sections = t["sections"]
+    if slug in topic_diagrams.SPEC:
+        sections += section(
+            "System views", "What's actually inside it, and where the request goes",
+            "The diagram above shows the pieces. These two open one of them up and "
+            "follow a single request through it.",
+            diagrams.figures(topic_diagrams.SPEC[slug]))
+
     html_out = render(
         slug=t["slug"], title=t["title"], tagline=t["tagline"], eyebrow=t["eyebrow"],
         crumbs=[("Home", "../../index.html"), ("Categories", "../../categories/index.html"),
                 (cat, f"../../categories/{cat_slug}/index.html"), (t["title"], None)],
-        meta=t["meta"], sections=t["sections"], pager=pager, up="../../",
+        meta=t["meta"], sections=sections, pager=pager, related=related, up="../../",
         css="../topic.css",
         canon=f'Kubernetes/{t["slug"].upper()}/{t["slug"]}.html')
 
