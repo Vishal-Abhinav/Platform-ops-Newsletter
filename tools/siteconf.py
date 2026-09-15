@@ -37,13 +37,20 @@ assert BASE.endswith("/"), "BASE must end with a slash — URLs are built by con
 # which is the right default: an empty verification tag on a live page is
 # noise, and a wrong one is a failed verification you have to debug.
 #
-#   Search Console → Add property → URL prefix → HTML tag
+#   Search Console → Settings → Ownership verification → HTML tag
 #   <meta name="google-site-verification" content="PASTE_THIS_PART" />
+#
+# Take it from the HTML TAG panel, nothing else. Search Console issues a
+# DIFFERENT token per verification method, and the one shown as
+#   google-site-verification=<token>
+# is the DNS TXT record, not this. Pasting that one here verifies
+# nothing: Google finds the tag, reads it, and rejects it as belonging
+# to another method — which looks like a broken deploy and is not.
 #
 # It goes on the homepage only, which is what a URL-prefix property at the
 # root is checked against. The tag has to be LIVE before you press Verify:
 # build, commit, push, confirm it is actually being served, then verify.
-GOOGLE_SITE_VERIFICATION = "s61EBMJcPkY5s2v1Bj8qxP2uiosu7H6G831MqA0WCWk"
+GOOGLE_SITE_VERIFICATION = "bderTx4lj4QRZNCauyzfCdi3rV2LbGqO4NMazuHoa0Y"
 
 assert "<" not in GOOGLE_SITE_VERIFICATION, (
     "GOOGLE_SITE_VERIFICATION wants just the token, not the whole <meta> tag")
