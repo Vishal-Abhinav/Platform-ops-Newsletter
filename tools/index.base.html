@@ -66,15 +66,6 @@
   --wash-1: rgba(0,0,0,0.03);
   --wash-2: rgba(0,0,0,0.06);
   --wash-faint: rgba(0,0,0,0.035);
-  /* The homepage grew its own names for the same ideas — hairline-N where the
-     rest of the site says line-N, wash-1 where it says wash. Renaming them
-     would mean rewriting every rule on this page, so they are aliased instead:
-     a shared component dropped in here now resolves the same tokens it would
-     anywhere else, and the vocabulary is one vocabulary. */
-  --line-1: var(--hairline-1); --line-2: var(--hairline-2); --line-3: var(--hairline-3);
-  --wash: var(--wash-1);
-  --cyan-t:#066c77; --lime-t:#3f6f0c; --amber-t:#8a5806;
-  --purple-t:#5b21b6; --crimson-t:#a32b28;
 }
 html[data-theme="dark"] {
   --page-bg: #0c0e12;
@@ -95,8 +86,6 @@ html[data-theme="dark"] {
   --wash-1: rgba(255,255,255,0.04);
   --wash-2: rgba(255,255,255,0.08);
   --wash-faint: rgba(255,255,255,0.04);
-  --cyan-t:#4dd6e4; --lime-t:#a7e137; --amber-t:#f5b544;
-  --purple-t:#b596f5; --crimson-t:#f07570;
 }
 html[data-theme="dark"] body::before { opacity: 0.35; }
 html[data-theme="dark"] .hpg-path,
@@ -990,13 +979,13 @@ a.footer-logo:hover{color:#fff;}
 
 <!-- ═══════════ NAV ═══════════ -->
 <nav id="mainNav">
-  <a href="index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="nav-logo"><span></span>PLATFORM OPS</div>
   <ul class="nav-links">
     <li><a href="#topics">Topics</a></li>
     <li><a href="#issues">Issues</a></li>
-    <li><a href="terminal/index.html" target="_blank" rel="noopener">LAB</a></li>
+    <li><a href="terminal/index.html" target="_blank" rel="noopener">Lab ↗</a></li>
     <li><a href="#authors">Authors</a></li>
-    <li><a href="#subscribe" class="nav-cta">SUBSCRIBE</a></li>
+    <li><a href="#subscribe" class="nav-cta">Subscribe →</a></li>
   </ul>
   <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark / light mode">
     <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -1838,6 +1827,8 @@ a.footer-logo:hover{color:#fff;}
         <div class="footer-col">
           <div class="footer-col-title">Explore</div>
           <a href="#topics">Knowledge Map</a>
+          <a href="categories/kubernetes-openshift-map/index.html">K8s &amp; OpenShift Topic Map</a>
+          <a href="Infrastructure/OS/index.html">OS / Linux Series</a>
           <a href="terminal/index.html" target="_blank" rel="noopener">Practice Terminal ↗</a>
           <a href="colophon/index.html">Colophon</a>
           <a href="#authors">About the Author</a>

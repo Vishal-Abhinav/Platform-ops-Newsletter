@@ -1,0 +1,14 @@
+# Tells `wrangler deploy` (Workers Static Assets) what NOT to upload.
+# .gitignore controls what git tracks; it has no effect on what wrangler
+# publishes, since wrangler just walks the filesystem. Without this file,
+# `npx wrangler deploy` with Output Directory "." uploads the entire repo,
+# including .git/ — meaning the full commit history of this "private" repo
+# becomes fetchable at https://platformops.srivantechnologies.com/.git/...
+# That happened once already; this file is what stops it happening again.
+
+.git
+.git/**
+.wrangler
+.wrangler/**
+node_modules
+node_modules/**

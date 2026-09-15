@@ -24,3 +24,10 @@ Thumbs.db
 # cache is also a public URL, the same mistake as the bytecode above.
 tools/.fontcache/
 tools/.mermaid/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
