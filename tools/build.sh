@@ -8,6 +8,8 @@
 #   README.md       <- README.base.md  + build_readme/library
 #   categories/     <- build_hubs      (33 hubs + index + hub.css)
 #   categories/kubernetes-openshift-map/ <- build_topicmap (46-group reader topic list, live/pipe/planned)
+#   categories/kubernetes/, categories/openshift/ <- build_hub_topicmap also appends the
+#     reader's list (split 1-24 / 25-46) onto the end of each hub page, idempotently
 #   Foundation/     <- build_foundation (topic pages + topic.css)
 #   Commands/       <- build_commands   (command references + commands.css)
 #   OpenShift/      <- build_openshift  (deep-dives + topic.css)
@@ -56,6 +58,9 @@ python3 tools/build_hubs.py
 
 say "Kubernetes + OpenShift complete topic map"
 python3 tools/build_topicmap.py
+
+say "folding the topic list into the Kubernetes and OpenShift hub pages"
+python3 tools/build_hub_topicmap.py
 
 say "topic pages"
 python3 tools/build_foundation.py fnd_a fnd_b

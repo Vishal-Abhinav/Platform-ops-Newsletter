@@ -114,6 +114,9 @@ STAGE_NOTE = {
     "build_topicmap": ("topicmap_data.py (46-group reader topic list)",
                        "the Kubernetes & OpenShift Complete Topic Map, every item marked "
                        "live / pipeline / planned"),
+    "build_hub_topicmap": ("the same 46-group list, split 1-24 / 25-46",
+                           "folds the reader's list onto categories/kubernetes/ and "
+                           "categories/openshift/ directly, not just the standalone page"),
     "build_foundation": ("fnd_a.py, fnd_b.py", "the Foundation deep-dives"),
     "build_openshift": ("ocp_a.py – ocp_c.py", "the OpenShift deep-dives"),
     "build_k8s": ("k8s_a.py, k8s_b.py, mesh_a.py", "the Kubernetes and Service Mesh deep-dives"),

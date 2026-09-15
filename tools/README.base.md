@@ -881,20 +881,21 @@ and a half-applied edit can never accumulate.
 | 7 | `build_author.py` | `linkedin_posts.py` | author profile + LinkedIn column |
 | 8 | `build_hubs.py` | taxonomy + `hubs_spec.py` | 43 category hubs, their diagrams and cross-links |
 | 9 | `build_topicmap.py` | `topicmap_data.py` (46-group reader topic list) | the Kubernetes & OpenShift Complete Topic Map — every item marked live / pipeline / planned |
-| 10 | `build_foundation.py` | `fnd_a.py`, `fnd_b.py` | the Foundation deep-dives |
-| 11 | `build_openshift.py` | `ocp_a.py`–`ocp_c.py` | the OpenShift deep-dives |
-| 12 | `build_k8s.py` | `k8s_a.py`, `k8s_b.py`, `mesh_a.py` | the Kubernetes and Service Mesh deep-dives |
-| 13 | `build_commands.py` | `cmd_data.py` | the command references |
-| 14 | `build_legacy_dg.py` | `categories/hub.css` + the built Kubernetes hub | injects a `.dg` diagram into the 3 hand-written pages that have none |
-| 15 | `build_legacy_chrome.py` | `chrome.py` | wires the shared nav, footer, and theme toggle onto the 25 hand-written pages |
-| 16 | `build_colophon.py` | everything above + the rendered SVGs | `colophon/index.html` — how the site is built, on the site |
-| 17 | `build_terminal.py` | `terminal_fs.py` | `terminal/index.html` — a Unix shell simulated over an in-memory filesystem |
-| 18 | `build_feed.py` | the register | `feed.xml` |
-| 19 | `build_nav.py` | taxonomy | mega-menu assets, wired into every page |
-| 20 | `build_search.py` | everything on disk | the search index, wired into every page |
-| 21 | `build_seo.py` | each page + register | JSON-LD, article dates, per-issue `og:image` |
-| 22 | `build_canonical.py` | `siteconf.BASE` | rewrites every origin to the canonical one |
-| 23 | `verify.py` | the built site | `sitemap.xml`, **and a non-zero exit if anything is wrong** |
+| 10 | `build_hub_topicmap.py` | the same 46-group list, split 1-24 / 25-46 | folds the reader's list directly onto `categories/kubernetes/` and `categories/openshift/`, not just the standalone page |
+| 11 | `build_foundation.py` | `fnd_a.py`, `fnd_b.py` | the Foundation deep-dives |
+| 12 | `build_openshift.py` | `ocp_a.py`–`ocp_c.py` | the OpenShift deep-dives |
+| 13 | `build_k8s.py` | `k8s_a.py`, `k8s_b.py`, `mesh_a.py` | the Kubernetes and Service Mesh deep-dives |
+| 14 | `build_commands.py` | `cmd_data.py` | the command references |
+| 15 | `build_legacy_dg.py` | `categories/hub.css` + the built Kubernetes hub | injects a `.dg` diagram into the 3 hand-written pages that have none |
+| 16 | `build_legacy_chrome.py` | `chrome.py` | wires the shared nav, footer, and theme toggle onto the 25 hand-written pages |
+| 17 | `build_colophon.py` | everything above + the rendered SVGs | `colophon/index.html` — how the site is built, on the site |
+| 18 | `build_terminal.py` | `terminal_fs.py` | `terminal/index.html` — a Unix shell simulated over an in-memory filesystem |
+| 19 | `build_feed.py` | the register | `feed.xml` |
+| 20 | `build_nav.py` | taxonomy | mega-menu assets, wired into every page |
+| 21 | `build_search.py` | everything on disk | the search index, wired into every page |
+| 22 | `build_seo.py` | each page + register | JSON-LD, article dates, per-issue `og:image` |
+| 23 | `build_canonical.py` | `siteconf.BASE` | rewrites every origin to the canonical one |
+| 24 | `verify.py` | the built site | `sitemap.xml`, **and a non-zero exit if anything is wrong** |
 
 Stages 17–20 are whole-site passes: they walk every page that exists at that point and inject
 the same chrome into all of them. That is why a new page needs no wiring of its own — it is

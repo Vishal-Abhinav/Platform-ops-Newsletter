@@ -35,6 +35,17 @@ for cname, (slug, _tag, _layers) in SPEC.items():
     ins = body_at + len('<div class="km-topics">')
     link = (f'\n          <a class="km-hublink" href="categories/{slug}/index.html">'
             f'Open the {esc} hub — architecture, issues, full topic list →</a>')
+    if slug in ("kubernetes", "openshift"):
+        # These two pillars have a second, much larger reference: the full
+        # 942-item Kubernetes + OpenShift topic & error list (46 groups),
+        # every item marked live / pipeline / planned. It lives on its own
+        # page rather than folded into this curated hub (this hub's chips
+        # each link to one specific published article; most of the 942
+        # items don't), but it needs to be reachable from right here, not
+        # only from the footer, since this is where a reader actually looks.
+        link += (f'\n          <a class="km-hublink" href="categories/kubernetes-openshift-map/index.html">'
+                f'See the complete Kubernetes &amp; OpenShift Topic Map — 942 items, '
+                f'every one marked live / pipeline / planned →</a>')
     src = src[:ins] + link + src[ins:]
     n += 1
 print(f'hub links added to {n} categories')
