@@ -47,6 +47,17 @@ for href in sorted(seen_pages):
     title = html.unescape(re.sub(r"\s+", " ", m.group(1))).split(" · ")[0].strip() if m else href
     rows.append([2, title, href, seen_pages[href], ""])
 
+# Standalone pages that no taxonomy topic links to. Without this they exist,
+# sit in the sitemap, and are unfindable in the site's own search — which is
+# exactly how the colophon and the practice terminal both shipped invisible.
+STANDALONE = [
+    ("terminal/index.html", "Practice Terminal", "Practice"),
+    ("colophon/index.html", "Colophon", "About"),
+]
+for href, title, group in STANDALONE:
+    if (ROOT / href).exists():
+        rows.append([2, title, href, group, ""])
+
 for spec in COMMANDS:
     page = f"Commands/{spec['slug'].upper()}/{spec['slug']}.html"
     for gid, heading, desc, cmds in spec["groups"]:

@@ -187,6 +187,19 @@ nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;pa
 .crumb a:hover{color:var(--crimson);}
 .crumb .cur{color:var(--heading-fg);}
 .nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+/* The Lab sits in the top bar of every page, not just the homepage footer —
+   it was reachable only from there and nobody found it. */
+.nav-lab{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.6px;
+ text-transform:uppercase;text-decoration:none;color:var(--muted);
+ border:1px solid var(--line-2);border-radius:3px;padding:5px 9px;
+ transition:color .2s,border-color .2s,background .2s;white-space:nowrap;}
+.nav-lab:hover{color:var(--crimson);border-color:var(--crimson);}
+.nav-lab::after{content:' \2197';font-size:9px;}
+/* Below 560px the bar holds the logo, the toggle, LAB and SUBSCRIBE, which is
+   ~30px more than fits. SUBSCRIBE goes: it is in the hero CTA and the footer
+   of every page. The Lab is not anywhere else in the top bar, so it stays. */
+@media(max-width:560px){.nav-lab{padding:4px 7px;font-size:9px;}
+  .nav-sub{display:none;}}
 .tt{width:32px;height:32px;border:1px solid var(--line-2);background:transparent;border-radius:50%;
  cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);}
 .tt:hover{color:var(--crimson);border-color:var(--crimson);}
@@ -452,7 +465,8 @@ def render(*, slug, title, tagline, eyebrow, crumbs, meta, sections, pager, up="
 <nav>
   <a href="{up}index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
   <div class="crumb">{crumb}</div>
-  <div class="nav-right">{TOGGLE}<a href="{up}index.html#subscribe" class="nav-logo"
+  <div class="nav-right">{TOGGLE}<a href="{up}terminal/index.html" class="nav-lab"
+    target="_blank" rel="noopener">LAB</a><a href="{up}index.html#subscribe" class="nav-logo nav-sub"
     style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
 </nav>
 

@@ -10,7 +10,14 @@
      "live": 7,
      "pipe": 0,
      "plan": 3
-    },
+    }
+   ],
+   "live": 7,
+   "pipe": 0
+  },
+  {
+   "name": "Roadmaps",
+   "cats": [
     {
      "name": "Roadmaps",
      "icon": "🧭",
@@ -20,7 +27,7 @@
      "plan": 18
     }
    ],
-   "live": 7,
+   "live": 0,
    "pipe": 0
   },
   {
@@ -290,7 +297,14 @@
      "live": 1,
      "pipe": 2,
      "plan": 11
-    },
+    }
+   ],
+   "live": 1,
+   "pipe": 12
+  },
+  {
+   "name": "System Design",
+   "cats": [
     {
      "name": "System Design",
      "icon": "📐",
@@ -300,8 +314,8 @@
      "plan": 46
     }
    ],
-   "live": 1,
-   "pipe": 12
+   "live": 0,
+   "pipe": 0
   },
   {
    "name": "Commands",
@@ -442,6 +456,14 @@
   {
    "label": "All Categories",
    "href": "categories/index.html"
+  },
+  {
+   "label": "Practice Terminal",
+   "href": "terminal/index.html"
+  },
+  {
+   "label": "Colophon",
+   "href": "colophon/index.html"
   },
   {
    "label": "Reference Library",

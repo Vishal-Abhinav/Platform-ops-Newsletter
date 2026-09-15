@@ -56,7 +56,7 @@ EX_JS = [{"title": t, "task": task, "hint": hint, "check": chk}
 
 TERMINAL_CSS = """
 /* ─── PRACTICE TERMINAL ─── */
-.tm-wrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;margin:8px 0 6px;}
+.tm-wrap{display:grid;grid-template-columns:minmax(0,1fr) 274px;gap:18px;margin:8px 0 6px;}
 @media(max-width:900px){.tm-wrap{grid-template-columns:minmax(0,1fr);}}
 
 .tm{background:#0d0f14;border:1px solid rgba(255,255,255,.1);border-radius:8px;
@@ -71,10 +71,28 @@ TERMINAL_CSS = """
   color:rgba(255,255,255,.5);font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1.2px;
   text-transform:uppercase;padding:4px 9px;border-radius:3px;cursor:pointer;}
 .tm-bar .tm-reset:hover{color:#fff;border-color:rgba(255,255,255,.4);}
+.tm-bar .tm-max{margin-left:8px;}
 
-.tm-screen{height:430px;overflow-y:auto;padding:14px 15px;font-family:'DM Mono',monospace;
-  font-size:12.5px;line-height:1.65;color:#cfd3dc;-webkit-overflow-scrolling:touch;}
-@media(max-width:600px){.tm-screen{height:340px;font-size:11.5px;}}
+/* Maximise rather than window.open: a popup is blocked by default in most
+   browsers, opens at the wrong size, and is hostile on a phone. This fills
+   the viewport, keeps the exercises beside the shell, and Esc gets you out. */
+.tm-wrap.max{position:fixed;inset:0;z-index:999;margin:0;padding:14px;gap:14px;
+  background:var(--page-bg);grid-template-columns:minmax(0,1fr) 300px;}
+.tm-wrap.max .tm-screen{height:auto;max-height:none;flex:1;}
+.tm-wrap.max .tm{height:100%;}
+.tm-wrap.max .tm-side{overflow-y:auto;}
+/* On a phone, maximised must not end up SMALLER than inline: at 34vh the
+   exercise list was taking more room than the shell it was meant to help. */
+@media(max-width:900px){.tm-wrap.max{grid-template-columns:minmax(0,1fr);grid-template-rows:1fr auto;
+    padding:8px;gap:8px;}
+  .tm-wrap.max .tm-side{max-height:22vh;}
+  .tm-wrap.max .tm-side h3,.tm-wrap.max .tm-task{display:none;}}
+html.tm-locked,html.tm-locked body{overflow:hidden;}
+
+.tm-screen{height:62vh;min-height:430px;max-height:760px;overflow-y:auto;padding:16px 17px;
+  font-family:'DM Mono',monospace;font-size:13px;line-height:1.7;color:#cfd3dc;
+  -webkit-overflow-scrolling:touch;}
+@media(max-width:600px){.tm-screen{height:56vh;min-height:320px;font-size:11.5px;}}
 .tm-screen::-webkit-scrollbar{width:9px;}
 .tm-screen::-webkit-scrollbar-track{background:rgba(255,255,255,.05);}
 .tm-screen::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:5px;}
@@ -123,7 +141,7 @@ TERMINAL_HTML = """<div class="tm-wrap">
   <div class="tm">
     <div class="tm-bar"><i class="r"></i><i class="y"></i><i class="g"></i>
       <b>__USER__@__HOST__ — simulated</b>
-      <button class="tm-reset" type="button" id="tmReset">Reset box</button></div>
+      <button class="tm-reset" type="button" id="tmReset">Reset box</button><button class="tm-reset tm-max" type="button" id="tmMax" aria-pressed="false">Maximise</button></div>
     <div class="tm-screen" id="tmScreen" role="log" aria-live="polite" aria-label="Terminal output"></div>
     <form class="tm-input" id="tmForm" autocomplete="off">
       <label for="tmInput" id="tmPrompt">$</label>
@@ -747,6 +765,18 @@ input.addEventListener('keydown', function(ev){
 });
 
 document.getElementById('tmReset').addEventListener('click', function(){ reset(false); input.focus(); });
+var wrap = document.querySelector('.tm-wrap'), maxBtn = document.getElementById('tmMax');
+function setMax(on){
+  wrap.classList.toggle('max', on);
+  document.documentElement.classList.toggle('tm-locked', on);
+  maxBtn.textContent = on ? 'Exit' : 'Maximise';
+  maxBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  input.focus();
+}
+maxBtn.addEventListener('click', function(){ setMax(!wrap.classList.contains('max')); });
+document.addEventListener('keydown', function(ev){
+  if (ev.key === 'Escape' && wrap.classList.contains('max')) setMax(false);
+});
 document.getElementById('tmHintBtn').addEventListener('click', function(){
   document.getElementById('tmHint').classList.toggle('show'); });
 screen.addEventListener('click', function(){ if (!window.getSelection().toString()) input.focus(); });

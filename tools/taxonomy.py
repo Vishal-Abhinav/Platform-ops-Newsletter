@@ -50,8 +50,9 @@ PILLARS = [
    ("Linux","L",LXF),("Unix","L",GLO),("Windows Server","-",None),
    ("Shell & Bash","L",SHB),("Python","L",PYT),("Programming Fundamentals","-",None),
    ("Data Structures & Algorithms","-",None),("Git & Version Control","L",GIT)]),
- # Career paths rather than technologies — the "where do I start, and what
- # comes next" question this newsletter gets asked more than any other.
+]),
+
+("Roadmaps", [
  ("Roadmaps", "🧭", [
    ("Linux / Systems Administrator","-",None),("DevOps Engineer","-",None),
    ("Site Reliability Engineer","-",None),("Platform Engineer","-",None),
@@ -274,7 +275,10 @@ PILLARS = [
    ("Distributed Transactions","-",None),("Caching","-",None),("Distributed Locking","-",None),
    ("Partition Tolerance","-",None),("CAP Theorem","P",None),("Failure Domains","-",None),
    ("Quorum","L",K8E),("Distributed Coordination","-",None)]),
- ("System Design", "📐", [
+]),
+
+("System Design", [
+("System Design", "📐", [
    ("System Design Fundamentals","-",None),("Scalability","-",None),
    ("Latency & Throughput","-",None),("Back-of-the-Envelope Estimation","-",None),
    ("Availability & SLOs","-",None),("Consistency Models","-",None),

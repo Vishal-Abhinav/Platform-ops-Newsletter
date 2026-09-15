@@ -45,30 +45,32 @@
 
 This repository *is* the newsletter. Every issue is a self-contained HTML page served straight from GitHub Pages — no build step, no framework, no tracking. Fork it, read it offline, or lift a diagram for your own docs.
 
-**Currently in this repo:** 21 monthly issue pages, 5 Foundation reference deep-dives, 4 command references covering 362 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 44 category pages, 2 section hubs and a homepage index — 91 pages in total.
+**Currently in this repo:** 21 monthly issue pages, 5 Foundation reference deep-dives, 4 command references covering 362 commands, a 190-term Linux & Unix glossary with 12 standalone term pages, 46 category pages, 2 section hubs and a homepage index — 94 pages in total.
 
 ---
 
 ## 🗺️ Knowledge Map
 
 The **2026 master map** — every subject this newsletter intends to cover, in one place.
-685 topics, grouped into 45 categories and 11 pillars. The homepage renders
+685 topics, grouped into 45 categories and 13 pillars. The homepage renders
 this same map with search and status filters; both are generated from one source
 of truth, so the numbers here and there can never disagree.
 
 | | Pillar | Categories | ✅ Live | 🔸 Pipeline | · Planned | Total |
 |:--|:--|--:|--:|--:|--:|--:|
-| `01` | **Foundation** | 2 | 7 | 0 | 21 | 28 |
-| `02` | **Infrastructure** | 3 | 1 | 8 | 29 | 38 |
-| `03` | **Networking** | 1 | 1 | 4 | 26 | 31 |
-| `04` | **Cloud** | 1 | 0 | 4 | 13 | 17 |
-| `05` | **Delivery** | 6 | 12 | 22 | 42 | 76 |
-| `06` | **Kubernetes** | 3 | 58 | 0 | 0 | 58 |
-| `07` | **Reliability** | 7 | 27 | 25 | 64 | 116 |
-| `08` | **Security** | 2 | 0 | 18 | 28 | 46 |
-| `09` | **Data & Applications** | 5 | 1 | 12 | 93 | 106 |
-| `10` | **Commands** | 10 | 44 | 34 | 22 | 100 |
-| `11` | **Modern Ops** | 5 | 3 | 21 | 45 | 69 |
+| `01` | **Foundation** | 1 | 7 | 0 | 3 | 10 |
+| `02` | **Roadmaps** | 1 | 0 | 0 | 18 | 18 |
+| `03` | **Infrastructure** | 3 | 1 | 8 | 29 | 38 |
+| `04` | **Networking** | 1 | 1 | 4 | 26 | 31 |
+| `05` | **Cloud** | 1 | 0 | 4 | 13 | 17 |
+| `06` | **Delivery** | 6 | 12 | 22 | 42 | 76 |
+| `07` | **Kubernetes** | 3 | 58 | 0 | 0 | 58 |
+| `08` | **Reliability** | 7 | 27 | 25 | 64 | 116 |
+| `09` | **Security** | 2 | 0 | 18 | 28 | 46 |
+| `10` | **Data & Applications** | 4 | 1 | 12 | 47 | 60 |
+| `11` | **System Design** | 1 | 0 | 0 | 46 | 46 |
+| `12` | **Commands** | 10 | 44 | 34 | 22 | 100 |
+| `13` | **Modern Ops** | 5 | 3 | 21 | 45 | 69 |
 | | **Total** | **45** | **154** | **148** | **383** | **685** |
 
 **Status meanings**
@@ -87,7 +89,7 @@ Secrets, Namespaces and RBAC.
 <br>
 
 <details>
-<summary><b>01 · Foundation</b> — 2 categories · 7 live · 0 pipeline · 21 planned</summary>
+<summary><b>01 · Foundation</b> — 1 category · 7 live · 0 pipeline · 3 planned</summary>
 
 **🧱 Foundation** — 7 live · 0 pipeline · 3 planned  
 ✅ [Computer Fundamentals](./Foundation/COMPUTER-FUNDAMENTALS/computer-fundamentals.html) &nbsp;
@@ -100,6 +102,11 @@ Secrets, Namespaces and RBAC.
 · Programming Fundamentals &nbsp;
 · Data Structures & Algorithms &nbsp;
 ✅ [Git & Version Control](./Foundation/GIT-VERSION-CONTROL/git-version-control.html) &nbsp;
+
+</details>
+
+<details>
+<summary><b>02 · Roadmaps</b> — 1 category · 0 live · 0 pipeline · 18 planned</summary>
 
 **🧭 Roadmaps** — 0 live · 0 pipeline · 18 planned  
 · Linux / Systems Administrator &nbsp;
@@ -124,7 +131,7 @@ Secrets, Namespaces and RBAC.
 </details>
 
 <details>
-<summary><b>02 · Infrastructure</b> — 3 categories · 1 live · 8 pipeline · 29 planned</summary>
+<summary><b>03 · Infrastructure</b> — 3 categories · 1 live · 8 pipeline · 29 planned</summary>
 
 **🏗️ IT Infrastructure** — 0 live · 5 pipeline · 7 planned  
 🔸 IT Infrastructure &nbsp;
@@ -173,7 +180,7 @@ Secrets, Namespaces and RBAC.
 </details>
 
 <details>
-<summary><b>03 · Networking</b> — 1 category · 1 live · 4 pipeline · 26 planned</summary>
+<summary><b>04 · Networking</b> — 1 category · 1 live · 4 pipeline · 26 planned</summary>
 
 **🌐 Networking** — 1 live · 4 pipeline · 26 planned  
 🔸 Networking Fundamentals &nbsp;
@@ -211,7 +218,7 @@ Secrets, Namespaces and RBAC.
 </details>
 
 <details>
-<summary><b>04 · Cloud</b> — 1 category · 0 live · 4 pipeline · 13 planned</summary>
+<summary><b>05 · Cloud</b> — 1 category · 0 live · 4 pipeline · 13 planned</summary>
 
 **☁️ Cloud** — 0 live · 4 pipeline · 13 planned  
 🔸 Cloud Fundamentals &nbsp;
@@ -235,7 +242,7 @@ Secrets, Namespaces and RBAC.
 </details>
 
 <details>
-<summary><b>05 · Delivery</b> — 6 categories · 12 live · 22 pipeline · 42 planned</summary>
+<summary><b>06 · Delivery</b> — 6 categories · 12 live · 22 pipeline · 42 planned</summary>
 
 **⚙️ DevOps** — 9 live · 5 pipeline · 7 planned  
 🔸 DevOps Fundamentals &nbsp;
@@ -328,7 +335,7 @@ Secrets, Namespaces and RBAC.
 </details>
 
 <details>
-<summary><b>06 · Kubernetes</b> — 3 categories · 58 live · 0 pipeline · 0 planned</summary>
+<summary><b>07 · Kubernetes</b> — 3 categories · 58 live · 0 pipeline · 0 planned</summary>
 
 **☸️ Kubernetes** — 35 live · 0 pipeline · 0 planned  
 ✅ [Kubernetes Fundamentals](./DevOps/K8/ARCHITECTURE/k8-architecture.html) &nbsp;
@@ -397,7 +404,7 @@ Secrets, Namespaces and RBAC.
 </details>
 
 <details>
-<summary><b>07 · Reliability</b> — 7 categories · 27 live · 25 pipeline · 64 planned</summary>
+<summary><b>08 · Reliability</b> — 7 categories · 27 live · 25 pipeline · 64 planned</summary>
 
 **📡 SRE** — 4 live · 8 pipeline · 13 planned  
 🔸 SRE Fundamentals &nbsp;
@@ -532,7 +539,7 @@ Secrets, Namespaces and RBAC.
 </details>
 
 <details>
-<summary><b>08 · Security</b> — 2 categories · 0 live · 18 pipeline · 28 planned</summary>
+<summary><b>09 · Security</b> — 2 categories · 0 live · 18 pipeline · 28 planned</summary>
 
 **🛡️ Security** — 0 live · 11 pipeline · 20 planned  
 🔸 Cybersecurity Fundamentals &nbsp;
@@ -587,7 +594,7 @@ Secrets, Namespaces and RBAC.
 </details>
 
 <details>
-<summary><b>09 · Data & Applications</b> — 5 categories · 1 live · 12 pipeline · 93 planned</summary>
+<summary><b>10 · Data & Applications</b> — 4 categories · 1 live · 12 pipeline · 47 planned</summary>
 
 **🗃️ Database** — 0 live · 3 pipeline · 13 planned  
 🔸 Database Fundamentals &nbsp;
@@ -657,6 +664,11 @@ Secrets, Namespaces and RBAC.
 ✅ [Quorum](./DevOps/K8/ERROR/K8-error.html) &nbsp;
 · Distributed Coordination &nbsp;
 
+</details>
+
+<details>
+<summary><b>11 · System Design</b> — 1 category · 0 live · 0 pipeline · 46 planned</summary>
+
 **📐 System Design** — 0 live · 0 pipeline · 46 planned  
 · System Design Fundamentals &nbsp;
 · Scalability &nbsp;
@@ -708,7 +720,7 @@ Secrets, Namespaces and RBAC.
 </details>
 
 <details>
-<summary><b>10 · Commands</b> — 10 categories · 44 live · 34 pipeline · 22 planned</summary>
+<summary><b>12 · Commands</b> — 10 categories · 44 live · 34 pipeline · 22 planned</summary>
 
 **🐧 Linux Commands** — 10 live · 0 pipeline · 0 planned  
 ✅ [Files & Navigation](./Commands/LINUX-COMMANDS/linux-commands.html) &nbsp;
@@ -833,7 +845,7 @@ Secrets, Namespaces and RBAC.
 </details>
 
 <details>
-<summary><b>11 · Modern Ops</b> — 5 categories · 3 live · 21 pipeline · 45 planned</summary>
+<summary><b>13 · Modern Ops</b> — 5 categories · 3 live · 21 pipeline · 45 planned</summary>
 
 **🤖 AI Infrastructure** — 0 live · 6 pipeline · 14 planned  
 🔸 AI Infrastructure &nbsp;
@@ -1044,15 +1056,15 @@ Platform-ops-Newsletter/
 ├── feed.xml   sitemap.xml           ← generated by build_feed.py and verify.py
 │
 ├── tools/                           ← THE SOURCE. Everything else here is generated.
-│   ├── taxonomy.py                  ← 11 pillars, 45 categories, 685 topics — single source of truth
+│   ├── taxonomy.py                  ← 13 pillars, 45 categories, 685 topics — single source of truth
 │   ├── build.sh                     ← one command rebuilds the whole site
 │   └── verify.py                    ← gates the build; refuses a broken link or a wrong count
 │
 ├── assets/                          ← shared components injected into every page
 │   ├── megamenu.css  megamenu.js    ← cascading Browse panel
-│   └── search.css    search.js      ← global search, 1056-entry index
+│   └── search.css    search.js      ← global search, 1122-entry index
 │
-├── categories/                       ← 44 pages · 43 category hubs + index
+├── categories/                       ← 46 pages · 45 category hubs + index
 ├── Foundation/                       ← 5 pages · reference deep-dives
 ├── Commands/                         ← 4 pages · 362 commands
 │
@@ -1301,15 +1313,15 @@ The homepage is a single hand-written HTML file with no framework behind it:
 |:--------|:-------------|
 | 🌓 **Dark / light toggle** | Theme switch in the nav, remembered via `localStorage`, applied before first paint so there's no flash |
 | ♾️ **Animated DevOps loop** | SVG infinity loop with the eight lifecycle stages and a light pulse racing the path |
-| 🗺️ **Knowledge map** | All 685 topics, grouped into 45 categories under 11 pillars — search by name, filter by status, open a pillar to see what's shipped and what's queued |
-| 🖥️ **Coverage terminal** | Terminal-style `tree` view of the 11 pillars with live-vs-total counts, and a `ls published/` listing that links straight into every issue |
+| 🗺️ **Knowledge map** | All 685 topics, grouped into 45 categories under 13 pillars — search by name, filter by status, open a pillar to see what's shipped and what's queued |
+| 🖥️ **Coverage terminal** | Terminal-style `tree` view of the 13 pillars with live-vs-total counts, and a `ls published/` listing that links straight into every issue |
 | 🔔 **Topic requests** | Clicking a pipeline or planned topic queues it; the signup then tells Kit which topics that reader is waiting for |
 | 📡 **RSS** | `feed.xml` carries all 21 issues, and every page advertises it in its `<head>` |
 | 📌 **Pinned archive** | On desktop Latest Issues is pinned beside the map and scrolls inside itself, so the issues stay one glance away however far down the map you are |
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
-| 🧭 **Mega-menu** | Cascading browse panel on every page — 11 pillars, 45 categories, with live counts |
+| 🧭 **Mega-menu** | Cascading browse panel on every page — 13 pillars, 45 categories, with live counts |
 | ⌨️ **Command references** | Searchable, group-filtered command tables — 362 commands so far |
-| 🔍 **Global search** | Centred in the nav of all 91 pages — 1056 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
+| 🔍 **Global search** | Centred in the nav of all 94 pages — 1122 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
 | 🧩 **Category hubs** | Every one of the 45 categories has its own page with a generated architecture diagram and its full topic list |
 | 💼 **LinkedIn column** | The author section carries the latest posts beside the profile, driven by `tools/linkedin_posts.py` |
 | 🦶 **Shared footer** | One footer across every page, with links rebuilt per directory depth |

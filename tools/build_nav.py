@@ -24,6 +24,8 @@ ASSETS.mkdir(exist_ok=True)
 # ── data ─────────────────────────────────────────────────────────────────────
 data = {"pillars": [], "quick": [
     {"label": "All Categories", "href": "categories/index.html"},
+    {"label": "Practice Terminal", "href": "terminal/index.html"},
+    {"label": "Colophon", "href": "colophon/index.html"},
     {"label": "Reference Library", "href": "index.html#library"},
     {"label": "Knowledge Map", "href": "index.html#topics"},
     {"label": "Latest Issues", "href": "index.html#issues"},
