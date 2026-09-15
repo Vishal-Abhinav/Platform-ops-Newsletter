@@ -116,6 +116,9 @@ STAGE_NOTE = {
     "build_commands": ("cmd_data.py", "the command references"),
     "build_legacy_dg": ("hub.css + the Kubernetes hub",
                         "injects a diagram into the hand-written pages that have none"),
+    "build_legacy_chrome": ("chrome.py + the issue register",
+                            "one nav, one footer and a theme toggle on the 25 "
+                            "hand-written pages, which had twenty-three between them"),
     "build_colophon": ("everything above", "this page"),
     "build_terminal": ("terminal_fs.py",
                        "the practice terminal: a shell simulated over an in-memory tree"),

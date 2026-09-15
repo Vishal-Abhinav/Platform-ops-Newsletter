@@ -1062,7 +1062,7 @@ Platform-ops-Newsletter/
 │
 ├── assets/                          ← shared components injected into every page
 │   ├── megamenu.css  megamenu.js    ← cascading Browse panel
-│   └── search.css    search.js      ← global search, 1122-entry index
+│   └── search.css    search.js      ← global search, 1124-entry index
 │
 ├── categories/                       ← 46 pages · 45 category hubs + index
 ├── Foundation/                       ← 5 pages · reference deep-dives
@@ -1192,14 +1192,15 @@ and a half-applied edit can never accumulate.
 | 11 | `build_k8s.py` | `k8s_a.py`, `k8s_b.py`, `mesh_a.py` | the Kubernetes and Service Mesh deep-dives |
 | 12 | `build_commands.py` | `cmd_data.py` | the command references |
 | 13 | `build_legacy_dg.py` | `categories/hub.css` + the built Kubernetes hub | injects a `.dg` diagram into the 3 hand-written pages that have none |
-| 14 | `build_colophon.py` | everything above + the rendered SVGs | `colophon/index.html` — how the site is built, on the site |
-| 15 | `build_terminal.py` | `terminal_fs.py` | `terminal/index.html` — a Unix shell simulated over an in-memory filesystem |
-| 16 | `build_feed.py` | the register | `feed.xml` |
-| 17 | `build_nav.py` | taxonomy | mega-menu assets, wired into every page |
-| 18 | `build_search.py` | everything on disk | the search index, wired into every page |
-| 19 | `build_seo.py` | each page + register | JSON-LD, article dates, per-issue `og:image` |
-| 20 | `build_canonical.py` | `siteconf.BASE` | rewrites every origin to the canonical one |
-| 21 | `verify.py` | the built site | `sitemap.xml`, **and a non-zero exit if anything is wrong** |
+| 14 | `build_legacy_chrome.py` | `chrome.py` + the register | one nav, one footer and a theme toggle on the 25 hand-written pages, which had twenty-three different bars between them |
+| 15 | `build_colophon.py` | everything above + the rendered SVGs | `colophon/index.html` — how the site is built, on the site |
+| 16 | `build_terminal.py` | `terminal_fs.py` | `terminal/index.html` — a Unix shell simulated over an in-memory filesystem |
+| 17 | `build_feed.py` | the register | `feed.xml` |
+| 18 | `build_nav.py` | taxonomy | mega-menu assets, wired into every page |
+| 19 | `build_search.py` | everything on disk | the search index, wired into every page |
+| 20 | `build_seo.py` | each page + register | JSON-LD, article dates, per-issue `og:image` |
+| 21 | `build_canonical.py` | `siteconf.BASE` | rewrites every origin to the canonical one |
+| 22 | `verify.py` | the built site | `sitemap.xml`, **and a non-zero exit if anything is wrong** |
 
 Stages 17–20 are whole-site passes: they walk every page that exists at that point and inject
 the same chrome into all of them. That is why a new page needs no wiring of its own — it is
@@ -1321,7 +1322,7 @@ The homepage is a single hand-written HTML file with no framework behind it:
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
 | 🧭 **Mega-menu** | Cascading browse panel on every page — 13 pillars, 45 categories, with live counts |
 | ⌨️ **Command references** | Searchable, group-filtered command tables — 362 commands so far |
-| 🔍 **Global search** | Centred in the nav of all 94 pages — 1122 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
+| 🔍 **Global search** | Centred in the nav of all 94 pages — 1124 entries covering every category, topic, page and command; `/` to focus, arrows to move, Enter to open |
 | 🧩 **Category hubs** | Every one of the 45 categories has its own page with a generated architecture diagram and its full topic list |
 | 💼 **LinkedIn column** | The author section carries the latest posts beside the profile, driven by `tools/linkedin_posts.py` |
 | 🦶 **Shared footer** | One footer across every page, with links rebuilt per directory depth |

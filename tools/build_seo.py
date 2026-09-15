@@ -197,7 +197,13 @@ for f in sorted(ROOT.rglob("*.html")):
     src = f.read_text(encoding="utf-8")
 
     # Replace our previous block rather than stacking a new one on each build.
-    src = re.sub(re.escape(MARK_OPEN) + r".*?" + re.escape(MARK_CLOSE), "", src, flags=re.S)
+    # The trailing \n must come off with it: `block` below ends in one, so
+    # leaving it behind grew every hand-written page by a blank line per build.
+    src = re.sub(re.escape(MARK_OPEN) + r".*?" + re.escape(MARK_CLOSE) + r"\n?",
+                 "", src, flags=re.S)
+    # One-time heal for pages that already carry a pile of those blank lines:
+    # every past build left one behind at the insertion point.
+    src = re.sub(r"\n{3,}(?=</head>)", "\n", src)
     src = apply_meta(src, rel)
 
     blocks = blocks_for(rel, src)

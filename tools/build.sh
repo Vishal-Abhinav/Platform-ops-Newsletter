@@ -12,6 +12,7 @@
 #   OpenShift/      <- build_openshift  (deep-dives + topic.css)
 #   Kubernetes/     <- build_k8s        (K8s + Service Mesh deep-dives)
 #   3 legacy pages  <- build_legacy_dg  (injects a .dg diagram, idempotent)
+#   25 hand-written <- build_legacy_chrome (one nav, one footer, theme toggle)
 #   colophon/       <- build_colophon   (how the site is built; SVG from make_arch_svg)
 #   terminal/       <- build_terminal   (simulated shell; FS + exercises in terminal_fs)
 #   feed.xml        <- build_feed
@@ -66,6 +67,9 @@ python3 tools/build_commands.py
 
 say "diagrams for the hand-written pages"
 python3 tools/build_legacy_dg.py
+
+say "shared chrome on the hand-written pages"
+python3 tools/build_legacy_chrome.py
 
 say "colophon"
 python3 tools/build_colophon.py

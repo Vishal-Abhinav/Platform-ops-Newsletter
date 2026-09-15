@@ -20,6 +20,7 @@ from hubs_spec import SPEC                       # noqa: E402
 
 OUT = ROOT / 'categories'
 from siteconf import BASE           # canonical origin, one source of truth
+import chrome                       # the one nav and the one footer
 KEY = {"L": "live", "P": "pipe", "-": "plan"}
 ZONE = {"live": "Live now", "pipe": "In pipeline", "plan": "Planned"}
 
@@ -171,20 +172,14 @@ def diagram(cname):
 
 # ── CSS shared by every hub ──────────────────────────────────────────────────
 CSS = """
-:root{--ink:#08090c;--paper:#f2f0eb;--smoke:#e4e0d8;--ash:#b8b2a7;--coal:#1c1f26;
- --cyan:#00c2d4;--amber:#f59e0b;--crimson:#e53935;--lime:#84cc16;--purple:#7c3aed;
- --page-bg:#f2f0eb;--panel-bg:#e4e0d8;--card-bg:#f8f7f4;--page-fg:#1c1f26;--heading-fg:#1c1f26;
- --muted:#6b6860;--line-1:rgba(0,0,0,.06);--line-2:rgba(0,0,0,.1);--line-3:rgba(0,0,0,.16);
- --wash:rgba(0,0,0,.04);--nav-bg:rgba(242,240,235,.9);
- --n-live-bg:rgba(132,204,22,.16);--n-live-br:#84cc16;--n-live-fg:#3f6f0c;--n-live-dot:#84cc16;
- --n-pipe-bg:rgba(245,158,11,.13);--n-pipe-br:rgba(245,158,11,.55);--n-pipe-fg:#8a5806;
- --n-plan-bg:transparent;--n-plan-br:rgba(0,0,0,.2);--n-plan-fg:#8d8981;}
-html[data-theme="dark"]{--page-bg:#0c0e12;--panel-bg:#14161c;--card-bg:#181b22;--page-fg:#e7e5df;
- --heading-fg:#eeece6;--muted:#9a978e;--line-1:rgba(255,255,255,.07);--line-2:rgba(255,255,255,.11);
- --line-3:rgba(255,255,255,.18);--wash:rgba(255,255,255,.05);--nav-bg:rgba(12,14,18,.9);
- --n-live-bg:rgba(132,204,22,.16);--n-live-fg:#a7e137;
- --n-pipe-bg:rgba(245,158,11,.14);--n-pipe-fg:#f5b544;
- --n-plan-br:rgba(255,255,255,.2);--n-plan-fg:#8a877f;}
+""" + chrome.TOKENS + """
+/* Status swatches for the coverage diagram — hub-only, so they stay here. */
+:root{--n-live-bg:rgba(132,204,22,.16);--n-live-br:#84cc16;--n-live-fg:#3f6f0c;--n-live-dot:#84cc16;
+  --n-pipe-bg:rgba(245,158,11,.13);--n-pipe-br:rgba(245,158,11,.55);--n-pipe-fg:#8a5806;
+  --n-plan-bg:transparent;--n-plan-br:rgba(0,0,0,.2);--n-plan-fg:#8d8981;}
+  --n-live-bg:rgba(132,204,22,.16);--n-live-fg:#a7e137;
+  --n-pipe-bg:rgba(245,158,11,.14);--n-pipe-fg:#f5b544;
+  --n-plan-br:rgba(255,255,255,.2);--n-plan-fg:#8a877f;}}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--page-bg);color:var(--page-fg);font-family:'Manrope',system-ui,sans-serif;
  -webkit-font-smoothing:antialiased;}
@@ -192,25 +187,7 @@ a{color:inherit;}
 .wrap{max-width:1120px;margin:0 auto;padding:0 40px;}
 @media(max-width:700px){.wrap{padding:0 20px;}}
 
-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;
- padding:14px 40px;background:var(--nav-bg);backdrop-filter:blur(14px);
- border-bottom:1px solid var(--line-1);}
-.nav-logo{display:flex;align-items:center;gap:9px;font-family:'Bebas Neue',sans-serif;
- font-size:19px;letter-spacing:2.5px;text-decoration:none;color:var(--heading-fg);flex-shrink:0;}
-.nav-logo span{width:8px;height:8px;border-radius:50%;background:var(--crimson);}
-.crumb{flex:1;min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
- font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;
- color:var(--muted);}
-.crumb a{text-decoration:none;color:var(--muted);}
-.crumb a:hover{color:var(--crimson);}
-.crumb .cur{color:var(--heading-fg);}
-.nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.tt{width:32px;height:32px;border:1px solid var(--line-2);background:transparent;border-radius:50%;
- cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);}
-.tt:hover{color:var(--crimson);border-color:var(--crimson);}
-.tt svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;}
-html:not([data-theme="dark"]) .tt .moon,html[data-theme="dark"] .tt .sun{display:none;}
-@media(max-width:700px){nav{padding:12px 18px;gap:12px;}.crumb{display:none;}}
+""" + chrome.BAR_CSS + """
 
 header.hero{padding:64px 0 40px;border-bottom:1px solid var(--line-1);}
 .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;
@@ -377,12 +354,7 @@ FONTS = ('<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&'
          'family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&'
          'family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">')
 
-TOGGLE = ('<button class="tt" id="tt" type="button" aria-label="Toggle dark mode">'
-          '<svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/>'
-          '<path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2'
-          'M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
-          '<svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>'
-          '</svg></button>')
+TOGGLE = chrome.TOGGLE          # one definition, in chrome.py
 
 SHARED_JS = """<script>
 document.getElementById('tt').addEventListener('click',function(){
@@ -453,46 +425,12 @@ def page(title, desc, canonical, crumbs, body, up="../../"):
 <link rel="stylesheet" href="{css}">
 </head>
 <body>
-<nav>
-  <a href="{up}index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
-  <div class="crumb">{crumb}</div>
-  <div class="nav-right">{TOGGLE}<a href="{up}index.html#subscribe" class="nav-logo"
-    style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
-</nav>
+{chrome.nav(up, crumb, toggle=TOGGLE)}
 {body}
 <a class="req-pill" id="pill" href="{up}index.html#subscribe">
   <span><b id="pillN">0</b> topics queued</span><span class="go">Get notified →</span>
 </a>
-<footer>
-  <div class="f-in">
-    <div class="f-top">
-      <div>
-        <a class="f-logo" href="{up}index.html">PLATFORM OPS</a>
-        <p class="f-tag">Field notes on Kubernetes, SRE, and Platform Engineering —
-          written from production, not slideware.</p>
-      </div>
-      <div class="f-cols">
-        <div><div class="f-col-t">Newsletter</div>
-          <a href="{up}index.html#issues">Latest Issues</a>
-          <a href="{up}Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Newest — Issue #057</a>
-          <a href="{up}index.html#subscribe">Subscribe</a></div>
-        <div><div class="f-col-t">Explore</div>
-          <a href="{up}categories/index.html">All Categories</a>
-          <a href="{up}index.html#topics">Knowledge Map</a>
-          <a href="{up}index.html#authors">About the Author</a></div>
-        <div><div class="f-col-t">Connect</div>
-          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
-          <a href="{up}feed.xml">RSS Feed</a>
-          <a href="#">Back to Top ↑</a></div>
-      </div>
-    </div>
-    <div class="f-bot">
-      <div>© 2026 Vishal Abhinav · Platform Ops — code MIT,
-        <a href="{up}LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
-      <div>Built for engineers, by an engineer.</div>
-    </div>
-  </div>
-</footer>
+{chrome.footer(up)}
 {SHARED_JS}
 </body>
 </html>

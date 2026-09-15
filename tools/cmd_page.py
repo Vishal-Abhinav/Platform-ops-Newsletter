@@ -10,21 +10,14 @@ import pathlib
 
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
 from siteconf import BASE           # canonical origin, one source of truth
+import chrome                       # the one nav and the one footer
 
 
 def esc(s):
     return html.escape(str(s), quote=True)
 
 
-CSS = """
-:root{--paper:#f2f0eb;--coal:#1c1f26;--cyan:#00c2d4;--amber:#f59e0b;--crimson:#e53935;
- --lime:#84cc16;--ash:#b8b2a7;--page-bg:#f2f0eb;--panel-bg:#e4e0d8;--card-bg:#f8f7f4;
- --page-fg:#1c1f26;--heading-fg:#1c1f26;--muted:#6b6860;--line-1:rgba(0,0,0,.06);
- --line-2:rgba(0,0,0,.1);--line-3:rgba(0,0,0,.16);--wash:rgba(0,0,0,.04);
- --nav-bg:rgba(242,240,235,.9);--code-bg:#0d0f14;}
-html[data-theme="dark"]{--page-bg:#0c0e12;--panel-bg:#14161c;--card-bg:#181b22;--page-fg:#e7e5df;
- --heading-fg:#eeece6;--muted:#9a978e;--line-1:rgba(255,255,255,.07);--line-2:rgba(255,255,255,.11);
- --line-3:rgba(255,255,255,.18);--wash:rgba(255,255,255,.05);--nav-bg:rgba(12,14,18,.9);}
+CSS = "\n" + chrome.TOKENS + """
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--page-bg);color:var(--page-fg);font-family:'Manrope',system-ui,sans-serif;
  -webkit-font-smoothing:antialiased;line-height:1.6;}
@@ -123,19 +116,11 @@ html[data-theme="dark"] .note b{color:var(--amber);}
 .pager a b{display:block;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.5px;
  color:var(--heading-fg);font-weight:400;margin-top:4px;}
 
-footer{background:var(--coal);color:var(--paper);padding:48px 40px 24px;margin-top:56px;}
-.f-in{max-width:1120px;margin:0 auto;display:flex;flex-wrap:wrap;gap:24px;
- justify-content:space-between;align-items:flex-end;}
-.f-logo{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:3px;color:#fff;
- text-decoration:none;}
-.f-links{display:flex;flex-wrap:wrap;gap:18px;font-family:'DM Mono',monospace;font-size:10px;
- letter-spacing:1.3px;text-transform:uppercase;}
-.f-links a{color:rgba(255,255,255,.65);text-decoration:none;}
-.f-links a:hover{color:var(--cyan);}
-.f-bot{max-width:1120px;margin:26px auto 0;padding-top:16px;
- border-top:1px solid rgba(255,255,255,.1);font-family:'DM Mono',monospace;font-size:9.5px;
- letter-spacing:1.2px;color:rgba(255,255,255,.35);}
-.f-bot a{color:rgba(255,255,255,.5);}
+/* The bar and the footer come from chrome.py so these pages cannot drift
+   away from the other 89. Only the wider max-width is local. */
+""" + chrome.BAR_CSS + "\n" + chrome.FOOT_CSS + """
+footer{margin-top:56px;}
+.f-in{max-width:1120px;}
 """
 
 JS = """<script>
@@ -180,12 +165,7 @@ document.getElementById('tt').addEventListener('click',function(){
 })();
 </script>"""
 
-TOGGLE = ('<button class="tt" id="tt" type="button" aria-label="Toggle dark mode">'
-          '<svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/>'
-          '<path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2'
-          'M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
-          '<svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>'
-          '</svg></button>')
+TOGGLE = chrome.TOGGLE          # one definition, in chrome.py
 
 FONTS = ('<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&'
          'family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&'
@@ -258,16 +238,7 @@ def render(*, slug, title, icon, tagline, groups, category_slug, pager, up="../.
 <link rel="stylesheet" href="{up}Commands/commands.css">
 </head>
 <body>
-<nav>
-  <a href="{up}index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
-  <div class="crumb">
-    <a href="{up}index.html">Home</a><span>/</span>
-    <a href="{up}categories/index.html">Categories</a><span>/</span>
-    <a href="{up}categories/{esc(category_slug)}/index.html">Commands</a><span>/</span>
-    <span class="cur">{esc(title)}</span>
-  </div>
-  {TOGGLE}
-</nav>
+{chrome.nav(up, f'<a href="{up}index.html">Home</a><span>/</span>' f'<a href="{up}categories/index.html">Categories</a><span>/</span>' f'<a href="{up}categories/{esc(category_slug)}/index.html">Commands</a><span>/</span>' f'<span class="cur">{esc(title)}</span>', toggle=TOGGLE)}
 
 <header class="hero"><div class="wrap">
   <div class="eyebrow">Commands · Reference</div>
@@ -292,20 +263,7 @@ def render(*, slug, title, icon, tagline, groups, category_slug, pager, up="../.
 
 <div class="wrap">{pager}</div>
 
-<footer>
-  <div class="f-in">
-    <a class="f-logo" href="{up}index.html">PLATFORM OPS</a>
-    <div class="f-links">
-      <a href="{up}categories/{esc(category_slug)}/index.html">Commands Hub</a>
-      <a href="{up}categories/index.html">All Categories</a>
-      <a href="{up}index.html#library">Reference Library</a>
-      <a href="{up}index.html#subscribe">Subscribe</a>
-      <a href="{up}feed.xml">RSS</a>
-    </div>
-  </div>
-  <div class="f-bot">© 2026 Vishal Abhinav · Platform Ops — code MIT,
-    <a href="{up}LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
-</footer>
+{chrome.footer(up)}
 {JS}
 </body>
 </html>

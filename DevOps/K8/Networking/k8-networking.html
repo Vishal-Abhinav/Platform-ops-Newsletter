@@ -26,30 +26,16 @@
 <meta name="twitter:description" content="Kubernetes networking decoded: six architecture diagrams covering Pod networking, CNI plugins, Ingress, NetworkPolicy and CoreDNS.">
 <meta name="twitter:image" content="https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/i047.png">
 
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #050a14;
-    --surface: #0b1628;
-    --surface2: #0f2040;
-    --accent: #00e5ff;
-    --accent2: #7c3aed;
-    --accent3: #10b981;
-    --accent4: #f59e0b;
-    --danger: #ef4444;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --border: #1e3a5f;
-    --glow: 0 0 20px rgba(0,229,255,0.3);
-    --glow2: 0 0 20px rgba(124,58,237,0.3);
-  }
+  :root{--bg:var(--page-bg);--surface:var(--panel-bg);--surface2:var(--card-bg);--accent:var(--cyan);--accent2:var(--purple);--accent3:var(--lime);--accent4:var(--amber);--danger:var(--crimson);--text:var(--page-fg);--border:var(--line-2);--glow: 0 0 20px rgba(0,229,255,0.3);--glow2: 0 0 20px rgba(124,58,237,0.3)}
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Syne', sans-serif;
+    font-family: 'Manrope', system-ui, sans-serif;
     overflow-x: hidden;
     line-height: 1.6;
   }
@@ -86,15 +72,15 @@
   }
 
   .issue-badge {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
-    color: var(--accent);
+    color: var(--cyan-t);
     letter-spacing: 3px;
     text-transform: uppercase;
   }
 
   .date-badge {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     color: var(--muted);
   }
@@ -110,8 +96,8 @@
     gap: 8px;
     background: rgba(0,229,255,0.08);
     border: 1px solid rgba(0,229,255,0.3);
-    color: var(--accent);
-    font-family: 'IBM Plex Mono', monospace;
+    color: var(--cyan-t);
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     padding: 6px 14px;
     letter-spacing: 2px;
@@ -153,7 +139,7 @@
   .hero-meta {
     display: flex;
     gap: 32px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 12px;
     color: var(--muted);
   }
@@ -168,9 +154,9 @@
   }
 
   .section-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
-    color: var(--accent);
+    color: var(--cyan-t);
     letter-spacing: 3px;
     text-transform: uppercase;
     margin-bottom: 8px;
@@ -213,7 +199,7 @@
   }
 
   .diagram-title {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     color: var(--muted);
     letter-spacing: 2px;
@@ -229,7 +215,7 @@
     flex-direction: column;
     align-items: center;
     gap: 0;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 12px;
   }
 
@@ -244,7 +230,7 @@
 
   .node-label {
     font-size: 10px;
-    color: var(--accent);
+    color: var(--cyan-t);
     letter-spacing: 2px;
     text-transform: uppercase;
     margin-bottom: 16px;
@@ -261,7 +247,7 @@
     border: 1px solid rgba(0,229,255,0.3);
     padding: 10px 14px;
     font-size: 11px;
-    color: var(--accent);
+    color: var(--cyan-t);
     min-width: 100px;
     text-align: center;
     position: relative;
@@ -283,7 +269,7 @@
 
   .pod.purple {
     border-color: rgba(124,58,237,0.5);
-    color: #a78bfa;
+    color: var(--purple-t);
     background: rgba(124,58,237,0.06);
   }
 
@@ -291,7 +277,7 @@
 
   .pod.green {
     border-color: rgba(16,185,129,0.5);
-    color: #34d399;
+    color: var(--lime-t);
     background: rgba(16,185,129,0.06);
   }
 
@@ -306,14 +292,14 @@
     letter-spacing: 1px;
   }
 
-  .veth-line svg { color: var(--accent3); }
+  .veth-line svg { color: var(--lime-t); }
 
   .cbr0 {
     background: rgba(16,185,129,0.1);
     border: 1px dashed rgba(16,185,129,0.5);
     padding: 10px 20px;
     font-size: 11px;
-    color: #34d399;
+    color: var(--lime-t);
     text-align: center;
     width: 100%;
     margin: 8px 0;
@@ -325,7 +311,7 @@
     border: 1px dashed rgba(245,158,11,0.4);
     padding: 12px 20px;
     font-size: 11px;
-    color: var(--accent4);
+    color: var(--amber-t);
     text-align: center;
   }
 
@@ -342,7 +328,7 @@
     align-items: center;
     justify-content: center;
     font-size: 22px;
-    color: var(--accent);
+    color: var(--cyan-t);
     gap: 4px;
   }
 
@@ -359,7 +345,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 16px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
   }
 
   .svc-card {
@@ -404,18 +390,18 @@
     background: rgba(0,229,255,0.05);
     border: 1px solid rgba(0,229,255,0.15);
     padding: 6px 10px;
-    color: var(--accent);
+    color: var(--cyan-t);
     text-align: center;
     font-size: 10px;
   }
 
-  .flow-box.ext { border-color: rgba(245,158,11,0.3); color: var(--accent4); background: rgba(245,158,11,0.05); }
-  .flow-box.pod-f { border-color: rgba(16,185,129,0.3); color: #34d399; background: rgba(16,185,129,0.05); }
+  .flow-box.ext { border-color: rgba(245,158,11,0.3); color: var(--amber-t); background: rgba(245,158,11,0.05); }
+  .flow-box.pod-f { border-color: rgba(16,185,129,0.3); color: var(--lime-t); background: rgba(16,185,129,0.05); }
   .flow-arrow { text-align: center; font-size: 16px; color: var(--muted); line-height: 1; }
 
   /* ─── DIAGRAM 3: Ingress ─── */
   .ingress-diagram {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 12px;
   }
 
@@ -436,10 +422,10 @@
     background: var(--surface2);
   }
 
-  .i-box.internet { border-color: rgba(245,158,11,0.5); color: var(--accent4); background: rgba(245,158,11,0.08); }
-  .i-box.ctrl { border-color: rgba(124,58,237,0.5); color: #a78bfa; background: rgba(124,58,237,0.08); }
-  .i-box.svc1 { border-color: rgba(0,229,255,0.4); color: var(--accent); }
-  .i-box.svc2 { border-color: rgba(16,185,129,0.4); color: #34d399; }
+  .i-box.internet { border-color: rgba(245,158,11,0.5); color: var(--amber-t); background: rgba(245,158,11,0.08); }
+  .i-box.ctrl { border-color: rgba(124,58,237,0.5); color: var(--purple-t); background: rgba(124,58,237,0.08); }
+  .i-box.svc1 { border-color: rgba(0,229,255,0.4); color: var(--cyan-t); }
+  .i-box.svc2 { border-color: rgba(16,185,129,0.4); color: var(--lime-t); }
 
   .i-arrow { font-size: 20px; color: var(--muted); padding: 0 8px; flex-shrink: 0; }
 
@@ -457,16 +443,16 @@
     font-size: 11px;
   }
 
-  .rule-host { color: var(--accent); display: block; margin-bottom: 4px; }
+  .rule-host { color: var(--cyan-t); display: block; margin-bottom: 4px; }
   .rule-path { color: var(--muted); }
-  .rule-arrow { color: #34d399; }
+  .rule-arrow { color: var(--lime-t); }
 
   /* ─── DIAGRAM 4: CNI ─── */
   .cni-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
   }
 
   .cni-plugin {
@@ -479,7 +465,7 @@
   }
 
   .cni-plugin:hover {
-    border-color: var(--accent);
+    border-color: var(--cyan-t);
     background: rgba(0,229,255,0.05);
     transform: translateY(-2px);
   }
@@ -492,20 +478,20 @@
     padding: 2px 8px;
     background: rgba(0,229,255,0.1);
     border: 1px solid rgba(0,229,255,0.2);
-    color: var(--accent);
+    color: var(--cyan-t);
     letter-spacing: 1px;
     margin-top: 6px;
   }
 
-  .cni-tag.p { background: rgba(124,58,237,0.1); border-color: rgba(124,58,237,0.3); color: #a78bfa; }
-  .cni-tag.g { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #34d399; }
-  .cni-tag.y { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: var(--accent4); }
+  .cni-tag.p { background: rgba(124,58,237,0.1); border-color: rgba(124,58,237,0.3); color: var(--purple-t); }
+  .cni-tag.g { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: var(--lime-t); }
+  .cni-tag.y { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: var(--amber-t); }
 
   .cni-desc { font-size: 10px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
 
   /* ─── DIAGRAM 5: NetworkPolicy ─── */
   .netpol-diagram {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     gap: 20px;
@@ -547,13 +533,13 @@
     border: 1px solid rgba(124,58,237,0.5);
     padding: 12px 16px;
     font-size: 11px;
-    color: #a78bfa;
+    color: var(--purple-t);
     text-align: center;
     width: 100px;
   }
 
-  .allow-line { color: #34d399; font-size: 10px; letter-spacing: 1px; }
-  .block-line { color: var(--danger); font-size: 10px; letter-spacing: 1px; text-decoration: line-through; }
+  .allow-line { color: var(--lime-t); font-size: 10px; letter-spacing: 1px; }
+  .block-line { color: var(--crimson-t); font-size: 10px; letter-spacing: 1px; text-decoration: line-through; }
 
   .traffic-pod {
     padding: 8px 12px;
@@ -563,12 +549,12 @@
     border: 1px solid var(--border);
   }
 
-  .traffic-pod.ok { border-color: rgba(16,185,129,0.5); color: #34d399; background: rgba(16,185,129,0.05); }
-  .traffic-pod.bad { border-color: rgba(239,68,68,0.4); color: var(--danger); background: rgba(239,68,68,0.05); }
+  .traffic-pod.ok { border-color: rgba(16,185,129,0.5); color: var(--lime-t); background: rgba(16,185,129,0.05); }
+  .traffic-pod.bad { border-color: rgba(239,68,68,0.4); color: var(--crimson-t); background: rgba(239,68,68,0.05); }
 
   /* ─── DIAGRAM 6: DNS ─── */
   .dns-flow {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -584,7 +570,7 @@
     width: 28px;
     height: 28px;
     border: 1px solid var(--accent);
-    color: var(--accent);
+    color: var(--cyan-t);
     font-size: 12px;
     display: flex;
     align-items: center;
@@ -600,8 +586,8 @@
     font-size: 11px;
   }
 
-  .dns-query { color: var(--accent4); display: block; }
-  .dns-result { color: #34d399; font-size: 10px; margin-top: 4px; display: block; }
+  .dns-query { color: var(--amber-t); display: block; }
+  .dns-result { color: var(--lime-t); font-size: 10px; margin-top: 4px; display: block; }
 
   .dns-arch {
     display: grid;
@@ -618,7 +604,7 @@
     font-size: 11px;
   }
 
-  .dns-comp-name { color: var(--accent2); display: block; font-weight: 700; margin-bottom: 6px; font-size: 13px; }
+  .dns-comp-name { color: var(--purple-t); display: block; font-weight: 700; margin-bottom: 6px; font-size: 13px; }
   .dns-comp-desc { color: var(--muted); font-size: 10px; line-height: 1.5; }
 
   /* ─── ARTICLE CARD ─── */
@@ -639,7 +625,7 @@
   }
 
   .article-card:hover {
-    border-color: var(--accent);
+    border-color: var(--cyan-t);
     background: rgba(0,229,255,0.03);
   }
 
@@ -652,11 +638,11 @@
   }
 
   .card-cat {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 9px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--cyan-t);
     margin-bottom: 10px;
   }
 
@@ -675,7 +661,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 20px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
     position: relative;
   }
 
@@ -685,7 +671,7 @@
     color: rgba(0,229,255,0.1);
     line-height: 1;
     margin-bottom: 8px;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Manrope', system-ui, sans-serif;
   }
 
   .tip-title { font-size: 12px; color: var(--text); font-weight: 700; margin-bottom: 8px; }
@@ -694,7 +680,7 @@
     border-left: 2px solid var(--accent3);
     padding: 10px 12px;
     font-size: 10px;
-    color: #34d399;
+    color: var(--lime-t);
     line-height: 1.7;
     white-space: pre;
     overflow-x: auto;
@@ -732,7 +718,7 @@
   }
 
   .tag {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     padding: 4px 10px;
     border: 1px solid var(--border);
@@ -771,6 +757,81 @@ a.footer-logo:hover{color:#fff;}
 .footer-meta{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:rgba(255,255,255,.2);}
 @media (max-width:900px){footer{padding:56px 32px 28px;}.footer-top{grid-template-columns:1fr;gap:32px;}}
 @media (max-width:600px){footer{padding:48px 22px 24px;}.footer-cols{grid-template-columns:1fr 1fr;}}
+/* chrome:begin */
+:root{--ink:#08090c;--paper:#f2f0eb;--smoke:#e4e0d8;--ash:#b8b2a7;--coal:#1c1f26;
+ --cyan:#00c2d4;--amber:#f59e0b;--crimson:#e53935;--lime:#84cc16;--purple:#7c3aed;
+ --page-bg:#f2f0eb;--panel-bg:#e4e0d8;--card-bg:#f8f7f4;--page-fg:#1c1f26;--heading-fg:#1c1f26;
+ --muted:#6b6860;--line-1:rgba(0,0,0,.06);--line-2:rgba(0,0,0,.1);--line-3:rgba(0,0,0,.16);
+ --wash:rgba(0,0,0,.04);--nav-bg:rgba(242,240,235,.9);--code-bg:#0d0f14;
+ /* Accents AS TEXT. The brand colours are tuned to be seen as fills and
+    borders; at 9-11px on paper, --lime and --cyan are close to illegible.
+    The diagrams already carried a second set for exactly this and kept it
+    private, so every page that wanted a coloured label reached for the fill
+    colour instead. These are that set, promoted to tokens. */
+ --cyan-t:#066c77;--lime-t:#3f6f0c;--amber-t:#8a5806;
+ --purple-t:#5b21b6;--crimson-t:#a32b28;}
+html[data-theme="dark"]{--page-bg:#0c0e12;--panel-bg:#14161c;--card-bg:#181b22;--page-fg:#e7e5df;
+ --heading-fg:#eeece6;--muted:#9a978e;--line-1:rgba(255,255,255,.07);--line-2:rgba(255,255,255,.11);
+ --line-3:rgba(255,255,255,.18);--wash:rgba(255,255,255,.05);--nav-bg:rgba(12,14,18,.9);
+ --cyan-t:#4dd6e4;--lime-t:#a7e137;--amber-t:#f5b544;
+ --purple-t:#b596f5;--crimson-t:#f07570;}
+nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;padding:14px 40px;
+ background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-1);}
+.nav-logo{display:flex;align-items:center;gap:9px;font-family:'Bebas Neue',sans-serif;font-size:19px;
+ letter-spacing:2.5px;text-decoration:none;color:var(--heading-fg);flex-shrink:0;}
+.nav-logo span{width:8px;height:8px;border-radius:50%;background:var(--crimson);}
+/* nowrap + hidden: a long trail used to push the bar onto two or three lines,
+   which made the header a different height on different pages. It truncates
+   instead — the crumb is wayfinding, not content. */
+.crumb{flex:1;min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;
+ overflow:hidden;white-space:nowrap;
+ font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);}
+/* Segments keep their natural width and the container clips what does not
+   fit. Letting them shrink instead gave 'H. / CA… / KU… / KUBERN…', which
+   is a breadcrumb that has stopped telling you where you are. */
+.crumb a,.crumb .cur,.crumb span{flex-shrink:0;}
+.crumb a{text-decoration:none;color:var(--muted);}
+.crumb a:hover{color:var(--crimson);}
+.crumb .cur{color:var(--heading-fg);}
+.nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.nav-lab{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.6px;
+ text-transform:uppercase;text-decoration:none;color:var(--muted);
+ border:1px solid var(--line-2);border-radius:3px;padding:5px 9px;
+ transition:color .2s,border-color .2s,background .2s;white-space:nowrap;}
+.nav-lab:hover{color:var(--crimson);border-color:var(--crimson);}
+.nav-lab::after{content:' \2197';font-size:9px;}
+@media(max-width:560px){.nav-lab{padding:4px 7px;font-size:9px;}
+  .nav-sub{display:none;}}
+.tt{width:32px;height:32px;border:1px solid var(--line-2);background:transparent;border-radius:50%;
+ cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+.tt:hover{color:var(--crimson);border-color:var(--crimson);}
+.tt svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;}
+html:not([data-theme="dark"]) .tt .moon,html[data-theme="dark"] .tt .sun{display:none;}
+@media(max-width:760px){nav{padding:12px 18px;gap:12px;}.crumb{display:none;}}
+footer{background:var(--coal);color:var(--paper);padding:52px 40px 26px;}
+.f-in{max-width:1000px;margin:0 auto;}
+.f-top{display:grid;grid-template-columns:1.3fr 2fr;gap:48px;}
+.f-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:#fff;text-decoration:none;}
+.f-tag{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:14px;
+ color:rgba(255,255,255,.5);margin-top:12px;line-height:1.6;}
+.f-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+.f-col-t{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;
+ color:rgba(255,255,255,.35);margin-bottom:12px;}
+.f-cols a{display:block;font-size:12.5px;color:rgba(255,255,255,.72);text-decoration:none;padding:4px 0;}
+.f-cols a:hover{color:var(--cyan);}
+.f-bot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:38px;padding-top:18px;
+ border-top:1px solid rgba(255,255,255,.1);font-family:'DM Mono',monospace;font-size:9.5px;
+ letter-spacing:1.2px;color:rgba(255,255,255,.35);}
+.f-bot a{color:rgba(255,255,255,.5);}
+@media(max-width:820px){.f-top{grid-template-columns:1fr;gap:30px;}footer{padding:44px 20px 22px;}}
+@media(max-width:560px){.f-cols{grid-template-columns:1fr 1fr;}}
+/* chrome:end */
+/* page:begin */
+/* Code blocks keep a dark surface in both themes, so they keep the bright
+   accent — the readable variants are for accents on the page surface. */
+.tip-code{background:var(--code-bg);color:var(--lime);}
+.tip-number{color:var(--line-2);}
+/* page:end */
 </style>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <!-- Privacy-friendly analytics (GoatCounter). Put your site code between the
@@ -799,11 +860,23 @@ a.footer-logo:hover{color:#fff;}
 
 
 
+<!-- chrome:prepaint -->
+<script>
+(function(){try{var t=localStorage.getItem('po-theme');
+ if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
+<!-- /chrome:prepaint -->
 <!-- seo:jsonld -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"K8s Network Digest — Issue #47","description":"Kubernetes networking decoded: six architecture diagrams covering Pod networking, CNI plugins, Ingress, NetworkPolicy and CoreDNS.","url":"https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/K8/Networking/k8-networking.html","mainEntityOfPage":{"@type":"WebPage","@id":"https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/K8/Networking/k8-networking.html"},"datePublished":"2026-03-01T09:00:00+00:00","dateModified":"2026-03-01T09:00:00+00:00","author":{"@type":"Person","name":"Vishal Abhinav","url":"https://www.linkedin.com/in/vishal-abhinav/","jobTitle":"Platform Ops Engineer","sameAs":["https://www.linkedin.com/in/vishal-abhinav/","https://github.com/Vishal-Abhinav","https://www.researchgate.net/profile/Vishal-Abhinav/research","https://www.hackerrank.com/Vishal_Abhinav"]},"publisher":{"@type":"Organization","name":"Platform Ops","url":"https://platform-ops-blog.vishal-abhinav.workers.dev/","logo":{"@type":"ImageObject","url":"https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/home.png"}},"image":"https://platform-ops-blog.vishal-abhinav.workers.dev/assets/og/i047.png","inLanguage":"en","isAccessibleForFree":true,"articleSection":"Platform Engineering"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://platform-ops-blog.vishal-abhinav.workers.dev/"},{"@type":"ListItem","position":2,"name":"Categories","item":"https://platform-ops-blog.vishal-abhinav.workers.dev/categories/index.html"},{"@type":"ListItem","position":3,"name":"Networking","item":"https://platform-ops-blog.vishal-abhinav.workers.dev/categories/networking/index.html"},{"@type":"ListItem","position":4,"name":"Kubernetes Networking","item":"https://platform-ops-blog.vishal-abhinav.workers.dev/DevOps/K8/Networking/k8-networking.html"}]}</script>
 <!-- /seo:jsonld -->
 </head>
 <body>
+<nav>
+  <a href="../../../index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
+  <div class="crumb"><a href="../../../index.html">Home</a><span>/</span><a href="../../../categories/index.html">Categories</a><span>/</span><a href="../../../categories/networking/index.html">Networking</a><span>/</span><span class="cur">Kubernetes Networking</span></div>
+  <div class="nav-right"><button class="tt" id="tt" type="button" aria-label="Toggle dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button><a href="../../../terminal/index.html" class="nav-lab" target="_blank" rel="noopener">LAB</a><a href="../../../index.html#subscribe" class="nav-logo nav-sub" style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
+</nav>
 
 <div class="container">
 
@@ -1063,14 +1136,14 @@ a.footer-logo:hover{color:#fff;}
           <span class="ns-label">NAMESPACE: frontend</span>
           <div class="traffic-pod ok">pod-web ✓<br><span style="font-size:9px;color:var(--muted)">10.244.1.5</span></div>
           <div class="traffic-pod ok">pod-mobile ✓<br><span style="font-size:9px;color:var(--muted)">10.244.1.6</span></div>
-          <div style="font-size:9px;color:#34d399;text-align:center;margin-top:8px;">✓ ALLOWED</div>
+          <div style="font-size:9px;color:var(--lime-t);text-align:center;margin-top:8px;">✓ ALLOWED</div>
         </div>
 
         <!-- Policy center -->
         <div class="policy-center">
           <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">INGRESS</div>
           <div class="allow-line">———→</div>
-          <div class="policy-icon">NetworkPolicy<br><span style="font-size:9px;color:#a78bfa">app: api-server</span></div>
+          <div class="policy-icon">NetworkPolicy<br><span style="font-size:9px;color:var(--purple-t)">app: api-server</span></div>
           <div class="allow-line">←———</div>
           <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:4px;">EGRESS</div>
           <div style="margin-top:16px;font-size:9px;text-align:center;line-height:1.8;color:var(--muted);">
@@ -1229,39 +1302,47 @@ cilium policy trace \
 
 </div>
 <footer>
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div class="footer-brandbox">
-        <a class="footer-logo" href="../../../index.html">PLATFORM OPS</a>
-        <p class="footer-tagline">Field notes on Kubernetes, SRE, and Platform Engineering — written from production, not slideware.</p>
-        <div class="footer-badge"><span class="fb-dot"></span> Published monthly · Free forever</div>
+  <div class="f-in">
+    <div class="f-top">
+      <div>
+        <a class="f-logo" href="../../../index.html">PLATFORM OPS</a>
+        <p class="f-tag">Field notes on Kubernetes, SRE, and Platform Engineering —
+          written from production, not slideware.</p>
       </div>
-      <div class="footer-cols">
-        <div class="footer-col">
-          <div class="footer-col-title">Newsletter</div>
+      <div class="f-cols">
+        <div><div class="f-col-t">Newsletter</div>
           <a href="../../../index.html#issues">Latest Issues</a>
-          <a href="../../../Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Newest — Issue #057</a>
+          <a href="../../../Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html">Newest — Issue #067</a>
           <a href="../../../index.html#subscribe">Subscribe</a>
-        </div>
-        <div class="footer-col">
-          <div class="footer-col-title">Explore</div>
+          <a href="../../../feed.xml">RSS Feed</a></div>
+        <div><div class="f-col-t">Explore</div>
+          <a href="../../../categories/index.html">All Categories</a>
           <a href="../../../index.html#topics">Knowledge Map</a>
-          <a href="../../../Infrastructure/OS/index.html">OS / Linux Series</a>
-          <a href="../../../index.html#authors">About the Author</a>
-        </div>
-        <div class="footer-col">
-          <div class="footer-col-title">Connect</div>
+          <a href="../../../terminal/index.html">Practice Terminal ↗</a>
+          <a href="../../../colophon/index.html">Colophon</a></div>
+        <div><div class="f-col-t">Connect</div>
           <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
-          <a href="../../../feed.xml">RSS Feed</a>
-          <a href="#">Back to Top ↑</a>
-        </div>
+          <a href="../../../index.html#authors">About the Author</a>
+          <a href="#">Back to Top ↑</a></div>
       </div>
     </div>
-    <div class="footer-bottom">
-      <div class="footer-note">© 2026 Vishal Abhinav · Platform Ops Engineer — code MIT, <a href="../../../LICENSE" style="color:inherit">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
-      <div class="footer-meta">Built for engineers, by an engineer.</div>
+    <div class="f-bot">
+      <div>© 2026 Vishal Abhinav · Platform Ops — code MIT,
+        <a href="../../../LICENSE">text &amp; diagrams CC BY-NC-ND 4.0</a></div>
+      <div>Built for engineers, by an engineer.</div>
     </div>
   </div>
 </footer>
+<!-- chrome:js -->
+<script>
+(function(){var b=document.getElementById('tt'); if(!b) return;
+b.addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  if(d){document.documentElement.removeAttribute('data-theme');}
+  else{document.documentElement.setAttribute('data-theme','dark');}
+  try{localStorage.setItem('po-theme',d?'light':'dark');}catch(e){}
+});})();
+</script>
+<!-- /chrome:js -->
 </body>
 </html>

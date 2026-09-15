@@ -59,11 +59,15 @@ def shared_css():
 
     # The light values only: these pages have no dark mode, so the dark
     # redefinitions further down the file would be dead weight.
-    root = re.search(r":root\s*\{(.*?)\}", src, re.S)
-    assert root, "hub.css: no :root block to take the diagram colours from"
+    # Every :root, not just the first: the shared token block and the hub-only
+    # status swatches now live in two of them, and reading only the first
+    # silently lost the swatches.
+    roots = re.findall(r":root\s*\{(.*?)\}", src, re.S)
+    assert roots, "hub.css: no :root block to take the diagram colours from"
+    light = "\n".join(roots)
     decls = []
     for v in VARS:
-        m = re.search(re.escape(v) + r"\s*:\s*([^;]+);", root.group(1))
+        m = re.search(re.escape(v) + r"\s*:\s*([^;}]+)[;}]", light)
         assert m, f"hub.css :root no longer defines {v}"
         decls.append(f"{v}:{m.group(1).strip()};")
 

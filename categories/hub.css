@@ -2,16 +2,26 @@
  --cyan:#00c2d4;--amber:#f59e0b;--crimson:#e53935;--lime:#84cc16;--purple:#7c3aed;
  --page-bg:#f2f0eb;--panel-bg:#e4e0d8;--card-bg:#f8f7f4;--page-fg:#1c1f26;--heading-fg:#1c1f26;
  --muted:#6b6860;--line-1:rgba(0,0,0,.06);--line-2:rgba(0,0,0,.1);--line-3:rgba(0,0,0,.16);
- --wash:rgba(0,0,0,.04);--nav-bg:rgba(242,240,235,.9);
- --n-live-bg:rgba(132,204,22,.16);--n-live-br:#84cc16;--n-live-fg:#3f6f0c;--n-live-dot:#84cc16;
- --n-pipe-bg:rgba(245,158,11,.13);--n-pipe-br:rgba(245,158,11,.55);--n-pipe-fg:#8a5806;
- --n-plan-bg:transparent;--n-plan-br:rgba(0,0,0,.2);--n-plan-fg:#8d8981;}
+ --wash:rgba(0,0,0,.04);--nav-bg:rgba(242,240,235,.9);--code-bg:#0d0f14;
+ /* Accents AS TEXT. The brand colours are tuned to be seen as fills and
+    borders; at 9-11px on paper, --lime and --cyan are close to illegible.
+    The diagrams already carried a second set for exactly this and kept it
+    private, so every page that wanted a coloured label reached for the fill
+    colour instead. These are that set, promoted to tokens. */
+ --cyan-t:#066c77;--lime-t:#3f6f0c;--amber-t:#8a5806;
+ --purple-t:#5b21b6;--crimson-t:#a32b28;}
 html[data-theme="dark"]{--page-bg:#0c0e12;--panel-bg:#14161c;--card-bg:#181b22;--page-fg:#e7e5df;
  --heading-fg:#eeece6;--muted:#9a978e;--line-1:rgba(255,255,255,.07);--line-2:rgba(255,255,255,.11);
  --line-3:rgba(255,255,255,.18);--wash:rgba(255,255,255,.05);--nav-bg:rgba(12,14,18,.9);
- --n-live-bg:rgba(132,204,22,.16);--n-live-fg:#a7e137;
- --n-pipe-bg:rgba(245,158,11,.14);--n-pipe-fg:#f5b544;
- --n-plan-br:rgba(255,255,255,.2);--n-plan-fg:#8a877f;}
+ --cyan-t:#4dd6e4;--lime-t:#a7e137;--amber-t:#f5b544;
+ --purple-t:#b596f5;--crimson-t:#f07570;}
+/* Status swatches for the coverage diagram — hub-only, so they stay here. */
+:root{--n-live-bg:rgba(132,204,22,.16);--n-live-br:#84cc16;--n-live-fg:#3f6f0c;--n-live-dot:#84cc16;
+  --n-pipe-bg:rgba(245,158,11,.13);--n-pipe-br:rgba(245,158,11,.55);--n-pipe-fg:#8a5806;
+  --n-plan-bg:transparent;--n-plan-br:rgba(0,0,0,.2);--n-plan-fg:#8d8981;}
+  --n-live-bg:rgba(132,204,22,.16);--n-live-fg:#a7e137;
+  --n-pipe-bg:rgba(245,158,11,.14);--n-pipe-fg:#f5b544;
+  --n-plan-br:rgba(255,255,255,.2);--n-plan-fg:#8a877f;}}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--page-bg);color:var(--page-fg);font-family:'Manrope',system-ui,sans-serif;
  -webkit-font-smoothing:antialiased;}
@@ -19,25 +29,39 @@ a{color:inherit;}
 .wrap{max-width:1120px;margin:0 auto;padding:0 40px;}
 @media(max-width:700px){.wrap{padding:0 20px;}}
 
-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;
- padding:14px 40px;background:var(--nav-bg);backdrop-filter:blur(14px);
- border-bottom:1px solid var(--line-1);}
-.nav-logo{display:flex;align-items:center;gap:9px;font-family:'Bebas Neue',sans-serif;
- font-size:19px;letter-spacing:2.5px;text-decoration:none;color:var(--heading-fg);flex-shrink:0;}
+nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;padding:14px 40px;
+ background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-1);}
+.nav-logo{display:flex;align-items:center;gap:9px;font-family:'Bebas Neue',sans-serif;font-size:19px;
+ letter-spacing:2.5px;text-decoration:none;color:var(--heading-fg);flex-shrink:0;}
 .nav-logo span{width:8px;height:8px;border-radius:50%;background:var(--crimson);}
-.crumb{flex:1;min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
- font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;
- color:var(--muted);}
+/* nowrap + hidden: a long trail used to push the bar onto two or three lines,
+   which made the header a different height on different pages. It truncates
+   instead — the crumb is wayfinding, not content. */
+.crumb{flex:1;min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;
+ overflow:hidden;white-space:nowrap;
+ font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);}
+/* Segments keep their natural width and the container clips what does not
+   fit. Letting them shrink instead gave 'H. / CA… / KU… / KUBERN…', which
+   is a breadcrumb that has stopped telling you where you are. */
+.crumb a,.crumb .cur,.crumb span{flex-shrink:0;}
 .crumb a{text-decoration:none;color:var(--muted);}
 .crumb a:hover{color:var(--crimson);}
 .crumb .cur{color:var(--heading-fg);}
 .nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.nav-lab{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.6px;
+ text-transform:uppercase;text-decoration:none;color:var(--muted);
+ border:1px solid var(--line-2);border-radius:3px;padding:5px 9px;
+ transition:color .2s,border-color .2s,background .2s;white-space:nowrap;}
+.nav-lab:hover{color:var(--crimson);border-color:var(--crimson);}
+.nav-lab::after{content:' \2197';font-size:9px;}
+@media(max-width:560px){.nav-lab{padding:4px 7px;font-size:9px;}
+  .nav-sub{display:none;}}
 .tt{width:32px;height:32px;border:1px solid var(--line-2);background:transparent;border-radius:50%;
  cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);}
 .tt:hover{color:var(--crimson);border-color:var(--crimson);}
 .tt svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;}
 html:not([data-theme="dark"]) .tt .moon,html[data-theme="dark"] .tt .sun{display:none;}
-@media(max-width:700px){nav{padding:12px 18px;gap:12px;}.crumb{display:none;}}
+@media(max-width:760px){nav{padding:12px 18px;gap:12px;}.crumb{display:none;}}
 
 header.hero{padding:64px 0 40px;border-bottom:1px solid var(--line-1);}
 .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;
