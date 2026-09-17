@@ -26,11 +26,23 @@
 # ── version control / tooling state ─────────────────────────────────────────
 .git
 .git/**
+.github
+.github/**
 .wrangler
 .wrangler/**
 node_modules
 node_modules/**
 .gitignore
+
+# ── deploy + hosting config, not site content ───────────────────────────────
+# wrangler.jsonc was being served at /wrangler.jsonc — it is the Worker's own
+# deploy config (project name, the assets directory, observability), which is
+# infrastructure, not a page. CNAME is GitHub Pages' custom-domain marker;
+# Pages reads it from the repo, never from the Worker's published assets, so
+# withholding it here breaks nothing.
+wrangler.jsonc
+wrangler.toml
+CNAME
 
 # ── the build system ────────────────────────────────────────────────────────
 # Every generator, every content data module (cmd_data.py is 51KB of command
@@ -38,6 +50,14 @@ node_modules/**
 # rendered site; no page anywhere links into tools/ — checked, the only match
 # in 878 pages is an external kubernetes.io URL that happens to contain the
 # word "tools". Safe to withhold entirely.
+#
+# This one line removed ~4,700 files from the deploy, not the ~70 you would
+# expect from the build scripts alone. The rest was tools/.mermaid/ — the
+# Mermaid install make_arch_svg.py caches, a full node_modules tree that
+# .gitignore already keeps out of git. wrangler walks the FILESYSTEM, not
+# git, so gitignored-but-present directories were being published anyway;
+# the `node_modules` rule above only ever matched at the repo root, never
+# nested inside tools/. That gap is the whole lesson of this file.
 tools
 tools/**
 
