@@ -29,7 +29,7 @@
 **A free, open-source knowledge base for DevOps Engineers, SREs, and Platform Builders.**
 *Deep-dive issues · Architecture diagrams · Runbooks · A 190-term Linux & Unix glossary.*
 
-### 🌐 **[Read it live → platform-ops-blog.vishal-abhinav.workers.dev](https://platform-ops-blog.vishal-abhinav.workers.dev/)**
+### 🌐 **[Read it live → platformops.srivantechnologies.com](https://platformops.srivantechnologies.com/)**
 
 [📚 Issues](#-published-issues) · [📖 Library](#-reference-library) · [🗺️ Knowledge Map](#️-knowledge-map) · [🗂️ Structure](#️-repository-structure) · [🚀 Run Locally](#-quick-start)
 
@@ -1273,7 +1273,7 @@ git push origin main
         └──→ .github/workflows/static.yml ──→ GitHub Pages
                                               vishal-abhinav.github.io/Platform-ops-Newsletter/
 
-                        Cloudflare Worker ──→ platform-ops-blog.vishal-abhinav.workers.dev
+                        Cloudflare Worker ──→ platformops.srivantechnologies.com
                                               ← the canonical origin: what every
                                                 <link rel="canonical"> on the site points at
 ```
@@ -1552,6 +1552,6 @@ Use it, fork it, quote it, build on it. Attribution appreciated, not required.
 
 *Built for engineers, by an engineer.*
 
-**[Read the latest issue →](https://platform-ops-blog.vishal-abhinav.workers.dev/)**
+**[Read the latest issue →](https://platformops.srivantechnologies.com/)**
 
 </div>

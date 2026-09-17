@@ -129,10 +129,27 @@ def main():
         fails.append(f"count drift  index.html total {stated[0]}, renders {total_chips}")
 
     # 5. sitemap
+    #
+    # Indexable pages only. A sitemap is a request to crawl; a page carrying
+    # noindex then declines to be indexed, so listing one spends crawl budget
+    # to be told no and fills Search Console with "Excluded by noindex"
+    # entries that bury the real problems. This site is mostly such pages:
+    # 784 of 878 are reader-checklist placeholders, deliberately
+    # noindex,follow — internal linking scaffolding, not content to submit.
+    # Before this filter the sitemap advertised all 878.
+    #
+    # The robots meta is read fresh here rather than reusing a set collected
+    # in the checking loop above: this stays correct if that loop is ever
+    # restructured, and re-reading 878 small files costs milliseconds against
+    # a 25-stage build.
     today = datetime.date.today().isoformat()
-    urls = []
+    urls, noindexed = [], 0
     for f in pages():
         rel = str(f.relative_to(ROOT)).replace("\\", "/")
+        if re.search(r'<meta name="robots"[^>]*noindex',
+                     f.read_text(encoding="utf-8"), re.I):
+            noindexed += 1
+            continue
         loc = BASE + (rel[:-len("index.html")] if rel.endswith("index.html") else rel)
         if rel == "index.html":
             loc, pri = BASE, "1.0"
@@ -154,7 +171,7 @@ def main():
             fails.append(f"malformed    {x}: {e}")
 
     print(f"pages checked : {n}")
-    print(f"sitemap urls  : {len(urls)}")
+    print(f"sitemap urls  : {len(urls)} indexable ({noindexed} noindex pages withheld)")
     print(f"topics        : {actual[0]} live / {actual[1]} pipeline / {actual[2]} planned")
     if fails:
         print(f"\nFAILED ({len(fails)}):")

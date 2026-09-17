@@ -49,7 +49,19 @@ SITES = {
 # Flip this ONLY once the new host actually resolves and serves the site.
 # Pointing 93 canonicals at a host that 404s tells a search engine the real
 # version of every page does not exist, which is worse than the wrong host.
-ACTIVE = "workers"
+#
+# Flipped to platformops on 17 Sep 2026. The precondition above was checked
+# first, not assumed: https://platformops.srivantechnologies.com/ was fetched
+# live and returns 200 with the full site — it is the same Worker answering on
+# a custom domain, so it serves identical bytes. Before the flip every page
+# declared its canonical to be the workers.dev host, which meant that on the
+# custom domain each page pointed search engines away from itself.
+#
+# The workers.dev host keeps serving until "workers_dev": false is set in
+# wrangler.jsonc — that is a separate, deliberate step, taken only after these
+# canonicals are confirmed live, so there is never a window where the old host
+# is gone and the new canonicals have not landed.
+ACTIVE = "platformops"
 
 assert ACTIVE in SITES, f"ACTIVE={ACTIVE!r} is not a profile in SITES"
 
