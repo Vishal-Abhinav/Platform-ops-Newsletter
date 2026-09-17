@@ -2,19 +2,10 @@
  --cyan:#00c2d4;--amber:#f59e0b;--crimson:#e53935;--lime:#84cc16;--purple:#7c3aed;
  --page-bg:#f2f0eb;--panel-bg:#e4e0d8;--card-bg:#f8f7f4;--page-fg:#1c1f26;--heading-fg:#1c1f26;
  --muted:#6b6860;--line-1:rgba(0,0,0,.06);--line-2:rgba(0,0,0,.1);--line-3:rgba(0,0,0,.16);
- --wash:rgba(0,0,0,.04);--nav-bg:rgba(242,240,235,.9);--code-bg:#0d0f14;
- /* Accents AS TEXT. The brand colours are tuned to be seen as fills and
-    borders; at 9-11px on paper, --lime and --cyan are close to illegible.
-    The diagrams already carried a second set for exactly this and kept it
-    private, so every page that wanted a coloured label reached for the fill
-    colour instead. These are that set, promoted to tokens. */
- --cyan-t:#066c77;--lime-t:#3f6f0c;--amber-t:#8a5806;
- --purple-t:#5b21b6;--crimson-t:#a32b28;}
+ --wash:rgba(0,0,0,.04);--nav-bg:rgba(242,240,235,.9);--code-bg:#0d0f14;}
 html[data-theme="dark"]{--page-bg:#0c0e12;--panel-bg:#14161c;--card-bg:#181b22;--page-fg:#e7e5df;
  --heading-fg:#eeece6;--muted:#9a978e;--line-1:rgba(255,255,255,.07);--line-2:rgba(255,255,255,.11);
- --line-3:rgba(255,255,255,.18);--wash:rgba(255,255,255,.05);--nav-bg:rgba(12,14,18,.9);
- --cyan-t:#4dd6e4;--lime-t:#a7e137;--amber-t:#f5b544;
- --purple-t:#b596f5;--crimson-t:#f07570;}
+ --line-3:rgba(255,255,255,.18);--wash:rgba(255,255,255,.05);--nav-bg:rgba(12,14,18,.9);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--page-bg);color:var(--page-fg);font-family:'Manrope',system-ui,sans-serif;
  -webkit-font-smoothing:antialiased;line-height:1.65;}
@@ -27,26 +18,23 @@ nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;pa
 .nav-logo{display:flex;align-items:center;gap:9px;font-family:'Bebas Neue',sans-serif;font-size:19px;
  letter-spacing:2.5px;text-decoration:none;color:var(--heading-fg);flex-shrink:0;}
 .nav-logo span{width:8px;height:8px;border-radius:50%;background:var(--crimson);}
-/* nowrap + hidden: a long trail used to push the bar onto two or three lines,
-   which made the header a different height on different pages. It truncates
-   instead — the crumb is wayfinding, not content. */
-.crumb{flex:1;min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;
- overflow:hidden;white-space:nowrap;
+.crumb{flex:1;min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);}
-/* Segments keep their natural width and the container clips what does not
-   fit. Letting them shrink instead gave 'H. / CA… / KU… / KUBERN…', which
-   is a breadcrumb that has stopped telling you where you are. */
-.crumb a,.crumb .cur,.crumb span{flex-shrink:0;}
 .crumb a{text-decoration:none;color:var(--muted);}
 .crumb a:hover{color:var(--crimson);}
 .crumb .cur{color:var(--heading-fg);}
 .nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+/* The Lab sits in the top bar of every page, not just the homepage footer —
+   it was reachable only from there and nobody found it. */
 .nav-lab{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.6px;
  text-transform:uppercase;text-decoration:none;color:var(--muted);
  border:1px solid var(--line-2);border-radius:3px;padding:5px 9px;
  transition:color .2s,border-color .2s,background .2s;white-space:nowrap;}
 .nav-lab:hover{color:var(--crimson);border-color:var(--crimson);}
-.nav-lab::after{content:' \2197';font-size:9px;}
+.nav-lab::after{content:' 97';font-size:9px;}
+/* Below 560px the bar holds the logo, the toggle, LAB and SUBSCRIBE, which is
+   ~30px more than fits. SUBSCRIBE goes: it is in the hero CTA and the footer
+   of every page. The Lab is not anywhere else in the top bar, so it stays. */
 @media(max-width:560px){.nav-lab{padding:4px 7px;font-size:9px;}
   .nav-sub{display:none;}}
 .tt{width:32px;height:32px;border:1px solid var(--line-2);background:transparent;border-radius:50%;
@@ -97,30 +85,6 @@ html[data-theme="dark"] .dg-node.n-calm{fill:#b596f5!important;}
 html[data-theme="dark"] .dg-node.n-plain{fill:#8a877f!important;}
 .dg-cap{font-size:13px;color:var(--muted);margin-top:16px;max-width:760px;font-style:italic;
  font-family:'Instrument Serif',Georgia,serif;}
-
-.dg-detail,.dg-flow{min-width:680px;}
-.dg-title{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;
- fill:var(--heading-fg);}
-.dg-gname{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.8px;
- fill:var(--muted);}
-.dg-sub{font-family:'DM Mono',monospace;font-size:8.5px;text-anchor:middle;fill:var(--muted);}
-.dg-port{font-family:'DM Mono',monospace;font-size:9px;text-anchor:middle;fill:var(--muted);}
-.dg-edge{stroke:var(--line-3);stroke-width:1.3;fill:none;}
-.dg-elabel{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.6px;
- text-anchor:middle;fill:var(--muted);}
-/* The three views of one system, side by side on wide screens and stacked on
-   a phone, each with the question it answers as its heading. */
-.dgset{margin:6px 0 4px;}
-.dgset-item{margin-bottom:34px;}
-.dgset-item:last-child{margin-bottom:0;}
-.dgset-h{display:flex;align-items:baseline;gap:12px;margin-bottom:4px;flex-wrap:wrap;}
-.dgset-k{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
- color:var(--crimson);border:1px solid var(--line-2);border-radius:3px;padding:3px 7px;
- white-space:nowrap;}
-.dgset-q{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:15px;
- color:var(--heading-fg);}
-.dgscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;}
-
 
 .rc{background:var(--card-bg);border:1px solid var(--line-1);margin-bottom:2px;position:relative;}
 .rc::before{content:'';position:absolute;top:0;left:0;width:2px;height:100%;background:transparent;
@@ -204,8 +168,14 @@ html[data-theme="dark"] .dg-node.n-plain{fill:#8a877f!important;}
 .note.tip{border-color:var(--lime);}.note.tip b{color:#4c840f;}
 .note.warn{border-color:var(--amber);}.note.warn b{color:#8a5806;}
 .note.trap{border-color:var(--crimson);}.note.trap b{color:var(--crimson);}
+/* Neutral fourth kind — tip/warn/trap all read as good/caution/danger, which
+   is wrong for "this simply hasn't been written yet". Same ash tone as the
+   topic-map's own "planned" chip, so a reader who has seen that colour there
+   reads it as the same status here. */
+.note.plan{border-color:var(--ash);}.note.plan b{color:var(--muted);}
 html[data-theme="dark"] .note.tip b{color:var(--lime);}
 html[data-theme="dark"] .note.warn b{color:var(--amber);}
+html[data-theme="dark"] .note.plan b{color:var(--muted);}
 
 .pager{display:flex;gap:2px;margin-top:26px;}
 .pager a{flex:1;background:var(--card-bg);border:1px solid var(--line-1);padding:16px 18px;
@@ -215,6 +185,21 @@ html[data-theme="dark"] .note.warn b{color:var(--amber);}
 .pager a.next{text-align:right;}
 .pager a b{display:block;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.5px;
  color:var(--heading-fg);font-weight:400;margin-top:5px;}
+
+/* Same visual language as the category hubs' "ALSO ON THIS SUBJECT" (.mates/
+   .mate in build_hubs.py) — a reader moving between the two template
+   families should not be able to tell the CSS came from two different
+   files. */
+.related{margin-top:26px;}
+.related-h{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;
+ text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.rel-l{display:flex;flex-wrap:wrap;gap:2px;background:var(--line-1);border:1px solid var(--line-1);}
+.rel{flex:1 1 220px;background:var(--card-bg);padding:16px 18px;text-decoration:none;
+ display:flex;flex-direction:column;gap:5px;transition:background .18s;}
+.rel:hover{background:var(--panel-bg);}
+.rel .n{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.5px;color:var(--heading-fg);}
+.rel .go{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1.4px;
+ text-transform:uppercase;color:var(--crimson);}
 
 footer{background:var(--coal);color:var(--paper);padding:52px 40px 26px;}
 .f-in{max-width:1000px;margin:0 auto;}

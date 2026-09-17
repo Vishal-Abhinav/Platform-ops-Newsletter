@@ -218,26 +218,3 @@ footer{background:var(--coal);color:var(--paper);padding:52px 40px 26px;}
 .f-bot a{color:rgba(255,255,255,.5);}
 @media(max-width:820px){.f-top{grid-template-columns:1fr;gap:30px;}footer{padding:44px 20px 22px;}}
 @media(max-width:560px){.f-cols{grid-template-columns:1fr 1fr;}}
-
-.dg-detail,.dg-flow{min-width:680px;}
-.dg-title{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;
- fill:var(--heading-fg);}
-.dg-gname{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.8px;
- fill:var(--muted);}
-.dg-sub{font-family:'DM Mono',monospace;font-size:8.5px;text-anchor:middle;fill:var(--muted);}
-.dg-port{font-family:'DM Mono',monospace;font-size:9px;text-anchor:middle;fill:var(--muted);}
-.dg-edge{stroke:var(--line-3);stroke-width:1.3;fill:none;}
-.dg-elabel{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.6px;
- text-anchor:middle;fill:var(--muted);}
-/* The three views of one system, side by side on wide screens and stacked on
-   a phone, each with the question it answers as its heading. */
-.dgset{margin:6px 0 4px;}
-.dgset-item{margin-bottom:34px;}
-.dgset-item:last-child{margin-bottom:0;}
-.dgset-h{display:flex;align-items:baseline;gap:12px;margin-bottom:4px;flex-wrap:wrap;}
-.dgset-k{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
- color:var(--crimson);border:1px solid var(--line-2);border-radius:3px;padding:3px 7px;
- white-space:nowrap;}
-.dgset-q{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:15px;
- color:var(--heading-fg);}
-.dgscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;}
