@@ -467,20 +467,37 @@ nav.scrolled {
 .section { padding: 100px 64px; max-width: 1200px; margin: 0 auto; }
 
 /* ─── DOCS RAIL ───
-   Sticky left-hand "on this page" nav, added alongside the existing
-   sections below the hero (Tier 3). It wraps Topics/Issues/Authors/
-   Subscribe without touching any of them — .docs-shell is a 2-col grid,
-   .docs-content is just the same stack of sections that was here before.
+   Sticky left-hand "on this page" nav, overlaid beside the sections below
+   the hero (Tier 3).
+
+   Two things this has to get right, both learned the hard way:
+
+   1. The rail's link list is a <div role="navigation">, NOT a <nav>. This
+      page's stylesheet styles the bare `nav` ELEMENT as THE fixed site
+      header (position:fixed; top/left/right:0; z-index:1000; background;
+      backdrop-filter; padding). A second <nav> anywhere on the page
+      inherits every one of those and flies to the top of the viewport as a
+      full-width opaque bar over the real header. Don't reintroduce a <nav>
+      here; the role attribute gives the same landmark semantics with none
+      of the cascade.
+
+   2. .docs-shell OVERLAYS the rail on the content instead of reserving a
+      grid column for it. Both children sit in the same grid area, so
+      .docs-content still spans the full viewport width and every
+      full-bleed section background (the dark issues panel, the authors
+      band, the subscribe band) still runs edge to edge exactly as before.
+      A real 2-column grid insets those backgrounds and leaves a dead
+      gutter down the left of the page. Room for the rail is made by
+      padding the INNER content of the few sections it would otherwise sit
+      on top of — see the min-width block at the end.
+
    "Library" has no on-page section of its own (build_library.py moved that
    listing to the README on purpose — Foundation content is reached through
    its category hub), so that one link navigates off-page instead of
    scroll-spying like the rest. */
-.docs-shell { display: grid; grid-template-columns: 212px minmax(0,1fr); align-items: start; }
-.docs-content { min-width: 0; }
-.docs-rail {
-  position: sticky; top: 84px; align-self: start;
-  padding: 56px 8px 56px 48px; max-height: calc(100vh - 84px); overflow-y: auto;
-}
+.docs-shell { display: grid; grid-template-columns: minmax(0, 1fr); }
+.docs-content { grid-area: 1 / 1; min-width: 0; }
+.docs-rail { display: none; }            /* off unless the min-width block turns it on */
 .docs-rail-label {
   font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px;
   text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
@@ -495,13 +512,11 @@ nav.scrolled {
 }
 .docs-rail-nav a:hover { color: var(--heading-fg); }
 .docs-rail-nav a.is-active { color: var(--cyan); border-left-color: var(--cyan); }
-/* Same breakpoint the two-pane knowledge-row below already stacks at — past
-   that width a fixed rail only steals the one column of space the reader
-   has left, for a nav they can already reach at the top of the page. */
-@media (max-width: 1100px) {
-  .docs-shell { display: block; }
-  .docs-rail { display: none; }
-}
+/* The block that actually turns the rail on lives at the very END of this
+   stylesheet — .kr-topics.section and .authors-section are re-declared
+   further down with padding shorthands, and a media query adds no
+   specificity, so a compensation rule placed here silently loses to them
+   on source order. Search for "DOCS RAIL — ACTIVATION". */
 
 /* ─── KNOWLEDGE ROW (Topics + Latest Issues side by side) ─── */
 .knowledge-row { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; }
@@ -1169,6 +1184,35 @@ a.footer-logo:hover{color:#fff;}
 @media (max-width:900px){footer{padding:56px 32px 28px;}.footer-top{grid-template-columns:1fr;gap:32px;}}
 @media (max-width:600px){footer{padding:48px 22px 24px;}.footer-cols{grid-template-columns:1fr 1fr;}}
 
+/* ─── DOCS RAIL — ACTIVATION ───
+   Deliberately the last block in this stylesheet. Everything that moves a
+   pixel for the rail is in here, for two reasons: it has to out-order the
+   .kr-topics.section / .authors-section padding shorthands declared above
+   (a media query adds no specificity, so an earlier copy of this block
+   loses to them silently — that is a bug this file has already had once),
+   and it makes the whole feature revertible by deleting one block.
+
+   The rail costs the topics column ~220px, so it only turns on where that
+   column can still afford it. Below 1480px nothing here applies and the
+   page is pixel-identical to how it rendered before the rail existed. */
+@media (min-width: 1480px) {
+  .docs-rail {
+    display: block; grid-area: 1 / 1; width: 196px;
+    justify-self: start; align-self: start;   /* align-self:start is what lets sticky move */
+    position: sticky; top: 92px; z-index: 5;
+    padding: 56px 16px 56px 48px;
+    max-height: calc(100vh - 92px); overflow-y: auto;
+    pointer-events: none;                     /* the empty strip must not eat clicks */
+  }
+  .docs-rail-inner { pointer-events: auto; }
+  /* Room for the rail is made by padding the CONTENT of the three sections
+     it sits over — never by insetting the sections themselves, so every
+     full-bleed band still runs edge to edge. */
+  .kr-topics.section { padding-left: 220px; }
+  .authors-section   { padding-left: 260px; }   /* 196 + its own 64 */
+  .subscribe-section { padding-left: 196px; }
+}
+
 /* ─── STICKY ARCHIVE ─── */
 /* Last in the sheet so it wins the cascade. */
 @media (min-width: 1101px) {
@@ -1565,16 +1609,17 @@ a.footer-logo:hover{color:#fff;}
 
 <!-- ═══════════ DOCS RAIL + CONTENT (Tier 3) ═══════════ -->
 <div class="docs-shell">
-<aside class="docs-rail" aria-label="On this page">
+<aside class="docs-rail">
   <div class="docs-rail-inner">
-    <div class="docs-rail-label">On this page</div>
-    <nav class="docs-rail-nav">
+    <div class="docs-rail-label" id="docsRailLabel">On this page</div>
+    <!-- a <div role="navigation">, not a <nav> — see the DOCS RAIL CSS comment -->
+    <div class="docs-rail-nav" role="navigation" aria-labelledby="docsRailLabel">
       <a href="#issues" data-rail="issues">Issues</a>
       <a href="#topics" data-rail="topics">Topics</a>
       <a href="categories/foundation/index.html">Library</a>
       <a href="#subscribe" data-rail="subscribe">Subscribe</a>
       <a href="#authors" data-rail="authors">Authors</a>
-    </nav>
+    </div>
   </div>
 </aside>
 <div class="docs-content">
