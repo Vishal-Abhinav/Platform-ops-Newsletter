@@ -18,7 +18,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
-sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from linkedin_posts import POSTS, PROFILE, SHOW      # noqa: E402
 from taxonomy import PILLARS                         # noqa: E402

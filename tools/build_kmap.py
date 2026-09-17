@@ -7,7 +7,10 @@ cannot drift away from the list again.
 """
 import os, pathlib as _pl
 ROOT = _pl.Path(os.environ.get("PO_ROOT") or _pl.Path(__file__).resolve().parent.parent)
-TOOLS = ROOT / "tools"
+# TOOLS is the real tools/ directory — derived from this file's own
+# location, never from ROOT. ROOT is the OUTPUT root (dist/) and source
+# must never be looked up underneath it.
+TOOLS = _pl.Path(__file__).resolve().parent
 
 import html
 import pathlib

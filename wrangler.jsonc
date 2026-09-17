@@ -6,6 +6,15 @@
     "enabled": true
   },
   "assets": {
-    "directory": "."
+    // dist/, not "." — this one line is the whole security model.
+    //
+    // Publishing the repo root meant the deploy surface was "everything,
+    // minus whatever .assetsignore remembered to exclude", so anything new
+    // shipped BY DEFAULT. That is how tools/ (every build script, the command
+    // corpus, siteconf.py with both Search Console tokens) and a ~4,700-file
+    // Mermaid install became publicly fetchable. tools/build.sh now writes
+    // everything it produces into dist/ and nothing else goes there, so a leak
+    // takes a mistake rather than an omission.
+    "directory": "dist"
   }
 }

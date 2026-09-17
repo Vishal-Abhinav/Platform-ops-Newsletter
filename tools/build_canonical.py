@@ -19,7 +19,7 @@ import pathlib
 import sys
 
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
-sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from siteconf import BASE, BASE_HOST, KNOWN_ORIGINS, SITES, skip_page  # noqa: E402
 

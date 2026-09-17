@@ -13,7 +13,10 @@ import re
 import sys
 
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
-TOOLS = ROOT / "tools"
+# TOOLS is the real tools/ directory — derived from this file's own
+# location, never from ROOT. ROOT is the OUTPUT root (dist/) and source
+# must never be looked up underneath it.
+TOOLS = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
 from siteconf import skip_page   # noqa: E402
 

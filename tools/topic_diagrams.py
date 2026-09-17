@@ -28,7 +28,7 @@ import pathlib as _pl
 import sys
 
 ROOT = _pl.Path(os.environ.get("PO_ROOT") or _pl.Path(__file__).resolve().parent.parent)
-sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(_pl.Path(__file__).resolve().parent))
 
 from diagrams import detail, flow                    # noqa: E402
 

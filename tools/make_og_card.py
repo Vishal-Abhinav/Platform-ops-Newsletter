@@ -34,7 +34,7 @@ import sys
 import tempfile
 
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
-sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from siteconf import BASE                      # noqa: E402
 from build_feed import ISSUES                  # noqa: E402

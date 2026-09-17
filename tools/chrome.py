@@ -32,7 +32,7 @@ import pathlib as _pl
 import sys
 
 ROOT = _pl.Path(os.environ.get("PO_ROOT") or _pl.Path(__file__).resolve().parent.parent)
-sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(_pl.Path(__file__).resolve().parent))
 
 from build_feed import ISSUES                       # noqa: E402  the register
 
