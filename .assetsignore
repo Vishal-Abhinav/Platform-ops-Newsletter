@@ -5,10 +5,51 @@
 # including .git/ — meaning the full commit history of this "private" repo
 # becomes fetchable at https://platformops.srivantechnologies.com/.git/...
 # That happened once already; this file is what stops it happening again.
+#
+# READ THIS BEFORE ADDING ANYTHING TO THE REPO
+# --------------------------------------------
+# This is a DENY-list on a deploy that publishes the whole repo directory.
+# That means anything new is published BY DEFAULT and stays published until
+# someone remembers to come back here. It has already failed once that way:
+# .git was excluded from the start, but tools/ never was, so every build
+# script, the command corpus and siteconf.py (both Search Console tokens)
+# were served to the public web for as long as the Worker has existed —
+# `GET /tools/siteconf.py` returned 200 with the file. The deploy log says
+# so plainly in hindsight: it lists `+ /tools/build_k8s.py` as an uploaded
+# asset on every release.
+#
+# The real fix is to build into a dist/ directory and deploy only that, so
+# publishing is an ALLOW-list and nothing can leak by omission. Until that
+# lands, every new top-level file or directory that is not part of the
+# rendered site has to be added below, by hand, or it goes public.
 
+# ── version control / tooling state ─────────────────────────────────────────
 .git
 .git/**
 .wrangler
 .wrangler/**
 node_modules
 node_modules/**
+.gitignore
+
+# ── the build system ────────────────────────────────────────────────────────
+# Every generator, every content data module (cmd_data.py is 51KB of command
+# corpus), the page templates, and siteconf.py. None of it is part of the
+# rendered site; no page anywhere links into tools/ — checked, the only match
+# in 878 pages is an external kubernetes.io URL that happens to contain the
+# word "tools". Safe to withhold entirely.
+tools
+tools/**
+
+# ── belt and braces ─────────────────────────────────────────────────────────
+# If a source file ever lands outside tools/, catch it anyway rather than
+# discovering it on the live site. Plain gitignore-style patterns on purpose —
+# these match at any depth and avoid leaning on "**" support in whatever
+# wrangler version is installed, since a pattern this file gets wrong fails
+# open (publishes) rather than closed.
+*.py
+*.sh
+__pycache__
+__pycache__/**
+.fontcache
+.fontcache/**
