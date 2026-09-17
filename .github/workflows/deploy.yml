@@ -1,0 +1,51 @@
+name: build → verify → deploy
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md']
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build the site
+        run: bash tools/build.sh
+
+      - name: Refuse to deploy an empty build
+        run: |
+          count=$(find dist -name '*.html' | wc -l)
+          echo "dist/ contains $count html files"
+          if [ "$count" -lt 500 ]; then
+            echo "::error::dist/ holds $count html files - expected ~880. Refusing to deploy."
+            exit 1
+          fi
+
+      - name: Install render-test dependencies
+        run: |
+          python3 -m pip install --quiet playwright
+          python3 -m playwright install --with-deps chromium
+
+      - name: Render tests
+        run: python3 tools/test_render.py dist
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
