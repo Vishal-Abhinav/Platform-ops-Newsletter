@@ -39,9 +39,19 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from siteconf import BASE, skip_page           # noqa: E402
 from build_feed import ISSUES                  # noqa: E402
+from chrome import icons                       # noqa: E402
 
 MARK_OPEN = "<!-- seo:jsonld -->"
 MARK_CLOSE = "<!-- /seo:jsonld -->"
+
+# The favicon links get their own marked block rather than riding inside the
+# JSON-LD one: a marker named "jsonld" wrapping <link rel="icon"> would lie
+# about its contents, and the two have different reasons to change. This stage
+# carries them because it is the only one that walks EVERY page — build_nav
+# reaches 853 and the 25 hand-written pages get their chrome from
+# build_legacy_chrome, so neither alone covers the site.
+ICON_OPEN = "<!-- seo:icons -->"
+ICON_CLOSE = "<!-- /seo:icons -->"
 # skip list now lives in siteconf
 
 AUTHOR = {
@@ -209,6 +219,10 @@ for f in sorted(ROOT.rglob("*.html")):
     # page it touched by one line each time before this fix.)
     src = re.sub(re.escape(MARK_OPEN) + r".*?" + re.escape(MARK_CLOSE) + r"\n?",
                  "", src, flags=re.S)
+    # Same strip-then-reinsert, same trailing \n? — see the note above for why
+    # that newline is not optional.
+    src = re.sub(re.escape(ICON_OPEN) + r".*?" + re.escape(ICON_CLOSE) + r"\n?",
+                 "", src, flags=re.S)
     src = apply_meta(src, rel)
 
     blocks = blocks_for(rel, src)
@@ -218,8 +232,13 @@ for f in sorted(ROOT.rglob("*.html")):
         + "</script>" for b in blocks)
     block = f"{MARK_OPEN}\n{payload}\n{MARK_CLOSE}\n"
 
+    # Relative, not root-relative: every other link in this repo is relative so
+    # the site can be opened from disk, and the GitHub Pages mirror served it
+    # from a subpath. Depth comes from the page's own path.
+    icon_block = f"{ICON_OPEN}\n{icons('../' * rel.count('/'))}\n{ICON_CLOSE}\n"
+
     assert src.count("</head>") == 1, f"{rel}: expected exactly one </head>"
-    src = src.replace("</head>", block + "</head>", 1)
+    src = src.replace("</head>", icon_block + block + "</head>", 1)
     f.write_text(src, encoding="utf-8")
 
     count += 1

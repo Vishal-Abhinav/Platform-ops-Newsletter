@@ -338,7 +338,10 @@ def build():
 .tm-h{{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;
  padding:22px 0;background:none;border:0;cursor:pointer;text-align:left;font:inherit;color:inherit;}}
 .tm-h-l{{display:flex;align-items:baseline;gap:14px;min-width:0;}}
-.tm-h-l h2{{margin:0;}}
+/* min-width:0 on the flex parent is not enough on its own — the h2 is itself
+   a flex item and its floor is its longest unbreakable run, so a group title
+   like "Application Troubleshooting" pushed past the viewport on a phone. */
+.tm-h-l h2{{margin:0;min-width:0;overflow-wrap:anywhere;}}
 .tm-h-r{{display:flex;align-items:center;gap:14px;flex-shrink:0;}}
 .tm-counts{{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;
  color:var(--muted);white-space:nowrap;}}

@@ -23,7 +23,12 @@ var PO_NAV = {"pillars":[{"name":"Foundation","cats":[{"name":"Foundation","icon
     btn.type = 'button';
     btn.setAttribute('aria-expanded', 'false');
     btn.setAttribute('aria-haspopup', 'true');
-    btn.innerHTML = '<i><span></span></i>Browse';
+    /* The label is wrapped, not bare text, so the phone breakpoint can hide
+       it and leave the icon. aria-label carries the name once it is hidden:
+       display:none removes a node from the accessibility tree as well as the
+       page, so without this the button would go unnamed on small screens. */
+    btn.innerHTML = '<i><span></span></i><span class="mm-lbl">Browse</span>';
+    btn.setAttribute('aria-label', 'Browse all categories');
 
     var scrim = el('div', 'mm-scrim');
     var panel = el('div', 'mm');

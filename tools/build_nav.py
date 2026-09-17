@@ -60,6 +60,12 @@ CSS = """/* Site-wide mega-menu. Deliberately dark in both themes — it reads a
   color:inherit;padding:8px 10px;border-radius:3px;transition:background .18s,color .18s;
   flex-shrink:0;}
 .mm-btn:hover,.mm-btn[aria-expanded="true"]{background:rgba(229,57,53,.12);color:#e53935;}
+/* Phones: the left flank is the logo plus this button and neither shrinks on
+   its own — 286px of it against a 390px viewport, which overflowed the page
+   even after the crumb had already hidden itself. Dropping the word leaves
+   the icon, which opens the same panel and is named by aria-label. */
+@media(max-width:560px){.mm-btn{gap:0;padding:8px 9px;}
+  .mm-btn .mm-lbl{display:none;}}
 .mm-btn i{display:block;width:14px;height:10px;position:relative;flex-shrink:0;}
 .mm-btn i::before,.mm-btn i::after,.mm-btn i span{content:'';position:absolute;left:0;right:0;
   height:1.5px;background:currentColor;transition:transform .25s,opacity .2s;}
@@ -156,7 +162,12 @@ JS = """var PO_NAV = __NAV_JSON__;
     btn.type = 'button';
     btn.setAttribute('aria-expanded', 'false');
     btn.setAttribute('aria-haspopup', 'true');
-    btn.innerHTML = '<i><span></span></i>Browse';
+    /* The label is wrapped, not bare text, so the phone breakpoint can hide
+       it and leave the icon. aria-label carries the name once it is hidden:
+       display:none removes a node from the accessibility tree as well as the
+       page, so without this the button would go unnamed on small screens. */
+    btn.innerHTML = '<i><span></span></i><span class="mm-lbl">Browse</span>';
+    btn.setAttribute('aria-label', 'Browse all categories');
 
     var scrim = el('div', 'mm-scrim');
     var panel = el('div', 'mm');

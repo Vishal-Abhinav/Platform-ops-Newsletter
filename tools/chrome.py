@@ -160,6 +160,29 @@ FOOT_CSS = """footer{background:var(--coal);color:var(--paper);padding:52px 40px
 CSS = TOKENS + "\n" + BAR_CSS + "\n" + FOOT_CSS
 
 
+def icons(up=""):
+    """The favicon set. `up` is the relative prefix back to the site root.
+
+    Lives here, not in the page templates, for the reason this whole module
+    exists: there are six separate <head> emitters in this repo
+    (index.base.html, content_page, cmd_page, build_hubs, build_topicmap and
+    build_legacy_chrome), and furniture written out six times drifts six ways.
+    build_seo.py is the one stage that walks every page, so it does the
+    injecting and this function is the single definition.
+
+    Sizes are multiples of 48 because that is Google's stated requirement for
+    the favicon it shows beside a search result; the .ico exists because
+    browsers request /favicon.ico whether or not anything declares it, and the
+    .svg is a real file rather than a data: URI so a crawler can fetch it.
+    See tools/make_favicon.py for the mark itself.
+    """
+    return (f'<link rel="icon" href="{up}favicon.ico" sizes="32x32">\n'
+            f'<link rel="icon" type="image/svg+xml" href="{up}assets/favicon.svg">\n'
+            f'<link rel="icon" type="image/png" sizes="96x96" href="{up}assets/favicon-96.png">\n'
+            f'<link rel="icon" type="image/png" sizes="192x192" href="{up}assets/favicon-192.png">\n'
+            f'<link rel="apple-touch-icon" href="{up}assets/apple-touch-icon.png">')
+
+
 def nav(up="", crumb="", *, toggle="", lab=True, subscribe=True):
     """The top bar. `up` is the relative prefix back to the site root.
 

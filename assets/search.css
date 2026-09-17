@@ -28,9 +28,25 @@ nav > .nav-side.l > .nav-logo{white-space:nowrap;}
   nav .nav-links{gap:26px;}}
 @media (max-width:1270px){nav .nav-links li[data-p="1"]{display:none;}}
 /* Below 900 the box and the links are both gone and the side tracks are wildly
-   uneven, so equal 1fr tracks only push the logo around. Back to a plain row. */
+   uneven, so equal 1fr tracks only push the logo around. Back to a plain row.
+
+   The flanks MUST stay shrinkable here. This block used to pin both with
+   flex:0 0 auto — "never shrink" — and that single declaration is what made
+   every page family except the homepage scroll sideways from 900px down to
+   761px, by up to 201px. The mechanism: .nav-side.r carries the crumb, and
+   the crumb is built to clip (flex:1; min-width:0; overflow:hidden), but a
+   parent that refuses to shrink never gives it the chance to. Below 761 the
+   crumb hides itself and the bar fitted again, which is why the damage sat
+   in a band instead of getting steadily worse as the window narrowed — and
+   why it survived so long. Measured live at an 807px viewport with real
+   fonts: the bar wanted 915px and overflowed the document by 102px.
+
+   min-width:0 is the load-bearing half. A flex item's floor is its content
+   width unless you say otherwise, so flex:0 1 auto alone would still not
+   shrink past the logo and the crumb. */
 @media (max-width:900px){nav{display:flex!important;}
-  nav > .nav-side{flex:0 0 auto;} nav > .nav-side.r{margin-left:auto;}}
+  nav > .nav-side{flex:0 1 auto;min-width:0;}
+  nav > .nav-side.r{flex:1 1 auto;margin-left:auto;}}
 .gs-in{display:flex;align-items:center;gap:8px;background:rgba(128,128,128,.12);
   border:1px solid rgba(128,128,128,.28);border-radius:4px;padding:0 10px;
   transition:border-color .18s,background .18s;}
