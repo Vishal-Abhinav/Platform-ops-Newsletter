@@ -49,3 +49,6 @@ jobs:
         run: |
           git diff --exit-code -- README.md brand/ \
             || { echo "::error::README.md or brand/ is stale - run bash tools/build.sh and commit."; exit 1; }
+
+      - name: Reduced-motion tests
+        run: python3 tools/test_motion.py dist
