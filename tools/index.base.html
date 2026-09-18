@@ -2151,6 +2151,19 @@ window.addEventListener('load', syncIssuesScrollHeight);
 window.addEventListener('resize', syncIssuesScrollHeight);
 syncIssuesScrollHeight();
 
+/* ── Reduced motion ──
+   assets/motion.css gates every CSS animation and transition on this site.
+   It cannot gate the three effects below, because they are driven by
+   setTimeout and setInterval rather than by CSS: a stylesheet has no say
+   over a number counting up in JS. So they are gated here, against the
+   same media query, and each one jumps straight to its FINAL state — the
+   text visible, the counter on its real total. Never skipped, never left
+   half-drawn; a reader who asked for less motion still gets every word.
+
+   matchMedia is read once at parse time on purpose. Re-reading it per
+   frame would let a mid-run OS change leave a half-staggered tree. */
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /* ── Scroll reveal ──
    threshold:0 + a negative bottom rootMargin, NOT a fractional threshold.
    A fraction is a share of the ELEMENT, so it is unreachable once the element
@@ -2191,11 +2204,14 @@ if (railLinks.length) {
   railTargets.forEach(el => railObs.observe(el));
 }
 
-/* ── Knowledge-map tree: staggered terminal-typing reveal ── */
-/* Capped, for the same reason as the typewriter stagger below. */
-document.querySelectorAll('.kt-row').forEach((row,i)=>{
-  row.style.transitionDelay = `${Math.min(i * 0.045, 1.2)}s`;
-});
+/* ── Knowledge-map tree: staggered terminal-typing reveal ──
+   There is no transition-delay stagger here, and adding one back would be
+   dead code. Every .kt-row is also a .tl, and the typewriter below sets
+   `style.transition` — the SHORTHAND, which resets transition-delay to 0s
+   on every one of these rows a few statements later. A stagger written
+   here was silently zeroed and had been for as long as both blocks
+   existed; the rows were staggered only by the typewriter's setTimeout.
+   The typewriter owns the reveal timing. This block owns only the class. */
 const kmapObs = new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     if(e.isIntersecting){
@@ -2204,11 +2220,21 @@ const kmapObs = new IntersectionObserver(entries=>{
     }
   });
 },{threshold:0, rootMargin:'0px 0px -60px 0px'});   /* same reason as above */
-document.querySelectorAll('.kmap-terminal').forEach(el=>kmapObs.observe(el));
+if (REDUCED) {
+  /* .visible carries translateX(0) as well as opacity. The typewriter
+     already forces opacity:1 inline, so skipping this would leave every
+     row legible but indented 10px — the reveal frozen at its first frame
+     instead of its last. Add the class up front and observe nothing. */
+  document.querySelectorAll('.kt-row').forEach(r=>r.classList.add('visible'));
+} else {
+  document.querySelectorAll('.kmap-terminal').forEach(el=>kmapObs.observe(el));
+}
 
 /* ── Counter animation ── */
 function animateCounter(el) {
   const target = parseInt(el.dataset.target);
+  /* The number is the content, the count-up is the decoration. Print it. */
+  if (REDUCED) { el.textContent = target; return; }
   const dur = 1800;
   const step = target / (dur / 16);
   let current = 0;
@@ -2237,11 +2263,18 @@ document.querySelectorAll('.hero-stats').forEach(el=>counterObs.observe(el));
    One stagger now, and the whole run is budgeted rather than per-line, so
    adding pillars to the tree can never stretch it again. */
 const lines = document.querySelectorAll('.tl');
-const tlStep = Math.min(180, Math.max(26, Math.round(2400 / Math.max(lines.length, 1))));
-lines.forEach((line,i)=>{
-  line.style.opacity='0'; line.style.transition='opacity 0.3s ease';
-  setTimeout(()=>{ line.style.opacity='1'; }, 500 + i*tlStep);
-});
+if (REDUCED) {
+  /* Do not set opacity:0 at all. Setting it and clearing it on the next
+     tick still flashes 42 lines of the tree; leaving the inline style off
+     entirely means the terminal was simply never hidden. */
+  lines.forEach(line=>{ line.style.opacity='1'; });
+} else {
+  const tlStep = Math.min(180, Math.max(26, Math.round(2400 / Math.max(lines.length, 1))));
+  lines.forEach((line,i)=>{
+    line.style.opacity='0'; line.style.transition='opacity 0.3s ease';
+    setTimeout(()=>{ line.style.opacity='1'; }, 500 + i*tlStep);
+  });
+}
 
 /* ── Magnetic hover on buttons ── */
 document.querySelectorAll('.btn-primary,.btn-ghost').forEach(btn=>{

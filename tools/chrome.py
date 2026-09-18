@@ -205,6 +205,19 @@ def fonts(up=""):
     return f'<link rel="stylesheet" href="{up}assets/fonts.css">'
 
 
+def stylesheets(up=""):
+    """Everything the <head> of every page must link.
+
+    Currently the typefaces and the reduced-motion reset. Both are injected by
+    build_seo's whole-site pass rather than by the six separate <head>
+    emitters, because a rule that must hold on every page cannot depend on six
+    templates remembering it — which is exactly how the site ran twelve
+    infinite animations on 880 pages with no prefers-reduced-motion support
+    anywhere.
+    """
+    return fonts(up) + f'<link rel="stylesheet" href="{up}assets/motion.css">'
+
+
 def nav(up="", crumb="", *, toggle="", lab=True, subscribe=True):
     """The top bar. `up` is the relative prefix back to the site root.
 

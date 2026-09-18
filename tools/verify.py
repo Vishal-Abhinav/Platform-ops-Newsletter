@@ -20,7 +20,31 @@ import sys
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 
-ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
+def _root():
+    """The tree to verify.
+
+    build.sh exports PO_ROOT=dist, so the pipeline has always checked the
+    right thing. Run by hand, though, this used to fall back to the REPO
+    ROOT — which still holds ~900 HTML files from the pre-dist layout. That
+    made `python3 tools/verify.py` either crash on wording that has since
+    changed, or, far worse, report "all checks passed" about a tree nobody
+    deploys. A verifier that green-lights the wrong directory is not a
+    weaker check, it is a misleading one.
+
+    So: honour PO_ROOT, else prefer ./dist when it looks built, and say out
+    loud which tree is being read either way.
+    """
+    env = os.environ.get("PO_ROOT")
+    if env:
+        return pathlib.Path(env)
+    repo = pathlib.Path(__file__).resolve().parent.parent
+    dist = repo / "dist"
+    if (dist / "index.html").exists():
+        return dist
+    return repo
+
+
+ROOT = _root()
 from siteconf import BASE, skip_page   # canonical origin + the non-page filter
 # skip list now lives in siteconf
 
@@ -255,6 +279,7 @@ def main():
         except Exception as e:                                    # noqa: BLE001
             fails.append(f"malformed    {x}: {e}")
 
+    print(f"tree verified : {ROOT}")
     print(f"pages checked : {n}")
     print(f"sitemap urls  : {len(urls)} indexable ({noindexed} noindex pages withheld)")
     print(f"topics        : {actual[0]} live / {actual[1]} pipeline / {actual[2]} planned")

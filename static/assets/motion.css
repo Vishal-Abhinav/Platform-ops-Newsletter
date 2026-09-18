@@ -1,0 +1,41 @@
+/* Reduced motion — honoured site-wide.
+ *
+ * This site runs twelve distinct infinite animations: a drifting background,
+ * pulsing status dots on 27 pages, a ticker on 24, a blinking terminal cursor,
+ * flowing diagram dashes. None of them respected prefers-reduced-motion until
+ * 18 Sep 2026, on any of 880 pages.
+ *
+ * For a reader with a vestibular disorder, motion sensitivity or a migraine
+ * trigger, continuous background motion is not a stylistic preference — it is
+ * the reason they close the tab. WCAG 2.2.2 (Level A) also has something to say
+ * about content that blinks or moves automatically for more than five seconds.
+ *
+ * WHY .01ms AND NOT animation:none
+ * --------------------------------
+ * Several entrance animations start at opacity:0 and animate to 1. Killing the
+ * animation outright would leave that content permanently invisible — a fix
+ * that breaks the page worse than the problem it solves. A near-zero duration
+ * with a single iteration lets every animation reach its FINAL keyframe
+ * immediately: entrances complete, loops stop after one pass, nothing moves.
+ *
+ * The !important is load-bearing. These rules have to beat per-page inline
+ * <style> blocks on 25 hand-written pages that this file cannot edit.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Smooth scrolling is set on <html> by several page families and is a
+     motion trigger in its own right — a jump is the accessible behaviour. */
+  html {
+    scroll-behavior: auto !important;
+  }
+}

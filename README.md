@@ -128,6 +128,144 @@ stage-by-stage account is in the [colophon](https://platformops.srivantechnologi
 
 ---
 
+## Repository layout
+
+Three directories are input. One is output. Nothing else is either.
+
+| Path | What it is |
+|:--|:--|
+| `tools/` | The build: 31 ordered stages, `verify.py`, and the browser test suites. Python 3.11, standard library only. |
+| `content/` | The 25 hand-written pages, kept pristine — they are copied into `dist/` and edited *there*, never in place. |
+| `static/` | Copied verbatim: icons, OG cards, 18 self-hosted font files, `assets/motion.css`. |
+| `brand/` | The generated banner. Tracked, deliberately outside `static/`, so it never reaches the site. |
+| `dist/` | **The only thing deployed.** Deleted and rebuilt from empty on every run. |
+
+`dist/` is an allow-list, and that is the whole point: a file reaches the
+public web only because a build stage deliberately wrote it there. The old
+layout published from the repository root, where shipping something private
+needed only an omission — which is how a full Mermaid install and a taxonomy
+file once became fetchable. Now it needs a mistake in `tools/`.
+
+---
+
+## Security
+
+The site is static, has no backend, sets no cookies and runs no third-party
+JavaScript. Most of what follows is therefore about keeping it that way.
+
+**The policy is derived, not written.** `build_headers.py` walks the built
+pages for the origins they actually fetch from and emits `dist/_headers`. Two
+are allowed — `gc.zgo.at` for privacy-preserving analytics, `www.linkedin.com`
+for the two post embeds. A page that starts fetching from anywhere else fails
+the build rather than silently widening the policy.
+
+The header it generates:
+
+```
+Content-Security-Policy: font-src 'self'; frame-src 'self' https://www.linkedin.com;
+  img-src 'self' data: https://gc.zgo.at; connect-src 'self' https://gc.zgo.at;
+  frame-ancestors 'none'; base-uri 'none'; object-src 'none'; form-action 'self';
+  upgrade-insecure-requests
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()
+Cross-Origin-Opener-Policy: same-origin
+```
+
+There is deliberately **no `default-src`**, and that is the load-bearing
+decision in the file. `default-src` is a *fallback*, not a baseline: every
+fetch directive left out inherits it. `default-src 'self'` with `script-src`
+absent therefore means `script-src 'self'`, which would block every inline
+`<script>` and every `onclick` handler on the site — several hundred of them.
+The comment explaining this sits above the constant, because it looks wrong
+and reads as an omission.
+
+A `script-src` that actually constrains scripts is the open item, and it is
+open honestly: closing it means moving those inline handlers out to files
+first. It is tracked, not forgotten.
+
+**Fonts are self-hosted.** 18 files under `static/assets/fonts/`, so
+there is no request to a third party on any page view and no `font-src`
+beyond `'self'`.
+
+**Supply chain.** Every GitHub Action is pinned to a full commit SHA with the
+version in a trailing comment, so a moved tag cannot change what runs. PR
+checks are `pull_request`, never `pull_request_target` — the workflow that
+runs a contributor's code has a read-only token, no `secrets:` block and no
+deploy step. There is nothing in it to leak.
+
+Found something? Open a [security advisory](https://github.com/Vishal-Abhinav/Platform-ops-Newsletter/security/advisories/new)
+rather than a public issue.
+
+---
+
+## Accessibility
+
+Honoured on all 880 pages, and tested rather than asserted.
+
+The site animates: a drifting background, pulsing status dots, a ticker, a
+blinking terminal cursor, a staggered typewriter reveal, counters that count
+up. Until September 2026 every one of those ran regardless of what the reader
+had asked their operating system for — twelve distinct infinite animations,
+`prefers-reduced-motion` honoured on zero pages.
+
+It now resolves in two places, because one is not enough:
+
+- `assets/motion.css`, on all 880 pages, collapses every CSS animation
+  and transition to `0.01ms` with a single iteration — **not** `animation:
+  none`. Several entrances start at `opacity: 0`; removing the animation
+  outright would leave that content permanently invisible, which is a worse
+  bug than the motion it fixes. A near-zero duration lets every animation
+  reach its *final* keyframe immediately.
+- The homepage typewriter and counters are driven by `setTimeout` and
+  `setInterval`, which no stylesheet can reach, so they check the same media
+  query in JavaScript and jump straight to their finished state — every line
+  shown, every counter on its real total.
+
+`tools/test_motion.py` opens seven pages twice, once under each preference,
+and asserts that nothing is still animating, nothing was left invisible,
+nothing is frozen part-way through a reveal, and no counter is stuck
+mid-count. It also asserts that the motion **is still there** without the
+preference — a test that only checked the reduced case would pass just as
+happily on a site whose animation had been deleted.
+
+Also measured across all 880 pages, rather than asserted: exactly one
+`<h1>` each, a `lang` attribute on every `<html>`, a `<nav>` landmark, and no
+icon-only control left without an `aria-label`. Colour is never the only thing
+carrying a meaning — the live/pipeline/planned states that colour the coverage
+bars are written out in words beside them.
+
+**What is still wrong, stated plainly**, because an accessibility section that
+lists only its wins is marketing:
+
+- There is **no `<main>` landmark and no skip link** — on any page. A
+  screen-reader user cannot jump to the content, and a keyboard user tabs
+  through the whole navigation to reach it, on every page, every time. This
+  is the largest remaining barrier here and it is not a small fix: the page
+  families do not share one content wrapper, so it needs doing per family
+  and re-verifying, not a regex across the build.
+- **Focus styling relies on the browser default**, and two pages remove it
+  with `outline: none` — which is worse than not styling it at all.
+- **Contrast has not been measured systematically.** It was chosen by eye
+  against WCAG AA, which is not the same as having checked.
+
+Something here not working for you? That is a bug, and a welcome one to
+receive. Please open an issue.
+
+---
+
+## Machine-readable
+
+| File | What it holds |
+|:--|:--|
+| [`/sitemap.xml`](https://platformops.srivantechnologies.com/sitemap.xml) | 96 indexable URLs. Pages carrying `noindex` are deliberately withheld — a sitemap is a request to crawl, and listing a page that then declines to be indexed just spends crawl budget. |
+| [`/feed.xml`](https://platformops.srivantechnologies.com/feed.xml) | RSS, full archive. |
+| [`/robots.txt`](https://platformops.srivantechnologies.com/robots.txt) | Crawl rules and the sitemap pointer. |
+| `/_headers` | Generated per build; see Security above. |
+
+---
+
 ## Running it
 
 ```bash
@@ -137,8 +275,42 @@ bash tools/build.sh          # writes dist/ — wait for: all checks passed
 python3 -m http.server -d dist
 ```
 
-Python 3.11+, standard library only. The render tests additionally want
-`pip install playwright && playwright install chromium`.
+Python 3.11+, standard library only. The browser suites additionally want
+`pip install playwright && playwright install chromium`:
+
+```bash
+python3 tools/verify.py              # links, tags, canonicals, cross-page agreement
+python3 tools/test_render.py dist    # 12 page families x 13 widths
+python3 tools/test_motion.py dist    # both motion preferences
+```
+
+---
+
+## Contributing
+
+Corrections are welcome and wanted — especially "this does not match what I
+see in production", which is the most useful issue anyone can file. Please
+include the version, the platform and what you observed.
+
+Two things worth knowing before a pull request:
+
+**Never edit anything in `dist/`.** It is deleted and regenerated on every
+build, so a change made there is gone the moment anyone runs `tools/build.sh`.
+Edit the source in `tools/`, `content/` or `static/` and rebuild.
+
+**`README.md` and `brand/` are generated.** They are built by
+`tools/build_ghreadme.py` and `tools/make_banner.py` from the taxonomy. Editing
+this file by hand works exactly until the next build overwrites it — and CI
+fails the PR if either is stale, so run `bash tools/build.sh` and commit the
+result.
+
+CI runs the full build, refuses a `dist/` holding fewer than 500 pages, and
+runs the render tests on every pull request. Running the three commands above
+locally first is the quickest way to know it will pass.
+
+Prose changes want an issue before a PR — the writing is first-hand and
+opinionated by design, and the licence on it is narrower than the one on the
+code. See below.
 
 ---
 
@@ -175,6 +347,9 @@ Two licences, because the code and the writing are different things.
 |:--|:--|:--|
 | The build system and code samples | **MIT** | Use them, change them, ship them commercially. |
 | The writing and the diagrams | **CC BY-NC-ND 4.0** | Quote it with credit and a link. Don't republish it wholesale, don't sell it, don't publish an edited version as the original. |
+
+Full text in [`LICENSE`](LICENSE); the attribution terms and the third-party
+credits — fonts and analytics — are in [`NOTICE`](NOTICE).
 
 Want to do something the second licence doesn't allow — translate an issue, use
 a diagram in training material, reprint a piece internally? Ask. The answer is

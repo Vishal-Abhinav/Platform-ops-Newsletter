@@ -39,7 +39,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from siteconf import BASE, skip_page           # noqa: E402
 from build_feed import ISSUES                  # noqa: E402
-from chrome import icons, fonts                # noqa: E402
+from chrome import icons, stylesheets          # noqa: E402
 
 MARK_OPEN = "<!-- seo:jsonld -->"
 MARK_CLOSE = "<!-- /seo:jsonld -->"
@@ -248,8 +248,8 @@ for f in sorted(ROOT.rglob("*.html")):
     # the next build rather than shipping.
     src, n_fonts = re.subn(
         r'<link href="https://fonts\.googleapis\.com/[^"]*" rel="stylesheet">',
-        fonts('../' * rel.count('/')), src)
-    if not n_fonts and 'assets/fonts.css' not in src:
+        stylesheets('../' * rel.count('/')), src)
+    if 'assets/fonts.css' not in src or 'assets/motion.css' not in src:
         localised_missing.append(rel)
     localised += n_fonts
 
