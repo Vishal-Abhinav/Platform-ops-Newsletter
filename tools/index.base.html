@@ -1628,11 +1628,29 @@ a.footer-logo:hover{color:#fff;}
    number beside each step is the count of LIVE pages in that area, which is
    the honest thing to show on a site that publishes its backlog: a path with
    a 0 on it is telling the reader something true rather than hiding it. */
-.rx { background: #0a0c10; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(44px, 6vw, 80px) 0; }
-.rx-inner, .ej-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-.rx-head, .ej-head { font-family: 'Bebas Neue', Impact, sans-serif; font-size: clamp(26px, 3.4vw, 40px); color: #fff; margin: 0 0 8px; }
-.rx-lede, .ej-lede { font-size: 14px; line-height: 1.6; color: #8b95a6; margin: 0 0 26px; max-width: 66ch; }
-.rx-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+/* One band, two columns. Roles get the wider share because their cards carry
+   a path of chips and wrap badly under ~300px; the journey is short labels and
+   sits comfortably narrower. Below 1040px they stack, roles first — "which
+   parts do I need" is the question a new reader actually arrives with. */
+.rj { background: #0a0c10; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(44px, 6vw, 80px) 0; }
+.rj-inner {
+  max-width: 1280px; margin: 0 auto; padding: 0 24px;
+  display: grid; gap: clamp(30px, 4vw, 52px); grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+@media (min-width: 1040px) {
+  .rj-inner { grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr); }
+  /* A hairline instead of a heavier divider: the gap already separates them,
+     and the rule is there to say "these are two answers", not to fence them. */
+  .rj-aside { border-left: 1px solid rgba(255,255,255,.09); padding-left: clamp(30px, 3vw, 44px); }
+}
+.rj-head { font-family: 'Bebas Neue', Impact, sans-serif; font-size: clamp(24px, 2.8vw, 34px); color: #fff; margin: 0 0 8px; }
+.rj-lede { font-size: 13.5px; line-height: 1.6; color: #8b95a6; margin: 0 0 22px; max-width: 56ch; }
+/* 255px, not 270: in the two-column band the roles column is ~546px at a
+   1100px viewport, and 270+270+10 overflows it by 4px — so the whole grid
+   collapses to a single column beside a journey that still has two. Four
+   pixels is the difference between balanced and lopsided. */
+.rx-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); }
 .rx-card { border: 1px solid rgba(255,255,255,.12); border-radius: 7px; background: #0d1015; padding: 18px; }
 .rx-role { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 21px; color: #fff; margin: 0 0 4px; letter-spacing: .02em; }
 .rx-meta {
@@ -1661,9 +1679,8 @@ a.footer-logo:hover{color:#fff;}
   transform: rotate(45deg); flex-shrink: 0;
 }
 
-.ej { background: #07080b; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(44px, 6vw, 80px) 0; }
 .ej-track { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 .ej-stop {
   display: block; text-decoration: none; position: relative;
   border: 1px solid rgba(255,255,255,.12); border-radius: 7px;

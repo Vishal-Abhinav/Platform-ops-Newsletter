@@ -828,22 +828,27 @@ for _role, _steps in _ROLES:
         f'<div class="rx-meta">{_live} live pages across {len(_steps)} areas</div>'
         f'<div class="rx-path">{_path}</div></div>')
 
-RJ = f"""<section class="rx" id="roles" aria-labelledby="rx-head">
-  <div class="rx-inner">
-    <h2 class="rx-head" id="rx-head">What are you building?</h2>
-    <p class="rx-lede">Ten jobs that share most of this material and need different parts of it.
-      Each path is in the order it tends to be learned; the number is how many pages are live in that area today.</p>
-    <div class="rx-grid">{''.join(_r)}</div>
-  </div>
-</section>
+# One band, two columns. These are the same question asked twice — "which
+# parts do I need?" and "in what order?" — so they belong side by side rather
+# than stacked, where a reader answers one and scrolls past the other. Two
+# real <section> elements inside, so each keeps its own heading and landmark.
+RJ = f"""<div class="rj">
+  <div class="rj-inner">
+    <section class="rj-col" id="roles" aria-labelledby="rx-head">
+      <h2 class="rj-head" id="rx-head">What are you building?</h2>
+      <p class="rj-lede">Ten jobs that share most of this material and need
+        different parts of it. The number is how many pages are live in that area today.</p>
+      <div class="rx-grid">{''.join(_r)}</div>
+    </section>
 
-<section class="ej" id="journey" aria-labelledby="ej-head">
-  <div class="ej-inner">
-    <h2 class="ej-head" id="ej-head">The engineering journey</h2>
-    <p class="ej-lede">One route through all of it, in the order each layer starts to make sense.</p>
-    <ol class="ej-track">{''.join(_j)}</ol>
+    <section class="rj-col rj-aside" id="journey" aria-labelledby="ej-head">
+      <h2 class="rj-head" id="ej-head">The engineering journey</h2>
+      <p class="rj-lede">Or one route through all of it, in the order each layer
+        starts to make sense.</p>
+      <ol class="ej-track">{''.join(_j)}</ol>
+    </section>
   </div>
-</section>"""
+</div>"""
 
 _r0 = src.index("<!-- RJ:START -->")
 _r1 = src.index("<!-- RJ:END -->") + len("<!-- RJ:END -->")
