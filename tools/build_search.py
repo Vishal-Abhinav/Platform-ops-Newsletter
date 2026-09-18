@@ -64,6 +64,7 @@ for href in sorted(seen_pages):
 STANDALONE = [
     ("terminal/index.html", "Practice Terminal", "Practice"),
     ("about/index.html", "About Platform Ops", "About"),
+    ("architecture/index.html", "Architecture", "About"),
     ("colophon/index.html", "Colophon", "About"),
     ("categories/kubernetes-openshift-map/index.html",
      "Kubernetes & OpenShift — Complete Topic Map", "Reference"),

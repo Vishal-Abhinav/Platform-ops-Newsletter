@@ -55,6 +55,7 @@ PAGES = {
     "categories index": "categories/index.html",
     "topic map":       "categories/kubernetes-openshift-map/index.html",
     "about":           "about/index.html",
+    "architecture":    "architecture/index.html",
     "colophon":        "colophon/index.html",
     "legacy":          "Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html",
 }

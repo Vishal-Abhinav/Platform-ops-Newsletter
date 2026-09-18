@@ -891,7 +891,8 @@ and a half-applied edit can never accumulate.
 | 17 | `build_legacy_chrome.py` | `chrome.py` | wires the shared nav, footer, and theme toggle onto the 25 hand-written pages |
 | 18 | `build_colophon.py` | everything above + the rendered SVGs | `colophon/index.html` — how the site is built, on the site |
 | 19 | `build_about.py` | taxonomy + register + commands | `about/index.html` — what this newsletter is and what it covers, on the domain rather than in a repo. Derives its numbers from the taxonomy, not from the generated README, so it runs here and the whole-site passes below pick it up like any other page |
-| 20 | `build_terminal.py` | `terminal_fs.py` | `terminal/index.html` — a Unix shell simulated over an in-memory filesystem |
+| 20 | `build_architecture.py` | taxonomy + register + corpus + `build.sh` | `architecture/index.html` — the system end to end in seven diagrams |
+| 21 | `build_terminal.py` | `terminal_fs.py` | `terminal/index.html` — a Unix shell simulated over an in-memory filesystem |
 | 21 | `build_feed.py` | the register | `feed.xml` |
 | 22 | `build_nav.py` | taxonomy | mega-menu assets, wired into every page |
 | 23 | `build_search.py` | everything on disk | the search index, wired into every page |

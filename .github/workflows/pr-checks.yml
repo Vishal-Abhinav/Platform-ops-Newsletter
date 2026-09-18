@@ -1,0 +1,51 @@
+name: pr checks
+
+# Deliberately `pull_request`, never `pull_request_target`. This workflow runs
+# a stranger's code, so it is given NOTHING: no secrets block, read-only token,
+# no deploy step. It can tell you whether a change builds and renders. It
+# cannot reach Cloudflare, and there is nothing in it to leak.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: '3.11'
+
+      - name: Build the site
+        run: bash tools/build.sh
+
+      - name: Refuse an empty build
+        run: |
+          count=$(find dist -name '*.html' | wc -l)
+          echo "dist/ contains $count html files"
+          if [ "$count" -lt 500 ]; then
+            echo "::error::dist/ holds $count html files - expected ~880."
+            exit 1
+          fi
+
+      - name: Install render-test dependencies
+        run: |
+          python3 -m pip install --quiet playwright
+          python3 -m playwright install --with-deps chromium
+
+      - name: Render tests
+        run: python3 tools/test_render.py dist
+
+      - name: Generated files must be committed
+        run: |
+          git diff --exit-code -- README.md brand/ \
+            || { echo "::error::README.md or brand/ is stale - run bash tools/build.sh and commit."; exit 1; }

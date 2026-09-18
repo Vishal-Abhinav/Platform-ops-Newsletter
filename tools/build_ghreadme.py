@@ -143,6 +143,7 @@ shows what is finished tells you nothing about what the project is trying to be.
 | [**Kubernetes &amp; OpenShift topic map**]({SITE}/categories/kubernetes-openshift-map/) | Check whether something specific is covered, queued or planned before spending time looking. |
 | [**Command references**]({SITE}/Commands/KUBERNETES-COMMANDS/kubernetes-commands.html) | {N_CMD_PAGES} references covering {N_CMDS} commands, searchable and filterable. |
 | [**Practice terminal**]({SITE}/terminal/) | A Unix shell simulated over an in-memory filesystem. Try the commands without a cluster. |
+| [**Architecture**]({SITE}/architecture/) | The system end to end in seven diagrams — data flow, the build opened up, the PR path, the request path, deploy and rollback, trust boundaries. |
 | [**About**]({SITE}/about/) | What this is, in more detail. |
 | [**Colophon**]({SITE}/colophon/) | How the site is built, on the site. |
 
@@ -190,7 +191,8 @@ exists because the thing it checks actually went wrong at least once:
 - CI **refuses to deploy** a build holding fewer than 500 pages, after a deploy
   from an empty directory once published a site where everything 404'd.
 
-Full account in the [colophon]({SITE}/colophon/).
+Drawn in full on the [architecture page]({SITE}/architecture/); the
+stage-by-stage account is in the [colophon]({SITE}/colophon/).
 
 ---
 

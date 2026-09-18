@@ -133,6 +133,11 @@ STAGE_NOTE = {
                             "one nav, one footer and a theme toggle on the 25 "
                             "hand-written pages, which had twenty-three between them"),
     "build_colophon": ("everything above", "this page"),
+    "build_architecture": ("taxonomy + register + corpus + build.sh itself",
+                           "architecture/index.html — the system end to end in "
+                           "seven diagrams: data flow, the build opened up, the "
+                           "pull-request path, the request path, deploy and "
+                           "rollback, and the trust boundaries"),
     "make_banner": ("taxonomy + register + commands",
                     "brand/banner.svg — the animated masthead on the repo's "
                     "GitHub page, with the live/pipeline/planned split drawn "

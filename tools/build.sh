@@ -182,6 +182,12 @@ python3 tools/build_colophon.py      # counts pages + reads build.sh's own stage
 say "about page (the public 'what is this', on the domain rather than in a repo)"
 python3 tools/build_about.py
 
+# Same slot and the same reason as build_about: it counts the finished content
+# but must still be here when the whole-site passes run, or it would ship
+# without a nav, a search box or a sitemap row.
+say "architecture page (the system drawn — 7 diagrams)"
+python3 tools/build_architecture.py
+
 #   (README moved below build_search — it quotes the search index size)
 
 say "mega-menu (assets + wiring into every page)"

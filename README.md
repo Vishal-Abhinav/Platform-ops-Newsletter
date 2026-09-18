@@ -75,6 +75,7 @@ shows what is finished tells you nothing about what the project is trying to be.
 | [**Kubernetes &amp; OpenShift topic map**](https://platformops.srivantechnologies.com/categories/kubernetes-openshift-map/) | Check whether something specific is covered, queued or planned before spending time looking. |
 | [**Command references**](https://platformops.srivantechnologies.com/Commands/KUBERNETES-COMMANDS/kubernetes-commands.html) | 4 references covering 362 commands, searchable and filterable. |
 | [**Practice terminal**](https://platformops.srivantechnologies.com/terminal/) | A Unix shell simulated over an in-memory filesystem. Try the commands without a cluster. |
+| [**Architecture**](https://platformops.srivantechnologies.com/architecture/) | The system end to end in seven diagrams — data flow, the build opened up, the PR path, the request path, deploy and rollback, trust boundaries. |
 | [**About**](https://platformops.srivantechnologies.com/about/) | What this is, in more detail. |
 | [**Colophon**](https://platformops.srivantechnologies.com/colophon/) | How the site is built, on the site. |
 
@@ -122,7 +123,8 @@ exists because the thing it checks actually went wrong at least once:
 - CI **refuses to deploy** a build holding fewer than 500 pages, after a deploy
   from an empty directory once published a site where everything 404'd.
 
-Full account in the [colophon](https://platformops.srivantechnologies.com/colophon/).
+Drawn in full on the [architecture page](https://platformops.srivantechnologies.com/architecture/); the
+stage-by-stage account is in the [colophon](https://platformops.srivantechnologies.com/colophon/).
 
 ---
 
