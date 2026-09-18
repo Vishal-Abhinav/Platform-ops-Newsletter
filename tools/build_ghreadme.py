@@ -88,6 +88,38 @@ N_STAGES = len(re.findall(r"^\s*python3 tools/(\w+)\.py", _SH, re.M))
 N_HANDWRITTEN = len(list((REPO / "content").rglob("*.html")))
 N_FONTS = len(list((REPO / "static" / "assets" / "fonts").glob("*")))
 
+
+def _count(path, pattern, default=0):
+    """Count `pattern` in a source file, or `default` if it isn't there.
+
+    The test suites and the workflows are the authority on their own numbers.
+    The README said "11 page families" for as long as test_render.py had
+    twelve, because that 11 was typed once and then the suite grew. Reading
+    it back means the sentence cannot be wrong for longer than one build.
+    """
+    p = pathlib.Path(path)
+    if not p.exists():
+        return default
+    return len(re.findall(pattern, p.read_text(encoding="utf-8"), re.M))
+
+
+# The render matrix, counted off the suite that runs it.
+_TR = (TOOLS / "test_render.py")
+N_RENDER_PAGES = _count(_TR, r'^\s{4}"[^"]+":\s*"[^"]+\.html"')
+_w = re.search(r"^WIDTHS\s*=\s*\[([^\]]*)\]",
+               _TR.read_text(encoding="utf-8"), re.M) if _TR.exists() else None
+N_RENDER_WIDTHS = len([x for x in _w.group(1).split(",") if x.strip()]) if _w else 0
+N_MOTION_PAGES = _count(TOOLS / "test_motion.py", r'^\s{4}"[^"]+":\s*"[^"]+\.html"')
+
+# The deploy workflow is the authority on the wrangler version and on the
+# page floor below which CI refuses to ship.
+_DEPLOY = REPO / ".github" / "workflows" / "deploy.yml"
+_dep = _DEPLOY.read_text(encoding="utf-8") if _DEPLOY.exists() else ""
+_m = re.search(r"wrangler@([\d.]+)", _dep)
+WRANGLER = _m.group(1) if _m else "4"
+_m = re.search(r'-lt\s+"?(\d+)', _dep)
+MIN_PAGES = _m.group(1) if _m else "500"
+
 # The page and sitemap counts describe the BUILT site, so they can only be
 # read from dist/ — and this stage runs last, after dist/ is complete. If it
 # is ever reordered ahead of the build, these fall back to 0 and the
@@ -189,18 +221,48 @@ hubs, in the topic map and in this README are all computed from one file at
 build time — so they cannot drift apart, and a stage that would make them
 disagree fails the build instead of shipping.
 
-```
-tools/      the build system         source, never published
-content/    hand-written pages       source, never mutated
-static/     copied verbatim          icons, OG cards, self-hosted fonts
-    │
-    ▼  tools/build.sh — sequential stages, set -euo pipefail
-    ▼
-dist/       everything the build makes — the only thing deployed
-    │
-    ▼  verify.py + test_render.py — no pass, no deploy
-    ▼
-GitHub Actions → Cloudflare Workers → {SITE.split('//')[1]}
+```mermaid
+flowchart TB
+  TAX["taxonomy.py<br/>{N_TOPICS} topics · {N_CATS} categories<br/>each live, pipeline or planned"]
+  DAT["cmd_data.py · hubs_spec.py<br/>topicmap_data.py · terminal_fs.py"]
+  HAND["content/ · {N_HANDWRITTEN} hand-written pages<br/>static/ · icons, OG cards, {N_FONTS} fonts"]
+
+  SH["bash tools/build.sh<br/>rm -rf dist, then {N_STAGES} stages in order"]
+
+  G1["structure<br/>build_hubs, build_topic_pages<br/>a hub per category,<br/>a page per item"]
+  G2["navigation<br/>build_kmap, build_topicmap,<br/>build_feed, build_search<br/>maps, RSS, search index"]
+  G3["contract<br/>build_seo, build_canonical,<br/>build_headers<br/>JSON-LD, canonicals, CSP"]
+
+  DIST[("dist/ · {N_PAGES} pages<br/>the only deploy surface")]
+  VER["verify.py<br/>links · tag balance · canonicals · sitemap<br/>and whether two pages agree with each other"]
+  OK["banner + README<br/>ready to deploy"]
+  STOP["exit 1 · nothing ships"]
+
+  TAX --> SH
+  DAT --> SH
+  HAND --> SH
+  SH --> G1
+  SH --> G2
+  SH --> G3
+  G1 --> DIST
+  G2 --> DIST
+  G3 --> DIST
+  DIST --> VER
+  VER -->|all checks passed| OK
+  VER -.->|one check fails| STOP
+
+  classDef src fill:#e0f2fe,stroke:#0369a1,color:#0c4a6e
+  classDef sh fill:#f1f5f9,stroke:#475569,color:#0f172a
+  classDef gen fill:#fef3c7,stroke:#b45309,color:#78350f
+  classDef gate fill:#dcfce7,stroke:#15803d,color:#14532d
+  classDef out fill:#ede9fe,stroke:#6d28d9,color:#4c1d95
+  classDef bad fill:#fee2e2,stroke:#b91c1c,color:#7f1d1d
+  class TAX,DAT,HAND src
+  class SH sh
+  class G1,G2,G3 gen
+  class VER gate
+  class DIST,OK out
+  class STOP bad
 ```
 
 **The build refuses to ship rather than ship something wrong.** Each of these
@@ -215,10 +277,13 @@ exists because the thing it checks actually went wrong at least once:
   after two pages described the same category differently, one click apart.
 - The **security policy** is derived by walking the built pages for the origins
   they actually fetch from, and fails on one it does not recognise.
-- **11 page families × 13 viewport widths** are opened in a real browser and
-  asserted for horizontal overflow and duplicate fixed headers.
-- CI **refuses to deploy** a build holding fewer than 500 pages, after a deploy
-  from an empty directory once published a site where everything 404'd.
+- **{N_RENDER_PAGES} page families × {N_RENDER_WIDTHS} viewport widths** are
+  opened in a real browser and asserted for horizontal overflow and duplicate
+  fixed headers.
+- **{N_MOTION_PAGES} pages are loaded twice**, once under each motion
+  preference, and asserted to stop animating without going invisible.
+- CI **refuses to deploy** a build holding fewer than {MIN_PAGES} pages, after a
+  deploy from an empty directory once published a site where everything 404'd.
 
 Drawn in full on the [architecture page]({SITE}/architecture/); the
 stage-by-stage account is in the [colophon]({SITE}/colophon/).
@@ -242,6 +307,141 @@ public web only because a build stage deliberately wrote it there. The old
 layout published from the repository root, where shipping something private
 needed only an omission — which is how a full Mermaid install and a taxonomy
 file once became fetchable. Now it needs a mistake in `tools/`.
+
+---
+
+## Tech stack
+
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python_3.11-standard_library_only-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=08090c)
+![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers-F38020?style=for-the-badge&logo=cloudflare&logoColor=white&labelColor=08090c)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-SHA_pinned-2088FF?style=for-the-badge&logo=githubactions&logoColor=white&labelColor=08090c)
+![Playwright](https://img.shields.io/badge/Playwright-render_+_motion_tests-2EAD33?style=for-the-badge&logo=playwright&logoColor=white&labelColor=08090c)
+![Mermaid](https://img.shields.io/badge/Mermaid-diagrams-FF3670?style=for-the-badge&logo=mermaid&logoColor=white&labelColor=08090c)
+![HTML5](https://img.shields.io/badge/Static_HTML-no_framework-E34F26?style=for-the-badge&logo=html5&logoColor=white&labelColor=08090c)
+
+</div>
+
+| Layer | Choice | Why this one |
+|:--|:--|:--|
+| Build | **Python 3.11**, standard library | No dependency can break a build of a site that has to still build in five years. There is no `requirements.txt` for the build itself. |
+| Output | **Static HTML**, no framework | Nothing to hydrate, nothing to server-render, nothing to keep patched. The slowest page is a file read. |
+| Styling | Hand-written CSS, **{N_FONTS} self-hosted font files** | Bebas Neue, Manrope, DM Mono, Instrument Serif — served from this origin, so `font-src` is `'self'` and no third party sees a reader. |
+| Tests | **Playwright** + Chromium | Overflow, duplicate headers and motion are properties of a rendered page. Reading the HTML cannot see any of them. |
+| CI | **GitHub Actions**, pinned to commit SHAs | A moved tag cannot change what runs. Dependabot watches the pins so they still get security fixes. |
+| Deploy | **Cloudflare Workers**, `wrangler@{WRANGLER}` via `npx` | Pinned exactly, and called directly rather than through an action that quietly resolved a different version. |
+| Analytics | **GoatCounter** | No cookies, no fingerprinting, no consent banner to show anyone. |
+| Diagrams | **Mermaid** in the README, hand-built SVG on the site | GitHub renders Mermaid natively, so these diagrams are text in the repo and cannot drift out of sync as images. |
+
+---
+
+## Architecture
+
+### End to end — a change, from an edit to a reader
+
+```mermaid
+flowchart TB
+  DEV(["Author<br/>edits taxonomy.py or content/"])
+
+  subgraph LOCAL["Local"]
+    BUILD["bash tools/build.sh<br/>{N_STAGES} stages · writes dist/"]
+    SUITE["verify.py · test_render.py · test_motion.py"]
+  end
+
+  GH[("GitHub<br/>Platform-ops-Newsletter<br/>public")]
+
+  subgraph CI["GitHub Actions · actions pinned to commit SHAs"]
+    PR["pr-checks.yml<br/>trigger: pull_request<br/>read-only token · no secrets · no deploy"]
+    DEP["deploy.yml<br/>trigger: push to main"]
+    G1["build · refuse a dist/ under {MIN_PAGES} pages"]
+    G2["render tests · {N_RENDER_PAGES} families x {N_RENDER_WIDTHS} widths"]
+    G3["reduced-motion tests · both preferences"]
+  end
+
+  CF["Cloudflare Workers<br/>platform-ops-blog<br/>assets directory: dist"]
+  EDGE["Edge cache"]
+  READER(["Reader<br/>{SITE.split('//')[1]}"])
+  BLOCK["deploy refused"]
+
+  DEV --> BUILD --> SUITE
+  SUITE -->|green| GH
+  GH --> PR
+  GH --> DEP
+  PR --> G1
+  DEP --> G1
+  G1 --> G2 --> G3
+  G3 -->|all pass, push to main only| CF
+  G3 -.->|any fail| BLOCK
+  CF --> EDGE
+  EDGE -->|"every response carries _headers<br/>CSP · HSTS · nosniff · no default-src"| READER
+
+  classDef human fill:#ede9fe,stroke:#6d28d9,color:#4c1d95
+  classDef local fill:#e0f2fe,stroke:#0369a1,color:#0c4a6e
+  classDef ci fill:#fef3c7,stroke:#b45309,color:#78350f
+  classDef edge fill:#dcfce7,stroke:#15803d,color:#14532d
+  classDef bad fill:#fee2e2,stroke:#b91c1c,color:#7f1d1d
+  class DEV,READER human
+  class BUILD,SUITE,GH local
+  class PR,DEP,G1,G2,G3 ci
+  class CF,EDGE edge
+  class BLOCK bad
+```
+
+A pull request from a fork runs the same build and the same gates, and then
+stops. Only a push to `main` reaches the deploy step, and only that step is
+given the Cloudflare credentials.
+
+### Integrations — every system this touches, and which way data moves
+
+```mermaid
+flowchart TB
+  REPO[("GitHub repo · public<br/>source, workflows, generated README")]
+
+  subgraph BT["Build time · none of this reaches a browser"]
+    ACT["GitHub Actions<br/>build · gate · deploy"]
+    WR["wrangler {WRANGLER}<br/>invoked with npx, not an action"]
+    DB["Dependabot<br/>watches the pinned SHAs, monthly"]
+  end
+
+  WORKER["Cloudflare Worker · platform-ops-blog<br/>serves dist/ as static assets"]
+
+  subgraph RT["Runtime · every origin a reader's browser contacts"]
+    SELF["this origin<br/>HTML · CSS · JS · {N_FONTS} font files"]
+    GC["gc.zgo.at<br/>GoatCounter<br/>no cookies, no fingerprinting"]
+    LI["www.linkedin.com<br/>2 post embeds, homepage only"]
+  end
+
+  subgraph OB["Outbound · the site publishes, nothing reads back"]
+    SM["sitemap.xml<br/>{N_SITEMAP} indexable URLs"]
+    RSS["feed.xml<br/>full archive"]
+    GSC["Google Search Console"]
+  end
+
+  REPO --> ACT --> WR --> WORKER
+  DB -.->|opens a pull request| REPO
+  WORKER --> SELF
+  SELF -.->|"img-src · connect-src"| GC
+  SELF -.->|frame-src| LI
+  WORKER --> SM
+  WORKER --> RSS
+  SM -.-> GSC
+
+  classDef own fill:#ede9fe,stroke:#6d28d9,color:#4c1d95
+  classDef bt fill:#fef3c7,stroke:#b45309,color:#78350f
+  classDef rt fill:#e0f2fe,stroke:#0369a1,color:#0c4a6e
+  classDef ob fill:#dcfce7,stroke:#15803d,color:#14532d
+  class REPO,WORKER own
+  class ACT,WR,DB bt
+  class SELF,GC,LI rt
+  class SM,RSS,GSC ob
+```
+
+Two origins in that runtime box are not this one, and both are in the CSP by
+name because the build found them there. Everything else a reader loads —
+every stylesheet, every script, all {N_FONTS} font files — comes from this
+origin. The same system drawn at greater depth, including the request path and
+the trust boundaries, is on the [architecture page]({SITE}/architecture/).
 
 ---
 
@@ -505,6 +705,41 @@ if __name__ == "__main__":
     assert (REPO / "static" / "assets" / "motion.css").exists(), (
         "README.md claims reduced motion is honoured site-wide, but "
         "static/assets/motion.css does not exist. Fix one or the other.")
+
+    # ── the Mermaid diagrams ────────────────────────────────────────────────
+    # GitHub renders these server-side. A syntax error does not fail anything
+    # here — it ships, and the repository's front page shows a grey error box
+    # where the architecture diagram should be. Nobody who already knows what
+    # the diagram says will notice.
+    #
+    # The specific hazard is this file: the README is one large f-string, so a
+    # literal { or } inside a diagram is eaten as an interpolation. Mermaid
+    # uses braces for node shapes, which makes writing one the natural thing
+    # to do and breaking the build the natural consequence. These diagrams are
+    # therefore written with no brace-shaped nodes at all, and this asserts it
+    # stays that way.
+    blocks = re.findall(r"```mermaid\n(.*?)```", text, re.S)
+    assert len(blocks) == 3, (
+        f"README.md should carry 3 mermaid diagrams (data flow, end-to-end, "
+        f"integrations); found {len(blocks)}.")
+    for i, b in enumerate(blocks, 1):
+        assert b.lstrip().startswith("flowchart"), (
+            f"mermaid block {i} does not start with a diagram type — GitHub "
+            f"will render it as an error box.")
+        stray = [ln for ln in b.splitlines() if "{" in ln or "}" in ln]
+        assert not stray, (
+            f"mermaid block {i} contains a literal brace, which means the "
+            f"f-string ate an interpolation or a brace-shaped node slipped "
+            f"in. Use [] or () node shapes here, never curly braces:\n  "
+            + "\n  ".join(stray[:3]))
+        # Every node named in a `class a,b,c name` line must actually exist,
+        # or Mermaid silently drops the styling and the diagram renders grey.
+        defined = set(re.findall(r"^\s*(\w+)[\[\(]", b, re.M))
+        for line in re.findall(r"^\s*class\s+([\w,]+)\s+\w+\s*$", b, re.M):
+            for node in line.split(","):
+                assert node in defined, (
+                    f"mermaid block {i}: `class` styles {node!r}, which is "
+                    f"not a node in that diagram.")
     assert (REPO / "brand" / "banner.svg").exists(), (
         "brand/banner.svg is missing, so the README's first image would be a "
         "broken one on the repo's front page. Run tools/make_banner.py first — "

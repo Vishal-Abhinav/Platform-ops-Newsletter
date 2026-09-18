@@ -92,18 +92,48 @@ hubs, in the topic map and in this README are all computed from one file at
 build time — so they cannot drift apart, and a stage that would make them
 disagree fails the build instead of shipping.
 
-```
-tools/      the build system         source, never published
-content/    hand-written pages       source, never mutated
-static/     copied verbatim          icons, OG cards, self-hosted fonts
-    │
-    ▼  tools/build.sh — sequential stages, set -euo pipefail
-    ▼
-dist/       everything the build makes — the only thing deployed
-    │
-    ▼  verify.py + test_render.py — no pass, no deploy
-    ▼
-GitHub Actions → Cloudflare Workers → platformops.srivantechnologies.com
+```mermaid
+flowchart TB
+  TAX["taxonomy.py<br/>685 topics · 45 categories<br/>each live, pipeline or planned"]
+  DAT["cmd_data.py · hubs_spec.py<br/>topicmap_data.py · terminal_fs.py"]
+  HAND["content/ · 25 hand-written pages<br/>static/ · icons, OG cards, 18 fonts"]
+
+  SH["bash tools/build.sh<br/>rm -rf dist, then 31 stages in order"]
+
+  G1["structure<br/>build_hubs, build_topic_pages<br/>a hub per category,<br/>a page per item"]
+  G2["navigation<br/>build_kmap, build_topicmap,<br/>build_feed, build_search<br/>maps, RSS, search index"]
+  G3["contract<br/>build_seo, build_canonical,<br/>build_headers<br/>JSON-LD, canonicals, CSP"]
+
+  DIST[("dist/ · 880 pages<br/>the only deploy surface")]
+  VER["verify.py<br/>links · tag balance · canonicals · sitemap<br/>and whether two pages agree with each other"]
+  OK["banner + README<br/>ready to deploy"]
+  STOP["exit 1 · nothing ships"]
+
+  TAX --> SH
+  DAT --> SH
+  HAND --> SH
+  SH --> G1
+  SH --> G2
+  SH --> G3
+  G1 --> DIST
+  G2 --> DIST
+  G3 --> DIST
+  DIST --> VER
+  VER -->|all checks passed| OK
+  VER -.->|one check fails| STOP
+
+  classDef src fill:#e0f2fe,stroke:#0369a1,color:#0c4a6e
+  classDef sh fill:#f1f5f9,stroke:#475569,color:#0f172a
+  classDef gen fill:#fef3c7,stroke:#b45309,color:#78350f
+  classDef gate fill:#dcfce7,stroke:#15803d,color:#14532d
+  classDef out fill:#ede9fe,stroke:#6d28d9,color:#4c1d95
+  classDef bad fill:#fee2e2,stroke:#b91c1c,color:#7f1d1d
+  class TAX,DAT,HAND src
+  class SH sh
+  class G1,G2,G3 gen
+  class VER gate
+  class DIST,OK out
+  class STOP bad
 ```
 
 **The build refuses to ship rather than ship something wrong.** Each of these
@@ -118,10 +148,13 @@ exists because the thing it checks actually went wrong at least once:
   after two pages described the same category differently, one click apart.
 - The **security policy** is derived by walking the built pages for the origins
   they actually fetch from, and fails on one it does not recognise.
-- **11 page families × 13 viewport widths** are opened in a real browser and
-  asserted for horizontal overflow and duplicate fixed headers.
-- CI **refuses to deploy** a build holding fewer than 500 pages, after a deploy
-  from an empty directory once published a site where everything 404'd.
+- **12 page families × 13 viewport widths** are
+  opened in a real browser and asserted for horizontal overflow and duplicate
+  fixed headers.
+- **7 pages are loaded twice**, once under each motion
+  preference, and asserted to stop animating without going invisible.
+- CI **refuses to deploy** a build holding fewer than 500 pages, after a
+  deploy from an empty directory once published a site where everything 404'd.
 
 Drawn in full on the [architecture page](https://platformops.srivantechnologies.com/architecture/); the
 stage-by-stage account is in the [colophon](https://platformops.srivantechnologies.com/colophon/).
@@ -136,7 +169,7 @@ Three directories are input. One is output. Nothing else is either.
 |:--|:--|
 | `tools/` | The build: 31 ordered stages, `verify.py`, and the browser test suites. Python 3.11, standard library only. |
 | `content/` | The 25 hand-written pages, kept pristine — they are copied into `dist/` and edited *there*, never in place. |
-| `static/` | Copied verbatim: icons, OG cards, 16 self-hosted font files, `assets/motion.css`. |
+| `static/` | Copied verbatim: icons, OG cards, 18 self-hosted font files, `assets/motion.css`. |
 | `brand/` | The generated banner. Tracked, deliberately outside `static/`, so it never reaches the site. |
 | `dist/` | **The only thing deployed.** Deleted and rebuilt from empty on every run. |
 
@@ -145,6 +178,141 @@ public web only because a build stage deliberately wrote it there. The old
 layout published from the repository root, where shipping something private
 needed only an omission — which is how a full Mermaid install and a taxonomy
 file once became fetchable. Now it needs a mistake in `tools/`.
+
+---
+
+## Tech stack
+
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python_3.11-standard_library_only-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=08090c)
+![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers-F38020?style=for-the-badge&logo=cloudflare&logoColor=white&labelColor=08090c)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-SHA_pinned-2088FF?style=for-the-badge&logo=githubactions&logoColor=white&labelColor=08090c)
+![Playwright](https://img.shields.io/badge/Playwright-render_+_motion_tests-2EAD33?style=for-the-badge&logo=playwright&logoColor=white&labelColor=08090c)
+![Mermaid](https://img.shields.io/badge/Mermaid-diagrams-FF3670?style=for-the-badge&logo=mermaid&logoColor=white&labelColor=08090c)
+![HTML5](https://img.shields.io/badge/Static_HTML-no_framework-E34F26?style=for-the-badge&logo=html5&logoColor=white&labelColor=08090c)
+
+</div>
+
+| Layer | Choice | Why this one |
+|:--|:--|:--|
+| Build | **Python 3.11**, standard library | No dependency can break a build of a site that has to still build in five years. There is no `requirements.txt` for the build itself. |
+| Output | **Static HTML**, no framework | Nothing to hydrate, nothing to server-render, nothing to keep patched. The slowest page is a file read. |
+| Styling | Hand-written CSS, **18 self-hosted font files** | Bebas Neue, Manrope, DM Mono, Instrument Serif — served from this origin, so `font-src` is `'self'` and no third party sees a reader. |
+| Tests | **Playwright** + Chromium | Overflow, duplicate headers and motion are properties of a rendered page. Reading the HTML cannot see any of them. |
+| CI | **GitHub Actions**, pinned to commit SHAs | A moved tag cannot change what runs. Dependabot watches the pins so they still get security fixes. |
+| Deploy | **Cloudflare Workers**, `wrangler@4.134.0` via `npx` | Pinned exactly, and called directly rather than through an action that quietly resolved a different version. |
+| Analytics | **GoatCounter** | No cookies, no fingerprinting, no consent banner to show anyone. |
+| Diagrams | **Mermaid** in the README, hand-built SVG on the site | GitHub renders Mermaid natively, so these diagrams are text in the repo and cannot drift out of sync as images. |
+
+---
+
+## Architecture
+
+### End to end — a change, from an edit to a reader
+
+```mermaid
+flowchart TB
+  DEV(["Author<br/>edits taxonomy.py or content/"])
+
+  subgraph LOCAL["Local"]
+    BUILD["bash tools/build.sh<br/>31 stages · writes dist/"]
+    SUITE["verify.py · test_render.py · test_motion.py"]
+  end
+
+  GH[("GitHub<br/>Platform-ops-Newsletter<br/>public")]
+
+  subgraph CI["GitHub Actions · actions pinned to commit SHAs"]
+    PR["pr-checks.yml<br/>trigger: pull_request<br/>read-only token · no secrets · no deploy"]
+    DEP["deploy.yml<br/>trigger: push to main"]
+    G1["build · refuse a dist/ under 500 pages"]
+    G2["render tests · 12 families x 13 widths"]
+    G3["reduced-motion tests · both preferences"]
+  end
+
+  CF["Cloudflare Workers<br/>platform-ops-blog<br/>assets directory: dist"]
+  EDGE["Edge cache"]
+  READER(["Reader<br/>platformops.srivantechnologies.com"])
+  BLOCK["deploy refused"]
+
+  DEV --> BUILD --> SUITE
+  SUITE -->|green| GH
+  GH --> PR
+  GH --> DEP
+  PR --> G1
+  DEP --> G1
+  G1 --> G2 --> G3
+  G3 -->|all pass, push to main only| CF
+  G3 -.->|any fail| BLOCK
+  CF --> EDGE
+  EDGE -->|"every response carries _headers<br/>CSP · HSTS · nosniff · no default-src"| READER
+
+  classDef human fill:#ede9fe,stroke:#6d28d9,color:#4c1d95
+  classDef local fill:#e0f2fe,stroke:#0369a1,color:#0c4a6e
+  classDef ci fill:#fef3c7,stroke:#b45309,color:#78350f
+  classDef edge fill:#dcfce7,stroke:#15803d,color:#14532d
+  classDef bad fill:#fee2e2,stroke:#b91c1c,color:#7f1d1d
+  class DEV,READER human
+  class BUILD,SUITE,GH local
+  class PR,DEP,G1,G2,G3 ci
+  class CF,EDGE edge
+  class BLOCK bad
+```
+
+A pull request from a fork runs the same build and the same gates, and then
+stops. Only a push to `main` reaches the deploy step, and only that step is
+given the Cloudflare credentials.
+
+### Integrations — every system this touches, and which way data moves
+
+```mermaid
+flowchart TB
+  REPO[("GitHub repo · public<br/>source, workflows, generated README")]
+
+  subgraph BT["Build time · none of this reaches a browser"]
+    ACT["GitHub Actions<br/>build · gate · deploy"]
+    WR["wrangler 4.134.0<br/>invoked with npx, not an action"]
+    DB["Dependabot<br/>watches the pinned SHAs, monthly"]
+  end
+
+  WORKER["Cloudflare Worker · platform-ops-blog<br/>serves dist/ as static assets"]
+
+  subgraph RT["Runtime · every origin a reader's browser contacts"]
+    SELF["this origin<br/>HTML · CSS · JS · 18 font files"]
+    GC["gc.zgo.at<br/>GoatCounter<br/>no cookies, no fingerprinting"]
+    LI["www.linkedin.com<br/>2 post embeds, homepage only"]
+  end
+
+  subgraph OB["Outbound · the site publishes, nothing reads back"]
+    SM["sitemap.xml<br/>96 indexable URLs"]
+    RSS["feed.xml<br/>full archive"]
+    GSC["Google Search Console"]
+  end
+
+  REPO --> ACT --> WR --> WORKER
+  DB -.->|opens a pull request| REPO
+  WORKER --> SELF
+  SELF -.->|"img-src · connect-src"| GC
+  SELF -.->|frame-src| LI
+  WORKER --> SM
+  WORKER --> RSS
+  SM -.-> GSC
+
+  classDef own fill:#ede9fe,stroke:#6d28d9,color:#4c1d95
+  classDef bt fill:#fef3c7,stroke:#b45309,color:#78350f
+  classDef rt fill:#e0f2fe,stroke:#0369a1,color:#0c4a6e
+  classDef ob fill:#dcfce7,stroke:#15803d,color:#14532d
+  class REPO,WORKER own
+  class ACT,WR,DB bt
+  class SELF,GC,LI rt
+  class SM,RSS,GSC ob
+```
+
+Two origins in that runtime box are not this one, and both are in the CSP by
+name because the build found them there. Everything else a reader loads —
+every stylesheet, every script, all 18 font files — comes from this
+origin. The same system drawn at greater depth, including the request path and
+the trust boundaries, is on the [architecture page](https://platformops.srivantechnologies.com/architecture/).
 
 ---
 
@@ -185,7 +353,7 @@ A `script-src` that actually constrains scripts is the open item, and it is
 open honestly: closing it means moving those inline handlers out to files
 first. It is tracked, not forgotten.
 
-**Fonts are self-hosted.** 16 files under `static/assets/fonts/`, so
+**Fonts are self-hosted.** 18 files under `static/assets/fonts/`, so
 there is no request to a third party on any page view and no `font-src`
 beyond `'self'`.
 
