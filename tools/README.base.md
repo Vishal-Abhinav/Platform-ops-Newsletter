@@ -897,7 +897,8 @@ and a half-applied edit can never accumulate.
 | 23 | `build_search.py` | everything on disk | the search index, wired into every page |
 | 24 | `build_seo.py` | each page + register | JSON-LD, article dates, per-issue `og:image` |
 | 25 | `build_canonical.py` | `siteconf.BASE` | rewrites every origin to the canonical one |
-| 26 | `verify.py` | the built site | `sitemap.xml`, **and a non-zero exit if anything is wrong** |
+| 26 | `build_headers.py` | every built page, for the origins they fetch from | `_headers` — the security response headers Cloudflare serves. Fails the build if a page starts loading from an origin the policy does not cover |
+| 27 | `verify.py` | the built site | `sitemap.xml`, **and a non-zero exit if anything is wrong** |
 
 Stages 17–20 are whole-site passes: they walk every page that exists at that point and inject
 the same chrome into all of them. That is why a new page needs no wiring of its own — it is

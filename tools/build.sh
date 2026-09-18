@@ -205,6 +205,13 @@ python3 tools/build_seo.py
 say "canonical origin (every page -> siteconf.BASE)"
 python3 tools/build_canonical.py
 
+# Last, because it audits the finished site: it walks every page for the
+# origins they actually fetch from and fails if one is not accounted for.
+# Running it earlier would let a page added later start loading from somewhere
+# the policy does not cover, silently.
+say "security headers (_headers, derived from what the pages actually load)"
+python3 tools/build_headers.py
+
 say "verify + sitemap"
 python3 tools/verify.py
 

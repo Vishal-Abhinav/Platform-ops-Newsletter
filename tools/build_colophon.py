@@ -133,6 +133,10 @@ STAGE_NOTE = {
                             "one nav, one footer and a theme toggle on the 25 "
                             "hand-written pages, which had twenty-three between them"),
     "build_colophon": ("everything above", "this page"),
+    "build_headers": ("every built page, for the origins they fetch from",
+                      "_headers — the security response headers Cloudflare "
+                      "serves, and a build failure if a page starts loading "
+                      "from an origin the policy does not cover"),
     "build_about": ("taxonomy + issue register + command corpus",
                     "about/index.html — what this newsletter is and what it "
                     "covers, derived from the taxonomy rather than from the "
