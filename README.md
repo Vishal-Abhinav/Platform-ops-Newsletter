@@ -378,7 +378,7 @@ up. Until September 2026 every one of those ran regardless of what the reader
 had asked their operating system for — twelve distinct infinite animations,
 `prefers-reduced-motion` honoured on zero pages.
 
-It now resolves in two places, because one is not enough:
+It now resolves in three places, because no one of them is enough:
 
 - `assets/motion.css`, on all 880 pages, collapses every CSS animation
   and transition to `0.01ms` with a single iteration — **not** `animation:
@@ -390,11 +390,22 @@ It now resolves in two places, because one is not enough:
   `setInterval`, which no stylesheet can reach, so they check the same media
   query in JavaScript and jump straight to their finished state — every line
   shown, every counter on its real total.
+- SVG **SMIL** — `<animateMotion>` and friends — is not CSS, so no stylesheet
+  can stop it, and `getAnimations()` does not report it either. That
+  combination is why it went unnoticed: the suite below asked the browser what
+  was animating, the browser said nothing was, and the particles kept flying
+  for a reader who had asked them not to. `build_seo.py` now injects an
+  explicit `pauseAnimations()` call into any page carrying SMIL, and
+  `verify.py` asserts across all 880 pages that a page which can animate
+  this way can also stop.
 
-`tools/test_motion.py` opens seven pages twice, once under each preference,
-and asserts that nothing is still animating, nothing was left invisible,
-nothing is frozen part-way through a reveal, and no counter is stuck
-mid-count. It also asserts that the motion **is still there** without the
+`tools/test_motion.py` opens 7 pages twice, once under each
+preference, and asserts that nothing is still animating, nothing was left
+invisible, nothing is frozen part-way through a reveal, and no counter is
+stuck mid-count. It also samples where everything inside every `<svg>`
+actually *is*, twice, a second apart — because asking the browser what is
+animating is exactly the question that missed SMIL, and asking whether
+anything moved cannot be fooled by the technique. It also asserts that the motion **is still there** without the
 preference — a test that only checked the reduced case would pass just as
 happily on a site whose animation had been deleted.
 

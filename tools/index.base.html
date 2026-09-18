@@ -203,89 +203,17 @@ nav.scrolled {
 .nav-cta::after { display: none !important; }
 
 /* ─── HERO ─── */
-.hero {
-  min-height: 100vh;
-  display: grid; grid-template-columns: 1fr 1fr;
-  padding-top: 80px; overflow: hidden; position: relative;
-}
-.hero::after {
-  content: '';
-  position: absolute; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22160%22%20viewBox%3D%220%200%20160%20160%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%231c1f26%22%20stroke-width%3D%221%22%20opacity%3D%220.07%22%3E%3Cpath%20d%3D%22M0%2C40%20H60%20V0%22/%3E%3Cpath%20d%3D%22M160%2C120%20H100%20V160%22/%3E%3Cpath%20d%3D%22M0%2C160%20V140%20H40%22/%3E%3Cpath%20d%3D%22M160%2C0%20V60%20H120%22/%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2240%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22120%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%22140%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%22120%22%20cy%3D%2260%22%20r%3D%223%22/%3E%3Cpath%20d%3D%22M0%2C90%20H160%22%20stroke-dasharray%3D%222%206%22/%3E%3Cpath%20d%3D%22M80%2C0%20V160%22%20stroke-dasharray%3D%222%206%22/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 160px 160px;
-  animation: bg-drift 50s linear infinite;
-  pointer-events: none; z-index: 0;
-}
 @keyframes bg-drift { from{background-position:0 0;} to{background-position:640px 320px;} }
 
 /* ─── HERO PIPELINE BACKGROUND (large, subtle, homepage-only) ─── */
-.hero-pipeline-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.hero-pipeline-bg svg { width: min(1300px, 118%); height: auto; }
-.hpg-path { fill: none; stroke: rgba(28,31,38,0.07); stroke-width: 1.5; stroke-dasharray: 10 14; animation: dash-flow 46s linear infinite; }
-.hpg-text { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 4px; fill: rgba(28,31,38,0.09); text-transform: uppercase; }
-.hpg-node-dot { animation: hpg-pulse 3.6s ease-in-out infinite; }
-.hpg-flow-dot { filter: drop-shadow(0 0 5px currentColor); opacity: 0.35; }
 @keyframes hpg-pulse { 0%,100%{opacity:0.25;} 50%{opacity:0.55;} }
 @media (max-width: 900px) { .hero-pipeline-bg { display: none; } }
 
-.hero-left {
-  padding: 80px 48px 80px 64px;
-  display: flex; flex-direction: column; justify-content: center;
-  position: relative; z-index: 2;
-}
-.hero-eyebrow {
-  display: flex; align-items: center; gap: 12px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 28px;
-  opacity: 0; transform: translateY(20px);
-  animation: fadeUp 0.7s ease 0.2s forwards;
-}
-.hero-eyebrow-line { display: block; width: 40px; height: 1px; background: var(--crimson); }
-.hero-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(64px, 7vw, 102px);
-  line-height: 0.92; letter-spacing: -1px; color: var(--heading-fg);
-  margin-bottom: 12px;
-  opacity: 0; transform: translateY(30px);
-  animation: fadeUp 0.8s ease 0.35s forwards;
-}
 .hero-title .accent { color: var(--crimson); }
-.hero-subtitle {
-  font-family: 'Instrument Serif', serif; font-style: italic;
-  font-size: 22px; color: var(--muted); margin-bottom: 36px; line-height: 1.4;
-  opacity: 0; transform: translateY(20px);
-  animation: fadeUp 0.7s ease 0.5s forwards;
-}
-.hero-desc {
-  font-size: 15px; color: var(--muted);
-  max-width: 420px; margin-bottom: 48px; line-height: 1.8;
-  opacity: 0; transform: translateY(20px);
-  animation: fadeUp 0.7s ease 0.65s forwards;
-}
-.hero-actions {
-  display: flex; gap: 16px; flex-wrap: wrap;
-  opacity: 0; transform: translateY(20px);
-  animation: fadeUp 0.7s ease 0.8s forwards;
-}
 /* Masthead credit line — the newsletter never named who runs it or that
    there's a studio behind it, the same gap the Tier-1 footer link closed
    sitewide, but visible on arrival this time, not just in the footer. */
-.hero-maintainer {
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  margin-top: 22px;
-  font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 1.3px;
-  text-transform: uppercase; color: var(--muted);
-  opacity: 0; transform: translateY(20px);
-  animation: fadeUp 0.7s ease 0.92s forwards;
-}
-.hero-maintainer b { color: var(--heading-fg); font-weight: 400; }
 .hero-maintainer .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-.hero-maintainer a {
-  color: var(--muted); text-decoration: none; border-bottom: 1px solid transparent;
-  transition: color 0.2s, border-color 0.2s;
-}
-.hero-maintainer a:hover { color: var(--crimson); border-color: var(--crimson); }
 @keyframes fadeUp {
   to { opacity: 1; transform: translateY(0); }
 }
@@ -316,34 +244,8 @@ nav.scrolled {
   display: inline-flex; align-items: center; gap: 10px;
 }
 .btn-ghost:hover { border-color: var(--crimson); color: var(--crimson); transform: translateY(-2px); }
-.hero-stats {
-  margin-top: 60px; display: flex; gap: 40px;
-  padding-top: 40px; border-top: 1px solid var(--hairline-3);
-  opacity: 0; transform: translateY(20px);
-  animation: fadeUp 0.7s ease 1s forwards;
-}
-.stat-num {
-  font-family: 'Bebas Neue', sans-serif; font-size: 42px; line-height: 1; color: var(--heading-fg);
-  transition: color 0.3s;
-}
-.stat-item:hover .stat-num { color: var(--crimson); }
-.stat-label {
-  font-family: 'DM Mono', monospace; font-size: 10px;
-  letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 4px;
-}
 
 /* ─── HERO RIGHT ─── */
-.hero-right {
-  background: var(--coal); position: relative; overflow: hidden; z-index: 2;
-  display: flex; flex-direction: column; justify-content: center;
-  align-items: center; padding: 60px 40px;
-}
-.hero-right::before {
-  content: ''; position: absolute; inset: 0;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(0,194,212,0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(229,57,53,0.15) 0%, transparent 50%);
-}
 .terminal {
   background: #12151c; border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px; width: 100%; max-width: 420px;
@@ -353,13 +255,7 @@ nav.scrolled {
 }
 
 /* ─── LIVE DEVOPS INFINITY LOOP (hero right) ─── */
-.devops-loop {
-  width: min(400px, 100%); margin: 0 auto 30px;
-  position: relative; z-index: 4; pointer-events: none;
-  animation: dol-in 0.9s ease 0.45s both;
-}
 @keyframes dol-in { from{opacity:0; transform:translateY(-16px) scale(0.96);} to{opacity:1; transform:translateY(0) scale(1);} }
-.devops-loop svg { width: 100%; height: auto; display: block; overflow: visible; }
 .dol-glow {
   fill: none; stroke: url(#dolAll); stroke-width: 15; stroke-linecap: round;
   opacity: 0.2; filter: blur(8px);
@@ -421,20 +317,6 @@ nav.scrolled {
 .t-badge:hover { background: rgba(0,194,212,0.15); border-color: var(--cyan); color: var(--cyan); }
 
 /* NEW: floating issue badge on hero-right */
-.hero-new-badge {
-  position: absolute; top: 24px; right: 24px;
-  background: rgba(229,57,53,0.9); color: #fff;
-  font-family: 'DM Mono', monospace; font-size: 10px;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  padding: 6px 14px; border-radius: 20px; z-index: 5;
-  display: flex; align-items: center; gap: 6px;
-  animation: pulse-badge 3s ease infinite;
-  text-decoration: none;
-}
-.hero-new-badge::before {
-  content: ''; width: 6px; height: 6px; border-radius: 50%;
-  background: #fff; animation: blink 1s step-end infinite;
-}
 @keyframes pulse-badge {
   0%,100%{box-shadow:0 0 0 0 rgba(229,57,53,0.5);}
   50%{box-shadow:0 0 0 8px rgba(229,57,53,0);}
@@ -925,12 +807,21 @@ html[data-theme="dark"] .sub-status.ok { color: var(--lime); }
   transition: box-shadow 0.2s, transform 0.2s;
 }
 .author-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.12); transform: translateY(-2px); }
+/* 96px rather than the old 56: at 56 a photograph is a thumbnail of a face
+   nobody can read, which is worse than the initials it replaced. The width
+   and height attributes are on the element too, so the row reserves its space
+   before the image arrives and the bio does not jump. */
 .author-avatar {
-  width:56px; height:56px; border-radius:50%;
+  width:96px; height:96px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
-  font-family:'Bebas Neue',sans-serif; font-size:22px; flex-shrink:0;
+  font-family:'Bebas Neue',sans-serif; font-size:30px; flex-shrink:0;
+  object-fit: cover;                  /* applies when it is an <img> */
+  object-position: 50% 22%;           /* keep the face off the top edge */
+  border: 1px solid var(--hairline-3);
+  background: var(--wash-1);
 }
 .author-avatar.v { background: linear-gradient(135deg, var(--crimson), #ff6b35); color: #fff; }
+@media (max-width: 600px) { .author-avatar { width:72px; height:72px; font-size:24px; } }
 .author-name { font-weight: 700; font-size: 16px; color: var(--heading-fg); }
 .author-role { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
 .author-bio { font-size: 14px; line-height: 1.6; color: var(--heading-fg); margin-top: 12px; max-width: 560px; }
@@ -1030,7 +921,9 @@ a.footer-logo:hover{color:#fff;}
 .footer-badge{display:inline-flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--lime,#84cc16);background:rgba(132,204,22,.1);border:1px solid rgba(132,204,22,.25);padding:6px 14px;border-radius:20px;}
 .fb-dot{width:5px;height:5px;border-radius:50%;background:var(--lime,#84cc16);flex-shrink:0;animation:fb-dot-pulse 2s ease-in-out infinite;}
 @keyframes fb-dot-pulse{0%,100%{box-shadow:0 0 0 0 rgba(132,204,22,.5);}50%{box-shadow:0 0 0 5px rgba(132,204,22,0);}}
-.footer-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+/* Four columns since the footer grew one; auto-fit rather than a hard 4 so
+   the tablet range folds to two rather than squeezing four to 90px each. */
+.footer-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:24px;}
 .footer-col{display:flex;flex-direction:column;gap:10px;}
 .footer-col-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.32);margin-bottom:6px;}
 .footer-col a{font-family:'DM Mono',monospace;font-size:12.5px;letter-spacing:.3px;color:rgba(255,255,255,.55);text-decoration:none;transition:color .2s;}
@@ -1069,6 +962,463 @@ a.footer-logo:hover{color:#fff;}
   .authors-section   { padding-left: 260px; }   /* 196 + its own 64 */
   .subscribe-section { padding-left: 196px; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CONTROL PLANE — the hero, rebuilt as a live system diagram
+   ══════════════════════════════════════════════════════════════════════════
+   This band stays dark in BOTH themes, deliberately. The rest of the site is
+   light by default with a toggle, and inverting all 880 pages was never the
+   ask. A console is dark because a console is dark; the band reads as the
+   thing it depicts — a running system — rather than as a theme the reader
+   has to opt into. Every token below is therefore literal rather than
+   var(--page-bg), so the toggle cannot half-apply to it.
+
+   The particles use CSS offset-path, NOT SVG <animateMotion>. That is the
+   load-bearing choice in this file. SMIL is invisible to
+   prefers-reduced-motion — no stylesheet can stop it, and getAnimations()
+   does not even report it, so it slips past both motion.css and
+   test_motion.py. offset-path is an ordinary CSS animation: motion.css
+   already collapses it to a single 0.01ms iteration, and the suite sees it.
+   ────────────────────────────────────────────────────────────────────────── */
+.cp {
+  position: relative;
+  background: #07080b;
+  color: #d6dae2;
+  border-top: 1px solid rgba(255,255,255,.09);
+  border-bottom: 1px solid rgba(255,255,255,.09);
+  overflow: hidden;
+  /* The top value never drops below 96px, and that floor is the whole point:
+     the site header is fixed and ~75px tall, so a fluid top padding that
+     shrinks with the viewport slides the eyebrow underneath it on a phone.
+     The old hero used a flat 80px for the same reason; this keeps the floor
+     and lets the padding grow on wide screens rather than shrink on small. */
+  padding: clamp(96px, 8vw, 132px) 0 clamp(36px, 6vw, 76px);
+}
+/* A surveyor's grid, not a decoration: it gives the diagram a plane to sit
+   on and makes the whole band read as a schematic. */
+.cp::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 85% 70% at 50% 40%, #000 55%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 40%, #000 55%, transparent 100%);
+}
+.cp-inner {
+  position: relative; z-index: 1;
+  max-width: 1280px; margin: 0 auto; padding: 0 24px;
+  display: grid; gap: clamp(32px, 5vw, 64px);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+}
+@media (min-width: 1024px) {
+  .cp-inner { grid-template-columns: minmax(0, 46fr) minmax(0, 54fr); }
+}
+
+/* ── left column ───────────────────────────────────────────────────────── */
+.cp-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  color: #6f7a8c; margin-bottom: 22px;
+}
+.cp-eyebrow i { display: block; width: 26px; height: 1px; background: var(--cyan); font-style: normal; }
+.cp-title {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(46px, 8.5vw, 104px);
+  line-height: .92; letter-spacing: .005em;
+  margin: 0 0 20px; color: #fff;
+}
+.cp-title span { display: block; }
+.cp-title .t2 { color: var(--cyan); }
+.cp-title .t3 { color: #5d6675; }
+.cp-lede {
+  font-size: clamp(14px, 1.5vw, 16.5px); line-height: 1.65;
+  color: #9aa3b2; max-width: 46ch; margin: 0 0 26px;
+}
+.cp-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 30px; }
+.cp-chips span {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .1em; color: #8b95a6;
+  border: 1px solid rgba(255,255,255,.13); border-radius: 3px;
+  padding: 5px 9px; white-space: nowrap;
+}
+.cp-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.cp-btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: 13.5px; font-weight: 500; text-decoration: none;
+  padding: 12px 20px; border-radius: 4px; border: 1px solid transparent;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+.cp-btn-primary { background: var(--cyan); color: #04151a; }
+.cp-btn-primary:hover { background: #2ad6e6; }
+.cp-btn-ghost { border-color: rgba(255,255,255,.2); color: #cdd4de; }
+.cp-btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+.cp-btn svg { flex-shrink: 0; }
+
+/* ── the diagram ───────────────────────────────────────────────────────── */
+.cp-diagram { position: relative; width: 100%; }
+.cp-diagram svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+.cp-edge { stroke: rgba(255,255,255,.17); stroke-width: 1.4; fill: none; }
+.cp-node rect {
+  fill: #0e1117; stroke: rgba(255,255,255,.19); stroke-width: 1.2;
+  transition: fill .2s ease, stroke .2s ease;
+}
+.cp-node text {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .07em; fill: #aab3c2;
+  text-anchor: middle; dominant-baseline: middle;
+  transition: fill .2s ease;
+  pointer-events: none;                 /* the <a>/<g> owns the hit area */
+}
+.cp-node { cursor: pointer; }
+.cp-node:hover rect, .cp-node:focus-visible rect { fill: #13202b; stroke: var(--cyan); }
+.cp-node:hover text, .cp-node:focus-visible text { fill: #fff; }
+.cp-node:focus-visible { outline: none; }
+.cp-node:focus-visible rect { stroke-width: 2.2; }
+
+/* Dimming is done by raising everything else's opacity DOWN rather than by
+   colouring the active path up: one class on the <svg> instead of hunting
+   every related edge in JS. */
+.cp-diagram.is-focus .cp-node { opacity: .32; }
+.cp-diagram.is-focus .cp-edge { opacity: .12; }
+.cp-diagram.is-focus .cp-node.on { opacity: 1; }
+.cp-diagram.is-focus .cp-edge.on { opacity: 1; stroke: var(--cyan); stroke-width: 2; }
+.cp-node, .cp-edge { transition: opacity .2s ease, stroke .2s ease, stroke-width .2s ease; }
+
+/* Particles. offset-path carries them along the same geometry as the edge
+   they belong to, so a moving dot is literally the request travelling that
+   link — not a decorative dot flying near it. */
+.cp-dot {
+  offset-rotate: 0deg;
+  animation: cp-travel 3.2s linear infinite;
+  fill: var(--cyan);
+}
+@keyframes cp-travel {
+  from { offset-distance: 0%;   opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  to   { offset-distance: 100%; opacity: 0; }
+}
+
+/* Tooltip */
+.cp-tip {
+  position: absolute; z-index: 5; pointer-events: none;
+  background: #0d1218; border: 1px solid rgba(255,255,255,.17);
+  border-radius: 5px; padding: 9px 12px; max-width: 250px;
+  opacity: 0; transform: translateY(3px);
+  transition: opacity .15s ease, transform .15s ease;
+}
+.cp-tip.show { opacity: 1; transform: translateY(0); }
+.cp-tip b {
+  display: block; font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .1em; color: var(--cyan);
+  text-transform: uppercase; margin-bottom: 4px; font-weight: 400;
+}
+.cp-tip span { display: block; font-size: 12.5px; line-height: 1.5; color: #b9c1cd; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE KNOWLEDGE SYSTEM — the counter band
+   ══════════════════════════════════════════════════════════════════════════ */
+.ks { background: #0a0c10; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(36px, 5vw, 60px) 0; }
+.ks-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.ks-head {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  color: #6f7a8c; margin: 0 0 26px;
+  display: flex; align-items: center; gap: 12px;
+}
+.ks-head::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,.1); }
+.ks-grid {
+  display: grid; gap: 1px; background: rgba(255,255,255,.09);
+  border: 1px solid rgba(255,255,255,.09); border-radius: 6px; overflow: hidden;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 720px)  { .ks-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .ks-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.ks-cell { background: #0d1015; padding: 22px 18px; }
+.ks-num {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(30px, 4vw, 44px); line-height: 1; color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.ks-cell[data-tone="live"]  .ks-num { color: var(--lime); }
+.ks-cell[data-tone="pipe"]  .ks-num { color: var(--amber); }
+.ks-cell[data-tone="plan"]  .ks-num { color: #7c8797; }
+.ks-label {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .11em; text-transform: uppercase;
+  color: #79839360; color: #7c8797; margin-top: 7px;
+}
+/* Status is never carried by colour alone — each coverage cell states its
+   meaning in words as well, for colour-blind readers and for anyone reading
+   this in a screen reader. */
+.ks-note { font-size: 11.5px; line-height: 1.5; color: #6f7a8c; margin-top: 5px; }
+.ks-foot { margin-top: 18px; font-size: 12.5px; color: #7c8797; }
+.ks-foot a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid rgba(0,194,212,.35); }
+.ks-foot a:hover { border-color: var(--cyan); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NOTICE BOARD
+   ══════════════════════════════════════════════════════════════════════════
+   A station departure board for the archive. Nothing here flashes: the lamp
+   breathes on a 2.4s cycle and the title flaps into place ONCE on arrival.
+   WCAG 2.3.1 puts the seizure threshold at three flashes a second, and a
+   board that strobes is a board people scroll past — "live" is carried by a
+   slow pulse and a one-time settle, which is what a real board does too. */
+.nb { background: #07080b; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(36px, 5vw, 64px) 0; }
+.nb-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.nb-frame {
+  border: 1px solid rgba(255,255,255,.14); border-radius: 8px; overflow: hidden;
+  background:
+    repeating-linear-gradient(180deg, rgba(255,255,255,.016) 0 1px, transparent 1px 3px),
+    #0b0e13;
+}
+.nb-top {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,.11);
+  background: #0d1117;
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .13em; text-transform: uppercase;
+}
+.nb-lamp {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--lime);
+  box-shadow: 0 0 7px rgba(132,204,22,.8); flex-shrink: 0;
+  animation: nb-breathe 2.4s ease-in-out infinite;
+}
+@keyframes nb-breathe { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+.nb-live { color: var(--lime); }
+.nb-title { font: inherit; margin: 0; color: #6f7a8c; font-weight: 400; }
+.nb-stamp { margin-left: auto; color: #5d6675; }
+
+.nb-hero { padding: 26px 18px 24px; border-bottom: 1px solid rgba(255,255,255,.09); }
+.nb-hero-meta {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10.5px;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--amber); margin-bottom: 10px;
+}
+.nb-flap {
+  margin: 0 0 18px; color: #fff;
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(28px, 5vw, 58px); line-height: 1.02; letter-spacing: .012em;
+  perspective: 500px;
+}
+.nb-flap span {
+  display: inline-block; transform-origin: 50% 0;
+  animation: nb-flap .42s cubic-bezier(.2,.75,.25,1) both;
+}
+@keyframes nb-flap {
+  from { transform: rotateX(-88deg); opacity: 0; }
+  to   { transform: none;            opacity: 1; }
+}
+.nb-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; text-decoration: none; color: #04151a; background: var(--cyan);
+  padding: 10px 16px; border-radius: 4px; transition: background-color .18s ease;
+}
+.nb-cta:hover { background: #2ad6e6; }
+
+.nb-list { font-family: 'DM Mono', ui-monospace, monospace; font-size: 12px; }
+.nb-head, .nb-row {
+  display: grid; align-items: center; gap: 14px; padding: 11px 18px;
+  grid-template-columns: 58px minmax(0,1fr) 92px 52px;
+}
+.nb-head { color: #5d6675; font-size: 10px; letter-spacing: .13em; text-transform: uppercase;
+  border-bottom: 1px solid rgba(255,255,255,.07); }
+.nb-row { color: #98a2b1; text-decoration: none; border-top: 1px solid rgba(255,255,255,.05);
+  transition: background-color .16s ease, color .16s ease; }
+.nb-row:first-of-type { border-top: 0; }
+.nb-row:hover { background: #121820; color: #e6eaf0; }
+.nb-no { color: #6f7a8c; }
+.nb-ti { color: #cfd6e0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nb-ca { color: #6f7a8c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nb-st { color: #5d6675; text-align: right; }
+.nb-row[data-new] .nb-st { color: var(--lime); }
+.nb-row[data-new] .nb-no { color: var(--amber); }
+/* Below 640px the series and status columns are the first to go: an issue
+   number and a title are the two things a board has to show. */
+@media (max-width: 640px) {
+  .nb-head, .nb-row { grid-template-columns: 50px minmax(0,1fr) 44px; gap: 10px; }
+  .nb-ca { display: none; }
+}
+.nb-foot { padding: 12px 18px; font-size: 11.5px; color: #6f7a8c;
+  border-top: 1px solid rgba(255,255,255,.09); background: #0a0d12; }
+.nb-foot a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid rgba(0,194,212,.35); }
+.nb-foot a:hover { border-color: var(--cyan); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   KNOWLEDGE CONSTELLATION
+   ══════════════════════════════════════════════════════════════════════════
+   Two presentations of one list. The circle is the desktop view; below 860px
+   it is replaced by the plain list underneath, because thirteen labels around
+   a ring on a phone is thirteen labels nobody can read. Both are generated
+   from the same loop in build_kmap.py, so they cannot disagree. */
+.kc { background: #07080b; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(44px, 6vw, 84px) 0; }
+.kc-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.kc-head {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(26px, 3.4vw, 40px); letter-spacing: .01em;
+  color: #fff; margin: 0 0 8px;
+}
+.kc-lede { font-size: 14px; line-height: 1.6; color: #8b95a6; margin: 0 0 12px; max-width: 54ch; }
+
+.kc-stage { position: relative; display: none; }
+@media (min-width: 860px) { .kc-stage { display: block; } }
+/* Capped rather than full-bleed: the viewBox is fitted to the drawing, so at
+   full container width the circle renders about a thousand pixels tall and
+   the reader has to scroll it in two goes. 900px keeps the whole map on one
+   screen, which is the only reason to draw it as a map. */
+.kc-stage svg { width: 100%; max-width: 900px; margin: 0 auto; height: auto; display: block; overflow: visible; }
+
+.kc-edge { stroke: rgba(255,255,255,.12); stroke-width: 1; fill: none; transition: stroke .2s ease, stroke-width .2s ease; }
+.kc-core-ring { fill: none; stroke: rgba(0,194,212,.3); stroke-width: 1; stroke-dasharray: 3 7; animation: kc-spin 44s linear infinite; transform-origin: 500px 430px; }
+.kc-core-disc { fill: #0c1419; stroke: rgba(0,194,212,.5); stroke-width: 1.4; }
+.kc-core-t {
+  font-family: 'Bebas Neue', Impact, sans-serif; font-size: 21px;
+  fill: var(--cyan); text-anchor: middle; dominant-baseline: middle;
+  letter-spacing: .06em;
+}
+@keyframes kc-spin { to { transform: rotate(360deg); } }
+
+.kc-node { cursor: pointer; }
+.kc-halo { fill: rgba(0,194,212,.08); opacity: 0; transition: opacity .2s ease; }
+.kc-disc { fill: #11161d; stroke: rgba(255,255,255,.22); stroke-width: 1.2; transition: fill .2s ease, stroke .2s ease; }
+.kc-n {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 12px;
+  fill: #cfd6e0; text-anchor: middle; dominant-baseline: middle; pointer-events: none;
+}
+.kc-l {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 11.5px;
+  letter-spacing: .06em; fill: #8b95a6; dominant-baseline: middle;
+  pointer-events: none; transition: fill .2s ease;
+}
+.kc-node:hover .kc-halo, .kc-node:focus-visible .kc-halo { opacity: 1; }
+.kc-node:hover .kc-disc, .kc-node:focus-visible .kc-disc { fill: #12232c; stroke: var(--cyan); }
+.kc-node:hover .kc-l, .kc-node:focus-visible .kc-l { fill: #fff; }
+.kc-node:focus-visible { outline: none; }
+.kc-node:focus-visible .kc-disc { stroke-width: 2.4; }
+
+.kc-stage.is-focus .kc-node { opacity: .3; }
+.kc-stage.is-focus .kc-edge { opacity: .08; }
+.kc-stage.is-focus .kc-node.on { opacity: 1; }
+.kc-stage.is-focus .kc-edge.on { opacity: 1; stroke: var(--cyan); stroke-width: 1.8; }
+.kc-node { transition: opacity .2s ease; }
+
+.kc-dot { fill: rgba(0,194,212,.75); animation: kc-travel 4.4s linear infinite; }
+@keyframes kc-travel {
+  from { offset-distance: 0%; opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  to   { offset-distance: 100%; opacity: 0; }
+}
+
+.kc-tip {
+  position: absolute; z-index: 5; pointer-events: none;
+  background: #0d1218; border: 1px solid rgba(255,255,255,.17);
+  border-radius: 5px; padding: 9px 12px; max-width: 260px;
+  opacity: 0; transform: translateY(3px);
+  transition: opacity .15s ease, transform .15s ease;
+}
+.kc-tip.show { opacity: 1; transform: translateY(0); }
+.kc-tip b {
+  display: block; font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .1em; color: var(--cyan);
+  text-transform: uppercase; margin-bottom: 4px; font-weight: 400;
+}
+.kc-tip span { display: block; font-size: 12.5px; line-height: 1.5; color: #b9c1cd; }
+
+/* The list: the whole content on a phone, and a fallback everywhere. */
+.kc-list { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 1px;
+  background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.09);
+  border-radius: 6px; overflow: hidden; }
+@media (min-width: 560px) { .kc-list { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 860px) { .kc-list { display: none; } }
+.kc-list a { display: block; background: #0d1015; padding: 14px 16px; text-decoration: none; }
+.kc-list a:hover { background: #131922; }
+.kc-list b { display: block; font-size: 14px; color: #e6eaf0; font-weight: 500; margin-bottom: 3px; }
+.kc-list span { display: block; font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .06em; color: #7c8797; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MASTHEAD — what this publication is, and who stands behind it
+   ══════════════════════════════════════════════════════════════════════════
+   Not a logo wall. For a technical newsletter the brand IS the editorial
+   promise, so this states the four commitments a reader can actually hold it
+   to, and names the two people-shaped things behind it. The author's full
+   biography already lives in the Authors section; repeating it here would
+   dilute both. */
+.mh { background: #07080b; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(44px, 6vw, 80px) 0; }
+.mh-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.mh-mark {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(38px, 6.5vw, 76px); line-height: .92; color: #fff;
+  margin: 0 0 10px; letter-spacing: .01em;
+}
+.mh-mark span { color: var(--cyan); }
+.mh-line { font-size: clamp(14px, 1.6vw, 17px); color: #9aa3b2; margin: 0 0 30px; max-width: 52ch; line-height: 1.6; }
+.mh-promises { display: grid; gap: 1px; background: rgba(255,255,255,.09);
+  border: 1px solid rgba(255,255,255,.09); border-radius: 6px; overflow: hidden;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-bottom: 32px; }
+.mh-promise { background: #0d1015; padding: 18px 18px 20px; }
+.mh-promise b {
+  display: block; font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--cyan); font-weight: 400; margin-bottom: 7px;
+}
+.mh-promise span { display: block; font-size: 13px; line-height: 1.55; color: #98a2b1; }
+.mh-by { display: grid; gap: 22px; grid-template-columns: minmax(0,1fr); }
+@media (min-width: 760px) { .mh-by { grid-template-columns: 1fr 1fr; } }
+.mh-card { border: 1px solid rgba(255,255,255,.11); border-radius: 6px; padding: 20px; background: #0a0d12; }
+.mh-role {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10.5px;
+  letter-spacing: .12em; text-transform: uppercase; color: #6f7a8c; margin-bottom: 8px;
+}
+.mh-name { font-size: 18px; color: #fff; margin: 0 0 6px; font-weight: 500; }
+.mh-desc { font-size: 13px; line-height: 1.6; color: #98a2b1; margin: 0 0 12px; }
+.mh-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.mh-links a {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10.5px;
+  letter-spacing: .07em; color: #aab3c2; text-decoration: none;
+  border: 1px solid rgba(255,255,255,.14); border-radius: 3px; padding: 6px 10px;
+  transition: border-color .18s ease, color .18s ease;
+}
+.mh-links a:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* ── About Platform Ops, inside the Authors block ────────────────────────
+   Theme-aware, unlike the dark bands above it: this sits inside the light
+   Authors section, so it follows the page tokens rather than fighting them. */
+.apo {
+  margin-top: 28px; padding: 26px 26px 24px;
+  border: 1px solid var(--hairline-3); border-radius: 8px;
+  background: var(--card-bg);
+}
+.apo-tag {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 12px;
+}
+.apo-lede { font-size: 15px; line-height: 1.65; color: var(--page-fg); margin: 0 0 20px; max-width: 68ch; }
+.apo-obj { border-left: 2px solid var(--crimson); padding-left: 18px; margin-bottom: 18px; }
+.apo-obj-label {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.apo-motto {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(26px, 3.6vw, 40px); line-height: 1; margin: 0 0 12px;
+  color: var(--heading-fg); letter-spacing: .015em;
+}
+.apo-motto span { margin-right: .28em; }
+.apo-motto span:nth-child(2) { color: var(--crimson); }
+.apo-body { font-size: 14px; line-height: 1.7; color: var(--page-fg); margin: 0; max-width: 64ch; }
+.apo-sign {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 12px; letter-spacing: .1em; color: var(--muted);
+  margin: 0; padding-top: 16px; border-top: 1px solid var(--hairline-2);
+}
+@media (max-width: 600px) { .apo { padding: 20px 18px; } }
 </style>
 </head>
 <body>
@@ -1093,169 +1443,175 @@ a.footer-logo:hover{color:#fff;}
 </nav>
 
 <!-- ═══════════ HERO ═══════════ -->
-<section class="hero">
-  <div class="hero-pipeline-bg" aria-hidden="true">
-    <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <path id="hpgLoop" class="hpg-path" d="M120,350 C120,195.4 290.1,70 500,70 C709.9,70 880,195.4 880,350 C880,504.6 709.9,630 500,630 C290.1,630 120,504.6 120,350 Z"/>
-      </defs>
-      <use href="#hpgLoop"/>
-      <text class="hpg-text" dy="5">
-        <textPath href="#hpgLoop" startOffset="0%">PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • PLATFORM OPERATIONS • </textPath>
-      </text>
+<!-- ═══════════ CONTROL PLANE (hero) ═══════════ -->
+<section class="cp" aria-labelledby="cp-title">
+  <div class="cp-inner">
 
-      <circle class="hpg-flow-dot" r="4" fill="var(--cyan)" style="color:var(--cyan)">
-        <animateMotion dur="14s" repeatCount="indefinite" rotate="auto"><mpath href="#hpgLoop"/></animateMotion>
-      </circle>
-      <circle class="hpg-flow-dot" r="4" fill="var(--amber)" style="color:var(--amber)">
-        <animateMotion dur="14s" begin="-7s" repeatCount="indefinite" rotate="auto"><mpath href="#hpgLoop"/></animateMotion>
-      </circle>
-
-      <!-- 8 pipeline stage nodes, evenly spaced around the loop — small & muted so they read as background texture -->
-      <circle class="hpg-node-dot" cx="880" cy="350" r="5" fill="rgba(229,57,53,0.3)"/>
-      <circle class="hpg-node-dot" cx="768.7" cy="548" r="5" fill="rgba(245,158,11,0.3)" style="animation-delay:.3s"/>
-      <circle class="hpg-node-dot" cx="500" cy="630" r="5" fill="rgba(0,194,212,0.3)" style="animation-delay:.6s"/>
-      <circle class="hpg-node-dot" cx="231.3" cy="548" r="5" fill="rgba(132,204,22,0.3)" style="animation-delay:.9s"/>
-      <circle class="hpg-node-dot" cx="120" cy="350" r="5" fill="rgba(229,57,53,0.3)" style="animation-delay:1.2s"/>
-      <circle class="hpg-node-dot" cx="231.3" cy="152" r="5" fill="rgba(245,158,11,0.3)" style="animation-delay:1.5s"/>
-      <circle class="hpg-node-dot" cx="500" cy="70" r="5" fill="rgba(0,194,212,0.3)" style="animation-delay:1.8s"/>
-      <circle class="hpg-node-dot" cx="768.7" cy="152" r="5" fill="rgba(132,204,22,0.3)" style="animation-delay:2.1s"/>
-    </svg>
-  </div>
-  <div class="hero-left">
-    <div class="hero-eyebrow">
-      <span class="hero-eyebrow-line"></span>
-      Monthly Technical Newsletter
-    </div>
-    <h1 class="hero-title">
-      PLATFORM <br><span class="accent">OPS</span>
-    </h1>
-    <p class="hero-subtitle">Tech with Vishal Abhinav</p>
-    <p class="hero-desc">Engineering knowledge for DevOps engineers, SREs, and Platform builders — with deep dives into Kubernetes, cloud infrastructure, observability, and modern tooling.</p>
-    <div class="hero-actions">
-      <a href="#subscribe" class="btn-primary">
-        <span>Subscribe Free</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-      <a href="#issues" class="btn-ghost">
-        Browse Issues
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-      </a>
-    </div>
-    <div class="hero-maintainer">
-      <span>Maintained by <b>Vishal Abhinav</b> — Platform Engineer</span>
-      <span class="dot" aria-hidden="true"></span>
-      <a href="https://srivantechnologies.com/" target="_blank" rel="noopener">Srivan Technologies ↗</a>
-    </div>
-    <div class="hero-stats">
-      <div class="stat-item">
-        <div class="stat-num"><span class="count-up" data-target="57">0</span></div>
-        <div class="stat-label">Issues Published</div>
+    <div class="cp-left">
+      <div class="cp-eyebrow"><i aria-hidden="true"></i>Platform Engineering Knowledge System</div>
+      <h1 class="cp-title" id="cp-title">
+        <span class="t1">Build.</span>
+        <span class="t2">Operate.</span>
+        <span class="t3">Understand.</span>
+      </h1>
+      <p class="cp-lede">Practical engineering knowledge for DevOps, SRE, Platform Engineering, Infrastructure, Cloud and modern production systems.</p>
+      <div class="cp-chips" aria-label="Subject areas">
+        <span>DEVOPS</span><span>SRE</span><span>PLATFORM</span><span>CLOUD</span><span>KUBERNETES</span><span>INFRASTRUCTURE</span>
       </div>
-      <div class="stat-item">
-        <div class="stat-num">250+</div>
-        <div class="stat-label">Subscribers</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">&lt;1</div>
-        <div class="stat-label">Years Running</div>
+      <div class="cp-actions">
+        <a class="cp-btn cp-btn-primary" href="categories/index.html">
+          Explore Knowledge
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a class="cp-btn cp-btn-ghost" href="architecture/index.html">
+          Explore Architecture
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
       </div>
     </div>
-  </div>
 
-  <div class="hero-right">
-    <a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html" class="hero-new-badge">📖 New — Issue #057</a>
+    <!-- The system this newsletter is about, drawn as the system it is.
+         Hovering a stage lights the paths it participates in. -->
+    <div class="cp-diagram" id="cpDiagram">
+      <svg viewBox="0 0 520 620" role="img" aria-labelledby="cpDiagTitle cpDiagDesc">
+        <title id="cpDiagTitle">A change travelling from a developer to production</title>
+        <desc id="cpDiagDesc">Developer to Git to CI and CD to Kubernetes and OpenShift, which fans out to network, storage and compute, then back through observability to SRE and finally production.</desc>
 
-    <!-- ── LIVE DEVOPS LOOP ── -->
-    <div class="devops-loop" role="img" aria-label="The DevOps lifecycle loop: plan, code, build, test, release, deploy, operate, monitor">
-      <svg viewBox="-34 0 388 190" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="dolDev" gradientUnits="userSpaceOnUse" x1="0" y1="45" x2="0" y2="145">
-            <stop offset="0" stop-color="#00c2d4"/>
-            <stop offset="1" stop-color="#84cc16"/>
-          </linearGradient>
-          <linearGradient id="dolOps" gradientUnits="userSpaceOnUse" x1="0" y1="45" x2="0" y2="145">
-            <stop offset="0" stop-color="#f59e0b"/>
-            <stop offset="1" stop-color="#e53935"/>
-          </linearGradient>
-          <linearGradient id="dolAll" gradientUnits="userSpaceOnUse" x1="52" y1="0" x2="268" y2="0">
-            <stop offset="0" stop-color="#00c2d4"/>
-            <stop offset="0.45" stop-color="#84cc16"/>
-            <stop offset="0.55" stop-color="#f59e0b"/>
-            <stop offset="1" stop-color="#e53935"/>
-          </linearGradient>
-        </defs>
+        <g class="cp-edges" fill="none">
+          <path id="e-dev-git"  class="cp-edge" d="M260,58 L260,95"/>
+          <path id="e-git-cicd" class="cp-edge" d="M260,133 L260,170"/>
+          <path id="e-cicd-k8s" class="cp-edge" d="M260,208 L260,245"/>
+          <path id="e-k8s-net"  class="cp-edge" d="M260,283 C260,312 85,312 85,340"/>
+          <path id="e-k8s-sto"  class="cp-edge" d="M260,283 L260,340"/>
+          <path id="e-k8s-com"  class="cp-edge" d="M260,283 C260,312 435,312 435,340"/>
+          <path id="e-net-obs"  class="cp-edge" d="M85,378 C85,408 260,408 260,435"/>
+          <path id="e-sto-obs"  class="cp-edge" d="M260,378 L260,435"/>
+          <path id="e-com-obs"  class="cp-edge" d="M435,378 C435,408 260,408 260,435"/>
+          <path id="e-obs-sre"  class="cp-edge" d="M260,473 L260,505"/>
+          <path id="e-sre-prod" class="cp-edge" d="M260,543 L260,575"/>
+        </g>
 
-        <!-- soft neon glow underlay -->
-        <path class="dol-glow" d="M160,95 C160,60 185,45 212,45 C245,45 268,67 268,95 C268,123 245,145 212,145 C185,145 160,130 160,95 C160,60 135,45 108,45 C75,45 52,67 52,95 C52,123 75,145 108,145 C135,145 160,130 160,95 Z"/>
+        <g class="cp-flow" aria-hidden="true">
+          <circle class="cp-dot" r="3" style="offset-path:path('M260,58 L260,95')"/>
+          <circle class="cp-dot" r="3" style="offset-path:path('M260,133 L260,170'); animation-delay:.35s"/>
+          <circle class="cp-dot" r="3" style="offset-path:path('M260,208 L260,245'); animation-delay:.7s"/>
+          <circle class="cp-dot" r="3" style="offset-path:path('M260,283 C260,312 85,312 85,340'); animation-delay:1.05s"/>
+          <circle class="cp-dot" r="3" style="offset-path:path('M260,283 L260,340'); animation-delay:1.05s"/>
+          <circle class="cp-dot" r="3" style="offset-path:path('M260,283 C260,312 435,312 435,340'); animation-delay:1.05s"/>
+          <circle class="cp-dot" r="3" style="offset-path:path('M260,378 L260,435'); animation-delay:1.5s; fill:var(--amber)"/>
+          <circle class="cp-dot" r="3" style="offset-path:path('M260,473 L260,505'); animation-delay:1.85s; fill:var(--amber)"/>
+          <circle class="cp-dot" r="3" style="offset-path:path('M260,543 L260,575'); animation-delay:2.2s; fill:var(--lime)"/>
+        </g>
 
-        <!-- the two lobes -->
-        <path class="dol-track dol-track-dev" d="M160,95 C160,60 135,45 108,45 C75,45 52,67 52,95 C52,123 75,145 108,145 C135,145 160,130 160,95"/>
-        <path class="dol-track dol-track-ops" d="M160,95 C160,60 185,45 212,45 C245,45 268,67 268,95 C268,123 245,145 212,145 C185,145 160,130 160,95"/>
-
-        <!-- live pulses racing the loop -->
-        <path class="dol-comet" pathLength="1000" d="M160,95 C160,60 185,45 212,45 C245,45 268,67 268,95 C268,123 245,145 212,145 C185,145 160,130 160,95 C160,60 135,45 108,45 C75,45 52,67 52,95 C52,123 75,145 108,145 C135,145 160,130 160,95 Z"/>
-        <path class="dol-comet dol-comet-2" pathLength="1000" d="M160,95 C160,60 185,45 212,45 C245,45 268,67 268,95 C268,123 245,145 212,145 C185,145 160,130 160,95 C160,60 135,45 108,45 C75,45 52,67 52,95 C52,123 75,145 108,145 C135,145 160,130 160,95 Z"/>
-
-        <!-- DEV / OPS -->
-        <text class="dol-lobe" x="106" y="108" textLength="62" lengthAdjust="spacingAndGlyphs">DEV</text>
-        <text class="dol-lobe" x="214" y="108" textLength="62" lengthAdjust="spacingAndGlyphs">OPS</text>
-
-        <!-- stage stations -->
-        <circle class="dol-node" cx="144" cy="57"    r="6" fill="#171b22" stroke="#00c2d4" stroke-width="2.5" style="animation-delay:0s"/>
-        <circle class="dol-node" cx="68"  cy="59.5"  r="6" fill="#171b22" stroke="#00c2d4" stroke-width="2.5" style="animation-delay:.5s"/>
-        <circle class="dol-node" cx="52"  cy="95"    r="6" fill="#171b22" stroke="#42c775" stroke-width="2.5" style="animation-delay:1s"/>
-        <circle class="dol-node" cx="68"  cy="130.5" r="6" fill="#171b22" stroke="#84cc16" stroke-width="2.5" style="animation-delay:1.5s"/>
-        <circle class="dol-node" cx="176" cy="57"    r="6" fill="#171b22" stroke="#f59e0b" stroke-width="2.5" style="animation-delay:2s"/>
-        <circle class="dol-node" cx="252" cy="59.5"  r="6" fill="#171b22" stroke="#f59e0b" stroke-width="2.5" style="animation-delay:2.5s"/>
-        <circle class="dol-node" cx="268" cy="95"    r="6" fill="#171b22" stroke="#ed6b20" stroke-width="2.5" style="animation-delay:3s"/>
-        <circle class="dol-node" cx="252" cy="130.5" r="6" fill="#171b22" stroke="#e53935" stroke-width="2.5" style="animation-delay:3.5s"/>
-
-        <!-- DEV -> OPS handoff marker at the crossing -->
-        <circle cx="160" cy="95" r="7" fill="#171b22" stroke="rgba(255,255,255,0.75)" stroke-width="2"/>
-
-        <!-- stage labels -->
-        <text class="dol-label" x="134" y="32">Plan</text>
-        <text class="dol-label" x="64"  y="32">Code</text>
-        <text class="dol-label" x="20"  y="99">Build</text>
-        <text class="dol-label" x="64"  y="164">Test</text>
-        <text class="dol-label" x="188" y="32">Release</text>
-        <text class="dol-label" x="256" y="32">Deploy</text>
-        <text class="dol-label" x="307" y="99">Operate</text>
-        <text class="dol-label" x="256" y="164">Monitor</text>
+        <g class="cp-nodes">
+          <g class="cp-node" tabindex="0" role="group" data-edges="e-dev-git"
+             data-t="Developer" data-d="Where a change starts: an engineer, an editor and a local test run.">
+            <rect x="185" y="20" width="150" height="38" rx="4"/>
+            <text x="260" y="39">DEVELOPER</text>
+          </g>
+          <a class="cp-node" href="Foundation/GIT-VERSION-CONTROL/git-version-control.html" data-edges="e-dev-git e-git-cicd"
+             data-t="Git" data-d="Version control, branching, history and recovery.">
+            <rect x="185" y="95" width="150" height="38" rx="4"/>
+            <text x="260" y="114">GIT</text>
+          </a>
+          <a class="cp-node" href="categories/devops/index.html" data-edges="e-git-cicd e-cicd-k8s"
+             data-t="CI / CD" data-d="Build, test and deliver automatically on every commit.">
+            <rect x="185" y="170" width="150" height="38" rx="4"/>
+            <text x="260" y="189">CI / CD</text>
+          </a>
+          <a class="cp-node" href="categories/kubernetes/index.html" data-edges="e-cicd-k8s e-k8s-net e-k8s-sto e-k8s-com"
+             data-t="Kubernetes / OpenShift" data-d="Container orchestration, scheduling, networking and workload management.">
+            <rect x="160" y="245" width="200" height="38" rx="4"/>
+            <text x="260" y="264">KUBERNETES / OPENSHIFT</text>
+          </a>
+          <a class="cp-node" href="categories/networking/index.html" data-edges="e-k8s-net e-net-obs"
+             data-t="Network" data-d="Service discovery, ingress, DNS and the paths between workloads.">
+            <rect x="26" y="340" width="118" height="38" rx="4"/>
+            <text x="85" y="359">NETWORK</text>
+          </a>
+          <a class="cp-node" href="categories/storage/index.html" data-edges="e-k8s-sto e-sto-obs"
+             data-t="Storage" data-d="Volumes, storage classes, persistence and the data that outlives a pod.">
+            <rect x="201" y="340" width="118" height="38" rx="4"/>
+            <text x="260" y="359">STORAGE</text>
+          </a>
+          <a class="cp-node" href="categories/virtualization/index.html" data-edges="e-k8s-com e-com-obs"
+             data-t="Compute" data-d="Nodes, CPU and memory, and the capacity workloads are scheduled onto.">
+            <rect x="376" y="340" width="118" height="38" rx="4"/>
+            <text x="435" y="359">COMPUTE</text>
+          </a>
+          <a class="cp-node" href="categories/observability/index.html" data-edges="e-net-obs e-sto-obs e-com-obs e-obs-sre"
+             data-t="Observability" data-d="Metrics, logs and traces — what the system says about itself.">
+            <rect x="185" y="435" width="150" height="38" rx="4"/>
+            <text x="260" y="454">OBSERVABILITY</text>
+          </a>
+          <a class="cp-node" href="categories/sre/index.html" data-edges="e-obs-sre e-sre-prod"
+             data-t="SRE" data-d="Error budgets, incident response and the practice of running production.">
+            <rect x="185" y="505" width="150" height="38" rx="4"/>
+            <text x="260" y="524">SRE</text>
+          </a>
+          <g class="cp-node" tabindex="0" role="group" data-edges="e-sre-prod"
+             data-t="Production" data-d="Real users, real traffic, real consequences.">
+            <rect x="185" y="575" width="150" height="38" rx="4"/>
+            <text x="260" y="594">PRODUCTION</text>
+          </g>
+        </g>
       </svg>
+      <div class="cp-tip" id="cpTip" role="status" aria-live="polite"><b></b><span></span></div>
     </div>
 
-    <div class="terminal">
-      <div class="terminal-bar">
-        <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
-        <div class="t-title">platform-ops ~ issue #057</div>
-      </div>
-      <div class="terminal-body">
-        <span class="tl"><span class="tl-prompt">/</span> <span class="tl-cmd">glossary search "systemd"</span></span>
-        <span class="tl tl-out">3 matches across 190 terms</span>
-        <span class="tl"><span class="tl-k">category</span>   <span class="tl-out">services-systemd-boot</span></span>
-        <span class="tl"> </span>
-        <span class="tl"><span class="tl-prompt">/</span> <span class="tl-cmd">glossary open --term "Init"</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">standalone page found — full deep-dive</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">15 categories · 190 terms indexed</span></span>
-        <span class="tl"><span class="tl-ok">✓</span> <span class="tl-out">Issue #057 — Linux & Unix Glossary 📖</span></span>
-        <span class="tl"> </span>
-        <span class="tl"><span class="tl-prompt">❯</span> <span class="cursor-blink"></span></span>
-      </div>
-    </div>
-    <div class="badge-strip">
-      <span class="t-badge">190 Terms</span>
-      <span class="t-badge">15 Categories</span>
-      <span class="t-badge">Searchable</span>
-      <span class="t-badge">chmod</span>
-      <span class="t-badge">systemd</span>
-      <span class="t-badge">LVM</span>
-      <span class="t-badge">grep</span>
-      <span class="t-badge">DNS</span>
-    </div>
   </div>
 </section>
+
+<!-- ═══════════ THE KNOWLEDGE SYSTEM ═══════════ -->
+<section class="ks" aria-labelledby="ks-head">
+  <div class="ks-inner">
+    <h2 class="ks-head" id="ks-head">The knowledge system</h2>
+    <div class="ks-grid">
+      <div class="ks-cell">
+        <div class="ks-num"><span class="count-up" data-ks="topics" data-target="0">0</span></div>
+        <div class="ks-label">Topics</div>
+      </div>
+      <div class="ks-cell">
+        <div class="ks-num"><span class="count-up" data-ks="categories" data-target="0">0</span></div>
+        <div class="ks-label">Categories</div>
+      </div>
+      <div class="ks-cell">
+        <div class="ks-num"><span class="count-up" data-ks="pillars" data-target="0">0</span></div>
+        <div class="ks-label">Pillars</div>
+      </div>
+      <div class="ks-cell" data-tone="live">
+        <div class="ks-num"><span class="count-up" data-ks="live" data-target="0">0</span></div>
+        <div class="ks-label">Live</div>
+        <div class="ks-note">A published page covers it.</div>
+      </div>
+      <div class="ks-cell" data-tone="pipe">
+        <div class="ks-num"><span class="count-up" data-ks="pipe" data-target="0">0</span></div>
+        <div class="ks-label">In pipeline</div>
+        <div class="ks-note">Next to a series already running.</div>
+      </div>
+      <div class="ks-cell" data-tone="plan">
+        <div class="ks-num"><span class="count-up" data-ks="plan" data-target="0">0</span></div>
+        <div class="ks-label">Planned</div>
+        <div class="ks-note">On the backlog, no date attached.</div>
+      </div>
+    </div>
+    <p class="ks-foot"><span data-ks-issues>0</span> issues published so far. Every figure here is counted from the same file the site is generated from, so it cannot disagree with what is actually published — <a href="categories/index.html">browse the categories</a>.</p>
+  </div>
+</section>
+
+<!-- ═══════════ NOTICE BOARD ═══════════ -->
+<!-- Generated by tools/build_kmap.py from the issue register. -->
+<!-- NB:START -->
+<!-- NB:END -->
+
+<!-- ═══════════ KNOWLEDGE CONSTELLATION ═══════════ -->
+<!-- Generated by tools/build_kmap.py from the taxonomy: the pillars, their
+     topic counts and their links are all read from the same register the
+     rest of the site uses, so this can never drift out of agreement with the
+     category index it points at. Everything between the markers is replaced
+     on every build — editing it here is editing a build artefact. -->
+<!-- KC:START -->
+<!-- KC:END -->
 
 <!-- ═══════════ TICKER ═══════════ -->
 <div class="ticker-wrap">
@@ -1863,15 +2219,19 @@ a.footer-logo:hover{color:#fff;}
     <div>
       <div class="section-tag">Behind the Newsletter</div>
       <h2 class="section-title">THE AUTHORS</h2>
-      <p class="section-lead" style="margin-bottom:0">One practitioner building in the trenches of Platform Engineering, sharing what actually works.</p>
+      <p class="section-lead" style="margin-bottom:0">Who writes this, and what it is for.</p>
     </div>
     <div class="author-cards">
       <div class="author-card">
-        <div class="author-avatar v">VA</div>
+        <img class="author-avatar" src="assets/author-vishal-abhinav.jpg"
+             width="96" height="96" alt="Vishal Abhinav"
+             loading="lazy" decoding="async">
         <div>
           <div class="author-name">Vishal Abhinav</div>
-          <div class="author-role">· Platform Ops · Kubernetes · Platform Engineering · Cloud Architecture · DevOps · SRE · Infrastructure Automation</div>
-          <p class="author-bio">I'm a Platform Ops Engineer with 4+ years of experience across Kubernetes, infrastructure, and SRE-engineered systems — designing for failure, automating the boring parts, and writing the runbooks I wish existed the first time something broke at 2 AM. Beyond core K8s and infra, I specialize in notification engine architecture: building and scaling high-throughput messaging systems on SMPP and PDU session handling. This newsletter is the field notes from that work — real runbooks, real postmortems, no theory-only content.</p>
+          <div class="author-role">Software Engineer (Infrastructure &amp; DevOps &amp; Platform)</div>
+          <p class="author-bio">I'm Vishal Abhinav, a Software Engineer specializing in Infrastructure, DevOps, Platform Operations, Observability and production systems.</p>
+          <p class="author-bio">My work focuses on building, automating, deploying, troubleshooting, and operating reliable technology platforms across Linux, Networking, Cloud, Git, CI/CD, Containers, Kubernetes, OpenShift, Automation, Observability, and SRE.</p>
+          <p class="author-bio">I'm particularly interested in understanding what happens behind the tools and commands — how infrastructure, applications, networks, platforms, and operational processes work together as one system.</p>
           <div class="author-certs">
             <span class="cert-badge"><span class="cert-icon">☁️</span> OCI Certified</span>
             <span class="cert-badge"><span class="cert-icon">🛡️</span> CISSP Certified</span>
@@ -1879,10 +2239,21 @@ a.footer-logo:hover{color:#fff;}
             <span class="cert-badge progress"><span class="cert-icon">⎈</span> Cloud Native — In Progress</span>
           </div>
           <div class="author-specialties">
-            <div class="as-label">Specialties</div>
-            <span class="spec-badge">Infrastructure & Automation Specialist</span>
-            <span class="spec-badge">SMPP</span>
-            <span class="spec-badge">PDU Session</span>
+            <div class="as-label">Areas of focus</div>
+            <span class="spec-badge">Infrastructure</span>
+            <span class="spec-badge">DevOps</span>
+            <span class="spec-badge">Linux</span>
+            <span class="spec-badge">Networking</span>
+            <span class="spec-badge">Cloud</span>
+            <span class="spec-badge">Kubernetes</span>
+            <span class="spec-badge">OpenShift</span>
+            <span class="spec-badge">CI/CD</span>
+            <span class="spec-badge">Containers</span>
+            <span class="spec-badge">GitOps</span>
+            <span class="spec-badge">Automation</span>
+            <span class="spec-badge">Observability</span>
+            <span class="spec-badge">SRE</span>
+            <span class="spec-badge">Platform Engineering</span>
           </div>
           <div class="author-links">
             <a class="au-link li" href="https://www.linkedin.com/in/vishal-abhinav/" target="_blank" rel="noopener" aria-label="Vishal Abhinav on LinkedIn">
@@ -1903,6 +2274,20 @@ a.footer-logo:hover{color:#fff;}
             </a>
           </div>
         </div>
+      </div>
+
+      <!-- What the publication is, in the author's own words. It sits inside
+           the Authors block rather than in a band of its own because "who
+           writes this" and "what this is" are one answer here. -->
+      <div class="apo">
+        <div class="apo-tag">About Platform Ops</div>
+        <p class="apo-lede">Platform Ops is my technical knowledge space where I document practical engineering concepts, production troubleshooting, architecture, automation, commands, and operational practices.</p>
+        <div class="apo-obj">
+          <div class="apo-obj-label">The objective is simple</div>
+          <p class="apo-motto"><span>Build.</span> <span>Operate.</span> <span>Understand.</span></p>
+          <p class="apo-body">Learn the technology. Understand how the components connect. Build reliable systems. And when something breaks, understand the problem before applying the fix.</p>
+        </div>
+        <p class="apo-sign">Everything is connected.</p>
       </div>
     </div>
   </div>
@@ -1934,6 +2319,55 @@ a.footer-logo:hover{color:#fff;}
 <!-- ═══════════ /DOCS RAIL + CONTENT ═══════════ -->
 
 <!-- ═══════════ FOOTER ═══════════ -->
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<section class="mh" aria-labelledby="mh-mark">
+  <div class="mh-inner">
+    <h2 class="mh-mark" id="mh-mark">PLATFORM <span>OPS</span></h2>
+    <p class="mh-line">A technical newsletter on Kubernetes, OpenShift, SRE and platform engineering — written from production systems, not from documentation.</p>
+
+    <div class="mh-promises">
+      <div class="mh-promise">
+        <b>No paywall</b>
+        <span>Every page is readable without an account. There is nothing to sign up for in order to read.</span>
+      </div>
+      <div class="mh-promise">
+        <b>Corrected in place</b>
+        <span>When an issue is wrong it is fixed at its original URL, not quietly replaced or reposted.</span>
+      </div>
+      <div class="mh-promise">
+        <b>First-hand</b>
+        <span>Where an issue describes a failure it is a failure that happened; where it gives a number, the number was measured.</span>
+      </div>
+      <div class="mh-promise">
+        <b>Open build</b>
+        <span>The generator, the tests and this page are public. What you read is what the repository produces.</span>
+      </div>
+    </div>
+
+    <div class="mh-by">
+      <div class="mh-card">
+        <div class="mh-role">Written by</div>
+        <p class="mh-name">Vishal Abhinav</p>
+        <p class="mh-desc">Software Engineer (Infrastructure &amp; DevOps &amp; Platform). Building, automating, deploying and operating reliable platforms — and understanding what happens behind the tools.</p>
+        <div class="mh-links">
+          <a href="#authors">About the author</a>
+          <a href="https://www.linkedin.com/in/vishal-abhinav/" target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="https://github.com/Vishal-Abhinav" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="mh-card">
+        <div class="mh-role">Published by</div>
+        <p class="mh-name">Srivan Technologies</p>
+        <p class="mh-desc">Infrastructure and platform engineering — clusters, the pipelines that deliver to them, and the observability that says what they are doing.</p>
+        <div class="mh-links">
+          <a href="https://srivantechnologies.com/" target="_blank" rel="noopener">srivantechnologies.com ↗</a>
+          <a href="about/index.html">About Platform Ops</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div class="footer-inner">
     <div class="footer-top">
@@ -1947,28 +2381,36 @@ a.footer-logo:hover{color:#fff;}
           <div class="footer-col-title">Newsletter</div>
           <a href="#issues">Latest Issues</a>
           <a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Newest — Issue #057</a>
+          <a href="feed.xml">RSS feed</a>
           <a href="#subscribe">Subscribe</a>
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Explore</div>
-          <a href="#topics">Knowledge Map</a>
-          <a href="categories/kubernetes-openshift-map/index.html">K8s &amp; OpenShift Topic Map</a>
-          <a href="Infrastructure/OS/index.html">OS / Linux Series</a>
-          <a href="terminal/index.html" target="_blank" rel="noopener">Practice Terminal ↗</a>
+          <a href="categories/index.html">All categories</a>
+          <a href="#constellation">Knowledge constellation</a>
+          <a href="categories/kubernetes-openshift-map/index.html">K8s &amp; OpenShift topic map</a>
+          <a href="Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">Command references</a>
+          <a href="terminal/index.html" target="_blank" rel="noopener">Practice terminal ↗</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">How it works</div>
+          <a href="architecture/index.html">Architecture</a>
           <a href="colophon/index.html">Colophon</a>
-          <a href="#authors">About the Author</a>
+          <a href="about/index.html">About Platform Ops</a>
+          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank" rel="noopener">Source on GitHub ↗</a>
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Connect</div>
-          <a href="about/index.html">About Platform Ops</a>
+          <a href="#authors">About the author</a>
+          <a href="https://www.linkedin.com/in/vishal-abhinav/" target="_blank" rel="noopener">LinkedIn ↗</a>
           <a href="https://srivantechnologies.com/" target="_blank" rel="noopener">Srivan Technologies ↗</a>
-          <a href="#">Back to Top ↑</a>
+          <a href="#">Back to top ↑</a>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-note">© 2026 Tech with Vishal Abhinav · Platform Ops Engineer</div>
-      <div class="footer-meta">Built for engineers, by an engineer.</div>
+      <div class="footer-note">© 2026 Vishal Abhinav · Published by Srivan Technologies</div>
+      <div class="footer-meta">Code MIT · Writing CC BY-NC-ND 4.0 · Built for engineers, by an engineer.</div>
     </div>
   </div>
 </footer>
@@ -2252,7 +2694,121 @@ const counterObs = new IntersectionObserver(entries=>{
     }
   });
 },{threshold:0.5});
-document.querySelectorAll('.hero-stats').forEach(el=>counterObs.observe(el));
+/* The hero's own three-stat strip is gone; the knowledge band replaced it.
+   Both selectors stay listed so a page that still carries the old markup is
+   not silently left with counters stuck on zero. */
+document.querySelectorAll('.hero-stats, .ks-grid').forEach(el=>counterObs.observe(el));
+
+/* ── Control-plane diagram: hover and keyboard focus ──
+   One class on the container dims everything, and the node re-lights itself
+   and the edges it names. Doing it this way means the JS never has to know
+   the topology — each node already declares which edges it participates in,
+   right next to the geometry, so the two cannot drift apart. */
+(function () {
+  const wrap = document.getElementById('cpDiagram');
+  if (!wrap) return;
+  const svg  = wrap.querySelector('svg');
+  const tip  = document.getElementById('cpTip');
+  const tipT = tip.querySelector('b');
+  const tipD = tip.querySelector('span');
+
+  function lightUp(node) {
+    clearAll();
+    svg.classList.add('is-focus');
+    node.classList.add('on');
+    (node.dataset.edges || '').split(/\s+/).filter(Boolean).forEach(id => {
+      const e = document.getElementById(id);
+      if (e) e.classList.add('on');
+    });
+    tipT.textContent = node.dataset.t || '';
+    tipD.textContent = node.dataset.d || '';
+    tip.classList.add('show');
+    // Position against the node's box, clamped inside the container so a
+    // node at the far edge does not push the tooltip off screen.
+    const r = node.getBoundingClientRect();
+    const w = wrap.getBoundingClientRect();
+    const tw = tip.offsetWidth || 240;
+    let x = r.left - w.left + r.width / 2 - tw / 2;
+    x = Math.max(4, Math.min(x, w.width - tw - 4));
+    tip.style.left = x + 'px';
+    tip.style.top  = (r.bottom - w.top + 8) + 'px';
+  }
+
+  function clearAll() {
+    svg.classList.remove('is-focus');
+    svg.querySelectorAll('.on').forEach(el => el.classList.remove('on'));
+    tip.classList.remove('show');
+  }
+
+  svg.querySelectorAll('.cp-node').forEach(node => {
+    node.addEventListener('mouseenter', () => lightUp(node));
+    node.addEventListener('focus',      () => lightUp(node));
+    node.addEventListener('mouseleave', clearAll);
+    node.addEventListener('blur',       clearAll);
+  });
+  wrap.addEventListener('mouseleave', clearAll);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') clearAll(); });
+})();
+
+/* ── Constellation: same interaction contract as the hero diagram ──
+   Deliberately a second small closure rather than a shared helper. The two
+   diagrams have different markup, different tooltip anchors and different
+   dimming targets; the "reuse" would be a function with four parameters that
+   is harder to read than either copy. */
+(function () {
+  const stage = document.querySelector('.kc-stage');
+  if (!stage) return;
+  const tip  = document.getElementById('kcTip');
+  const tipT = tip.querySelector('b');
+  const tipD = tip.querySelector('span');
+
+  function clearAll() {
+    stage.classList.remove('is-focus');
+    stage.querySelectorAll('.on').forEach(el => el.classList.remove('on'));
+    tip.classList.remove('show');
+  }
+
+  stage.querySelectorAll('.kc-node').forEach(node => {
+    function show() {
+      clearAll();
+      stage.classList.add('is-focus');
+      node.classList.add('on');
+      const e = document.getElementById(node.dataset.edge);
+      if (e) e.classList.add('on');
+      tipT.textContent = node.dataset.t || '';
+      tipD.textContent = node.dataset.d || '';
+      tip.classList.add('show');
+      const r = node.getBoundingClientRect();
+      const w = stage.getBoundingClientRect();
+      const tw = tip.offsetWidth || 240;
+      let x = r.left - w.left + r.width / 2 - tw / 2;
+      x = Math.max(4, Math.min(x, w.width - tw - 4));
+      tip.style.left = x + 'px';
+      tip.style.top  = (r.bottom - w.top + 8) + 'px';
+    }
+    node.addEventListener('mouseenter', show);
+    node.addEventListener('focus', show);
+    node.addEventListener('mouseleave', clearAll);
+    node.addEventListener('blur', clearAll);
+  });
+  stage.addEventListener('mouseleave', clearAll);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') clearAll(); });
+})();
+
+/* ── SMIL, which no stylesheet can reach ──
+   assets/motion.css stops CSS animations and transitions. It has no effect
+   whatsoever on SVG SMIL — <animateMotion> and friends keep running under
+   prefers-reduced-motion, and getAnimations() does not even report them, so
+   test_motion.py could not see them either. The particles on this page ran
+   for a reader who had explicitly asked for less motion.
+   pauseAnimations() is the SVG DOM's own answer. setCurrentTime(0) first so
+   the frozen frame is the start of the loop rather than wherever it happened
+   to be at page load. */
+if (REDUCED) {
+  document.querySelectorAll('svg').forEach(s => {
+    try { s.setCurrentTime(0); s.pauseAnimations(); } catch (e) {}
+  });
+}
 
 /* ── Typewriter terminal ──
    The stagger was doubled and unbounded: each line carried BOTH a

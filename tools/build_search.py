@@ -225,7 +225,13 @@ JS = """var PO_SEARCH = __INDEX__;
       '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
       '<input type="search" id="gsq" autocomplete="off" spellcheck="false" ' +
       'placeholder="Search topics, commands, pages…" aria-label="Search the site">' +
-      '<span class="gs-k">/</span></div>';
+      /* The hint shows the shortcut this reader's own keyboard uses, rather
+         than both — two badges in a header strip is noise, and a Windows
+         reader shown a ⌘ learns nothing. Mac gets ⌘K, everyone else / . */
+      '<span class="gs-k">' +
+      (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)
+        ? '\\u2318K' : '/') +
+      '</span></div>';
 
     var pop = document.createElement('div');
     pop.className = 'gs-pop';
@@ -322,10 +328,22 @@ JS = """var PO_SEARCH = __INDEX__;
     document.addEventListener('click', function (e) {
       if (!pop.contains(e.target) && !wrap.contains(e.target)) pop.classList.remove('on');
     });
-    /* "/" focuses search, the way every docs site does it */
+    /* Two ways in, because readers arrive with two different habits.
+       "/" is the docs-site reflex; Cmd-K / Ctrl-K is the app reflex, and a
+       reader who has one in their fingers rarely has the other.
+       The INPUT/TEXTAREA guard applies to "/" only: a lone slash is a
+       character someone may legitimately be typing, while Cmd-K is not, so
+       Cmd-K stays live even from inside another field and selects what is
+       already there — the same thing it does everywhere else. */
     document.addEventListener('keydown', function (e) {
-      if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) {
-        e.preventDefault(); input.focus();
+      var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)
+                   || document.activeElement.isContentEditable;
+      if (e.key === '/' && !typing) {
+        e.preventDefault(); input.focus(); return;
+      }
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();          /* Chrome and Firefox both bind Ctrl-K */
+        input.focus(); input.select();
       }
     });
     window.addEventListener('resize', function () {

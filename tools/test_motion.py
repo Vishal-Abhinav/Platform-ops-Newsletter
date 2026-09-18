@@ -108,7 +108,22 @@ PROBE = """() => {
     .filter(c => c.dataset.target)
     .map(c => ({got: c.textContent.trim(), want: c.dataset.target}));
 
-  return {running, invisible, shifted,
+  // A fingerprint of where everything inside every <svg> currently IS.
+  //
+  // This exists because getAnimations() is not a complete answer. It does not
+  // report SVG SMIL at all, so a page running <animateMotion> reported zero
+  // running animations while its particles flew across the screen — which is
+  // precisely the bug this suite was written to catch, sailing straight
+  // through it. Sampling positions asks the only question that matters: did
+  // anything actually move? It cannot be fooled by the animation technique,
+  // because it does not ask what the technique was.
+  const fingerprint = [...document.querySelectorAll('svg *')]
+    .slice(0, 400)
+    .map(el => { const r = el.getBoundingClientRect();
+                 return Math.round(r.x) + ',' + Math.round(r.y); })
+    .join('|');
+
+  return {running, invisible, shifted, fingerprint,
           badCounters: counters.filter(c => c.got !== c.want)};
 }"""
 
@@ -140,6 +155,10 @@ def sample(browser, base, rel, mode):
     }""")
     page.wait_for_timeout(SETTLE_MS)
     result = page.evaluate(PROBE)
+    # Second look, after long enough for any surviving loop to have moved.
+    page.wait_for_timeout(1400)
+    result["movedAfterSettle"] = (
+        page.evaluate(PROBE)["fingerprint"] != result["fingerprint"])
     ctx.close()
     return result
 
@@ -174,6 +193,11 @@ def main():
             if calm["badCounters"]:
                 fails.append(f"{name}: counter(s) not at final value "
                              f"{calm['badCounters'][:3]}")
+            if calm["movedAfterSettle"]:
+                fails.append(
+                    f"{name}: something inside an <svg> was still MOVING under "
+                    f"reduced motion — measured by position, so this catches "
+                    f"SMIL and anything else getAnimations() cannot see")
 
             # 5. the motion must still exist for everyone else
             if loud["running"] or loud["invisible"] or loud["shifted"]:

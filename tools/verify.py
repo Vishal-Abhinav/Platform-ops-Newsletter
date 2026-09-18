@@ -237,6 +237,30 @@ def main():
                         f"category sync: {slug} checklist — index card says "
                         f"{cg}, hub page says {hw}")
 
+    # 5b. SMIL must not outrun prefers-reduced-motion
+    #
+    # assets/motion.css gates every CSS animation on the site, and for a while
+    # the README said so without qualification. It was not true: SVG SMIL is
+    # not CSS, no stylesheet can stop it, and getAnimations() does not list it
+    # — so the homepage's particles kept flying for a reader who had asked for
+    # stillness, past both motion.css and test_motion.py.
+    #
+    # build_seo.py now injects an explicit pauseAnimations() call into any page
+    # carrying <animate*>. This asserts the result rather than trusting the
+    # stage: the invariant is "if a page can animate via SMIL, it can also stop",
+    # and it is checked here, across every page, because the next SMIL diagram
+    # will be added by someone who has never read this comment.
+    unguarded = []
+    for f in pages():
+        src = f.read_text(encoding="utf-8", errors="ignore")
+        if re.search(r"<animate(Motion|Transform)?[\s>]", src) \
+                and "pauseAnimations" not in src:
+            unguarded.append(str(f.relative_to(ROOT)))
+    for rel in unguarded[:5]:
+        fails.append(
+            f"reduced motion: {rel} uses SVG SMIL but never calls "
+            f"pauseAnimations() — its animation ignores the reader's setting")
+
     # 6. sitemap
     #
     # Indexable pages only. A sitemap is a request to crawl; a page carrying

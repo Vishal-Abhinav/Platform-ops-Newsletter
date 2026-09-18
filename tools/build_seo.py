@@ -201,6 +201,19 @@ def apply_meta(src, rel):
 count, with_article, with_crumbs = 0, 0, 0
 localised, localised_missing = 0, []
 
+# The marker is what makes this idempotent and what verify.py looks for. It
+# is the function name itself, so the guard cannot be "present" in a page
+# that does not actually call it.
+SMIL_MARK = "pauseAnimations"
+SMIL_GUARD = (
+    '<script>/* SVG SMIL ignores prefers-reduced-motion and is invisible to '
+    'CSS; pause it explicitly. */\n'
+    "if(matchMedia('(prefers-reduced-motion: reduce)').matches){"
+    "document.querySelectorAll('svg').forEach(function(s){"
+    "try{s.setCurrentTime(0);s.pauseAnimations();}catch(e){}});}"
+    '</script>\n')
+smil_guarded = 0
+
 for f in sorted(ROOT.rglob("*.html")):
     if "tools" in f.parts or skip_page(f.name):
         continue
@@ -253,6 +266,25 @@ for f in sorted(ROOT.rglob("*.html")):
         localised_missing.append(rel)
     localised += n_fonts
 
+    # ── SMIL, which assets/motion.css cannot reach ──────────────────────────
+    # motion.css collapses CSS animations and transitions under
+    # prefers-reduced-motion. It has no power at all over SVG SMIL:
+    # <animateMotion> and friends are not CSS, no stylesheet can stop them,
+    # and — the part that made this invisible for so long — getAnimations()
+    # does not report them either, so test_motion.py could not see them
+    # running and reported the page as calm while its particles flew.
+    #
+    # pauseAnimations() is the SVG DOM's own answer, and it is injected here
+    # rather than into each emitter because there are six of them: a new
+    # diagram with a SMIL particle would otherwise ship unguarded and nothing
+    # would say so. This pass already walks every page, so it costs one
+    # substring test per file and cannot be forgotten. verify.py asserts the
+    # invariant afterwards, in case this ever stops running.
+    if re.search(r"<animate(Motion|Transform)?[\s>]", src) and SMIL_MARK not in src:
+        assert src.count("</body>") == 1, f"{rel}: expected exactly one </body>"
+        src = src.replace("</body>", SMIL_GUARD + "</body>", 1)
+        smil_guarded += 1
+
     assert src.count("</head>") == 1, f"{rel}: expected exactly one </head>"
     src = src.replace("</head>", icon_block + block + "</head>", 1)
     f.write_text(src, encoding="utf-8")
@@ -265,6 +297,8 @@ for f in sorted(ROOT.rglob("*.html")):
 
 print(f"structured data -> {count} pages "
       f"({with_article} TechArticle, {with_crumbs} with breadcrumbs)")
+print(f"  SMIL reduced-motion guard -> {smil_guarded} page(s) carrying "
+      f"<animate*>")
 
 # Every block must be valid JSON, or it is worse than having none — a parse
 # error makes a search engine discard the whole page's structured data.

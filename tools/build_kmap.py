@@ -557,6 +557,200 @@ src = src.replace("'a,button,.topic-card,.issue-card",
 src = src.replace(".kr-topics .topics-grid { grid-template-columns: 1fr; }\n", "")
 src = src.replace("  .topics-grid{grid-template-columns:1fr;}\n", "")
 
+# 6. the knowledge constellation ──────────────────────────────────────────────
+#
+# Thirteen pillars around a centre, sized by how much each one actually holds.
+# Drawn here rather than written into index.base.html for the usual reason: the
+# names, the counts and the anchors all come off the taxonomy, so a pillar
+# added there appears here, correctly sized and correctly linked, without
+# anyone remembering to update a hand-drawn diagram.
+#
+# The anchors are the ones build_hubs.py already writes onto the category
+# index — `<section id="kubernetes-openshift">` and friends — so these links
+# point into a page that exists today. No new route is invented, and no
+# existing page is modified to make this work.
+import math  # noqa: E402
+
+_PILL = []
+for _name, _cats in PILLARS:
+    _l = _p = _n = 0
+    for _c, _i, _topics in _cats:
+        a, b, c = cat_stats(_topics)
+        _l += a; _p += b; _n += c
+    _PILL.append({
+        "name": _name,
+        "cats": len(_cats),
+        "live": _l, "pipe": _p, "plan": _n,
+        "total": _l + _p + _n,
+        # build_hubs.py: pname.lower().replace(" & ", "-").replace(" ", "-")
+        "anchor": _name.lower().replace(" & ", "-").replace(" ", "-"),
+    })
+
+_MAXT = max(p["total"] for p in _PILL)
+_CX, _CY, _RING = 500.0, 430.0, 248.0
+_nodes, _edges, _dots, _items = [], [], [], []
+# Track what the drawing actually occupies so the viewBox can be fitted to it
+# rather than guessed. A guessed box is how a diagram ends up centred in a
+# screenful of empty dark: the shape is fine, the frame is wrong.
+_ext = []   # (x0, y0, x1, y1) boxes in user units
+_CHW = 7.0  # DM Mono advance at 11.5px — close enough to fit a label box
+
+for _i, _p in enumerate(sorted(_PILL, key=lambda d: -d["total"])):
+    # Start at the top and go clockwise. The largest pillar leads, so the eye
+    # lands on the substantial part of the map first rather than on whatever
+    # happens to sort first alphabetically.
+    _ang = -math.pi / 2 + (2 * math.pi * _i / len(_PILL))
+    _x = _CX + _RING * math.cos(_ang)
+    _y = _CY + _RING * math.sin(_ang)
+    # Area, not radius, tracks the count — a pillar holding four times as much
+    # should look four times as big, and radius alone would make it sixteen.
+    _r = 15 + 23 * math.sqrt(_p["total"] / _MAXT)
+    _lx = _CX + (_RING + _r + 14) * math.cos(_ang)
+    _ly = _CY + (_RING + _r + 14) * math.sin(_ang)
+    _anchor_attr = ("middle" if abs(_x - _CX) < 40
+                    else ("start" if _x > _CX else "end"))
+    _lw = len(_p["name"]) * _CHW
+    _lx0 = _lx if _anchor_attr == "start" else (
+        _lx - _lw if _anchor_attr == "end" else _lx - _lw / 2)
+    _ext.append((_x - _r, _y - _r, _x + _r, _y + _r))          # the disc
+    _ext.append((_lx0, _ly - 9, _lx0 + _lw, _ly + 9))          # its label
+    _href = f"categories/index.html#{_p['anchor']}"
+    _label = html.escape(_p["name"])
+    _tot, _live = _p["total"], _p["live"]
+
+    _edges.append(
+        f'<path class="kc-edge" id="kc-e{_i}" d="M{_CX:.0f},{_CY:.0f} '
+        f'L{_x:.1f},{_y:.1f}"/>')
+    _dots.append(
+        f'<circle class="kc-dot" r="2.5" style="offset-path:path(\'M{_CX:.0f},'
+        f'{_CY:.0f} L{_x:.1f},{_y:.1f}\'); animation-delay:{_i * 0.31:.2f}s"/>')
+    _nodes.append(
+        f'<a class="kc-node" href="{_href}" data-edge="kc-e{_i}" '
+        f'data-t="{_label}" '
+        f'data-d="{_tot} topics in {_p["cats"]} categor'
+        f'{"y" if _p["cats"] == 1 else "ies"} · {_live} live">'
+        f'<circle class="kc-halo" cx="{_x:.1f}" cy="{_y:.1f}" r="{_r + 9:.1f}"/>'
+        f'<circle class="kc-disc" cx="{_x:.1f}" cy="{_y:.1f}" r="{_r:.1f}"/>'
+        f'<text class="kc-n" x="{_x:.1f}" y="{_y:.1f}">{_tot}</text>'
+        f'<text class="kc-l" x="{_lx:.1f}" y="{_ly:.1f}" '
+        f'text-anchor="{_anchor_attr}">{_label}</text>'
+        f'</a>')
+    # The same thirteen, as a list. This is what a phone shows and what a
+    # screen reader reads; the circle is the desktop presentation of it.
+    _items.append(
+        f'<li><a href="{_href}"><b>{_label}</b>'
+        f'<span>{_tot} topics · {_live} live · {_p["cats"]} categor'
+        f'{"y" if _p["cats"] == 1 else "ies"}</span></a></li>')
+
+_ext.append((_CX - 74, _CY - 74, _CX + 74, _CY + 74))          # the core ring
+_PAD = 14.0
+_vx0 = min(e[0] for e in _ext) - _PAD
+_vy0 = min(e[1] for e in _ext) - _PAD
+_vw  = max(e[2] for e in _ext) + _PAD - _vx0
+_vh  = max(e[3] for e in _ext) + _PAD - _vy0
+
+KC = f"""<section class="kc" id="constellation" aria-labelledby="kc-head">
+  <div class="kc-inner">
+    <h2 class="kc-head" id="kc-head">The knowledge constellation</h2>
+    <p class="kc-lede">{len(_PILL)} pillars, sized by how much each one holds.
+      Follow one into its categories.</p>
+
+    <div class="kc-stage">
+      <svg viewBox="{_vx0:.0f} {_vy0:.0f} {_vw:.0f} {_vh:.0f}" role="img" aria-label="The {len(_PILL)} knowledge pillars arranged around Platform Ops, sized by topic count. The same list follows in text.">
+        <g class="kc-edges">{''.join(_edges)}</g>
+        <g class="kc-flow" aria-hidden="true">{''.join(_dots)}</g>
+        <g class="kc-core" aria-hidden="true">
+          <circle class="kc-core-ring" cx="{_CX:.0f}" cy="{_CY:.0f}" r="74"/>
+          <circle class="kc-core-disc" cx="{_CX:.0f}" cy="{_CY:.0f}" r="58"/>
+          <text class="kc-core-t" x="{_CX:.0f}" y="{_CY - 8:.0f}">PLATFORM</text>
+          <text class="kc-core-t" x="{_CX:.0f}" y="{_CY + 12:.0f}">OPS</text>
+        </g>
+        <g class="kc-nodes">{''.join(_nodes)}</g>
+      </svg>
+      <div class="kc-tip" id="kcTip" role="status" aria-live="polite"><b></b><span></span></div>
+    </div>
+
+    <ul class="kc-list">{''.join(_items)}</ul>
+  </div>
+</section>"""
+
+_k0 = src.index("<!-- KC:START -->")
+_k1 = src.index("<!-- KC:END -->") + len("<!-- KC:END -->")
+src = src[:_k0] + KC + src[_k1:]
+
+# 7. the notice board ─────────────────────────────────────────────────────────
+#
+# A departure board for the archive: what is newest, in the format a board at
+# a station would use. Generated from the same issue register the feed and the
+# footer read, so the newest row cannot be the issue before last — which is
+# exactly what the old hand-typed hero pill was, three issues running.
+#
+# ON THE WORD "FLASHING": this board does not flash, and that is deliberate
+# rather than a liberty. WCAG 2.3.1 draws the line at three flashes a second
+# because anything faster is a seizure risk, and a page that strobes is a page
+# people close. What it does instead is what a real board does — a lamp that
+# breathes at 2.4s, and characters that flap into place once on arrival and
+# then hold still. It reads as live; it does not blink at anyone.
+_ISS = sorted(ISSUES, key=lambda r: -r[0])[:4]
+_NB_ROWS = []
+for _n, _path, _title, _desc, _dt in _ISS:
+    _cat = _path.split("/")[0].replace("-", " ")
+    _new = ' data-new="1"' if _n == _ISS[0][0] else ""
+    _NB_ROWS.append(
+        f'<a class="nb-row" href="{_path}"{_new}>'
+        f'<span class="nb-no">#{_n:03d}</span>'
+        f'<span class="nb-ti">{html.escape(_title)}</span>'
+        f'<span class="nb-ca">{html.escape(_cat)}</span>'
+        f'<span class="nb-st">{"NEW" if _n == _ISS[0][0] else "&#183;"}</span>'
+        f'</a>')
+
+# One <span> per character so each can settle on its own beat. Spaces get a
+# non-breaking space or the inline-block collapses them and the title closes
+# up into one word as it lands.
+_HEAD = _ISS[0][2].upper()
+_FLAP = "".join(
+    f'<span style="animation-delay:{i * 0.035:.3f}s">'
+    f'{"&#160;" if ch == " " else html.escape(ch)}</span>'
+    for i, ch in enumerate(_HEAD))
+
+_STAMP = _ISS[0][4].strftime("%d %b %Y").upper()
+
+NB = f"""<section class="nb" aria-labelledby="nb-head">
+  <div class="nb-inner">
+    <div class="nb-frame">
+      <div class="nb-top">
+        <span class="nb-lamp" aria-hidden="true"></span>
+        <span class="nb-live">Live</span>
+        <h2 class="nb-title" id="nb-head">Platform Ops &#183; notice board</h2>
+        <span class="nb-stamp">{_STAMP}</span>
+      </div>
+
+      <div class="nb-hero">
+        <div class="nb-hero-meta">Now published &#183; Issue #{_ISS[0][0]:03d}</div>
+        <p class="nb-flap" aria-label="{html.escape(_ISS[0][2])}">{_FLAP}</p>
+        <a class="nb-cta" href="{_ISS[0][1]}">Read issue #{_ISS[0][0]:03d}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <div class="nb-list" role="list">
+        <div class="nb-head" aria-hidden="true">
+          <span class="nb-no">Issue</span><span class="nb-ti">Title</span>
+          <span class="nb-ca">Series</span><span class="nb-st">Status</span>
+        </div>
+        {''.join(_NB_ROWS)}
+      </div>
+
+      <div class="nb-foot">{len(ISSUES)} issues in the archive &#183;
+        <a href="#issues">browse them all</a></div>
+    </div>
+  </div>
+</section>"""
+
+_n0 = src.index("<!-- NB:START -->")
+_n1 = src.index("<!-- NB:END -->") + len("<!-- NB:END -->")
+src = src[:_n0] + NB + src[_n1:]
+
 
 # 6. hero: the issue counter and the "New" pill ───────────────────────────────
 # Both were typed into index.base.html and both were still on #057 three issues
@@ -571,12 +765,27 @@ def _one(pattern, repl, why):
     src = new
 
 
-_one(r'(<span class="count-up" data-target=")\d+(">)',
-     lambda m: f"{m.group(1)}{int(LATEST_NUM)}{m.group(2)}", "hero issue counter")
+# The knowledge band under the hero. Every cell is filled from the register
+# rather than typed, and each is substituted BY NAME rather than by position,
+# so adding a seventh cell can never quietly hand one cell another's number —
+# which is exactly what a single `data-target="\d+"` pattern would do the
+# moment a second counter appeared on the page.
+_KS = {
+    "topics":     T_ALL,
+    "categories": N_CATS,
+    "pillars":    N_PILL,
+    "live":       T_LIVE,
+    "pipe":       T_PIPE,
+    "plan":       T_PLAN,
+}
+for _key, _value in _KS.items():
+    _one(rf'(data-ks="{_key}" data-target=")\d+(")',
+         lambda m, v=_value: f"{m.group(1)}{v}{m.group(2)}",
+         f"knowledge band: {_key}")
 
-_one(r'<a href="[^"]*" class="hero-new-badge">[^<]*</a>',
-     lambda m: (f'<a href="{LATEST_PATH}" class="hero-new-badge">'
-                f'📖 New — Issue #{LATEST_NUM}</a>'), "hero new-issue pill")
+_one(r'(<span data-ks-issues>)\d+(</span>)',
+     lambda m: f"{m.group(1)}{len(PUBLISHED)}{m.group(2)}",
+     "knowledge band: issues published")
 
 # The footer's Newsletter column carries the same "newest" claim, and it had
 # drifted with the other two.

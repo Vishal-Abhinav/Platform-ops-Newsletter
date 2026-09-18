@@ -127,6 +127,19 @@ card = m.group(0).rstrip("\n")
 
 lead = re.search(r'<p class="section-lead"[^>]*>(.*?)</p>', old, re.S).group(1).strip()
 
+# "About Platform Ops" is authored in index.base.html beside the rest of the
+# page copy, and lifted out here the same way the card is. It has to be
+# carried across explicitly: this stage REPLACES everything between the two
+# section markers, so anything in that range it does not copy is discarded on
+# the next build — silently, and only visible as a section that vanished.
+m_apo = re.search(r'( *)<div class="apo">.*?\n\1</div>\n', old, re.S)
+assert m_apo, (
+    'the "About Platform Ops" panel (<div class="apo">) is not in the authors '
+    'section of index.base.html. This stage rebuilds that whole region, so a '
+    'renamed or moved panel is not a layout bug — it is a section that stops '
+    'being published, with nothing else to notice.')
+apo = "\n    " + m_apo.group(0).strip() + "\n"
+
 NEW = f"""<!-- ═══════════ AUTHORS ═══════════ -->
 <div class="authors-section" id="authors">
   <div class="authors-inner">
@@ -141,7 +154,7 @@ NEW = f"""<!-- ═══════════ AUTHORS ═══════�
     </div>
 {RIGHT}
     </div>
-  </div>
+{apo}  </div>
 </div>
 
 """
