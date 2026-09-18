@@ -1123,7 +1123,14 @@ a.footer-logo:hover{color:#fff;}
    THE KNOWLEDGE SYSTEM — the counter band
    ══════════════════════════════════════════════════════════════════════════ */
 .ks { background: #0a0c10; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(36px, 5vw, 60px) 0; }
-.ks-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+/* Full width, unlike every other band on the page. Six counters and a label
+   each carry no prose, so the line-length argument that caps the rest of the
+   page at 1280px does not apply to them — and a strip of figures that runs
+   the whole window reads as an instrument panel rather than a card floating
+   in 320px of nothing on either side. It sits on its own darker background,
+   so the step out to the window edge reads as a change of band and not as a
+   row that failed to line up with the one below it. */
+.ks-inner { max-width: none; margin: 0; padding: 0 24px; }
 .ks-head {
   font-family: 'DM Mono', ui-monospace, monospace;
   font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
@@ -1340,6 +1347,66 @@ a.footer-logo:hover{color:#fff;}
 .kc-list span { display: block; font-family: 'DM Mono', ui-monospace, monospace;
   font-size: 10.5px; letter-spacing: .06em; color: #7c8797; }
 
+/* ════════════════════════════════════════════════════════════════════════
+   THE MAP AND THE BOARD — one paired band
+   ════════════════════════════════════════════════════════════════════════
+   Below 1200px the two stack and each behaves exactly as it did when they
+   were separate sections — including the constellation swapping its drawing
+   for the plain list at 860px. Above 1200px they become columns, and three
+   things inside the board have to be re-sized for a ~440px column instead of
+   a 1232px one: the flap headline, the row grid and the row type. None of it
+   is a new component; it is the same markup asked to survive a third of the
+   width it was drawn for. */
+.kn { background: #07080b; border-bottom: 1px solid rgba(255,255,255,.09);
+  padding: clamp(44px, 6vw, 84px) 0; }
+.kn-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px;
+  display: grid; gap: clamp(30px, 4vw, 56px); grid-template-columns: minmax(0, 1fr); }
+
+/* The panels keep their own markup and give up their section chrome: inside
+   the band the padding, the background and the closing rule belong to .kn. */
+.kn .kc, .kn .nb { background: none; border-bottom: 0; padding: 0; }
+.kn .kc-inner, .kn .nb-inner { max-width: none; margin: 0; padding: 0; }
+
+@media (min-width: 1200px) {
+  /* stretch, not start: the board is asked to finish level with the drawing
+     beside it rather than stopping short and leaving the hole this band was
+     paired to close. */
+  .kn-inner { grid-template-columns: minmax(0, 1.42fr) minmax(370px, 1fr);
+    align-items: stretch; }
+
+  /* The height has to be handed down the whole chain — section, inner, frame
+     — or the frame keeps sizing to its content and the stretch stops at the
+     section box, invisibly. */
+  .kn .nb, .kn .nb-inner, .kn .nb-frame { height: 100%; }
+  .kn .nb-frame { display: flex; flex-direction: column; }
+
+  /* Spend the difference on the rows rather than padding the bottom: the list
+     takes the slack and every row grows by an equal share of it, so the board
+     gets airier instead of gaining a gap under the last issue. The header is
+     pinned to its own height so it does not grow with them. */
+  .kn .nb-list { flex: 1; display: flex; flex-direction: column; }
+  .kn .nb-head { flex: 0 0 auto; }
+  .kn .nb-row { flex: 1; }
+
+  /* Freed from the 900px cap: the column is the constraint now, and it is
+     narrower than the cap ever was. */
+  .kn .kc-stage svg { max-width: none; }
+
+  /* clamp()'s vw term measures the viewport, not the column it sits in, so on
+     a 1920 screen this resolved to 58px inside a 440px box and the headline
+     ran straight out of the frame. Re-sized to the container it lives in. */
+  .kn .nb-flap { font-size: clamp(25px, 2.5vw, 40px); }
+
+  /* Series stays — dropping it is the 640px phone behaviour and this is not
+     a phone. The columns tighten instead and the type drops a point, which
+     buys the title back the room the narrower column took from it. */
+  .kn .nb-list { font-size: 11px; }
+  .kn .nb-head, .kn .nb-row {
+    grid-template-columns: 46px minmax(0, 1fr) 74px 40px; gap: 10px; padding: 10px 16px; }
+  .kn .nb-hero { padding: 22px 16px 20px; }
+  .kn .nb-foot { padding: 11px 16px; }
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    FROM CODE TO PRODUCTION — the delivery pipeline
    ══════════════════════════════════════════════════════════════════════════
@@ -1477,6 +1544,65 @@ a.footer-logo:hover{color:#fff;}
   text-transform: uppercase; margin-bottom: 4px; font-weight: 400;
 }
 .ia-tip span { display: block; font-size: 12.5px; line-height: 1.5; color: #b9c1cd; }
+
+/* THE PANEL — pairing the diagram with a column that explains it
+   ---------------------------------------------------------------------------
+   The drawing is fitted to 780px inside a 1280px band, so it floated in about
+   230px of nothing on either side while a tooltip appeared and vanished over
+   the top of it. At 1100px and up the tooltip stops floating and becomes that
+   column: the diagram keeps the left, the reading of it keeps the right.
+
+   No JavaScript changed for this. wireDiagram only ever toggled .show and set
+   text — it never cleared it — so a rule that keeps the panel visible whatever
+   .show says leaves the last layer read on screen instead of blanking it when
+   the pointer wanders off. The one thing missing was something to read before
+   the first hover, and that is four lines of seeding next to the wiring. */
+.ia-inspector { margin-top: 24px; }
+.ia-guide { margin-top: 20px; }
+.ia-guide-h {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10.5px;
+  letter-spacing: .13em; text-transform: uppercase; color: #6f7a8c; margin: 0 0 12px;
+}
+.ia-guide ol { margin: 0; padding: 0; list-style: none; counter-reset: iag; }
+.ia-guide li {
+  counter-increment: iag; position: relative; padding: 0 0 14px 30px;
+  font-size: 13px; line-height: 1.6; color: #8b95a6;
+}
+.ia-guide li::before {
+  content: counter(iag, decimal-leading-zero);
+  position: absolute; left: 0; top: 1px;
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 11px; color: var(--cyan);
+}
+.ia-guide li b { display: block; color: #d7dde6; font-weight: 500; margin-bottom: 2px; }
+
+@media (min-width: 1100px) {
+  .ia-stage {
+    display: grid; grid-template-columns: minmax(0, 1.34fr) minmax(300px, 1fr);
+    gap: clamp(30px, 4vw, 64px); align-items: stretch;
+  }
+  /* The column is the cap now; 780px was only ever there to stop the drawing
+     filling a 1232px band on its own. */
+  .ia-stage svg { max-width: none; margin: 0; }
+  /* Stretched to the drawing rather than pinned to the viewport. The three
+     parts of the guide describe three vertical stretches of the diagram —
+     routing at the top, the workload through the middle, the telemetry at the
+     bottom — so spreading them down the column puts each one roughly level
+     with the nodes it is talking about, and closes the gap that a panel
+     sitting at its natural height leaves under itself. */
+  .ia-inspector { margin-top: 0; display: flex; flex-direction: column; height: 100%; }
+  .ia-guide { flex: 1; display: flex; flex-direction: column; }
+  .ia-guide ol { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+  .ia-guide li { padding-bottom: 0; }
+  .ia-tip {
+    position: static; opacity: 1; transform: none; pointer-events: auto;
+    max-width: none; padding: 20px 22px;
+    /* Held open so a one-line layer and a four-line one do not shunt the
+       guide underneath it up and down as the pointer crosses the diagram. */
+    min-height: 150px;
+  }
+  .ia-tip b { font-size: 11px; margin-bottom: 9px; }
+  .ia-tip span { font-size: 14px; line-height: 1.65; }
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    TROUBLESHOOTING — five symptoms and the order to look in
@@ -2004,19 +2130,21 @@ a.footer-logo:hover{color:#fff;}
   </div>
 </section>
 
-<!-- ═══════════ NOTICE BOARD ═══════════ -->
-<!-- Generated by tools/build_kmap.py from the issue register. -->
-<!-- NB:START -->
-<!-- NB:END -->
+<!-- ═══════════ THE MAP AND THE BOARD ═══════════ -->
+<!-- One band, two panels: the constellation on the left is what exists, the
+     notice board on the right is what has just landed on it. They were two
+     full-width sections until the constellation's fitted 900px drawing was
+     measured leaving 190px dead on either side of a 1280px band at every
+     width. Pairing them spends that space on the one thing a reader most
+     wants next, and puts the newest issue beside the pillar it belongs to.
 
-<!-- ═══════════ KNOWLEDGE CONSTELLATION ═══════════ -->
-<!-- Generated by tools/build_kmap.py from the taxonomy: the pillars, their
-     topic counts and their links are all read from the same register the
-     rest of the site uses, so this can never drift out of agreement with the
-     category index it points at. Everything between the markers is replaced
-     on every build — editing it here is editing a build artefact. -->
-<!-- KC:START -->
-<!-- KC:END -->
+     Both halves are generated by tools/build_kmap.py from the same registers
+     the rest of the site reads — the taxonomy for the pillars, the issue
+     register for the board — so neither can drift out of agreement with the
+     pages it points at. Everything between the markers is replaced on every
+     build: editing it here is editing a build artefact. -->
+<!-- KN:START -->
+<!-- KN:END -->
 
 <!-- ═══════════ FROM CODE TO PRODUCTION ═══════════ -->
 <section class="pf" id="production-flow" aria-labelledby="pf-head">
@@ -2745,14 +2873,24 @@ a.footer-logo:hover{color:#fff;}
 <section class="ia" id="infra-diagram" aria-labelledby="ia-head">
   <div class="ia-inner">
     <h2 class="ia-head" id="ia-head">Infrastructure architecture</h2>
-    <p class="ia-lede">One request, from the person who made it down to the engineer who gets paged when it fails. Hover any layer.</p>
+    <p class="ia-lede">One request, from the person who made it down to the engineer who gets paged when it fails. Take any layer — by pointer or by tab — and the panel beside it says what that layer is for.</p>
     <div class="ia-stage" id="iaStage">
       <svg viewBox="0 0 760 716" role="img" aria-label="A production request path: users, DNS and CDN, load balancer, two services, Kubernetes, pods, storage and network, the application, metrics, logs and traces, observability, and SRE.">
         <g class="ia-edges"><path class="ia-edge" d="M380.0,52.0 C380.0,70.0 380.0,70.0 380.0,88.0"/><path class="ia-edge" d="M380.0,124.0 C380.0,142.0 380.0,142.0 380.0,160.0"/><path class="ia-edge" d="M380.0,196.0 C380.0,214.0 277.0,214.0 277.0,232.0"/><path class="ia-edge" d="M380.0,196.0 C380.0,214.0 483.0,214.0 483.0,232.0"/><path class="ia-edge" d="M277.0,268.0 C277.0,286.0 380.0,286.0 380.0,304.0"/><path class="ia-edge" d="M483.0,268.0 C483.0,286.0 380.0,286.0 380.0,304.0"/><path class="ia-edge" d="M380.0,340.0 C380.0,358.0 196.0,358.0 196.0,376.0"/><path class="ia-edge" d="M380.0,340.0 C380.0,358.0 380.0,358.0 380.0,376.0"/><path class="ia-edge" d="M380.0,340.0 C380.0,358.0 564.0,358.0 564.0,376.0"/><path class="ia-edge" d="M196.0,412.0 C196.0,430.0 380.0,430.0 380.0,448.0"/><path class="ia-edge" d="M380.0,412.0 C380.0,430.0 380.0,430.0 380.0,448.0"/><path class="ia-edge" d="M564.0,412.0 C564.0,430.0 380.0,430.0 380.0,448.0"/><path class="ia-edge" d="M380.0,484.0 C380.0,502.0 196.0,502.0 196.0,520.0"/><path class="ia-edge" d="M380.0,484.0 C380.0,502.0 380.0,502.0 380.0,520.0"/><path class="ia-edge" d="M380.0,484.0 C380.0,502.0 564.0,502.0 564.0,520.0"/><path class="ia-edge" d="M196.0,556.0 C196.0,574.0 380.0,574.0 380.0,592.0"/><path class="ia-edge" d="M380.0,556.0 C380.0,574.0 380.0,574.0 380.0,592.0"/><path class="ia-edge" d="M564.0,556.0 C564.0,574.0 380.0,574.0 380.0,592.0"/><path class="ia-edge" d="M380.0,628.0 C380.0,646.0 380.0,646.0 380.0,664.0"/></g>
         <g class="ia-flow" aria-hidden="true"><circle class="ia-dot" r="3" style="offset-path:path('M380.0,52.0 C380.0,70.0 380.0,70.0 380.0,88.0'); animation-delay:0.00s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,124.0 C380.0,142.0 380.0,142.0 380.0,160.0'); animation-delay:0.42s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,196.0 C380.0,214.0 483.0,214.0 483.0,232.0'); animation-delay:0.84s"/><circle class="ia-dot" r="3" style="offset-path:path('M483.0,268.0 C483.0,286.0 380.0,286.0 380.0,304.0'); animation-delay:1.26s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,340.0 C380.0,358.0 380.0,358.0 380.0,376.0'); animation-delay:1.68s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,412.0 C380.0,430.0 380.0,430.0 380.0,448.0'); animation-delay:2.10s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,484.0 C380.0,502.0 380.0,502.0 380.0,520.0'); animation-delay:2.52s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,556.0 C380.0,574.0 380.0,574.0 380.0,592.0'); animation-delay:2.94s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,628.0 C380.0,646.0 380.0,646.0 380.0,664.0'); animation-delay:3.36s"/></g>
         <g class="ia-nodes"><g class="ia-node" tabindex="0" role="group" data-t="Users" data-d="Where every request starts. Nothing below exists for any other reason."><rect x="280.0" y="16.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="34.0">USERS</text></g><a class="ia-node" href="categories/networking/index.html" data-t="DNS / CDN" data-d="Name resolution and edge caching: the first hop, and usually the last one anybody suspects."><rect x="280.0" y="88.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="106.0">DNS / CDN</text></a><a class="ia-node" href="categories/networking/index.html" data-t="Load balancer" data-d="Spreads traffic across healthy instances, and takes the unhealthy ones out of rotation."><rect x="280.0" y="160.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="178.0">LOAD BALANCER</text></a><a class="ia-node" href="categories/api-microservices/index.html" data-t="Service A" data-d="A stable address in front of instances that come and go."><rect x="187.0" y="232.0" width="180.0" height="36.0" rx="4"/><text x="277.0" y="250.0">SERVICE A</text></a><a class="ia-node" href="categories/api-microservices/index.html" data-t="Service B" data-d="Another one. Independently deployed, independently able to fail."><rect x="393.0" y="232.0" width="180.0" height="36.0" rx="4"/><text x="483.0" y="250.0">SERVICE B</text></a><a class="ia-node" href="categories/kubernetes/index.html" data-t="Kubernetes" data-d="Schedules the workloads and reconciles them back whenever reality drifts from the spec."><rect x="280.0" y="304.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="322.0">KUBERNETES</text></a><a class="ia-node" href="categories/kubernetes/index.html" data-t="Pods" data-d="The running unit: restarted, rescheduled and replaced, never repaired in place."><rect x="117.0" y="376.0" width="158.0" height="36.0" rx="4"/><text x="196.0" y="394.0">PODS</text></a><a class="ia-node" href="categories/storage/index.html" data-t="Storage" data-d="Volumes and storage classes — the data that has to outlive the pod using it."><rect x="301.0" y="376.0" width="158.0" height="36.0" rx="4"/><text x="380.0" y="394.0">STORAGE</text></a><a class="ia-node" href="categories/networking/index.html" data-t="Network" data-d="Pod-to-pod paths, network policy, and the DNS that lives inside the cluster."><rect x="485.0" y="376.0" width="158.0" height="36.0" rx="4"/><text x="564.0" y="394.0">NETWORK</text></a><a class="ia-node" href="categories/api-microservices/index.html" data-t="Application" data-d="Your code, finally. The part all of the above exists to keep running."><rect x="280.0" y="448.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="466.0">APPLICATION</text></a><a class="ia-node" href="categories/observability/index.html" data-t="Metrics" data-d="Numbers over time: how much, how often, how slow."><rect x="117.0" y="520.0" width="158.0" height="36.0" rx="4"/><text x="196.0" y="538.0">METRICS</text></a><a class="ia-node" href="categories/logging/index.html" data-t="Logs" data-d="What happened, in order, with the detail a metric had to throw away."><rect x="301.0" y="520.0" width="158.0" height="36.0" rx="4"/><text x="380.0" y="538.0">LOGS</text></a><a class="ia-node" href="categories/observability/index.html" data-t="Traces" data-d="One request&#x27;s path across every service it touched."><rect x="485.0" y="520.0" width="158.0" height="36.0" rx="4"/><text x="564.0" y="538.0">TRACES</text></a><a class="ia-node" href="categories/observability/index.html" data-t="Observability" data-d="Turning three signals into one answer about what is actually happening."><rect x="280.0" y="592.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="610.0">OBSERVABILITY</text></a><a class="ia-node" href="categories/sre/index.html" data-t="SRE" data-d="Error budgets, on-call, and deciding what to do about everything above this line."><rect x="280.0" y="664.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="682.0">SRE</text></a></g>
       </svg>
-      <div class="ia-tip" id="iaTip" role="status" aria-live="polite"><b></b><span></span></div>
+      <aside class="ia-inspector" aria-label="Layer detail">
+        <div class="ia-tip" id="iaTip" role="status" aria-live="polite"><b></b><span></span></div>
+        <div class="ia-guide">
+          <p class="ia-guide-h">Read it in three parts</p>
+          <ol>
+            <li><b>Route the request</b>Users, DNS and the load balancer decide which service ever sees it.</li>
+            <li><b>Run the workload</b>Kubernetes, pods, storage and the network keep the application up.</li>
+            <li><b>Understand the result</b>Metrics, logs and traces are what the engineer on call actually reads.</li>
+          </ol>
+        </div>
+      </aside>
     </div>
   </div>
 </section>
@@ -3264,6 +3402,17 @@ function wireDiagram(stageSel, tipSel, edgeAttr) {
 wireDiagram('#cpDiagram', '#cpTip', 'edges');       /* hero: many edges  */
 wireDiagram('.kc-stage',      '#kcTip', 'edge');    /* constellation: one */
 wireDiagram('.ia-stage',      '#iaTip', null);      /* request path: none */
+
+/* The panel is permanent above 1100px, so it cannot open blank. It keeps
+   whatever was last read because nothing clears the text — all that is needed
+   is a first layer to show before anyone has touched the diagram. */
+(function seedInfraPanel() {
+  const tip = document.querySelector('#iaTip');
+  const first = document.querySelector('.ia-stage [data-t]');
+  if (!tip || !first) return;
+  tip.querySelector('b').textContent = first.dataset.t || '';
+  tip.querySelector('span').textContent = first.dataset.d || '';
+})();
 
 /* ── Delivery pipeline: select a stage ──
    All eleven panels are in the DOM and one is visible. That costs a few KB
