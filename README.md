@@ -136,7 +136,7 @@ Three directories are input. One is output. Nothing else is either.
 |:--|:--|
 | `tools/` | The build: 31 ordered stages, `verify.py`, and the browser test suites. Python 3.11, standard library only. |
 | `content/` | The 25 hand-written pages, kept pristine — they are copied into `dist/` and edited *there*, never in place. |
-| `static/` | Copied verbatim: icons, OG cards, 18 self-hosted font files, `assets/motion.css`. |
+| `static/` | Copied verbatim: icons, OG cards, 16 self-hosted font files, `assets/motion.css`. |
 | `brand/` | The generated banner. Tracked, deliberately outside `static/`, so it never reaches the site. |
 | `dist/` | **The only thing deployed.** Deleted and rebuilt from empty on every run. |
 
@@ -185,7 +185,7 @@ A `script-src` that actually constrains scripts is the open item, and it is
 open honestly: closing it means moving those inline handlers out to files
 first. It is tracked, not forgotten.
 
-**Fonts are self-hosted.** 18 files under `static/assets/fonts/`, so
+**Fonts are self-hosted.** 16 files under `static/assets/fonts/`, so
 there is no request to a third party on any page view and no `font-src`
 beyond `'self'`.
 
