@@ -1341,6 +1341,144 @@ a.footer-logo:hover{color:#fff;}
   font-size: 10.5px; letter-spacing: .06em; color: #7c8797; }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   FROM CODE TO PRODUCTION — the delivery pipeline
+   ══════════════════════════════════════════════════════════════════════════
+   Built from buttons and a flex row rather than an SVG. A reader has to be
+   able to tab to each stage, read it with a screen reader and open it; that
+   is ordinary interactive markup, and reimplementing focus and roles inside
+   an <svg> to get the same result would be work spent to end up level.
+   The rail is a pseudo-element behind the row; the travelling dot is the one
+   decorative part, and it is a CSS animation so motion.css governs it. */
+.pf { background: #0a0c10; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(44px, 6vw, 80px) 0; }
+.pf-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.pf-head { font-family: 'Bebas Neue', Impact, sans-serif; font-size: clamp(26px, 3.4vw, 40px); color: #fff; margin: 0 0 8px; }
+.pf-lede { font-size: 14px; line-height: 1.6; color: #8b95a6; margin: 0 0 30px; max-width: 58ch; }
+
+.pf-rail { position: relative; margin-bottom: 26px; }
+.pf-rail::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 19px; height: 1px;
+  background: rgba(255,255,255,.13);
+}
+.pf-dot {
+  position: absolute; top: 15px; left: 0; width: 9px; height: 9px;
+  border-radius: 50%; background: var(--cyan);
+  box-shadow: 0 0 10px rgba(0,194,212,.9);
+  animation: pf-run 9s linear infinite;
+}
+@keyframes pf-run {
+  from { left: 0;    opacity: 0; }
+  6%   { opacity: 1; }
+  94%  { opacity: 1; }
+  to   { left: 100%; opacity: 0; }
+}
+.pf-stages {
+  position: relative; display: grid; gap: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+}
+.pf-stage {
+  appearance: none; background: none; border: 0; padding: 0; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 9px;
+  font: inherit; color: inherit;
+}
+.pf-pip {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: #0a0c10; border: 1.5px solid rgba(255,255,255,.28);
+  margin-top: 14px; transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
+}
+.pf-name {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10px;
+  letter-spacing: .09em; text-transform: uppercase; color: #79839a;
+  text-align: center; transition: color .18s ease;
+}
+.pf-stage:hover .pf-pip, .pf-stage:focus-visible .pf-pip { border-color: var(--cyan); transform: scale(1.25); }
+.pf-stage:hover .pf-name, .pf-stage:focus-visible .pf-name { color: #cfd6e0; }
+.pf-stage[aria-expanded="true"] .pf-pip { background: var(--cyan); border-color: var(--cyan); transform: scale(1.35); }
+.pf-stage[aria-expanded="true"] .pf-name { color: #fff; }
+.pf-stage:focus-visible { outline: none; }
+.pf-stage:focus-visible .pf-name { text-decoration: underline; text-underline-offset: 3px; }
+
+.pf-panel {
+  border: 1px solid rgba(255,255,255,.12); border-radius: 7px;
+  background: #0d1015; padding: 22px;
+}
+.pf-step {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10.5px;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px;
+}
+.pf-title { font-family: 'Bebas Neue', Impact, sans-serif; font-size: clamp(24px, 3vw, 34px); color: #fff; margin: 0 0 8px; }
+.pf-what { font-size: 14.5px; line-height: 1.65; color: #b0b9c6; margin: 0 0 16px; max-width: 70ch; }
+.pf-techlabel, .pf-readlabel {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10px;
+  letter-spacing: .13em; text-transform: uppercase; color: #6f7a8c; margin-bottom: 8px;
+}
+.pf-tech { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+.pf-tech span {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10.5px; color: #98a2b1;
+  border: 1px solid rgba(255,255,255,.13); border-radius: 3px; padding: 5px 9px;
+}
+.pf-read { display: flex; flex-wrap: wrap; gap: 8px; }
+.pf-read a {
+  font-size: 12.5px; color: var(--cyan); text-decoration: none;
+  border: 1px solid rgba(0,194,212,.32); border-radius: 3px; padding: 7px 12px;
+  transition: background-color .18s ease;
+}
+.pf-read a:hover { background: rgba(0,194,212,.1); }
+.pf-read .pf-none { font-size: 12.5px; color: #6f7a8c; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   INFRASTRUCTURE ARCHITECTURE — one request, all the way down
+   ══════════════════════════════════════════════════════════════════════════
+   The hero diagram shows how a CHANGE reaches production. This one shows how
+   a REQUEST does, which is the other axis and the one people are usually
+   staring at when something is broken. Same interaction contract as the
+   hero and the constellation so the page teaches it once. */
+.ia { background: #0a0c10; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(44px, 6vw, 80px) 0; }
+.ia-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.ia-head { font-family: 'Bebas Neue', Impact, sans-serif; font-size: clamp(26px, 3.4vw, 40px); color: #fff; margin: 0 0 8px; }
+.ia-lede { font-size: 14px; line-height: 1.6; color: #8b95a6; margin: 0 0 26px; max-width: 60ch; }
+.ia-stage { position: relative; }
+.ia-stage svg { width: 100%; max-width: 780px; margin: 0 auto; height: auto; display: block; overflow: visible; }
+
+.ia-edge { stroke: rgba(255,255,255,.13); stroke-width: 1; fill: none; transition: stroke .2s ease, opacity .2s ease; }
+.ia-node rect { fill: #0f141b; stroke: rgba(255,255,255,.2); stroke-width: 1.1; transition: fill .2s ease, stroke .2s ease; }
+.ia-node text {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10px;
+  letter-spacing: .07em; fill: #aab3c2; text-anchor: middle;
+  dominant-baseline: middle; pointer-events: none; transition: fill .2s ease;
+}
+.ia-node { cursor: pointer; transition: opacity .2s ease; }
+.ia-node:hover rect, .ia-node:focus-visible rect { fill: #13202b; stroke: var(--cyan); }
+.ia-node:hover text, .ia-node:focus-visible text { fill: #fff; }
+.ia-node:focus-visible { outline: none; }
+.ia-node:focus-visible rect { stroke-width: 2.2; }
+.ia-stage.is-focus .ia-node { opacity: .32; }
+.ia-stage.is-focus .ia-edge { opacity: .1; }
+.ia-stage.is-focus .ia-node.on { opacity: 1; }
+
+.ia-dot { fill: var(--cyan); animation: ia-run 3.6s linear infinite; }
+@keyframes ia-run {
+  from { offset-distance: 0%; opacity: 0; }
+  18%  { opacity: 1; }
+  82%  { opacity: 1; }
+  to   { offset-distance: 100%; opacity: 0; }
+}
+
+.ia-tip {
+  position: absolute; z-index: 5; pointer-events: none;
+  background: #0d1218; border: 1px solid rgba(255,255,255,.17);
+  border-radius: 5px; padding: 9px 12px; max-width: 270px;
+  opacity: 0; transform: translateY(3px);
+  transition: opacity .15s ease, transform .15s ease;
+}
+.ia-tip.show { opacity: 1; transform: translateY(0); }
+.ia-tip b {
+  display: block; font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .1em; color: var(--cyan);
+  text-transform: uppercase; margin-bottom: 4px; font-weight: 400;
+}
+.ia-tip span { display: block; font-size: 12.5px; line-height: 1.5; color: #b9c1cd; }
+
+/* ══════════════════════════════════════════════════════════════════════════
    MASTHEAD — what this publication is, and who stands behind it
    ══════════════════════════════════════════════════════════════════════════
    Not a logo wall. For a technical newsletter the brand IS the editorial
@@ -1612,6 +1750,22 @@ a.footer-logo:hover{color:#fff;}
      on every build — editing it here is editing a build artefact. -->
 <!-- KC:START -->
 <!-- KC:END -->
+
+<!-- ═══════════ FROM CODE TO PRODUCTION ═══════════ -->
+<section class="pf" id="production-flow" aria-labelledby="pf-head">
+  <div class="pf-inner">
+    <h2 class="pf-head" id="pf-head">From code to production</h2>
+    <p class="pf-lede">Eleven stages between an edit and a user. Select any one of them.</p>
+    <div class="pf-rail">
+      <span class="pf-dot" aria-hidden="true"></span>
+      <div class="pf-stages" role="tablist" aria-label="Delivery pipeline stages">
+        <button class="pf-stage" type="button" id="pf-b-code" aria-expanded="true" aria-controls="pf-p-code" data-stage="code"><span class="pf-pip" aria-hidden="true"></span><span class="pf-name">Code</span></button><button class="pf-stage" type="button" id="pf-b-git" aria-expanded="false" aria-controls="pf-p-git" data-stage="git"><span class="pf-pip" aria-hidden="true"></span><span class="pf-name">Git</span></button><button class="pf-stage" type="button" id="pf-b-build" aria-expanded="false" aria-controls="pf-p-build" data-stage="build"><span class="pf-pip" aria-hidden="true"></span><span class="pf-name">Build</span></button><button class="pf-stage" type="button" id="pf-b-test" aria-expanded="false" aria-controls="pf-p-test" data-stage="test"><span class="pf-pip" aria-hidden="true"></span><span class="pf-name">Test</span></button><button class="pf-stage" type="button" id="pf-b-container" aria-expanded="false" aria-controls="pf-p-container" data-stage="container"><span class="pf-pip" aria-hidden="true"></span><span class="pf-name">Container</span></button><button class="pf-stage" type="button" id="pf-b-registry" aria-expanded="false" aria-controls="pf-p-registry" data-stage="registry"><span class="pf-pip" aria-hidden="true"></span><span class="pf-name">Registry</span></button><button class="pf-stage" type="button" id="pf-b-kubernetes" aria-expanded="false" aria-controls="pf-p-kubernetes" data-stage="kubernetes"><span class="pf-pip" aria-hidden="true"></span><span class="pf-name">Kubernetes</span></button><button class="pf-stage" type="button" id="pf-b-service" aria-expanded="false" aria-controls="pf-p-service" data-stage="service"><span class="pf-pip" aria-hidden="true"></span><span class="pf-name">Service</span></button><button class="pf-stage" type="button" id="pf-b-observability" aria-expanded="false" aria-controls="pf-p-observability" data-stage="observability"><span class="pf-pip" aria-hidden="true"></span><span class="pf-name">Observability</span></button><button class="pf-stage" type="button" id="pf-b-sre" aria-expanded="false" aria-controls="pf-p-sre" data-stage="sre"><span class="pf-pip" aria-hidden="true"></span><span class="pf-name">SRE</span></button><button class="pf-stage" type="button" id="pf-b-production" aria-expanded="false" aria-controls="pf-p-production" data-stage="production"><span class="pf-pip" aria-hidden="true"></span><span class="pf-name">Production</span></button>
+      </div>
+    </div>
+    <div class="pf-panel" id="pf-p-code" role="region" aria-labelledby="pf-b-code"><div class="pf-step">Stage 1 of 11</div><h3 class="pf-title">Code</h3><p class="pf-what">The change starts as an edit on somebody's machine, next to a test that fails until it doesn't.</p><div class="pf-techlabel">Commonly</div><div class="pf-tech"><span>Editor</span><span>Language runtime</span><span>Unit tests</span><span>Pre-commit hooks</span></div><div class="pf-readlabel">Read more</div><div class="pf-read"><a href="categories/foundation/index.html">Foundation &#8594;</a></div></div><div class="pf-panel" id="pf-p-git" role="region" aria-labelledby="pf-b-git" hidden><div class="pf-step">Stage 2 of 11</div><h3 class="pf-title">Git</h3><p class="pf-what">Version control, branching, history and recovery — the record of what changed, and why.</p><div class="pf-techlabel">Commonly</div><div class="pf-tech"><span>Branching</span><span>Tags</span><span>Reflog</span><span>Bisect</span></div><div class="pf-readlabel">Read more</div><div class="pf-read"><a href="Foundation/GIT-VERSION-CONTROL/git-version-control.html">Git version control &#8594;</a><a href="categories/gitops/index.html">GitOps &#8594;</a></div></div><div class="pf-panel" id="pf-p-build" role="region" aria-labelledby="pf-b-build" hidden><div class="pf-step">Stage 3 of 11</div><h3 class="pf-title">Build</h3><p class="pf-what">Resolve dependencies and produce an artefact that comes out the same every time it is built.</p><div class="pf-techlabel">Commonly</div><div class="pf-tech"><span>CI runner</span><span>Dependency cache</span><span>Reproducible builds</span><span>Artefacts</span></div><div class="pf-readlabel">Read more</div><div class="pf-read"><a href="categories/devops/index.html">DevOps &#8594;</a></div></div><div class="pf-panel" id="pf-p-test" role="region" aria-labelledby="pf-b-test" hidden><div class="pf-step">Stage 4 of 11</div><h3 class="pf-title">Test</h3><p class="pf-what">Prove it behaves before anything downstream is allowed to depend on it.</p><div class="pf-techlabel">Commonly</div><div class="pf-tech"><span>Unit</span><span>Integration</span><span>Contract</span><span>Coverage gates</span></div><div class="pf-readlabel">Read more</div><div class="pf-read"><a href="categories/devops/index.html">DevOps &#8594;</a><a href="categories/automation/index.html">Automation &#8594;</a></div></div><div class="pf-panel" id="pf-p-container" role="region" aria-labelledby="pf-b-container" hidden><div class="pf-step">Stage 5 of 11</div><h3 class="pf-title">Container</h3><p class="pf-what">Package the application with the runtime it expects, so the target machine stops mattering.</p><div class="pf-techlabel">Commonly</div><div class="pf-tech"><span>Dockerfile</span><span>Multi-stage</span><span>Base images</span><span>Layer cache</span></div><div class="pf-readlabel">Read more</div><div class="pf-read"><a href="categories/containers/index.html">Containers &#8594;</a><a href="Commands/DOCKER-COMMANDS/docker-commands.html">Docker commands &#8594;</a></div></div><div class="pf-panel" id="pf-p-registry" role="region" aria-labelledby="pf-b-registry" hidden><div class="pf-step">Stage 6 of 11</div><h3 class="pf-title">Registry</h3><p class="pf-what">Store the image, sign it, and be able to say what is inside before it ever runs.</p><div class="pf-techlabel">Commonly</div><div class="pf-tech"><span>Digests</span><span>Signing</span><span>SBOM</span><span>Scanning</span></div><div class="pf-readlabel">Read more</div><div class="pf-read"><a href="categories/supply-chain-security/index.html">Supply chain security &#8594;</a><a href="categories/security/index.html">Security &#8594;</a></div></div><div class="pf-panel" id="pf-p-kubernetes" role="region" aria-labelledby="pf-b-kubernetes" hidden><div class="pf-step">Stage 7 of 11</div><h3 class="pf-title">Kubernetes</h3><p class="pf-what">Schedule the workload, keep it running, and reconcile it back whenever reality drifts from the spec.</p><div class="pf-techlabel">Commonly</div><div class="pf-tech"><span>Deployments</span><span>Scheduler</span><span>Probes</span><span>Requests &amp; limits</span></div><div class="pf-readlabel">Read more</div><div class="pf-read"><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a><a href="Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">kubectl commands &#8594;</a></div></div><div class="pf-panel" id="pf-p-service" role="region" aria-labelledby="pf-b-service" hidden><div class="pf-step">Stage 8 of 11</div><h3 class="pf-title">Service</h3><p class="pf-what">Give it a stable address, and route traffic only to the instances that are actually healthy.</p><div class="pf-techlabel">Commonly</div><div class="pf-tech"><span>Service</span><span>Ingress</span><span>DNS</span><span>mTLS</span></div><div class="pf-readlabel">Read more</div><div class="pf-read"><a href="categories/networking/index.html">Networking &#8594;</a><a href="categories/service-mesh/index.html">Service mesh &#8594;</a></div></div><div class="pf-panel" id="pf-p-observability" role="region" aria-labelledby="pf-b-observability" hidden><div class="pf-step">Stage 9 of 11</div><h3 class="pf-title">Observability</h3><p class="pf-what">Metrics, logs and traces — what the system says about itself while nobody is watching.</p><div class="pf-techlabel">Commonly</div><div class="pf-tech"><span>Metrics</span><span>Logs</span><span>Traces</span><span>Dashboards</span><span>Alerts</span></div><div class="pf-readlabel">Read more</div><div class="pf-read"><a href="categories/observability/index.html">Observability &#8594;</a><a href="categories/logging/index.html">Logging &#8594;</a></div></div><div class="pf-panel" id="pf-p-sre" role="region" aria-labelledby="pf-b-sre" hidden><div class="pf-step">Stage 10 of 11</div><h3 class="pf-title">SRE</h3><p class="pf-what">Error budgets, on-call and incident response: the practice of running the thing once it is running.</p><div class="pf-techlabel">Commonly</div><div class="pf-tech"><span>SLO</span><span>Error budget</span><span>On-call</span><span>Postmortem</span></div><div class="pf-readlabel">Read more</div><div class="pf-read"><a href="categories/sre/index.html">SRE &#8594;</a><a href="categories/troubleshooting/index.html">Troubleshooting &#8594;</a></div></div><div class="pf-panel" id="pf-p-production" role="region" aria-labelledby="pf-b-production" hidden><div class="pf-step">Stage 11 of 11</div><h3 class="pf-title">Production</h3><p class="pf-what">Real users, real traffic, real consequences — and the feedback that starts the next change.</p><div class="pf-techlabel">Commonly</div><div class="pf-tech"><span>Traffic</span><span>Incidents</span><span>Capacity</span><span>Feedback</span></div><div class="pf-readlabel">Read more</div><div class="pf-read"><span class="pf-none">The end of the pipeline, and the start of the next one.</span></div></div>
+  </div>
+</section>
+
 
 <!-- ═══════════ TICKER ═══════════ -->
 <div class="ticker-wrap">
@@ -2319,6 +2473,23 @@ a.footer-logo:hover{color:#fff;}
 <!-- ═══════════ /DOCS RAIL + CONTENT ═══════════ -->
 
 <!-- ═══════════ FOOTER ═══════════ -->
+
+<!-- ═══════════ INFRASTRUCTURE ARCHITECTURE ═══════════ -->
+<section class="ia" id="infra-diagram" aria-labelledby="ia-head">
+  <div class="ia-inner">
+    <h2 class="ia-head" id="ia-head">Infrastructure architecture</h2>
+    <p class="ia-lede">One request, from the person who made it down to the engineer who gets paged when it fails. Hover any layer.</p>
+    <div class="ia-stage" id="iaStage">
+      <svg viewBox="0 0 760 716" role="img" aria-label="A production request path: users, DNS and CDN, load balancer, two services, Kubernetes, pods, storage and network, the application, metrics, logs and traces, observability, and SRE.">
+        <g class="ia-edges"><path class="ia-edge" d="M380.0,52.0 C380.0,70.0 380.0,70.0 380.0,88.0"/><path class="ia-edge" d="M380.0,124.0 C380.0,142.0 380.0,142.0 380.0,160.0"/><path class="ia-edge" d="M380.0,196.0 C380.0,214.0 277.0,214.0 277.0,232.0"/><path class="ia-edge" d="M380.0,196.0 C380.0,214.0 483.0,214.0 483.0,232.0"/><path class="ia-edge" d="M277.0,268.0 C277.0,286.0 380.0,286.0 380.0,304.0"/><path class="ia-edge" d="M483.0,268.0 C483.0,286.0 380.0,286.0 380.0,304.0"/><path class="ia-edge" d="M380.0,340.0 C380.0,358.0 196.0,358.0 196.0,376.0"/><path class="ia-edge" d="M380.0,340.0 C380.0,358.0 380.0,358.0 380.0,376.0"/><path class="ia-edge" d="M380.0,340.0 C380.0,358.0 564.0,358.0 564.0,376.0"/><path class="ia-edge" d="M196.0,412.0 C196.0,430.0 380.0,430.0 380.0,448.0"/><path class="ia-edge" d="M380.0,412.0 C380.0,430.0 380.0,430.0 380.0,448.0"/><path class="ia-edge" d="M564.0,412.0 C564.0,430.0 380.0,430.0 380.0,448.0"/><path class="ia-edge" d="M380.0,484.0 C380.0,502.0 196.0,502.0 196.0,520.0"/><path class="ia-edge" d="M380.0,484.0 C380.0,502.0 380.0,502.0 380.0,520.0"/><path class="ia-edge" d="M380.0,484.0 C380.0,502.0 564.0,502.0 564.0,520.0"/><path class="ia-edge" d="M196.0,556.0 C196.0,574.0 380.0,574.0 380.0,592.0"/><path class="ia-edge" d="M380.0,556.0 C380.0,574.0 380.0,574.0 380.0,592.0"/><path class="ia-edge" d="M564.0,556.0 C564.0,574.0 380.0,574.0 380.0,592.0"/><path class="ia-edge" d="M380.0,628.0 C380.0,646.0 380.0,646.0 380.0,664.0"/></g>
+        <g class="ia-flow" aria-hidden="true"><circle class="ia-dot" r="3" style="offset-path:path('M380.0,52.0 C380.0,70.0 380.0,70.0 380.0,88.0'); animation-delay:0.00s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,124.0 C380.0,142.0 380.0,142.0 380.0,160.0'); animation-delay:0.42s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,196.0 C380.0,214.0 483.0,214.0 483.0,232.0'); animation-delay:0.84s"/><circle class="ia-dot" r="3" style="offset-path:path('M483.0,268.0 C483.0,286.0 380.0,286.0 380.0,304.0'); animation-delay:1.26s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,340.0 C380.0,358.0 380.0,358.0 380.0,376.0'); animation-delay:1.68s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,412.0 C380.0,430.0 380.0,430.0 380.0,448.0'); animation-delay:2.10s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,484.0 C380.0,502.0 380.0,502.0 380.0,520.0'); animation-delay:2.52s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,556.0 C380.0,574.0 380.0,574.0 380.0,592.0'); animation-delay:2.94s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,628.0 C380.0,646.0 380.0,646.0 380.0,664.0'); animation-delay:3.36s"/></g>
+        <g class="ia-nodes"><g class="ia-node" tabindex="0" role="group" data-t="Users" data-d="Where every request starts. Nothing below exists for any other reason."><rect x="280.0" y="16.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="34.0">USERS</text></g><a class="ia-node" href="categories/networking/index.html" data-t="DNS / CDN" data-d="Name resolution and edge caching: the first hop, and usually the last one anybody suspects."><rect x="280.0" y="88.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="106.0">DNS / CDN</text></a><a class="ia-node" href="categories/networking/index.html" data-t="Load balancer" data-d="Spreads traffic across healthy instances, and takes the unhealthy ones out of rotation."><rect x="280.0" y="160.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="178.0">LOAD BALANCER</text></a><a class="ia-node" href="categories/api-microservices/index.html" data-t="Service A" data-d="A stable address in front of instances that come and go."><rect x="187.0" y="232.0" width="180.0" height="36.0" rx="4"/><text x="277.0" y="250.0">SERVICE A</text></a><a class="ia-node" href="categories/api-microservices/index.html" data-t="Service B" data-d="Another one. Independently deployed, independently able to fail."><rect x="393.0" y="232.0" width="180.0" height="36.0" rx="4"/><text x="483.0" y="250.0">SERVICE B</text></a><a class="ia-node" href="categories/kubernetes/index.html" data-t="Kubernetes" data-d="Schedules the workloads and reconciles them back whenever reality drifts from the spec."><rect x="280.0" y="304.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="322.0">KUBERNETES</text></a><a class="ia-node" href="categories/kubernetes/index.html" data-t="Pods" data-d="The running unit: restarted, rescheduled and replaced, never repaired in place."><rect x="117.0" y="376.0" width="158.0" height="36.0" rx="4"/><text x="196.0" y="394.0">PODS</text></a><a class="ia-node" href="categories/storage/index.html" data-t="Storage" data-d="Volumes and storage classes — the data that has to outlive the pod using it."><rect x="301.0" y="376.0" width="158.0" height="36.0" rx="4"/><text x="380.0" y="394.0">STORAGE</text></a><a class="ia-node" href="categories/networking/index.html" data-t="Network" data-d="Pod-to-pod paths, network policy, and the DNS that lives inside the cluster."><rect x="485.0" y="376.0" width="158.0" height="36.0" rx="4"/><text x="564.0" y="394.0">NETWORK</text></a><a class="ia-node" href="categories/api-microservices/index.html" data-t="Application" data-d="Your code, finally. The part all of the above exists to keep running."><rect x="280.0" y="448.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="466.0">APPLICATION</text></a><a class="ia-node" href="categories/observability/index.html" data-t="Metrics" data-d="Numbers over time: how much, how often, how slow."><rect x="117.0" y="520.0" width="158.0" height="36.0" rx="4"/><text x="196.0" y="538.0">METRICS</text></a><a class="ia-node" href="categories/logging/index.html" data-t="Logs" data-d="What happened, in order, with the detail a metric had to throw away."><rect x="301.0" y="520.0" width="158.0" height="36.0" rx="4"/><text x="380.0" y="538.0">LOGS</text></a><a class="ia-node" href="categories/observability/index.html" data-t="Traces" data-d="One request&#x27;s path across every service it touched."><rect x="485.0" y="520.0" width="158.0" height="36.0" rx="4"/><text x="564.0" y="538.0">TRACES</text></a><a class="ia-node" href="categories/observability/index.html" data-t="Observability" data-d="Turning three signals into one answer about what is actually happening."><rect x="280.0" y="592.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="610.0">OBSERVABILITY</text></a><a class="ia-node" href="categories/sre/index.html" data-t="SRE" data-d="Error budgets, on-call, and deciding what to do about everything above this line."><rect x="280.0" y="664.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="682.0">SRE</text></a></g>
+      </svg>
+      <div class="ia-tip" id="iaTip" role="status" aria-live="polite"><b></b><span></span></div>
+    </div>
+  </div>
+</section>
+
 <!-- ═══════════ MASTHEAD ═══════════ -->
 <section class="mh" aria-labelledby="mh-mark">
   <div class="mh-inner">
@@ -2699,66 +2870,25 @@ const counterObs = new IntersectionObserver(entries=>{
    not silently left with counters stuck on zero. */
 document.querySelectorAll('.hero-stats, .ks-grid').forEach(el=>counterObs.observe(el));
 
-/* ── Control-plane diagram: hover and keyboard focus ──
-   One class on the container dims everything, and the node re-lights itself
-   and the edges it names. Doing it this way means the JS never has to know
-   the topology — each node already declares which edges it participates in,
-   right next to the geometry, so the two cannot drift apart. */
-(function () {
-  const wrap = document.getElementById('cpDiagram');
-  if (!wrap) return;
-  const svg  = wrap.querySelector('svg');
-  const tip  = document.getElementById('cpTip');
-  const tipT = tip.querySelector('b');
-  const tipD = tip.querySelector('span');
+/* ── Hover-and-focus diagrams ──
+   Three diagrams on this page share one behaviour: pointing at a node dims
+   everything else, lights that node and the edges it names, and shows a
+   tooltip under it. They were three copies of the same thirty lines until
+   the third one arrived, which is the point at which copies start drifting
+   apart instead of staying in step.
 
-  function lightUp(node) {
-    clearAll();
-    svg.classList.add('is-focus');
-    node.classList.add('on');
-    (node.dataset.edges || '').split(/\s+/).filter(Boolean).forEach(id => {
-      const e = document.getElementById(id);
-      if (e) e.classList.add('on');
-    });
-    tipT.textContent = node.dataset.t || '';
-    tipD.textContent = node.dataset.d || '';
-    tip.classList.add('show');
-    // Position against the node's box, clamped inside the container so a
-    // node at the far edge does not push the tooltip off screen.
-    const r = node.getBoundingClientRect();
-    const w = wrap.getBoundingClientRect();
-    const tw = tip.offsetWidth || 240;
-    let x = r.left - w.left + r.width / 2 - tw / 2;
-    x = Math.max(4, Math.min(x, w.width - tw - 4));
-    tip.style.left = x + 'px';
-    tip.style.top  = (r.bottom - w.top + 8) + 'px';
-  }
+   What actually differs between them is four things, so those are the four
+   arguments. Everything else — the clamping, the Escape handler, the
+   mouseleave — is identical and now exists once.
 
-  function clearAll() {
-    svg.classList.remove('is-focus');
-    svg.querySelectorAll('.on').forEach(el => el.classList.remove('on'));
-    tip.classList.remove('show');
-  }
-
-  svg.querySelectorAll('.cp-node').forEach(node => {
-    node.addEventListener('mouseenter', () => lightUp(node));
-    node.addEventListener('focus',      () => lightUp(node));
-    node.addEventListener('mouseleave', clearAll);
-    node.addEventListener('blur',       clearAll);
-  });
-  wrap.addEventListener('mouseleave', clearAll);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') clearAll(); });
-})();
-
-/* ── Constellation: same interaction contract as the hero diagram ──
-   Deliberately a second small closure rather than a shared helper. The two
-   diagrams have different markup, different tooltip anchors and different
-   dimming targets; the "reuse" would be a function with four parameters that
-   is harder to read than either copy. */
-(function () {
-  const stage = document.querySelector('.kc-stage');
+   The topology still lives in the markup: each node names the edges it
+   participates in, next to its own geometry, so the JS never has to know
+   what is connected to what. */
+function wireDiagram(stageSel, tipSel, edgeAttr) {
+  const stage = document.querySelector(stageSel);
   if (!stage) return;
-  const tip  = document.getElementById('kcTip');
+  const tip = document.querySelector(tipSel);
+  if (!tip) return;
   const tipT = tip.querySelector('b');
   const tipD = tip.querySelector('span');
 
@@ -2768,13 +2898,19 @@ document.querySelectorAll('.hero-stats, .ks-grid').forEach(el=>counterObs.observ
     tip.classList.remove('show');
   }
 
-  stage.querySelectorAll('.kc-node').forEach(node => {
+  stage.querySelectorAll('[data-t]').forEach(node => {
     function show() {
       clearAll();
       stage.classList.add('is-focus');
       node.classList.add('on');
-      const e = document.getElementById(node.dataset.edge);
-      if (e) e.classList.add('on');
+      // edgeAttr is absent for diagrams whose nodes light nothing but
+      // themselves; "edges" carries a space-separated list, "edge" one id.
+      if (edgeAttr) {
+        (node.dataset[edgeAttr] || '').split(/\s+/).filter(Boolean).forEach(id => {
+          const e = document.getElementById(id);
+          if (e) e.classList.add('on');
+        });
+      }
       tipT.textContent = node.dataset.t || '';
       tipD.textContent = node.dataset.d || '';
       tip.classList.add('show');
@@ -2793,6 +2929,49 @@ document.querySelectorAll('.hero-stats, .ks-grid').forEach(el=>counterObs.observ
   });
   stage.addEventListener('mouseleave', clearAll);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') clearAll(); });
+}
+
+/* '#cpDiagram', not the <svg> inside it. The dimming rule is
+   `.cp-diagram.is-focus .cp-node`, so the class has to land on the element
+   that carries .cp-diagram — putting it on the child <svg> matched nothing
+   and the dim never happened, while a test that asserted "the class is
+   there" passed the whole time. Assert the effect, not the mechanism. */
+wireDiagram('#cpDiagram', '#cpTip', 'edges');       /* hero: many edges  */
+wireDiagram('.kc-stage',      '#kcTip', 'edge');    /* constellation: one */
+wireDiagram('.ia-stage',      '#iaTip', null);      /* request path: none */
+
+/* ── Delivery pipeline: select a stage ──
+   All eleven panels are in the DOM and one is visible. That costs a few KB
+   and buys two things worth more: the content is readable by a screen reader
+   and indexable, rather than living in a data attribute that neither can
+   reach, and a reader with JavaScript off still gets the first stage instead
+   of an empty box. */
+(function () {
+  const wrap = document.getElementById('production-flow');
+  if (!wrap) return;
+  const btns = [...wrap.querySelectorAll('.pf-stage')];
+
+  function select(btn) {
+    btns.forEach(b => {
+      const on = b === btn;
+      b.setAttribute('aria-expanded', on ? 'true' : 'false');
+      const panel = document.getElementById(b.getAttribute('aria-controls'));
+      if (panel) panel.hidden = !on;
+    });
+  }
+
+  btns.forEach((b, i) => {
+    b.addEventListener('click', () => select(b));
+    b.addEventListener('keydown', e => {
+      // Left/right walk the rail, Home/End jump to either end — what a
+      // reader who is already on a stage will try before reaching for Tab.
+      const map = { ArrowLeft: i - 1, ArrowRight: i + 1, Home: 0, End: btns.length - 1 };
+      if (!(e.key in map)) return;
+      e.preventDefault();
+      const next = btns[Math.max(0, Math.min(btns.length - 1, map[e.key]))];
+      next.focus(); select(next);
+    });
+  });
 })();
 
 /* ── SMIL, which no stylesheet can reach ──
