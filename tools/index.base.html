@@ -1479,6 +1479,96 @@ a.footer-logo:hover{color:#fff;}
 .ia-tip span { display: block; font-size: 12.5px; line-height: 1.5; color: #b9c1cd; }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   TROUBLESHOOTING — five symptoms and the order to look in
+   ══════════════════════════════════════════════════════════════════════════
+   Native <details>, not a JS accordion. It is keyboard operable, announced
+   correctly, survives JavaScript failing to load, and is findable by the
+   browser's own in-page search — which matters more here than anywhere else
+   on the page, because somebody reading this is looking for one string they
+   half-remember while something is on fire. */
+.tb { background: #07080b; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(44px, 6vw, 80px) 0; }
+.tb-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.tb-head {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(26px, 4vw, 48px); line-height: 1.04; color: #fff; margin: 0 0 10px;
+}
+.tb-head span { color: var(--cyan); }
+.tb-lede-top { font-size: 14px; line-height: 1.6; color: #8b95a6; margin: 0 0 26px; }
+.tb-grid { display: grid; gap: 10px; }
+
+.tb-card { border: 1px solid rgba(255,255,255,.12); border-radius: 7px; background: #0d1015; overflow: hidden; }
+.tb-card[open] { border-color: rgba(0,194,212,.35); }
+.tb-card summary {
+  list-style: none; cursor: pointer; padding: 16px 18px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  transition: background-color .16s ease;
+}
+.tb-card summary::-webkit-details-marker { display: none; }
+.tb-card summary:hover { background: #121820; }
+.tb-card summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: -2px; }
+.tb-sym {
+  font-family: 'Bebas Neue', Impact, sans-serif; font-size: 21px;
+  letter-spacing: .02em; color: #fff; flex-shrink: 0;
+}
+.tb-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.tb-chips span {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10px;
+  letter-spacing: .07em; color: #79839a;
+  border: 1px solid rgba(255,255,255,.12); border-radius: 3px; padding: 4px 8px;
+}
+/* The affordance is drawn rather than typed so it cannot be read aloud as a
+   stray character, and it rotates to point down when the card is open. */
+.tb-open {
+  margin-left: auto; width: 9px; height: 9px; flex-shrink: 0;
+  border-right: 1.5px solid #6f7a8c; border-bottom: 1.5px solid #6f7a8c;
+  transform: rotate(-45deg); transition: transform .2s ease, border-color .2s ease;
+}
+.tb-card[open] .tb-open { transform: rotate(45deg); border-color: var(--cyan); }
+
+.tb-body { padding: 0 18px 20px; border-top: 1px solid rgba(255,255,255,.08); }
+.tb-lede { font-size: 14px; line-height: 1.65; color: #b0b9c6; margin: 16px 0 18px; max-width: 74ch; }
+.tb-flowlabel {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10px;
+  letter-spacing: .13em; text-transform: uppercase; color: #6f7a8c; margin-bottom: 10px;
+}
+.tb-flow { list-style: none; margin: 0 0 18px; padding: 0; counter-reset: tb; }
+.tb-flow li {
+  counter-increment: tb; position: relative;
+  padding: 0 0 14px 34px; border-left: 1px solid rgba(255,255,255,.1);
+  margin-left: 11px;
+}
+.tb-flow li:last-child { border-left-color: transparent; padding-bottom: 0; }
+.tb-flow li::before {
+  content: counter(tb); position: absolute; left: -11px; top: 0;
+  width: 21px; height: 21px; border-radius: 50%;
+  background: #0d1015; border: 1px solid rgba(255,255,255,.2);
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10px; color: #8b95a6;
+  display: flex; align-items: center; justify-content: center;
+}
+.tb-flow b {
+  display: block; font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 12.5px; color: #e6eaf0; font-weight: 400; margin-bottom: 4px;
+  line-height: 1.45;
+}
+.tb-flow span { display: block; font-size: 13.5px; line-height: 1.6; color: #98a2b1; max-width: 76ch; }
+.tb-flow code {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 12px;
+  background: rgba(255,255,255,.06); border-radius: 3px; padding: 1px 5px; color: #cfd6e0;
+}
+.tb-flow b code { background: none; padding: 0; color: inherit; }
+.tb-reads { display: flex; flex-wrap: wrap; gap: 8px; }
+.tb-reads a {
+  font-size: 12.5px; color: var(--cyan); text-decoration: none;
+  border: 1px solid rgba(0,194,212,.32); border-radius: 3px; padding: 7px 12px;
+  transition: background-color .18s ease;
+}
+.tb-reads a:hover { background: rgba(0,194,212,.1); }
+@media (max-width: 620px) {
+  .tb-card summary { gap: 9px; }
+  .tb-chips span:nth-child(n+4) { display: none; }   /* first three signals only */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
    MASTHEAD — what this publication is, and who stands behind it
    ══════════════════════════════════════════════════════════════════════════
    Not a logo wall. For a technical newsletter the brand IS the editorial
@@ -2487,6 +2577,16 @@ a.footer-logo:hover{color:#fff;}
       </svg>
       <div class="ia-tip" id="iaTip" role="status" aria-live="polite"><b></b><span></span></div>
     </div>
+  </div>
+</section>
+
+
+<!-- ═══════════ TROUBLESHOOTING ═══════════ -->
+<section class="tb" id="troubleshooting" aria-labelledby="tb-head">
+  <div class="tb-inner">
+    <h2 class="tb-head" id="tb-head">Production doesn't break.<br><span>Your observability tells you why.</span></h2>
+    <p class="tb-lede-top">Five symptoms, and the order to look in. Open one.</p>
+    <div class="tb-grid"><details class="tb-card" id="tb-pod-pending"><summary><span class="tb-sym">Pod pending</span><span class="tb-chips"><span>Scheduler</span><span>Nodes</span><span>Taints</span><span>Affinity</span><span>PVC</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">The scheduler has looked at every node and refused to place it. The pod is fine; the cluster has no seat for it.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>kubectl describe pod &lt;name&gt;</b><span>Read the Events at the bottom first. The scheduler says exactly why it declined, once per node.</span></li><li><b>Insufficient cpu / memory</b><span>No node has room for the <b>requests</b> — not the usage. Compare requests against each node's allocatable, not its capacity.</span></li><li><b>Untolerated taint</b><span>A node is marked for something else and this pod has no toleration for it. Common on control-plane and GPU pools.</span></li><li><b>Didn't match node affinity/selector</b><span>A nodeSelector or affinity rule matches nothing. A typo in a label value fails exactly like a full cluster.</span></li><li><b>Unbound PersistentVolumeClaim</b><span>The pod waits for a volume that will never bind — no StorageClass, no capacity, or the wrong access mode.</span></li><li><b>Nothing in Events at all</b><span>The scheduler never saw it. Check the pod is not stuck on an admission webhook or a missing priority class.</span></li></ol><div class="tb-reads"><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a><a href="categories/troubleshooting/index.html">Troubleshooting &#8594;</a><a href="Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">kubectl commands &#8594;</a></div></div></details><details class="tb-card" id="tb-crashloopbackoff"><summary><span class="tb-sym">CrashLoopBackOff</span><span class="tb-chips"><span>Logs</span><span>Events</span><span>Probes</span><span>Config</span><span>Resources</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">The container starts, exits, and Kubernetes backs off before trying again. The loop is the symptom; the first exit is the cause.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>kubectl logs &lt;pod&gt; --previous</b><span>Without <code>--previous</code> you are reading the instance that has not failed yet. The one that died holds the answer.</span></li><li><b>Read the exit code</b><span><code>1</code> the application decided to stop. <code>137</code> it was killed — usually OOM. <code>143</code> it was asked to stop and did.</span></li><li><b>kubectl describe pod → Last State</b><span>Reason: OOMKilled means the memory limit, not a leak, ended it. Raise the limit or find what grew.</span></li><li><b>Liveness probe restarting a healthy app</b><span>A slow starter fails a liveness probe that began too early. That is what <code>startupProbe</code> is for; raising initialDelaySeconds hides it.</span></li><li><b>Missing config or secret</b><span>A mount that is not there, or an env var the app requires and does not find, exits before the first log line.</span></li><li><b>It only crashes on some nodes</b><span>Then it is not the image. Look at the node: kernel, runtime version, or a mount that exists in one place.</span></li></ol><div class="tb-reads"><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a><a href="categories/troubleshooting/index.html">Troubleshooting &#8594;</a><a href="Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">kubectl commands &#8594;</a></div></div></details><details class="tb-card" id="tb-node-notready"><summary><span class="tb-sym">Node NotReady</span><span class="tb-chips"><span>Kubelet</span><span>Network</span><span>Disk</span><span>Runtime</span><span>Conditions</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">The kubelet has stopped saying it is healthy. Everything on that node is already being evicted.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>kubectl describe node &lt;name&gt;</b><span>The Conditions block names it: MemoryPressure, DiskPressure, PIDPressure, or Ready=Unknown when the kubelet went quiet.</span></li><li><b>Ready=Unknown</b><span>The node stopped reporting rather than reported a problem. That is the network or the kubelet process, not the workload.</span></li><li><b>systemctl status kubelet</b><span>Then <code>journalctl -u kubelet -n 200</code>. The kubelet says why it is unhappy in plain text.</span></li><li><b>DiskPressure</b><span><code>/var/lib/kubelet</code> or the image store is full. Image garbage collection has thresholds; a large pulled image can cross them.</span></li><li><b>Container runtime</b><span><code>crictl info</code> and <code>crictl ps</code>. A kubelet cannot be ready if the runtime under it is not.</span></li><li><b>CNI not ready</b><span>No pod networking means no Ready. Check the network plugin's own pods on that node before blaming the kubelet.</span></li></ol><div class="tb-reads"><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a><a href="categories/it-infrastructure/index.html">Infrastructure &#8594;</a><a href="Commands/LINUX-COMMANDS/linux-commands.html">Linux commands &#8594;</a></div></div></details><details class="tb-card" id="tb-high-memory"><summary><span class="tb-sym">High memory</span><span class="tb-chips"><span>Metrics</span><span>Working set</span><span>OOMKilled</span><span>Limits</span><span>GC</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">Usage is climbing. Whether that is a leak, a cache, or a limit set too low is the whole question.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>kubectl top pod — against the limit</b><span>A number on its own means nothing. What matters is the ratio to the limit, and the shape over time.</span></li><li><b>Sawtooth or ramp</b><span>Sawtooth is a garbage collector doing its job. A ramp that never comes down is a leak, or a cache with no bound.</span></li><li><b>Working set, not RSS</b><span>The kubelet evicts on working set. Page cache the container touched counts towards it, which surprises people.</span></li><li><b>OOMKilled with plenty free</b><span>The cgroup limit was reached, not the node's memory. The node being fine is not evidence.</span></li><li><b>Heap vs off-heap</b><span>A JVM or Go heap graph can look calm while the process grows — native allocations, thread stacks and mapped files sit outside it.</span></li><li><b>Requests below limits</b><span>Burstable pods are evicted before Guaranteed ones. If it dies under node pressure, the QoS class is the reason.</span></li></ol><div class="tb-reads"><a href="categories/performance-engineering/index.html">Performance engineering &#8594;</a><a href="categories/observability/index.html">Observability &#8594;</a><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a></div></div></details><details class="tb-card" id="tb-connection-timeout"><summary><span class="tb-sym">Connection timeout</span><span class="tb-chips"><span>DNS</span><span>Network</span><span>Service</span><span>Endpoint</span><span>Application</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">The request goes out and nothing comes back. A timeout is the one failure that looks identical at every layer.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>Resolve it from inside the pod</b><span><code>nslookup &lt;svc&gt;</code> in the calling pod. Name resolution failing looks exactly like the far end being down.</span></li><li><b>kubectl get endpoints &lt;svc&gt;</b><span>A Service with no endpoints is a healthy-looking object that routes nowhere. This is the single most common cause.</span></li><li><b>Selector mismatch</b><span>Endpoints are empty because the Service selector matches no pod. Both objects look correct in isolation.</span></li><li><b>Readiness, not liveness</b><span>A pod that is running but not ready is removed from endpoints. Traffic stops without a single restart.</span></li><li><b>NetworkPolicy</b><span>A default-deny policy in the namespace drops the packet silently. Timeout, never refused.</span></li><li><b>Listening on 127.0.0.1</b><span>The app binds loopback instead of 0.0.0.0, so it works inside the container and nowhere else.</span></li></ol><div class="tb-reads"><a href="categories/networking/index.html">Networking &#8594;</a><a href="categories/service-mesh/index.html">Service mesh &#8594;</a><a href="categories/troubleshooting/index.html">Troubleshooting &#8594;</a></div></div></details></div>
   </div>
 </section>
 
