@@ -133,6 +133,15 @@ STAGE_NOTE = {
                             "one nav, one footer and a theme toggle on the 25 "
                             "hand-written pages, which had twenty-three between them"),
     "build_colophon": ("everything above", "this page"),
+    "make_banner": ("taxonomy + register + commands",
+                    "brand/banner.svg — the animated masthead on the repo's "
+                    "GitHub page, with the live/pipeline/planned split drawn "
+                    "to scale from the same taxonomy this site reads"),
+    "build_ghreadme": ("taxonomy + register + commands",
+                       "README.md at the repo root — the repository's front "
+                       "page, which is a different document from the site's "
+                       "own README and the only file here written for GitHub "
+                       "rather than for the web"),
     "build_headers": ("every built page, for the origins they fetch from",
                       "_headers — the security response headers Cloudflare "
                       "serves, and a build failure if a page starts loading "

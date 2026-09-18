@@ -899,6 +899,8 @@ and a half-applied edit can never accumulate.
 | 25 | `build_canonical.py` | `siteconf.BASE` | rewrites every origin to the canonical one |
 | 26 | `build_headers.py` | every built page, for the origins they fetch from | `_headers` — the security response headers Cloudflare serves. Fails the build if a page starts loading from an origin the policy does not cover |
 | 27 | `verify.py` | the built site | `sitemap.xml`, **and a non-zero exit if anything is wrong** |
+| 28 | `make_banner.py` | taxonomy + register + commands | `brand/banner.svg` — the animated masthead for the repo's GitHub page |
+| 29 | `build_ghreadme.py` | taxonomy + register + commands | `README.md` at the repo root — the repository front page, a different document from the site's own README |
 
 Stages 17–20 are whole-site passes: they walk every page that exists at that point and inject
 the same chrome into all of them. That is why a new page needs no wiring of its own — it is

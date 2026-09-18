@@ -215,4 +215,19 @@ python3 tools/build_headers.py
 say "verify + sitemap"
 python3 tools/verify.py
 
+# ── the repo's own front page ───────────────────────────────────────────────
+# These two are the only stages that write OUTSIDE dist/, deliberately: GitHub
+# reads the repository, not the deployment, so a README in dist/ is a README
+# nobody on GitHub can see. The repo had none at all after Phase 8 untracked
+# dist/ — the front page was blank and nothing noticed, because the person who
+# owns a repo rarely visits its public face.
+#
+# Banner first: build_ghreadme asserts the image exists, since a README whose
+# first element is a broken image is worse than one with no image.
+say "repo banner (brand/banner.svg — animated, numbers from the taxonomy)"
+python3 tools/make_banner.py
+
+say "repo README.md (the GitHub front page, not the site's copy)"
+python3 tools/build_ghreadme.py
+
 say "done — review 'git status', then commit"
