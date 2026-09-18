@@ -5,6 +5,11 @@
   "observability": {
     "enabled": true
   },
+  // The workers.dev hostname served a byte-identical copy of this site at
+  // HTTP 200 — duplicate content, and the host every canonical used to point
+  // at. Off means exactly one origin answers for this site.
+  "workers_dev": false,
+
   "assets": {
     // dist/, not "." â€” this one line is the whole security model.
     //
