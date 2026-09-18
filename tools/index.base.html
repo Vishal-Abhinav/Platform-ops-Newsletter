@@ -1569,6 +1569,71 @@ a.footer-logo:hover{color:#fff;}
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   ROLE EXPLORER + ENGINEERING JOURNEY
+   ══════════════════════════════════════════════════════════════════════════
+   Both are lists of links, so both are lists of links in the markup. The
+   number beside each step is the count of LIVE pages in that area, which is
+   the honest thing to show on a site that publishes its backlog: a path with
+   a 0 on it is telling the reader something true rather than hiding it. */
+.rx { background: #0a0c10; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(44px, 6vw, 80px) 0; }
+.rx-inner, .ej-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.rx-head, .ej-head { font-family: 'Bebas Neue', Impact, sans-serif; font-size: clamp(26px, 3.4vw, 40px); color: #fff; margin: 0 0 8px; }
+.rx-lede, .ej-lede { font-size: 14px; line-height: 1.6; color: #8b95a6; margin: 0 0 26px; max-width: 66ch; }
+.rx-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.rx-card { border: 1px solid rgba(255,255,255,.12); border-radius: 7px; background: #0d1015; padding: 18px; }
+.rx-role { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 21px; color: #fff; margin: 0 0 4px; letter-spacing: .02em; }
+.rx-meta {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10px;
+  letter-spacing: .1em; text-transform: uppercase; color: #6f7a8c; margin-bottom: 14px;
+}
+/* The chevron is a pseudo-element between links rather than a character in
+   the markup, so a screen reader reads a list of areas and not "Linux
+   greater-than Git greater-than". */
+.rx-path { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rx-path a {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; color: #b0b9c6; text-decoration: none;
+  border: 1px solid rgba(255,255,255,.13); border-radius: 3px; padding: 6px 9px;
+  transition: border-color .18s ease, color .18s ease;
+}
+.rx-path a:hover { border-color: var(--cyan); color: #fff; }
+.rx-path a b {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10px;
+  font-weight: 400; color: var(--lime); min-width: 1ch; text-align: right;
+}
+.rx-path a b:empty::before { content: "0"; }
+.rx-path a + a::before {
+  content: ""; width: 5px; height: 5px; margin-right: 2px;
+  border-right: 1px solid rgba(255,255,255,.22); border-top: 1px solid rgba(255,255,255,.22);
+  transform: rotate(45deg); flex-shrink: 0;
+}
+
+.ej { background: #07080b; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(44px, 6vw, 80px) 0; }
+.ej-track { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.ej-stop {
+  display: block; text-decoration: none; position: relative;
+  border: 1px solid rgba(255,255,255,.12); border-radius: 7px;
+  background: #0d1015; padding: 16px 16px 18px;
+  border-top: 2px solid rgba(255,255,255,.14);
+  transition: border-color .18s ease, background-color .18s ease, transform .18s ease;
+}
+.ej-stop[data-state="live"] { border-top-color: var(--lime); }
+.ej-stop[data-state="soon"] { border-top-color: rgba(255,255,255,.16); }
+.ej-stop:hover { background: #131922; border-color: rgba(0,194,212,.4); transform: translateY(-2px); }
+.ej-n {
+  display: block; font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10px; letter-spacing: .12em; color: #5d6675; margin-bottom: 6px;
+}
+.ej-l { display: block; font-family: 'Bebas Neue', Impact, sans-serif; font-size: 22px; color: #fff; letter-spacing: .02em; }
+.ej-c {
+  display: block; font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10px; letter-spacing: .08em; color: #7c8797; margin: 3px 0 9px;
+}
+.ej-stop[data-state="live"] .ej-c { color: var(--lime); }
+.ej-w { display: block; font-size: 12.5px; line-height: 1.55; color: #98a2b1; }
+
+/* ══════════════════════════════════════════════════════════════════════════
    MASTHEAD — what this publication is, and who stands behind it
    ══════════════════════════════════════════════════════════════════════════
    Not a logo wall. For a technical newsletter the brand IS the editorial
@@ -2589,6 +2654,14 @@ a.footer-logo:hover{color:#fff;}
     <div class="tb-grid"><details class="tb-card" id="tb-pod-pending"><summary><span class="tb-sym">Pod pending</span><span class="tb-chips"><span>Scheduler</span><span>Nodes</span><span>Taints</span><span>Affinity</span><span>PVC</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">The scheduler has looked at every node and refused to place it. The pod is fine; the cluster has no seat for it.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>kubectl describe pod &lt;name&gt;</b><span>Read the Events at the bottom first. The scheduler says exactly why it declined, once per node.</span></li><li><b>Insufficient cpu / memory</b><span>No node has room for the <b>requests</b> — not the usage. Compare requests against each node's allocatable, not its capacity.</span></li><li><b>Untolerated taint</b><span>A node is marked for something else and this pod has no toleration for it. Common on control-plane and GPU pools.</span></li><li><b>Didn't match node affinity/selector</b><span>A nodeSelector or affinity rule matches nothing. A typo in a label value fails exactly like a full cluster.</span></li><li><b>Unbound PersistentVolumeClaim</b><span>The pod waits for a volume that will never bind — no StorageClass, no capacity, or the wrong access mode.</span></li><li><b>Nothing in Events at all</b><span>The scheduler never saw it. Check the pod is not stuck on an admission webhook or a missing priority class.</span></li></ol><div class="tb-reads"><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a><a href="categories/troubleshooting/index.html">Troubleshooting &#8594;</a><a href="Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">kubectl commands &#8594;</a></div></div></details><details class="tb-card" id="tb-crashloopbackoff"><summary><span class="tb-sym">CrashLoopBackOff</span><span class="tb-chips"><span>Logs</span><span>Events</span><span>Probes</span><span>Config</span><span>Resources</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">The container starts, exits, and Kubernetes backs off before trying again. The loop is the symptom; the first exit is the cause.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>kubectl logs &lt;pod&gt; --previous</b><span>Without <code>--previous</code> you are reading the instance that has not failed yet. The one that died holds the answer.</span></li><li><b>Read the exit code</b><span><code>1</code> the application decided to stop. <code>137</code> it was killed — usually OOM. <code>143</code> it was asked to stop and did.</span></li><li><b>kubectl describe pod → Last State</b><span>Reason: OOMKilled means the memory limit, not a leak, ended it. Raise the limit or find what grew.</span></li><li><b>Liveness probe restarting a healthy app</b><span>A slow starter fails a liveness probe that began too early. That is what <code>startupProbe</code> is for; raising initialDelaySeconds hides it.</span></li><li><b>Missing config or secret</b><span>A mount that is not there, or an env var the app requires and does not find, exits before the first log line.</span></li><li><b>It only crashes on some nodes</b><span>Then it is not the image. Look at the node: kernel, runtime version, or a mount that exists in one place.</span></li></ol><div class="tb-reads"><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a><a href="categories/troubleshooting/index.html">Troubleshooting &#8594;</a><a href="Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">kubectl commands &#8594;</a></div></div></details><details class="tb-card" id="tb-node-notready"><summary><span class="tb-sym">Node NotReady</span><span class="tb-chips"><span>Kubelet</span><span>Network</span><span>Disk</span><span>Runtime</span><span>Conditions</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">The kubelet has stopped saying it is healthy. Everything on that node is already being evicted.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>kubectl describe node &lt;name&gt;</b><span>The Conditions block names it: MemoryPressure, DiskPressure, PIDPressure, or Ready=Unknown when the kubelet went quiet.</span></li><li><b>Ready=Unknown</b><span>The node stopped reporting rather than reported a problem. That is the network or the kubelet process, not the workload.</span></li><li><b>systemctl status kubelet</b><span>Then <code>journalctl -u kubelet -n 200</code>. The kubelet says why it is unhappy in plain text.</span></li><li><b>DiskPressure</b><span><code>/var/lib/kubelet</code> or the image store is full. Image garbage collection has thresholds; a large pulled image can cross them.</span></li><li><b>Container runtime</b><span><code>crictl info</code> and <code>crictl ps</code>. A kubelet cannot be ready if the runtime under it is not.</span></li><li><b>CNI not ready</b><span>No pod networking means no Ready. Check the network plugin's own pods on that node before blaming the kubelet.</span></li></ol><div class="tb-reads"><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a><a href="categories/it-infrastructure/index.html">Infrastructure &#8594;</a><a href="Commands/LINUX-COMMANDS/linux-commands.html">Linux commands &#8594;</a></div></div></details><details class="tb-card" id="tb-high-memory"><summary><span class="tb-sym">High memory</span><span class="tb-chips"><span>Metrics</span><span>Working set</span><span>OOMKilled</span><span>Limits</span><span>GC</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">Usage is climbing. Whether that is a leak, a cache, or a limit set too low is the whole question.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>kubectl top pod — against the limit</b><span>A number on its own means nothing. What matters is the ratio to the limit, and the shape over time.</span></li><li><b>Sawtooth or ramp</b><span>Sawtooth is a garbage collector doing its job. A ramp that never comes down is a leak, or a cache with no bound.</span></li><li><b>Working set, not RSS</b><span>The kubelet evicts on working set. Page cache the container touched counts towards it, which surprises people.</span></li><li><b>OOMKilled with plenty free</b><span>The cgroup limit was reached, not the node's memory. The node being fine is not evidence.</span></li><li><b>Heap vs off-heap</b><span>A JVM or Go heap graph can look calm while the process grows — native allocations, thread stacks and mapped files sit outside it.</span></li><li><b>Requests below limits</b><span>Burstable pods are evicted before Guaranteed ones. If it dies under node pressure, the QoS class is the reason.</span></li></ol><div class="tb-reads"><a href="categories/performance-engineering/index.html">Performance engineering &#8594;</a><a href="categories/observability/index.html">Observability &#8594;</a><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a></div></div></details><details class="tb-card" id="tb-connection-timeout"><summary><span class="tb-sym">Connection timeout</span><span class="tb-chips"><span>DNS</span><span>Network</span><span>Service</span><span>Endpoint</span><span>Application</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">The request goes out and nothing comes back. A timeout is the one failure that looks identical at every layer.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>Resolve it from inside the pod</b><span><code>nslookup &lt;svc&gt;</code> in the calling pod. Name resolution failing looks exactly like the far end being down.</span></li><li><b>kubectl get endpoints &lt;svc&gt;</b><span>A Service with no endpoints is a healthy-looking object that routes nowhere. This is the single most common cause.</span></li><li><b>Selector mismatch</b><span>Endpoints are empty because the Service selector matches no pod. Both objects look correct in isolation.</span></li><li><b>Readiness, not liveness</b><span>A pod that is running but not ready is removed from endpoints. Traffic stops without a single restart.</span></li><li><b>NetworkPolicy</b><span>A default-deny policy in the namespace drops the packet silently. Timeout, never refused.</span></li><li><b>Listening on 127.0.0.1</b><span>The app binds loopback instead of 0.0.0.0, so it works inside the container and nowhere else.</span></li></ol><div class="tb-reads"><a href="categories/networking/index.html">Networking &#8594;</a><a href="categories/service-mesh/index.html">Service mesh &#8594;</a><a href="categories/troubleshooting/index.html">Troubleshooting &#8594;</a></div></div></details></div>
   </div>
 </section>
+
+
+<!-- ═══════════ ROLES + JOURNEY ═══════════ -->
+<!-- Generated by tools/build_kmap.py: the stages, their live counts and
+     their links all come off the taxonomy, so a category that gains a
+     published page is reflected here without anyone editing this file. -->
+<!-- RJ:START -->
+<!-- RJ:END -->
 
 <!-- ═══════════ MASTHEAD ═══════════ -->
 <section class="mh" aria-labelledby="mh-mark">

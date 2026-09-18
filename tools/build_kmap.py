@@ -751,6 +751,104 @@ _n0 = src.index("<!-- NB:START -->")
 _n1 = src.index("<!-- NB:END -->") + len("<!-- NB:END -->")
 src = src[:_n0] + NB + src[_n1:]
 
+# 8. roles and the engineering journey ────────────────────────────────────────
+#
+# Two ways through the same material. The journey is the order most people
+# actually learn it in; the roles are the subsets a particular job needs. Both
+# are built from one lookup table so a stage cannot appear in one with a live
+# count and in the other without, and both carry the counts off the taxonomy
+# rather than a number typed next to the label — which is the failure this
+# whole build is arranged to prevent.
+from hubs_spec import SPEC as _SPEC           # noqa: E402  category -> (slug, ...)
+
+_BY_SLUG = {}
+for _pname, _cats in PILLARS:
+    for _cname, _icon, _topics in _cats:
+        _l, _p, _n = cat_stats(_topics)
+        _BY_SLUG[_SPEC[_cname][0]] = {
+            "name": _cname, "live": _l, "total": _l + _p + _n,
+            "href": f"categories/{_SPEC[_cname][0]}/index.html"}
+
+# (label, slug, why this step is here)
+_JOURNEY = [
+    ("Foundation",   "foundation",           "How a computer, a process and a filesystem actually behave."),
+    ("Linux",        "linux-commands",       "The operating system everything above it assumes."),
+    ("Networking",   "networking",           "Packets, routes, DNS and the failures that look like everything else."),
+    ("Cloud",        "cloud",                "Somebody else's computers, with somebody else's failure modes."),
+    ("Git",          "gitops",               "Version control, and then version control as the source of truth."),
+    ("CI / CD",      "devops",               "Build and deliver on every commit, or do it by hand forever."),
+    ("Containers",   "containers",           "Package the runtime with the app so the target stops mattering."),
+    ("Kubernetes",   "kubernetes",           "Schedule it, keep it running, reconcile it when it drifts."),
+    ("Observability","observability",        "Metrics, logs and traces: what the system says about itself."),
+    ("SRE",          "sre",                  "Error budgets and incidents — running it, not just shipping it."),
+    ("Security",     "security",             "The layer that is someone else's job right up until it isn't."),
+    ("Platform",     "platform-engineering", "Turning all of the above into something a team can use."),
+]
+
+_ROLES = [
+    ("DevOps Engineer",        ["linux-commands", "gitops", "devops", "containers", "kubernetes", "observability"]),
+    ("SRE",                    ["kubernetes", "observability", "troubleshooting", "performance-engineering", "sre"]),
+    ("Platform Engineer",      ["kubernetes", "infrastructure-as-code", "gitops", "platform-engineering", "observability"]),
+    ("Cloud Engineer",         ["networking", "cloud", "infrastructure-as-code", "security", "finops"]),
+    ("Kubernetes Engineer",    ["containers", "kubernetes", "openshift", "networking", "service-mesh"]),
+    ("Linux Engineer",         ["foundation", "linux-commands", "systemd-commands", "storage", "performance-engineering"]),
+    ("Network Engineer",       ["networking", "networking-commands", "service-mesh", "distributed-systems"]),
+    ("Security Engineer",      ["security", "supply-chain-security", "kubernetes", "networking"]),
+    ("DevSecOps Engineer",     ["devops", "security", "supply-chain-security", "gitops", "automation"]),
+    ("Observability Engineer", ["observability", "logging", "performance-engineering", "sre"]),
+]
+
+# Fail here rather than emit a dead link and leave it to verify.py: this file
+# knows the slug it meant, and the error can say so.
+for _lbl, _slug, _ in _JOURNEY:
+    assert _slug in _BY_SLUG, f"journey stage {_lbl!r} points at unknown category {_slug!r}"
+for _role, _steps in _ROLES:
+    for _slug in _steps:
+        assert _slug in _BY_SLUG, f"role {_role!r} points at unknown category {_slug!r}"
+
+_j = []
+for _i, (_lbl, _slug, _why) in enumerate(_JOURNEY):
+    _c = _BY_SLUG[_slug]
+    _state = "live" if _c["live"] else "soon"
+    _j.append(
+        f'<a class="ej-stop" href="{_c["href"]}" data-state="{_state}">'
+        f'<span class="ej-n">{_i + 1:02d}</span>'
+        f'<span class="ej-l">{html.escape(_lbl)}</span>'
+        f'<span class="ej-c">{_c["live"]} of {_c["total"]} live</span>'
+        f'<span class="ej-w">{html.escape(_why)}</span></a>')
+
+_r = []
+for _role, _steps in _ROLES:
+    _path = "".join(
+        f'<a href="{_BY_SLUG[s]["href"]}">{html.escape(_BY_SLUG[s]["name"])}'
+        f'<b>{_BY_SLUG[s]["live"]}</b></a>' for s in _steps)
+    _live = sum(_BY_SLUG[s]["live"] for s in _steps)
+    _r.append(
+        f'<div class="rx-card"><h3 class="rx-role">{html.escape(_role)}</h3>'
+        f'<div class="rx-meta">{_live} live pages across {len(_steps)} areas</div>'
+        f'<div class="rx-path">{_path}</div></div>')
+
+RJ = f"""<section class="rx" id="roles" aria-labelledby="rx-head">
+  <div class="rx-inner">
+    <h2 class="rx-head" id="rx-head">What are you building?</h2>
+    <p class="rx-lede">Ten jobs that share most of this material and need different parts of it.
+      Each path is in the order it tends to be learned; the number is how many pages are live in that area today.</p>
+    <div class="rx-grid">{''.join(_r)}</div>
+  </div>
+</section>
+
+<section class="ej" id="journey" aria-labelledby="ej-head">
+  <div class="ej-inner">
+    <h2 class="ej-head" id="ej-head">The engineering journey</h2>
+    <p class="ej-lede">One route through all of it, in the order each layer starts to make sense.</p>
+    <ol class="ej-track">{''.join(_j)}</ol>
+  </div>
+</section>"""
+
+_r0 = src.index("<!-- RJ:START -->")
+_r1 = src.index("<!-- RJ:END -->") + len("<!-- RJ:END -->")
+src = src[:_r0] + RJ + src[_r1:]
+
 
 # 6. hero: the issue counter and the "New" pill ───────────────────────────────
 # Both were typed into index.base.html and both were still on #057 three issues
