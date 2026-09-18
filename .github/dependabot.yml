@@ -1,0 +1,11 @@
+# SHA-pinned actions never move on their own, which is the point and also the
+# risk: a security fix in actions/checkout would never reach us. This watches
+# the pinned SHAs and opens a PR when a new release lands.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: CI
