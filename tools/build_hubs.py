@@ -47,7 +47,29 @@ def _tm_totals(lo, hi):
     return L, P, N, L + P + N
 
 
-K8S_CHECKLIST_TOTALS = _tm_totals(0, _tm_split)   # (live, pipe, planned, total)
+K8S_CHECKLIST_TOTALS = _tm_totals(0, _tm_split)              # (live, pipe, planned, total)
+OCP_CHECKLIST_TOTALS = _tm_totals(_tm_split, len(_tm_groups))
+
+# Keyed by category, so a hub that HAS a checklist says so on the index too.
+#
+# This was `if cname == "Kubernetes"` and nothing else, which meant the index
+# described OpenShift as "13 topics · all live" — complete, nothing queued —
+# while the OpenShift hub one click away opened with 450 items, 76 live, 93 in
+# pipeline and 281 planned. Neither number was wrong; the index simply never
+# mentioned the second one existed, so the two pages read as contradicting
+# each other. Caught by Vishal reading the pages, not by any check here.
+CHECKLIST_TOTALS = {
+    "Kubernetes": K8S_CHECKLIST_TOTALS,
+    "OpenShift": OCP_CHECKLIST_TOTALS,
+}
+
+# The split is an index into a list, so inserting a group in the wrong place
+# would move items from one side to the other silently. Assert the two halves
+# still account for every item in the checklist.
+_all_rows = sum(len(grp) for _, grp in _tm_groups)
+assert K8S_CHECKLIST_TOTALS[3] + OCP_CHECKLIST_TOTALS[3] == _all_rows, (
+    f"checklist split lost items: {K8S_CHECKLIST_TOTALS[3]} + "
+    f"{OCP_CHECKLIST_TOTALS[3]} != {_all_rows}")
 
 # Which issue each live page is, for the article cards.
 PAGES = {
@@ -505,6 +527,62 @@ def flexes(l, p, n):
                    for c, v in (("live", l), ("pipe", p), ("plan", n)) if v)
 
 
+def stat_tiles(total, l, p, n, issues):
+    """The hero's stat tiles, telling the same story as the index card.
+
+    The index card says "35 topics · all live". This header said
+    "35 Topics | 35 Live | 0 In pipeline | 0 Planned | 9 Issues" — the same
+    data giving the opposite impression. One page called the category
+    finished; the other put two zeros in front of the reader and let them
+    draw their own conclusion, one click apart.
+
+    Same rule as counts(), deliberately: a status with nothing in it does not
+    earn a tile. Live always keeps its tile even at zero, because "0 live" on
+    a category with work queued is the most useful number on the page.
+    """
+    tiles = [(str(total), "Topics", ""), (str(l), "Live", "live")]
+    if p:
+        tiles.append((str(p), "In pipeline", "pipe"))
+    if n:
+        tiles.append((str(n), "Planned", "plan"))
+    tiles.append((str(issues), "Issues", ""))
+    out = []
+    for v, k, c in tiles:
+        cls = ' class="%s"' % c if c else ''
+        out.append('<div class="stat"><b%s>%s</b><i>%s</i></div>' % (cls, v, k))
+    return "".join(out)
+
+
+def counts(l, p, n):
+    """A category's topic counts, without printing zeros that mislead.
+
+    Kubernetes rendered as "35 live · 0 pipe · 0 planned" — directly above a
+    second line reading "492 in the complete checklist — 81 live · 114
+    pipeline · 297 planned". Both were true and they count different things,
+    so the card appeared to contradict itself one line apart: nothing planned,
+    and 297 planned. Raised by a reader rather than found by a check, which is
+    the part worth noting — every assertion in this build was satisfied.
+
+    The zeros were never information. A category with nothing queued is
+    described by saying it is complete, not by printing two noughts. Where
+    something IS queued the numbers still appear, because there the count is
+    the point.
+
+    This does not resolve the underlying split — the taxonomy and the reader
+    checklist remain two systems counting two different things, and only the
+    single hierarchy fixes that. It stops the page stating it confusingly in
+    the meantime.
+    """
+    if not p and not n:
+        return f'{l} topic{"" if l == 1 else "s"} · all live'
+    parts = [f"{l} live"]
+    if p:
+        parts.append(f"{p} pipeline")
+    if n:
+        parts.append(f"{n} planned")
+    return " · ".join(parts)
+
+
 # ── build ────────────────────────────────────────────────────────────────────
 if OUT.exists():
     shutil.rmtree(OUT)
@@ -565,7 +643,7 @@ def companion_block(cname):
         links += (f'<a class="mate" href="../{SPEC[m][0]}/index.html">'
                   f'<span class="k">{"Command reference" if to_commands else "Deep dives"}</span>'
                   f'<span class="n">{CATS[m]["icon"]} {esc(m)}</span>'
-                  f'<span class="c">{ml} live · {mp} pipe · {mn} planned</span>'
+                  f'<span class="c">{counts(ml, mp, mn)}</span>'
                   f'<span class="go">Open →</span></a>')
     return ('<section><div class="wrap"><h2>ALSO ON THIS SUBJECT</h2>'
             f'<p class="lede">{lead}</p>'
@@ -621,7 +699,7 @@ for idx, cname in enumerate(ORDER):
         cur = ' cur' if c == cname else ''
         sib_html += (f'<a class="sib{cur}" href="../{SPEC[c][0]}/index.html">'
                      f'<span class="n">{CATS[c]["icon"]} {esc(c)}</span>'
-                     f'<span class="c">{cl} live · {cp} pipe · {cn} planned</span></a>')
+                     f'<span class="c">{counts(cl, cp, cn)}</span></a>')
 
     pager = '<div class="pager">'
     pager += (f'<a href="../{SPEC[prev_c][0]}/index.html">← Previous<b>{esc(prev_c)}</b></a>'
@@ -659,16 +737,21 @@ for idx, cname in enumerate(ORDER):
         '</div></section>'
     )
 
-    if cname == "Kubernetes":
-        # Reader-reported: the 492-item checklist this page also carries (via
+    if cname in CHECKLIST_TOTALS:
+        # Reader-reported: the big checklist these pages also carry (via
         # build_hub_topicmap.py, injected at <!-- topic-checklist-anchor -->)
         # used to land after the sibling-pillar nav strip and the pager — the
-        # last thing before the footer, disconnected from the "ALL 35 TOPICS"
+        # last thing before the footer, disconnected from the "ALL N TOPICS"
         # section it's a superset of. Moved the topics chips (and the anchor
         # that follows them) right after ARCHITECTURE instead, so everything
         # about "what topics exist and their status" reads together, and the
         # supporting material (published issues, the command-reference
         # cross-link, sibling-category nav) comes after, not interleaved.
+        #
+        # This was keyed on the Kubernetes name, so OpenShift — which carries
+        # an identical 450-item checklist — got the OTHER layout, and the two
+        # sibling hubs presented the same kind of content in two different
+        # orders. Keyed on having a checklist now, so they cannot diverge.
         TOPICS_SECTION = sec_topics
         OTHER_SECTIONS = f"{published_block}\n\n{companion_block(cname)}\n\n{sec_pillar}"
     else:
@@ -681,18 +764,14 @@ for idx, cname in enumerate(ORDER):
   <h1><span class="ico">{info['icon']}</span>{esc(cname)}</h1>
   <p class="tagline">{esc(tagline)}</p>
   <div class="stats">
-    <div class="stat"><b>{total}</b><i>Topics</i></div>
-    <div class="stat"><b class="live">{l}</b><i>Live</i></div>
-    <div class="stat"><b class="pipe">{p}</b><i>In pipeline</i></div>
-    <div class="stat"><b class="plan">{n}</b><i>Planned</i></div>
-    <div class="stat"><b>{len(pages)}</b><i>Issues</i></div>
+    {stat_tiles(total, l, p, n, len(pages))}
   </div>
   <div class="progress">{flexes(l, p, n)}</div>
   {f'<p class="lede" style="margin-top:14px">These {total} count only topics already tied to a '
     f'published issue in this curated set — that is why it can read {l} of {total} live. For every '
     f'topic a reader might actually search for, including what is still pending, see '
     f'<a href="#complete-topic-list">the complete topic &amp; error list</a> below.</p>'
-    if cname in ("Kubernetes", "OpenShift") else ''}
+    if cname in CHECKLIST_TOTALS else ''}
 </div></header>
 
 <section><div class="wrap">
@@ -735,24 +814,28 @@ for pname, cats in PILLARS:
         # published issue. The reader's full 942-item checklist (folded onto
         # categories/kubernetes/index.html by build_hub_topicmap.py) is a much
         # bigger, separate count, so show it as a second line on this one
-        # category's card rather than conflating the two totals — same scope
-        # as every other Kubernetes-only change this round.
+        # category's card rather than conflating the two totals.
+        #
+        # Every hub that HAS a checklist gets this line. It used to be
+        # Kubernetes only, which is how the index came to describe OpenShift
+        # as complete while the OpenShift hub itself opened with 374 items
+        # outstanding.
         checklist_line = ""
-        if cname == "Kubernetes":
-            k_live, k_pipe, k_plan, k_total = K8S_CHECKLIST_TOTALS
+        if cname in CHECKLIST_TOTALS:
+            k_live, k_pipe, k_plan, k_total = CHECKLIST_TOTALS[cname]
             checklist_line = (
                 f'<span class="c" style="display:block;margin-top:2px">'
-                f'{k_total} in the complete checklist — {k_live} live · '
+                f'separate {k_total}-item reader checklist — {k_live} live · '
                 f'{k_pipe} pipeline · {k_plan} planned</span>'
             )
         rows += (f'<a class="sib" href="{SPEC[cname][0]}/index.html">'
                  f'<span class="n">{icon} {esc(cname)}</span>'
-                 f'<span class="c">{cl} live · {cp} pipe · {cn} planned</span>'
+                 f'<span class="c">{counts(cl, cp, cn)}</span>'
                  f'{checklist_line}</a>')
     anchor = pname.lower().replace(" & ", "-").replace(" ", "-")
     groups += (f'<section id="{anchor}"><div class="wrap"><h2>{esc(pname.upper())}</h2>'
                f'<p class="lede">{len(cats)} categor{"y" if len(cats) == 1 else "ies"} · '
-               f'{pl} live · {pp} in pipeline · {pn} planned.</p>'
+               f'{counts(pl, pp, pn)}.</p>'
                f'<div class="siblings">{rows}</div></div></section>')
 
 TL = sum(b[2] for b in built); TP = sum(b[3] for b in built); TN = sum(b[4] for b in built)

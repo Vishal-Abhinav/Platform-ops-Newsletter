@@ -6,7 +6,8 @@ Checks, in order:
   2. every page's tags are balanced
   3. every page carries the analytics loader, the RSS link and the copyright meta
   4. the counts on the homepage match the topics actually rendered there
-  5. sitemap.xml and feed.xml parse
+  5. every category card agrees with the hub page it links to
+  6. sitemap.xml and feed.xml parse
 
 Exit status is non-zero if anything fails, so it can gate a commit.
 """
@@ -128,7 +129,91 @@ def main():
     if len(stated) >= 1 and stated[0] != total_chips:
         fails.append(f"count drift  index.html total {stated[0]}, renders {total_chips}")
 
-    # 5. sitemap
+    # 5. every category card must tell the same story as the hub it links to
+    #
+    # WHY THIS EXISTS
+    # Three separate defects this week were the same defect: two pages stating
+    # the same fact differently. The index called Kubernetes "35 live · 0 pipe
+    # · 0 planned" while its hub carried a 492-item checklist; it called
+    # OpenShift complete while the OpenShift hub opened with 374 items
+    # outstanding; and the hub heroes kept printing the zeros the index had
+    # stopped printing. Every one was found by a reader opening two pages, and
+    # not one of them tripped a check — because every check here asks whether a
+    # number is COMPUTED correctly, and all of them were. Nothing asked whether
+    # two pages AGREE.
+    #
+    # So this walks each card on categories/index.html, reads the figures off
+    # the hub it points at, and fails the build if they differ. A future
+    # special case for one category cannot silently desynchronise the pair.
+    def _counts(s):
+        """(total, live, pipe, plan) from a rendered counts line."""
+        m = re.search(r"(\d+) topics? · all live", s)
+        if m:
+            t = int(m.group(1))
+            return t, t, 0, 0
+        live = int(re.search(r"(\d+) live", s).group(1))
+        mp = re.search(r"(\d+) pipeline", s)
+        mn = re.search(r"(\d+) planned", s)
+        pipe = int(mp.group(1)) if mp else 0
+        plan = int(mn.group(1)) if mn else 0
+        return live + pipe + plan, live, pipe, plan
+
+    cat_idx = ROOT / "categories" / "index.html"
+    if cat_idx.exists():
+        cidx = cat_idx.read_text(encoding="utf-8")
+        cards = re.findall(
+            r'<a class="sib" href="([a-z0-9-]+)/index\.html">(.*?)</a>', cidx, re.S)
+        if not cards:
+            fails.append("category sync: no cards found on categories/index.html")
+        for slug, card in cards:
+            hub = ROOT / "categories" / slug / "index.html"
+            if not hub.exists():
+                fails.append(f"category sync: {slug} card links to a missing hub")
+                continue
+            hsrc = hub.read_text(encoding="utf-8")
+            tiles = re.findall(
+                r'<div class="stat"><b[^>]*>([\d,]+)</b><i>([^<]+)</i></div>', hsrc)
+            # the hero group ends at its Issues tile; anything after is the
+            # separate reader checklist that build_hub_topicmap.py folds in
+            keys = [k for _, k in tiles]
+            cut = keys.index("Issues") + 1 if "Issues" in keys else len(tiles)
+            hero, chk = dict(map(reversed, tiles[:cut])), tiles[cut:]
+
+            want = (int(hero.get("Topics", -1)), int(hero.get("Live", -1)),
+                    int(hero.get("In pipeline", 0)), int(hero.get("Planned", 0)))
+            spans = re.findall(r'<span class="c"[^>]*>(.*?)</span>', card, re.S)
+            if not spans:
+                fails.append(f"category sync: {slug} card has no counts line")
+                continue
+            got = _counts(re.sub(r"<[^>]+>", " ", spans[0]))
+            if got != want:
+                fails.append(
+                    f"category sync: {slug} — index card says "
+                    f"total/live/pipe/plan {got}, hub page says {want}")
+
+            # and the checklist line, in both directions
+            card_chk = len(spans) > 1
+            hub_chk = bool(chk)
+            if card_chk != hub_chk:
+                where = "card but not hub" if card_chk else "hub but not card"
+                fails.append(
+                    f"category sync: {slug} — reader checklist appears on the "
+                    f"{where}. A hub that carries one must say so on the index.")
+            elif hub_chk:
+                d = dict(map(reversed, chk))
+                hw = (int(d.get("Items", -1)), int(d.get("Live", -1)),
+                      int(d.get("In pipeline", -1)), int(d.get("Planned", -1)))
+                t = re.sub(r"<[^>]+>", " ", spans[1])
+                cg = (int(re.search(r"(\d+)-item", t).group(1)),
+                      int(re.search(r"(\d+) live", t).group(1)),
+                      int(re.search(r"(\d+) pipeline", t).group(1)),
+                      int(re.search(r"(\d+) planned", t).group(1)))
+                if cg != hw:
+                    fails.append(
+                        f"category sync: {slug} checklist — index card says "
+                        f"{cg}, hub page says {hw}")
+
+    # 6. sitemap
     #
     # Indexable pages only. A sitemap is a request to crawl; a page carrying
     # noindex then declines to be indexed, so listing one spends crawl budget

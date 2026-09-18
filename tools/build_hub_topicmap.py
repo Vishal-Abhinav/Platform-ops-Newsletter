@@ -31,21 +31,23 @@ SPLIT_TITLE = "OpenShift Fundamentals"   # group 25 — everything before this i
 _titles = [t for t, _ in GROUPS]
 SPLIT_AT = _titles.index(SPLIT_TITLE)
 
-END_ANCHOR = '<a class="req-pill" id="pill"'   # unique per hub page, right before the footer
 TOPICS_ANCHOR = '<!-- topic-checklist-anchor -->'   # right after the "ALL n TOPICS" chips section
 
+# Both hubs anchor the checklist immediately after their own "ALL n TOPICS"
+# chips, so the curated set and the full list read as one thought instead of
+# being split by the sibling-pillar nav and the pager.
+#
+# OpenShift used to anchor on the request pill — last thing before the footer — with a
+# comment saying only the Kubernetes page had been asked for. That is how a
+# one-page fix becomes an inconsistency: two hubs carrying the same kind of
+# content in two different places, and a reader who learns the Kubernetes page
+# then cannot find the same thing on OpenShift. The layout belongs to the
+# content type, not to whichever page prompted the request.
 HUBS = [
-    # Kubernetes: inserted right after the "ALL 35 TOPICS" chips (build_hubs.py
-    # moved that section up specifically so this lands next to it) — reader
-    # asked for this page specifically to be reorganized so the curated chips
-    # and the full checklist read together instead of being split by the
-    # sibling-pillar nav strip.
     ("kubernetes", ROOT / "categories" / "kubernetes" / "index.html",
      "KUBERNETES", 0, SPLIT_AT, TOPICS_ANCHOR),
-    # OpenShift: left at the end, unchanged — only the Kubernetes page was
-    # asked to be reorganized so far.
     ("openshift", ROOT / "categories" / "openshift" / "index.html",
-     "OPENSHIFT", SPLIT_AT, len(GROUPS), END_ANCHOR),
+     "OPENSHIFT", SPLIT_AT, len(GROUPS), TOPICS_ANCHOR),
 ]
 
 

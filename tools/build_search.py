@@ -197,7 +197,14 @@ JS = """var PO_SEARCH = __INDEX__;
   var LIMIT = 40;
 
   function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    // Quotes are escaped too. Today every esc() result lands in element
+    // content, where &<> is sufficient — so this changes nothing visible.
+    // It is here because the next person to use esc() inside an attribute
+    // will not check first, and at that moment the missing &quot; turns a
+    // correct function into an injection point with no code change to blame.
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
   }
   function hi(text, q) {
     var i = text.toLowerCase().indexOf(q);
