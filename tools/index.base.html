@@ -1569,6 +1569,59 @@ a.footer-logo:hover{color:#fff;}
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   TERMINAL — a transcript, not a shell
+   ══════════════════════════════════════════════════════════════════════════
+   Every line is in the DOM and visible by default. The reveal is JS removing
+   a class, not JS writing the text, which means the transcript is there for
+   a screen reader, for a search engine, with JavaScript off, and under
+   reduced motion — four cases that a type-it-out-character-by-character
+   terminal gets wrong in four different ways.
+
+   It also does not execute anything, and never could: there is no input. */
+.tm { background: #0a0c10; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(44px, 6vw, 80px) 0; }
+.tm-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.tm-head { font-family: 'Bebas Neue', Impact, sans-serif; font-size: clamp(26px, 3.4vw, 40px); color: #fff; margin: 0 0 8px; }
+.tm-lede { font-size: 14px; line-height: 1.6; color: #8b95a6; margin: 0 0 26px; max-width: 64ch; }
+
+.tm-win { border: 1px solid rgba(255,255,255,.14); border-radius: 8px; overflow: hidden; background: #05070a; }
+.tm-bar {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  background: #0d1117; border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.tm-dots { display: flex; gap: 6px; }
+.tm-dots i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.16); }
+.tm-title {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 11px;
+  letter-spacing: .06em; color: #6f7a8c;
+}
+.tm-body {
+  padding: 16px 18px; overflow-x: auto;
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 12px; line-height: 1.75;
+}
+.tm-line { white-space: pre; color: #8b95a6; }
+.tm-cmd { color: #e6eaf0; margin-top: 10px; display: flex; gap: 9px; }
+.tm-body > .tm-cmd:first-child { margin-top: 0; }
+.tm-pr { color: var(--cyan); }
+.tm-h { color: #6f7a8c; }
+.tm-e { color: #ff6b6b; }
+.tm-w { color: var(--amber); }
+.tm-c { color: #5d6675; font-style: italic; }
+/* The reveal. Added by JS only when motion is welcome; without it every
+   line simply stays where it already is — visible. */
+.tm-body.is-typing .tm-line { opacity: 0; }
+.tm-body.is-typing .tm-line.shown { opacity: 1; transition: opacity .16s ease; }
+
+.tm-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.tm-btn {
+  font-size: 13px; text-decoration: none; padding: 10px 16px; border-radius: 4px;
+  background: var(--cyan); color: #04151a; transition: background-color .18s ease;
+}
+.tm-btn:hover { background: #2ad6e6; }
+.tm-btn.ghost { background: none; border: 1px solid rgba(255,255,255,.2); color: #cdd4de; }
+.tm-btn.ghost:hover { border-color: var(--cyan); color: var(--cyan); background: none; }
+
+/* ══════════════════════════════════════════════════════════════════════════
    ROLE EXPLORER + ENGINEERING JOURNEY
    ══════════════════════════════════════════════════════════════════════════
    Both are lists of links, so both are lists of links in the markup. The
@@ -1632,6 +1685,48 @@ a.footer-logo:hover{color:#fff;}
 }
 .ej-stop[data-state="live"] .ej-c { color: var(--lime); }
 .ej-w { display: block; font-size: 12.5px; line-height: 1.55; color: #98a2b1; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EVERYTHING IS CONNECTED — the closing argument
+   ══════════════════════════════════════════════════════════════════════════
+   Deliberately not a fourth layered diagram. The hero already draws how a
+   change reaches production and the request path draws how a request does;
+   a third picture of the same stack would be decoration. The claim here is
+   about coupling between DISCIPLINES, and the honest way to make it is eight
+   specific crossings a reader will recognise, not more boxes and arrows. */
+.ec { background: #0a0c10; border-bottom: 1px solid rgba(255,255,255,.09); padding: clamp(48px, 7vw, 92px) 0; }
+.ec-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.ec-kicker {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10.5px;
+  letter-spacing: .16em; text-transform: uppercase; color: #6f7a8c; margin: 0 0 14px;
+}
+.ec-head {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(34px, 6vw, 72px); line-height: 1; color: #fff;
+  margin: 0 0 14px; letter-spacing: .01em;
+}
+.ec-lede { font-size: 15px; line-height: 1.65; color: #9aa3b2; margin: 0 0 30px; max-width: 68ch; }
+.ec-list {
+  list-style: none; margin: 0 0 28px; padding: 0;
+  display: grid; gap: 1px; background: rgba(255,255,255,.09);
+  border: 1px solid rgba(255,255,255,.09); border-radius: 7px; overflow: hidden;
+}
+@media (min-width: 880px) { .ec-list { grid-template-columns: 1fr 1fr; } }
+.ec-list li { background: #0d1015; padding: 16px 18px; }
+.ec-list b {
+  display: block; font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 12px; letter-spacing: .05em; color: var(--cyan);
+  font-weight: 400; margin-bottom: 5px;
+}
+.ec-list span { display: block; font-size: 13.5px; line-height: 1.6; color: #b0b9c6; }
+.ec-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.ec-btn {
+  font-size: 13.5px; text-decoration: none; padding: 11px 18px; border-radius: 4px;
+  background: var(--cyan); color: #04151a; transition: background-color .18s ease;
+}
+.ec-btn:hover { background: #2ad6e6; }
+.ec-btn.ghost { background: none; border: 1px solid rgba(255,255,255,.2); color: #cdd4de; }
+.ec-btn.ghost:hover { border-color: var(--cyan); color: var(--cyan); background: none; }
 
 /* ══════════════════════════════════════════════════════════════════════════
    MASTHEAD — what this publication is, and who stands behind it
@@ -2656,12 +2751,52 @@ a.footer-logo:hover{color:#fff;}
 </section>
 
 
+<!-- ═══════════ TERMINAL ═══════════ -->
+<section class="tm" id="terminal-demo" aria-labelledby="tm-head">
+  <div class="tm-inner">
+    <h2 class="tm-head" id="tm-head">One session, start to finish</h2>
+    <p class="tm-lede">A crashing pod traced to the reason it actually died, a node that stopped
+      reporting, and the command that gets the work back. Nothing here runs — it is a transcript.</p>
+
+    <div class="tm-win">
+      <div class="tm-bar">
+        <span class="tm-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="tm-title">platform-ops@production:~</span>
+      </div>
+      <div class="tm-body" id="tmBody"><div class="tm-line tm-cmd"><span class="tm-pr">$</span><span>kubectl get pods -A</span></div><div class="tm-line tm-h">NAMESPACE     NAME                            READY   STATUS             RESTARTS   AGE</div><div class="tm-line tm-o">kube-system   coredns-76f75df574-4xkqp        1/1     Running            0          14d</div><div class="tm-line tm-o">kube-system   kube-proxy-jr8wq                1/1     Running            0          14d</div><div class="tm-line tm-o">payments      api-7d9f8c6b5-2klmn             1/1     Running            0          3h</div><div class="tm-line tm-e">payments      api-7d9f8c6b5-9wxyz             0/1     CrashLoopBackOff   7          12m</div><div class="tm-line tm-cmd"><span class="tm-pr">$</span><span>kubectl describe pod api-7d9f8c6b5-9wxyz -n payments</span></div><div class="tm-line tm-o">    Last State:     Terminated</div><div class="tm-line tm-e">      Reason:       OOMKilled</div><div class="tm-line tm-o">      Exit Code:    137</div><div class="tm-line tm-o">    Limits:</div><div class="tm-line tm-o">      memory:       256Mi</div><div class="tm-line tm-o">Events:</div><div class="tm-line tm-w">  Warning  BackOff  2m (x18 over 11m)  kubelet  Back-off restarting failed container</div><div class="tm-line tm-cmd"><span class="tm-pr">$</span><span>oc get nodes</span></div><div class="tm-line tm-h">NAME        STATUS     ROLES    AGE   VERSION</div><div class="tm-line tm-o">worker-01   Ready      worker   61d   v1.30.4</div><div class="tm-line tm-e">worker-02   NotReady   worker   61d   v1.30.4</div><div class="tm-line tm-cmd"><span class="tm-pr">$</span><span>systemctl status kubelet</span></div><div class="tm-line tm-o">* kubelet.service - Kubernetes Kubelet</div><div class="tm-line tm-e">   Active: activating (auto-restart) (Result: exit-code)</div><div class="tm-line tm-cmd"><span class="tm-pr">$</span><span>journalctl -u kubelet -n 2 --no-pager</span></div><div class="tm-line tm-w">eviction_manager: attempting to reclaim ephemeral-storage</div><div class="tm-line tm-e">failed to garbage collect required amount of images: wanted to free 4.1GB</div><div class="tm-line tm-cmd"><span class="tm-pr">$</span><span>git reflog</span></div><div class="tm-line tm-o">a1b2c3d HEAD@{0}: reset --hard HEAD~3</div><div class="tm-line tm-o">9f8e7d6 HEAD@{1}: commit: raise the payments memory limit to 512Mi</div><div class="tm-line tm-c"># nothing is lost until the reflog expires</div></div>
+    </div>
+
+    <div class="tm-actions">
+      <a class="tm-btn" href="Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">Explore commands &#8594;</a>
+      <a class="tm-btn ghost" href="terminal/index.html">Practice terminal &#8599;</a>
+      <a class="tm-btn ghost" href="#troubleshooting">The symptoms above</a>
+    </div>
+  </div>
+</section>
+
 <!-- ═══════════ ROLES + JOURNEY ═══════════ -->
 <!-- Generated by tools/build_kmap.py: the stages, their live counts and
      their links all come off the taxonomy, so a category that gains a
      published page is reflected here without anyone editing this file. -->
 <!-- RJ:START -->
 <!-- RJ:END -->
+
+
+<!-- ═══════════ EVERYTHING IS CONNECTED ═══════════ -->
+<section class="ec" id="connected" aria-labelledby="ec-head">
+  <div class="ec-inner">
+    <p class="ec-kicker">Why this covers so much ground</p>
+    <h2 class="ec-head" id="ec-head">Everything is connected.</h2>
+    <p class="ec-lede">Production problems do not respect the boundaries between disciplines,
+      and the layer a failure belongs to is rarely the layer it shows up in. That is the whole
+      reason this publication runs from Linux to Kubernetes to SRE rather than picking one.</p>
+    <ul class="ec-list"><li><b>A DNS TTL</b><span>is a networking setting, until a failover takes thirty minutes to be believed.</span></li><li><b>A memory limit</b><span>is a Kubernetes field, until it is a garbage collector thrashing at 94%.</span></li><li><b>A readiness probe</b><span>is a YAML block, until it quietly removes every pod from the load balancer.</span></li><li><b>A base image</b><span>is a Dockerfile line, until it is the CVE in somebody&#x27;s audit.</span></li><li><b>A retry</b><span>is three lines of client code, until it is the reason the outage lasted an hour.</span></li><li><b>A disk filling up</b><span>is a Linux problem, until the kubelet stops reporting and the node goes NotReady.</span></li><li><b>A Service selector</b><span>is one label, until it is a healthy object routing to nothing at all.</span></li><li><b>An error budget</b><span>is a number in a document, until it is the argument that stops a release.</span></li></ul>
+    <div class="ec-actions">
+      <a class="ec-btn" href="categories/index.html">Start anywhere &#8594;</a>
+      <a class="ec-btn ghost" href="architecture/index.html">See how this site is built &#8599;</a>
+    </div>
+  </div>
+</section>
 
 <!-- ═══════════ MASTHEAD ═══════════ -->
 <section class="mh" aria-labelledby="mh-mark">
@@ -3145,6 +3280,39 @@ wireDiagram('.ia-stage',      '#iaTip', null);      /* request path: none */
       next.focus(); select(next);
     });
   });
+})();
+
+/* ── Terminal transcript: reveal, never type ──
+   The lines are already on the page. This hides them and brings them back in
+   order, once, when the window scrolls into view — and does nothing at all
+   under reduced motion, where "already on the page" is the correct result
+   rather than a fallback. */
+(function () {
+  const body = document.getElementById('tmBody');
+  if (!body || REDUCED) return;
+  const lines = [...body.querySelectorAll('.tm-line')];
+  body.classList.add('is-typing');
+
+  let started = false;
+  const run = () => {
+    if (started) return;
+    started = true;
+    let t = 0;
+    lines.forEach(line => {
+      // A command lands, then its output follows quickly: the rhythm of
+      // somebody typing and the machine answering, rather than a metronome.
+      t += line.classList.contains('tm-cmd') ? 420 : 90;
+      setTimeout(() => line.classList.add('shown'), t);
+    });
+    // Whatever happens, everything is visible by 9s. A reveal that can strand
+    // a line is worse than no reveal.
+    setTimeout(() => lines.forEach(l => l.classList.add('shown')), 9000);
+  };
+
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => { if (e.isIntersecting) { run(); io.disconnect(); } });
+  }, { threshold: 0, rootMargin: '0px 0px -80px 0px' });
+  io.observe(body);
 })();
 
 /* ── SMIL, which no stylesheet can reach ──
