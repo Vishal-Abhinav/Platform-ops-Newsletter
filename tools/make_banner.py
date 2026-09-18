@@ -173,6 +173,10 @@ SVG = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}"
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     f = OUT / "banner.svg"
-    f.write_text(SVG.lstrip(), encoding="utf-8")
+    # newline="\n" for the same reason as build_ghreadme.py: brand/ is
+    # generated AND committed, and pr-checks.yml diffs it after rebuilding on
+    # Linux. Without this the file is CRLF on Windows and LF in CI, and the
+    # staleness gate fires on a banner that is not stale.
+    f.write_text(SVG.lstrip(), encoding="utf-8", newline="\n")
     print(f"  {len(SVG) // 1024 + 1} KB  brand/banner.svg  "
           f"({LIVE} live / {PIPE} pipeline / {PLAN} planned of {TOTAL})")

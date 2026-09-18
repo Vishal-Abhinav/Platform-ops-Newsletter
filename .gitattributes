@@ -1,3 +1,12 @@
 *.sh text eol=lf
 *.py text eol=lf
 *.yml text eol=lf
+
+# README.md and brand/banner.svg are GENERATED and COMMITTED, and pr-checks.yml
+# rebuilds then diffs them on a Linux runner. Left to each contributor's
+# core.autocrlf, a Windows commit stores CRLF, CI regenerates LF, and every
+# line differs - reported as "README.md or brand/ is stale" when nothing is.
+# The generators now write \n explicitly; these two lines mean it stays true
+# even for a file written by something that does not.
+*.md text eol=lf
+*.svg text eol=lf

@@ -663,7 +663,15 @@ usually yes.
 
 if __name__ == "__main__":
     out = REPO / "README.md"
-    out.write_text(README, encoding="utf-8")
+    # newline="\n" is not decoration. This file is GENERATED and COMMITTED, and
+    # pr-checks.yml runs `git diff --exit-code -- README.md` after rebuilding it
+    # on a Linux runner. write_text() without this writes os.linesep, so the
+    # same commit produces CRLF on Windows and LF in CI — a diff in every byte
+    # of every line, reported as "README.md is stale" when nothing is stale.
+    # It happens to work today only because one contributor's git has
+    # core.autocrlf=true and normalises it back on the way in. Depending on a
+    # local git setting for a reproducible build is not a guarantee; this is.
+    out.write_text(README, encoding="utf-8", newline="\n")
 
     # What a generator cannot guarantee: that the document it produced is
     # actually the document it claims to be. A silently truncated f-string or a
