@@ -39,7 +39,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from siteconf import BASE, skip_page           # noqa: E402
 from build_feed import ISSUES                  # noqa: E402
-from chrome import icons                       # noqa: E402
+from chrome import icons, fonts                # noqa: E402
 
 MARK_OPEN = "<!-- seo:jsonld -->"
 MARK_CLOSE = "<!-- /seo:jsonld -->"
@@ -199,6 +199,7 @@ def apply_meta(src, rel):
 
 
 count, with_article, with_crumbs = 0, 0, 0
+localised, localised_missing = 0, []
 
 for f in sorted(ROOT.rglob("*.html")):
     if "tools" in f.parts or skip_page(f.name):
@@ -237,6 +238,21 @@ for f in sorted(ROOT.rglob("*.html")):
     # from a subpath. Depth comes from the page's own path.
     icon_block = f"{ICON_OPEN}\n{icons('../' * rel.count('/'))}\n{ICON_CLOSE}\n"
 
+    # ── typefaces: point every page at the local stylesheet ─────────────────
+    # Six different emitters write a <head> in this repo and the 25
+    # hand-written pages each carry their own, so "swap the font link" would
+    # otherwise be a 30-file change that a new page could silently miss. This
+    # pass already walks every page and already computes the right relative
+    # depth for the icons, so it does the swap too — one place, no page
+    # exempt, and a page that reintroduces the Google link gets corrected on
+    # the next build rather than shipping.
+    src, n_fonts = re.subn(
+        r'<link href="https://fonts\.googleapis\.com/[^"]*" rel="stylesheet">',
+        fonts('../' * rel.count('/')), src)
+    if not n_fonts and 'assets/fonts.css' not in src:
+        localised_missing.append(rel)
+    localised += n_fonts
+
     assert src.count("</head>") == 1, f"{rel}: expected exactly one </head>"
     src = src.replace("</head>", icon_block + block + "</head>", 1)
     f.write_text(src, encoding="utf-8")
@@ -264,3 +280,17 @@ for f in sorted(ROOT.rglob("*.html")):
             bad.append(f"{f.relative_to(ROOT)}: {e}")
 assert not bad, "invalid JSON-LD emitted:\n  " + "\n  ".join(bad[:5])
 print("  all JSON-LD parses clean")
+
+# The font swap is only as good as its coverage: a page that kept the Google
+# link, or never had one, would quietly go on fetching from a third party (or
+# render in a fallback face) with nothing to show for it. Report both numbers
+# and fail on a page that ended up with no stylesheet at all.
+assert not localised_missing, (
+    "pages with no font stylesheet after the swap:\n  "
+    + "\n  ".join(localised_missing[:8]))
+_left = [str(f.relative_to(ROOT)) for f in ROOT.rglob("*.html")
+         if "tools" not in f.parts and not skip_page(f.name)
+         and "fonts.googleapis.com" in f.read_text(encoding="utf-8")]
+assert not _left, ("pages still linking Google Fonts after the swap:\n  "
+                   + "\n  ".join(_left[:8]))
+print(f"  fonts localised -> assets/fonts.css on {localised} page(s)")

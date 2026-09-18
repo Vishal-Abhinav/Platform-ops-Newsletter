@@ -183,6 +183,28 @@ def icons(up=""):
             f'<link rel="apple-touch-icon" href="{up}assets/apple-touch-icon.png">')
 
 
+def fonts(up=""):
+    """The site's four typefaces, served from this origin.
+
+    These came from fonts.googleapis.com until now, which meant every reader
+    of every page made a request to a third party before the text could
+    render — an IP address and a Referer handed over on each of 880 pages, a
+    DNS lookup and a TLS handshake on the critical path, and a render blocked
+    on a host this site does not control.
+
+    Self-hosted, the whole set is 320 KB of woff2 across 16 faces, served
+    from the same connection as the page and cached for a week by the
+    _headers rule on /assets/*. It also lets the CSP drop two external
+    origins, and it makes the render tests exact everywhere rather than
+    relaxing their tolerance when Google is unreachable.
+
+    Note Manrope: Google serves it as ONE variable font repeated under six
+    weight names. Six identical 24 KB downloads, no cache sharing between
+    them. The local set carries it once, as Manrope-normal-variable-*.
+    """
+    return f'<link rel="stylesheet" href="{up}assets/fonts.css">'
+
+
 def nav(up="", crumb="", *, toggle="", lab=True, subscribe=True):
     """The top bar. `up` is the relative prefix back to the site root.
 

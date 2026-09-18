@@ -65,12 +65,15 @@ WIDTHS = [360, 390, 430, 600, 759, 761, 800, 900, 960, 1100, 1479, 1480, 1920]
 
 PROBE = """() => {
   const vw = document.documentElement.clientWidth;
-  // Is the real display face available? The site's type is Bebas Neue from
-  // Google Fonts, and the fallback is materially wider — wide enough to
-  // produce ~20px of phantom overflow at 360px on pages that are fine in
-  // production. A sandbox or an air-gapped runner cannot reach
-  // fonts.googleapis.com, so the test says so and loosens its tolerance
-  // rather than reporting a layout bug that does not exist.
+  // Is the real display face available? The fallback is materially wider —
+  // wide enough to produce ~20px of phantom overflow at 360px on pages that
+  // are fine in production, so the test checks rather than assumes.
+  //
+  // This used to be the common case: the faces came from fonts.googleapis.com
+  // and any sandbox without egress fell back, so the tolerance was relaxed on
+  // most runs. They are served from this origin now, so a fallback here means
+  // assets/fonts.css or the woff2 files did not make it into the build — a
+  // real defect, not an environment quirk.
   // document.fonts.check() is the obvious call and the wrong one: it answers
   // "could this be rendered", which is true even when the answer is a
   // fallback. Ask the FontFaceSet for a face that actually finished loading.
@@ -161,10 +164,11 @@ def main():
     httpd.shutdown()
 
     if not any(seen_webfont):
-        print("\nNOTE  webfonts did not load (no route to fonts.googleapis.com).\n"
-              "      Fallback faces render wider, so the overflow tolerance was\n"
-              "      relaxed to 24px. Run this where fonts resolve for an exact\n"
-              "      result — in CI it will be exact.")
+        print("\nWARNING  the self-hosted webfonts did NOT load, on any page.\n"
+              "         They ship with the site now, so this is not an offline\n"
+              "         sandbox — check assets/fonts.css and assets/fonts/ are in\n"
+              "         the build. Tolerance was relaxed to 24px, so these results\n"
+              "         are weaker than they look.")
 
     if fails:
         print(f"\nFAILED ({len(fails)}):")

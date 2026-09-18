@@ -56,25 +56,26 @@ OUT = ROOT / "_headers"
 # Every entry is here because a built page references it. The audit below
 # fails the build if a page starts referencing something that is not.
 ALLOWED = {
-    "fonts.googleapis.com": "Google Fonts stylesheet (see HARDENING NOTES — "
-                            "self-hosting removes this)",
-    "fonts.gstatic.com":    "the font files the Google Fonts CSS then fetches",
-    "gc.zgo.at":            "GoatCounter analytics (count.js + its beacon)",
+    "gc.zgo.at":        "GoatCounter analytics (count.js + its beacon)",
+    "www.linkedin.com": "the two post embeds on the homepage author section",
 }
+# fonts.googleapis.com and fonts.gstatic.com used to be here. The typefaces are
+# served from this origin now, so there is no font exception to make — and the
+# audit below proved it rather than being told: it walks the built pages and
+# found nothing fetching from either host.
 
-# Origins that appear only as link targets — a reader clicks them, the page
-# never loads anything from them, so they need no CSP allowance.
-LINK_ONLY = {
-    "www.linkedin.com", "github.com", "srivantechnologies.com",
-    "platformops.srivantechnologies.com", "www.researchgate.net",
-    "www.hackerrank.com", "schema.org", "www.w3.org", "kubernetes.io",
-    "istio.io", "linkerd.io", "www.envoyproxy.io", "app.kit.com",
-    "c2pa.org", "example.com", "repo.example.com", "creativecommons.org",
-    "opensource.org", "developer.mozilla.org", "www.cncf.io",
-    "cloud.google.com", "docs.openshift.com", "access.redhat.com",
-    "prometheus.io", "grafana.com", "opentelemetry.io", "www.cloudflare.com",
-    "search.google.com", "www.google.com", "127.0.0.1", "localhost", "api",
-}
+# There is deliberately no allow-list of "link-only" hosts here any more.
+#
+# There was one, holding about thirty domains this site links to, and it did
+# real damage: it exempted by HOSTNAME, while `seen` below only ever collects
+# hosts the browser actually FETCHES. So a host that was both — linked in the
+# prose AND loaded as a resource — was waved through as harmless. That is
+# precisely what happened with www.linkedin.com: two <iframe> embeds on the
+# homepage, fetched by every visitor, invisible to this audit because the same
+# domain also appears as an ordinary link. Found by watching a real browser's
+# request log, not by reading this file.
+#
+# The rule now is simply: if it is fetched, it must be in ALLOWED.
 
 # ── audit: does the built site load anything we have not accounted for? ─────
 # Only things the BROWSER FETCHES count, and that distinction is the whole
@@ -120,8 +121,7 @@ for f in ROOT.rglob("*.html"):
     for host in re.findall(r"src\s*=\s*'https://([a-z0-9.-]+)/", text):
         seen.setdefault(host, f.relative_to(ROOT).as_posix())
 
-unknown = {h: p for h, p in seen.items()
-           if h not in ALLOWED and h not in LINK_ONLY}
+unknown = {h: p for h, p in seen.items() if h not in ALLOWED}
 assert not unknown, (
     "build_headers: the built site fetches from origins this policy does not\n"
     "cover. Either add them to ALLOWED (and to the CSP below), or find out why\n"
@@ -150,7 +150,12 @@ CSP = [
     # claim the directive until the inline scripts are gone. This file does
     # the second. Everything listed below is a real restriction that the
     # site genuinely operates within; nothing here is decorative.
-    f"font-src 'self' https://fonts.gstatic.com",
+    "font-src 'self'",
+    # Declared rather than omitted, and that matters: with no default-src, an
+    # absent frame-src means frames are UNRESTRICTED. Naming the one embed
+    # origin turns "anything may be framed here" into "these two LinkedIn
+    # posts may".
+    "frame-src 'self' https://www.linkedin.com",
     "img-src 'self' data: https://gc.zgo.at",
     "connect-src 'self' https://gc.zgo.at",
     "frame-ancestors 'none'",
@@ -231,8 +236,7 @@ print(f"  _headers -> {len(HEADERS)} headers, "
 #    Lower severity than script — style injection can deface and can exfiltrate
 #    via crafted selectors, but cannot execute. Worth doing after script-src.
 #
-# 3. fonts.googleapis.com / fonts.gstatic.com. Self-hosting the four families
-#    removes both origins, stops every reader's IP reaching a third party on
-#    every page load, and makes the render tests exact everywhere instead of
-#    relaxing their tolerance when fonts cannot be reached.
+# 3. DONE — the four families are self-hosted. Both Google origins are gone
+#    from the policy, no reader's IP reaches a third party to render a page,
+#    and the render tests run at full precision everywhere.
 # ════════════════════════════════════════════════════════════════════════════
