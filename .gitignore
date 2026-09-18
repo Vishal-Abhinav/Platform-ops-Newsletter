@@ -31,3 +31,11 @@ tools/.mermaid/
 !.dev.vars.example
 .env*
 !.env.example
+
+# Build output -- not source.
+# tools/build.sh wipes and rebuilds dist/ from content/, static/ and the
+# generators on every run, and CI rebuilds it from scratch on every push
+# before deploying. A committed copy is therefore a second source of
+# truth that can only ever drift, and it turned every one-word content
+# edit into an 800-file diff that buried the real change.
+dist/

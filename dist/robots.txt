@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://platformops.srivantechnologies.com/sitemap.xml
