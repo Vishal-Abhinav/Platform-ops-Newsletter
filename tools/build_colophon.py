@@ -133,6 +133,10 @@ STAGE_NOTE = {
                             "one nav, one footer and a theme toggle on the 25 "
                             "hand-written pages, which had twenty-three between them"),
     "build_colophon": ("everything above", "this page"),
+    "build_about": ("taxonomy + issue register + command corpus",
+                    "about/index.html — what this newsletter is and what it "
+                    "covers, derived from the taxonomy rather than from the "
+                    "generated README, so it needs nothing that runs later"),
     "build_terminal": ("terminal_fs.py",
                        "the practice terminal: a shell simulated over an in-memory tree"),
     "build_feed": ("the issue register", "feed.xml"),

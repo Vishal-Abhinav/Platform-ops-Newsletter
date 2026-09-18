@@ -63,6 +63,7 @@ for href in sorted(seen_pages):
 # exactly how the colophon and the practice terminal both shipped invisible.
 STANDALONE = [
     ("terminal/index.html", "Practice Terminal", "Practice"),
+    ("about/index.html", "About Platform Ops", "About"),
     ("colophon/index.html", "Colophon", "About"),
     ("categories/kubernetes-openshift-map/index.html",
      "Kubernetes & OpenShift — Complete Topic Map", "Reference"),

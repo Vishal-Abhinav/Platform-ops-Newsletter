@@ -572,7 +572,7 @@ def render(*, slug, title, tagline, eyebrow, crumbs, meta, sections, pager, up="
           <a href="{up}categories/foundation/index.html">Foundation Hub</a>
           <a href="{up}index.html#topics">Knowledge Map</a></div>
         <div><div class="f-col-t">Connect</div>
-          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="{up}about/index.html">About Platform Ops</a>
           <a href="{up}index.html#authors">About the Author</a>
           <a href="https://srivantechnologies.com/" target="_blank" rel="noopener">Srivan Technologies ↗</a>
           <a href="#">Back to Top ↑</a></div>

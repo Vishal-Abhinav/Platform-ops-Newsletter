@@ -162,6 +162,26 @@ python3 tools/build_feed.py
 say "colophon"
 python3 tools/build_colophon.py      # counts pages + reads build.sh's own stage list
 
+# ── /about/, and why it runs HERE rather than after the README ─────────────
+# This page is the public "what is this", which used to live only in README.md
+# on a public repo. The repo is private now, so the description moved onto the
+# domain.
+#
+# The tempting implementation is to render dist/README.md into HTML. It does
+# not work, and the reason is the ordering rule at the top of this file.
+# build_readme quotes the size of the search index, so it cannot run until
+# build_search has written it — and build_search is a whole-site pass that
+# wires the search box into every page that exists when it runs. A page
+# generated from the finished README would therefore be created after that
+# pass and would ship without a search box, a mega-menu, or a sitemap row.
+#
+# build_about derives its numbers straight from taxonomy.py and the issue
+# register instead, so it has no dependency on the README at all and sits here
+# with the other content generators, where the whole-site passes below pick it
+# up like any other page.
+say "about page (the public 'what is this', on the domain rather than in a repo)"
+python3 tools/build_about.py
+
 #   (README moved below build_search — it quotes the search index size)
 
 say "mega-menu (assets + wiring into every page)"

@@ -890,13 +890,14 @@ and a half-applied edit can never accumulate.
 | 16 | `build_legacy_dg.py` | `categories/hub.css` + the built Kubernetes hub | injects a `.dg` diagram into the 3 hand-written pages that have none |
 | 17 | `build_legacy_chrome.py` | `chrome.py` | wires the shared nav, footer, and theme toggle onto the 25 hand-written pages |
 | 18 | `build_colophon.py` | everything above + the rendered SVGs | `colophon/index.html` — how the site is built, on the site |
-| 19 | `build_terminal.py` | `terminal_fs.py` | `terminal/index.html` — a Unix shell simulated over an in-memory filesystem |
-| 20 | `build_feed.py` | the register | `feed.xml` |
-| 21 | `build_nav.py` | taxonomy | mega-menu assets, wired into every page |
-| 22 | `build_search.py` | everything on disk | the search index, wired into every page |
-| 23 | `build_seo.py` | each page + register | JSON-LD, article dates, per-issue `og:image` |
-| 24 | `build_canonical.py` | `siteconf.BASE` | rewrites every origin to the canonical one |
-| 25 | `verify.py` | the built site | `sitemap.xml`, **and a non-zero exit if anything is wrong** |
+| 19 | `build_about.py` | taxonomy + register + commands | `about/index.html` — what this newsletter is and what it covers, on the domain rather than in a repo. Derives its numbers from the taxonomy, not from the generated README, so it runs here and the whole-site passes below pick it up like any other page |
+| 20 | `build_terminal.py` | `terminal_fs.py` | `terminal/index.html` — a Unix shell simulated over an in-memory filesystem |
+| 21 | `build_feed.py` | the register | `feed.xml` |
+| 22 | `build_nav.py` | taxonomy | mega-menu assets, wired into every page |
+| 23 | `build_search.py` | everything on disk | the search index, wired into every page |
+| 24 | `build_seo.py` | each page + register | JSON-LD, article dates, per-issue `og:image` |
+| 25 | `build_canonical.py` | `siteconf.BASE` | rewrites every origin to the canonical one |
+| 26 | `verify.py` | the built site | `sitemap.xml`, **and a non-zero exit if anything is wrong** |
 
 Stages 17–20 are whole-site passes: they walk every page that exists at that point and inject
 the same chrome into all of them. That is why a new page needs no wiring of its own — it is

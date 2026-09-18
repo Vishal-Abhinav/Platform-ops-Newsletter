@@ -227,7 +227,7 @@ def footer(up=""):
           <a href="{up}terminal/index.html">Practice Terminal ↗</a>
           <a href="{up}colophon/index.html">Colophon</a></div>
         <div><div class="f-col-t">Connect</div>
-          <a href="https://github.com/Vishal-Abhinav/Platform-ops-Newsletter" target="_blank">GitHub Repo ↗</a>
+          <a href="{up}about/index.html">About Platform Ops</a>
           <a href="{up}index.html#authors">About the Author</a>
           <a href="{STUDIO}" target="_blank" rel="noopener">Srivan Technologies ↗</a>
           <a href="#">Back to Top ↑</a></div>
