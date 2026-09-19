@@ -190,6 +190,12 @@ python3 tools/build_about.py
 say "architecture page (the system drawn — 7 diagrams)"
 python3 tools/build_architecture.py
 
+# These pages are noindex and are served only after the Worker validates its
+# own D1-backed OAuth session. They still run before whole-site wiring so their
+# shared navigation and security headers stay consistent with the public site.
+say "custom login + protected account pages"
+python3 tools/build_auth.py
+
 #   (README moved below build_search — it quotes the search index size)
 
 say "mega-menu (assets + wiring into every page)"

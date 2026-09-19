@@ -57,6 +57,9 @@ PAGES = {
     "about":           "about/index.html",
     "architecture":    "architecture/index.html",
     "colophon":        "colophon/index.html",
+    "member login":    "login/index.html",
+    "admin account":   "admin/index.html",
+    "user account":    "user/index.html",
     "legacy":          "Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html",
 }
 

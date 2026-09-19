@@ -33,6 +33,7 @@ data = {"pillars": [], "quick": [
     {"label": "Reference Library", "href": "index.html#library"},
     {"label": "Knowledge Map", "href": "categories/index.html"},
     {"label": "Latest Issues", "href": "issues/index.html"},
+    {"label": "Member Sign In", "href": "user/"},
     {"label": "Subscribe", "href": "index.html#subscribe"},
 ]}
 for pname, cats in PILLARS:

@@ -28,8 +28,8 @@ you.
 It assumes you already know what a Pod is. It does not assume the default
 settings are correct.
 
-**No paywall, no sign-in, no tracking beyond page counts, no AI-generated
-filler.** Every page is readable without an account, the archive stays up, and
+**No paywall, no required sign-in, no tracking beyond page counts, no AI-generated
+filler.** Every knowledge page is readable without an account, the archive stays up, and
 issues are corrected in place rather than silently replaced.
 
 > **Newest — [Issue #067: Service Mesh Operations](https://platformops.srivantechnologies.com/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html)**
@@ -98,13 +98,13 @@ flowchart TB
   DAT["cmd_data.py · hubs_spec.py<br/>topicmap_data.py · terminal_fs.py"]
   HAND["content/ · 25 hand-written pages<br/>static/ · icons, OG cards, 16 fonts"]
 
-  SH["bash tools/build.sh<br/>rm -rf dist, then 34 stages in order"]
+  SH["bash tools/build.sh<br/>rm -rf dist, then 35 stages in order"]
 
   G1["structure<br/>build_hubs, build_topic_pages<br/>a hub per category,<br/>a page per item"]
   G2["navigation<br/>build_kmap, build_topicmap,<br/>build_feed, build_search<br/>maps, RSS, search index"]
   G3["contract<br/>build_seo, build_canonical,<br/>build_headers<br/>JSON-LD, canonicals, CSP"]
 
-  DIST[("dist/ · 881 pages<br/>the only deploy surface")]
+  DIST[("dist/ · 884 pages<br/>the only deploy surface")]
   VER["verify.py<br/>links · tag balance · canonicals · sitemap<br/>and whether two pages agree with each other"]
   OK["banner + README<br/>ready to deploy"]
   STOP["exit 1 · nothing ships"]
@@ -148,7 +148,7 @@ exists because the thing it checks actually went wrong at least once:
   after two pages described the same category differently, one click apart.
 - The **security policy** is derived by walking the built pages for the origins
   they actually fetch from, and fails on one it does not recognise.
-- **12 page families × 13 viewport widths** are
+- **15 page families × 13 viewport widths** are
   opened in a real browser and asserted for horizontal overflow and duplicate
   fixed headers.
 - **7 pages are loaded twice**, once under each motion
@@ -167,7 +167,7 @@ Three directories are input. One is output. Nothing else is either.
 
 | Path | What it is |
 |:--|:--|
-| `tools/` | The build: 34 ordered stages, `verify.py`, and the browser test suites. Python 3.11, standard library only. |
+| `tools/` | The build: 35 ordered stages, `verify.py`, and the browser test suites. Python 3.11, standard library only. |
 | `content/` | The 25 hand-written pages, kept pristine — they are copied into `dist/` and edited *there*, never in place. |
 | `static/` | Copied verbatim: icons, OG cards, 16 self-hosted font files, `assets/motion.css`. |
 | `brand/` | The generated banner. Tracked, deliberately outside `static/`, so it never reaches the site. |
@@ -216,7 +216,7 @@ flowchart TB
   DEV(["Author<br/>edits taxonomy.py or content/"])
 
   subgraph LOCAL["Local"]
-    BUILD["bash tools/build.sh<br/>34 stages · writes dist/"]
+    BUILD["bash tools/build.sh<br/>35 stages · writes dist/"]
     SUITE["verify.py · test_render.py · test_motion.py"]
   end
 
@@ -226,7 +226,7 @@ flowchart TB
     PR["pr-checks.yml<br/>trigger: pull_request<br/>read-only token · no secrets · no deploy"]
     DEP["deploy.yml<br/>trigger: push to main"]
     G1["build · refuse a dist/ under 500 pages"]
-    G2["render tests · 12 families x 13 widths"]
+    G2["render tests · 15 families x 13 widths"]
     G3["reduced-motion tests · both preferences"]
   end
 
@@ -318,8 +318,9 @@ the trust boundaries, is on the [architecture page](https://platformops.srivante
 
 ## Security
 
-The site is static, has no backend, sets no cookies and runs no third-party
-JavaScript. Most of what follows is therefore about keeping it that way.
+The public knowledge surface is static and runs no third-party JavaScript.
+Optional private account pages use a small Worker, GitHub OAuth, a hashed
+session cookie, and D1 role records; public reading still requires no account.
 
 **The policy is derived, not written.** `build_headers.py` walks the built
 pages for the origins they actually fetch from and emits `dist/_headers`. Two
@@ -370,7 +371,7 @@ rather than a public issue.
 
 ## Accessibility
 
-Honoured on all 881 pages, and tested rather than asserted.
+Honoured on all 884 pages, and tested rather than asserted.
 
 The site animates: a drifting background, pulsing status dots, a ticker, a
 blinking terminal cursor, a staggered typewriter reveal, counters that count
@@ -380,7 +381,7 @@ had asked their operating system for — twelve distinct infinite animations,
 
 It now resolves in three places, because no one of them is enough:
 
-- `assets/motion.css`, on all 881 pages, collapses every CSS animation
+- `assets/motion.css`, on all 884 pages, collapses every CSS animation
   and transition to `0.01ms` with a single iteration — **not** `animation:
   none`. Several entrances start at `opacity: 0`; removing the animation
   outright would leave that content permanently invisible, which is a worse
@@ -396,7 +397,7 @@ It now resolves in three places, because no one of them is enough:
   was animating, the browser said nothing was, and the particles kept flying
   for a reader who had asked them not to. `build_seo.py` now injects an
   explicit `pauseAnimations()` call into any page carrying SMIL, and
-  `verify.py` asserts across all 881 pages that a page which can animate
+  `verify.py` asserts across all 884 pages that a page which can animate
   this way can also stop.
 
 `tools/test_motion.py` opens 7 pages twice, once under each
@@ -409,7 +410,7 @@ anything moved cannot be fooled by the technique. It also asserts that the motio
 preference — a test that only checked the reduced case would pass just as
 happily on a site whose animation had been deleted.
 
-Also measured across all 881 pages, rather than asserted: exactly one
+Also measured across all 884 pages, rather than asserted: exactly one
 `<h1>` each, a `lang` attribute on every `<html>`, a `<nav>` landmark, and no
 icon-only control left without an `aria-label`. Colour is never the only thing
 carrying a meaning — the live/pipeline/planned states that colour the coverage

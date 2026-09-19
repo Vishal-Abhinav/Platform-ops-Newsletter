@@ -169,8 +169,8 @@ you.
 It assumes you already know what a Pod is. It does not assume the default
 settings are correct.
 
-**No paywall, no sign-in, no tracking beyond page counts, no AI-generated
-filler.** Every page is readable without an account, the archive stays up, and
+**No paywall, no required sign-in, no tracking beyond page counts, no AI-generated
+filler.** Every knowledge page is readable without an account, the archive stays up, and
 issues are corrected in place rather than silently replaced.
 
 > **Newest — [Issue #{NEWEST_NUM:03d}: {NEWEST_TITLE}]({SITE}/{NEWEST_PATH})**
@@ -447,8 +447,9 @@ the trust boundaries, is on the [architecture page]({SITE}/architecture/).
 
 ## Security
 
-The site is static, has no backend, sets no cookies and runs no third-party
-JavaScript. Most of what follows is therefore about keeping it that way.
+The public knowledge surface is static and runs no third-party JavaScript.
+Optional private account pages use a small Worker, GitHub OAuth, a hashed
+session cookie, and D1 role records; public reading still requires no account.
 
 **The policy is derived, not written.** `build_headers.py` walks the built
 pages for the origins they actually fetch from and emits `dist/_headers`. Two

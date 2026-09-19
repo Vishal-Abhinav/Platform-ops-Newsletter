@@ -27,6 +27,9 @@ jobs:
       - name: Build the site
         run: bash tools/build.sh
 
+      - name: Authentication tests
+        run: node tools/test_auth.mjs
+
       - name: Refuse to deploy an empty build
         run: |
           count=$(find dist -name '*.html' | wc -l)
@@ -44,11 +47,81 @@ jobs:
       - name: Render tests
         run: python3 tools/test_render.py dist
 
+      - name: Reduced-motion tests
+        run: python3 tools/test_motion.py dist
+
+      - name: Require authentication deployment secrets
+        env:
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+          OAUTH_GITHUB_CLIENT_ID: ${{ secrets.OAUTH_GITHUB_CLIENT_ID }}
+          OAUTH_GITHUB_CLIENT_SECRET: ${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}
+          ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
+        run: |
+          missing=0
+          for name in D1_DATABASE_ID OAUTH_GITHUB_CLIENT_ID OAUTH_GITHUB_CLIENT_SECRET ADMIN_EMAILS; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Required repository secret $name is missing"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: Sync authentication runtime secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          OAUTH_GITHUB_CLIENT_ID: ${{ secrets.OAUTH_GITHUB_CLIENT_ID }}
+          OAUTH_GITHUB_CLIENT_SECRET: ${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}
+          ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
+        run: |
+          jq -n \
+            --arg client_id "$OAUTH_GITHUB_CLIENT_ID" \
+            --arg client_secret "$OAUTH_GITHUB_CLIENT_SECRET" \
+            --arg admins "$ADMIN_EMAILS" \
+            '{OAUTH_GITHUB_CLIENT_ID:$client_id,OAUTH_GITHUB_CLIENT_SECRET:$client_secret,ADMIN_EMAILS:$admins}' \
+            | npx --yes wrangler@4.134.0 secret bulk
+
+      - name: Configure production D1 binding
+        env:
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+        run: python3 tools/configure_wrangler.py wrangler.jsonc wrangler.deploy.jsonc
+
+      - name: Apply authentication database migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4.134.0 d1 migrations apply platform-ops-auth --remote --config wrangler.deploy.jsonc
+
       - name: Deploy to Cloudflare Workers
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx --yes wrangler@4.134.0 deploy
+        run: npx --yes wrangler@4.134.0 deploy --config wrangler.deploy.jsonc
 
-      - name: Reduced-motion tests
-        run: python3 tools/test_motion.py dist
+      - name: Verify custom authentication gates
+        env:
+          AUTH_ORIGIN: https://platformops.srivantechnologies.com
+        run: |
+          login_code=$(curl --silent --show-error --output /dev/null --max-time 20 --write-out '%{http_code}' "$AUTH_ORIGIN/login/")
+          if [ "$login_code" != "200" ]; then
+            echo "::error::Login page returned $login_code"
+            exit 1
+          fi
+          for area in admin user; do
+            protected=0
+            for attempt in 1 2 3 4 5 6; do
+              read -r code location < <(curl --silent --show-error --output /dev/null \
+                --max-time 20 --write-out '%{http_code} %{redirect_url}' "$AUTH_ORIGIN/$area/")
+              if [[ "$code" =~ ^30(1|2|3|7|8)$ ]] && [[ "$location" == "$AUTH_ORIGIN/login/"* ]]; then
+                echo "$area gate: $code -> custom login"
+                protected=1
+                break
+              fi
+              echo "$area gate not ready (attempt $attempt: $code ${location:-no-redirect})"
+              sleep 10
+            done
+            if [ "$protected" -ne 1 ]; then
+              echo "::error::$AUTH_ORIGIN/$area/ is not gated by the custom login"
+              exit 1
+            fi
+          done

@@ -575,6 +575,7 @@ def render(*, slug, title, tagline, eyebrow, crumbs, meta, sections, pager, up="
           <a href="{up}categories/foundation/index.html">Foundation Hub</a>
           <a href="{up}categories/index.html">Knowledge Map</a></div>
         <div><div class="f-col-t">Connect</div>
+          <a href="{up}user/">Member Sign In</a>
           <a href="{up}about/index.html">About Platform Ops</a>
           <a href="{up}about/index.html#author">About the Author</a>
           <a href="https://srivantechnologies.com/" target="_blank" rel="noopener">Srivan Technologies ↗</a>

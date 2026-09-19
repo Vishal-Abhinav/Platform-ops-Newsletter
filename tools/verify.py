@@ -52,6 +52,9 @@ VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'met
         'stop', 'use', 'animate', 'animateMotion', 'animateTransform', 'feGaussianBlur',
         'image', 'feOffset', 'feMerge', 'feMergeNode'}
 
+# These paths are implemented by src/worker.mjs rather than emitted as files.
+RUNTIME_PATH_PREFIXES = ("/auth/",)
+
 
 class Nesting(HTMLParser):
     def __init__(self):
@@ -101,6 +104,8 @@ def main():
         for m in re.finditer(r'(?:href|src)="([^"]+)"', src):
             u = m.group(1)
             if u.startswith(("http://", "https://", "#", "mailto:", "data:", "javascript:", "{{")):
+                continue
+            if u.startswith(RUNTIME_PATH_PREFIXES):
                 continue
             tgt = posixpath.normpath(
                 posixpath.join(base_dir, u.split("#")[0].split("?")[0])).lstrip("/")

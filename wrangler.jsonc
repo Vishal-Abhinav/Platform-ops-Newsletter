@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "platform-ops-blog",
+  "main": "src/worker.mjs",
   "compatibility_date": "2026-09-15",
   "observability": {
     "enabled": true
@@ -20,6 +21,21 @@
     // Mermaid install became publicly fetchable. tools/build.sh now writes
     // everything it produces into dist/ and nothing else goes there, so a leak
     // takes a mistake rather than an omission.
-    "directory": "dist"
-  }
+    "directory": "dist",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/auth*",
+      "/login*",
+      "/admin*",
+      "/user*"
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "platform-ops-auth",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ]
 }
