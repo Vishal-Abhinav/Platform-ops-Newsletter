@@ -83,6 +83,7 @@ python3 tools/build_sticky.py
 
 say "author section (profile + LinkedIn)"
 python3 tools/build_author.py
+python3 tools/build_home_portals.py
 
 # ── ordering rule for everything below ─────────────────────────────────────
 # A stage that COUNTS or CLASSIFIES against the filesystem must run after the
@@ -145,6 +146,7 @@ python3 tools/build_hubs.py
 # chrome/diagram passes that add text to the hand-written pages.
 say "Kubernetes + OpenShift complete topic map"
 python3 tools/build_topicmap.py
+python3 tools/build_issues.py
 
 say "folding the topic list into the Kubernetes and OpenShift hub pages"
 python3 tools/build_hub_topicmap.py

@@ -113,10 +113,14 @@ STAGE_NOTE = {
     "build_library": ("taxonomy", "the reference-library listing"),
     "build_sticky": ("—", "pins the Latest Issues panel beside the map"),
     "build_author": ("linkedin_posts.py", "author profile + LinkedIn column"),
+    "build_home_portals": ("generated homepage",
+                           "dedicated-page gateways and the paired About / Subscribe row"),
     "build_hubs": ("taxonomy + hubs_spec.py", "the category hubs, diagrams and cross-links"),
     "build_topicmap": ("topicmap_data.py (46-group reader topic list)",
                        "the Kubernetes & OpenShift Complete Topic Map, every item marked "
                        "live / pipeline / planned"),
+    "build_issues": ("build_feed.py issue register",
+                     "the standalone newest-first issue archive"),
     "build_hub_topicmap": ("the same 46-group list, split 1-24 / 25-46",
                            "folds the reader's list onto categories/kubernetes/ and "
                            "categories/openshift/ directly, not just the standalone page"),

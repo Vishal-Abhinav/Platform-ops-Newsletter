@@ -144,7 +144,7 @@ README = f"""<div align="center">
 ![Platform Ops](brand/banner.svg)
 
 [![Read it]({BADGE}/read%20it-{SITE.split('//')[1].replace('-', '--')}-e53935?style=for-the-badge&labelColor=08090c)]({SITE}/)
-[![Issues]({BADGE}/issues-{N_ISSUES}-00c2d4?style=for-the-badge&labelColor=08090c)]({SITE}/#issues)
+[![Issues]({BADGE}/issues-{N_ISSUES}-00c2d4?style=for-the-badge&labelColor=08090c)]({SITE}/issues/)
 [![Topics]({BADGE}/topics-{N_TOPICS}-f59e0b?style=for-the-badge&labelColor=08090c)]({SITE}/categories/)
 [![Commands]({BADGE}/commands-{N_CMDS}-84cc16?style=for-the-badge&labelColor=08090c)]({SITE}/Commands/KUBERNETES-COMMANDS/kubernetes-commands.html)
 [![RSS]({BADGE}/rss-feed-8b5cf6?style=for-the-badge&labelColor=08090c)]({SITE}/feed.xml)

@@ -158,19 +158,59 @@ S_BUILT = section(
     "account: the build stages in order, what each one reads and writes, and "
     "the checks that gate a deploy.</p>")
 
+S_PLATFORM = section(
+    "Platform Ops", "The publication promise",
+    "A technical newsletter on Kubernetes, OpenShift, SRE and platform "
+    "engineering — written from production systems, not from documentation.",
+    table(["Promise", "What it means"],
+          [("No paywall",
+            "Every page is readable without an account. There is nothing to "
+            "sign up for in order to read."),
+           ("Corrected in place",
+            "When an issue is wrong it is fixed at its original URL, not "
+            "quietly replaced or reposted."),
+           ("First-hand",
+            "Where an issue describes a failure it is a failure that happened; "
+            "where it gives a number, the number was measured."),
+           ("Open build",
+            "The generator, the tests and this page are public. What you read "
+            "is what the repository produces.")])
+    + "<p><b>Build. Operate. Understand.</b> Learn the technology, understand "
+      "how the components connect, build reliable systems, and when something "
+      "breaks, understand the problem before applying the fix.</p>")
+
 S_WHO = section(
     "Who writes it", "Vishal Abhinav",
     "A platform engineer who spends his working days on the systems this "
     "newsletter is about.",
+    "<div id=\"author\"></div>"
+    "<p>Vishal Abhinav is a Software Engineer specializing in Infrastructure, "
+    "DevOps, Platform Operations, Observability and production systems. His "
+    "work focuses on building, automating, deploying, troubleshooting, and "
+    "operating reliable technology platforms across Linux, Networking, Cloud, "
+    "Git, CI/CD, Containers, Kubernetes, OpenShift, Automation, Observability, "
+    "and SRE.</p>"
     "<p>The writing is first-hand. Where an issue describes a failure, it is "
-    "a failure that happened; where it gives a number, the number was "
-    "measured rather than quoted. When something here turns out to be wrong, "
-    "the page is corrected and the correction is visible.</p>"
-    "<p>Platform Ops is published by "
+    "a failure that happened; where it gives a number, the number was measured "
+    "rather than quoted. When something here turns out to be wrong, the page "
+    "is corrected and the correction is visible.</p>"
+    + table(["Author", "Links"],
+            [("Vishal Abhinav",
+              '<a href="https://www.linkedin.com/in/vishal-abhinav/" '
+              'target="_blank" rel="noopener">LinkedIn</a> · '
+              '<a href="https://github.com/Vishal-Abhinav" target="_blank" '
+              'rel="noopener">GitHub</a> · '
+              '<a href="https://www.hackerrank.com/Vishal_Abhinav?hr_r=1" '
+              'target="_blank" rel="noopener">HackerRank</a> · '
+              '<a href="https://www.researchgate.net/profile/Vishal-Abhinav/research" '
+              'target="_blank" rel="noopener">ResearchGate</a>'),
+             ("Areas of focus",
+              "Infrastructure, DevOps, Linux, Networking, Cloud, Kubernetes, "
+              "OpenShift, CI/CD, Containers, GitOps, Automation, Observability, "
+              "SRE, Platform Engineering")])
+    + "<p>Platform Ops is published by "
     "<a href=\"https://srivantechnologies.com/\" target=\"_blank\" "
-    "rel=\"noopener\">Srivan Technologies</a>. You can reach the author "
-    "through the <a href=\"../index.html#authors\">author section</a> on the "
-    "homepage.</p>")
+    "rel=\"noopener\">Srivan Technologies</a>.</p>")
 
 S_LICENCE = section(
     "Licence", "What you may do with this",
@@ -192,7 +232,7 @@ S_LICENCE = section(
            "site to a model and publishing what comes out, link the source "
            "page so a reader can check it against the original.</p>"))
 
-SECTIONS = S_WHAT + S_COVERS + S_READ + S_BUILT + S_WHO + S_LICENCE
+SECTIONS = S_WHAT + S_COVERS + S_READ + S_BUILT + S_PLATFORM + S_WHO + S_LICENCE
 
 PAGER = ('<div class="pager">'
          '<a href="../index.html">← Home<b>Platform Ops</b></a>'

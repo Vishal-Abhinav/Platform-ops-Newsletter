@@ -879,8 +879,10 @@ and a half-applied edit can never accumulate.
 | 5 | `build_library.py` | taxonomy | the reference-library listing |
 | 6 | `build_sticky.py` | — | pins the Latest Issues panel beside the map |
 | 7 | `build_author.py` | `linkedin_posts.py` | author profile + LinkedIn column |
+| 8 | `build_home_portals.py` | generated homepage | dedicated-page gateways and the paired About / Subscribe row |
 | 8 | `build_hubs.py` | taxonomy + `hubs_spec.py` | 43 category hubs, their diagrams and cross-links |
 | 9 | `build_topicmap.py` | `topicmap_data.py` (46-group reader topic list) | the Kubernetes & OpenShift Complete Topic Map — every item marked live / pipeline / planned |
+| 10 | `build_issues.py` | `build_feed.py` issue register | `issues/index.html` — the standalone newest-first issue archive |
 | 10 | `build_hub_topicmap.py` | the same 46-group list, split 1-24 / 25-46 | folds the reader's list directly onto `categories/kubernetes/` and `categories/openshift/`, not just the standalone page |
 | 11 | `build_topic_pages.py` | `build_topicmap.classify()` | one honest page per checklist item that isn't Live yet — 786 right now — so a Pipeline/Planned chip links somewhere instead of being a dead `<span>` |
 | 12 | `build_foundation.py` | `fnd_a.py`, `fnd_b.py` | the Foundation deep-dives |

@@ -361,7 +361,7 @@ def build():
 <nav>
   <a href="{UP}index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
   <div class="crumb"><a href="{UP}index.html">Home</a><span>/</span><a href="{UP}categories/index.html">Categories</a><span>/</span><span class="cur">Kubernetes &amp; OpenShift Topic Map</span></div>
-  <div class="nav-right">{chrome.TOGGLE}<a href="{UP}terminal/index.html" class="nav-lab" target="_blank" rel="noopener">LAB</a><a href="{UP}index.html#subscribe" class="nav-logo nav-sub" style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
+  <div class="nav-right">{chrome.TOGGLE}<a href="{UP}terminal/index.html" class="nav-lab">TERMINAL</a><a href="{UP}about/index.html" class="nav-lab">ABOUT</a><a href="{UP}index.html#subscribe" class="nav-logo nav-sub" style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
 </nav>
 
 <header class="hero"><div class="wrap">

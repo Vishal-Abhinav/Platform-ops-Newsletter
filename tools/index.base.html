@@ -1530,20 +1530,33 @@ a.footer-logo:hover{color:#fff;}
   to   { offset-distance: 100%; opacity: 0; }
 }
 
+/* Not a tooltip any more. It heads the right-hand column of the band, above
+   the symptoms, and it is a panel at every width rather than only wide ones:
+   it no longer sits inside .ia-stage, so there is nothing for an absolutely
+   positioned box to be positioned against. wireDiagram still writes to it by
+   id and still sets left/top, which are simply inert on a static box — which
+   is why none of the wiring had to change. It also never clears the text, so
+   the last layer read stays up instead of blanking when the pointer leaves.
+
+   The hero and the constellation keep their floating tooltips; only this one
+   had a column to move into. */
 .ia-tip {
-  position: absolute; z-index: 5; pointer-events: none;
   background: #0d1218; border: 1px solid rgba(255,255,255,.17);
-  border-radius: 5px; padding: 9px 12px; max-width: 270px;
-  opacity: 0; transform: translateY(3px);
-  transition: opacity .15s ease, transform .15s ease;
+  border-radius: 6px; padding: 16px 18px;
+  /* held open so a one-line layer and a four-line one do not shunt the cards
+     underneath it up and down as the pointer crosses the drawing */
+  min-height: 124px;
 }
-.ia-tip.show { opacity: 1; transform: translateY(0); }
 .ia-tip b {
   display: block; font-family: 'DM Mono', ui-monospace, monospace;
-  font-size: 10.5px; letter-spacing: .1em; color: var(--cyan);
-  text-transform: uppercase; margin-bottom: 4px; font-weight: 400;
+  font-size: 11px; letter-spacing: .1em; color: var(--cyan);
+  text-transform: uppercase; margin-bottom: 8px; font-weight: 400;
 }
-.ia-tip span { display: block; font-size: 12.5px; line-height: 1.5; color: #b9c1cd; }
+.ia-tip span { display: block; font-size: 13.5px; line-height: 1.6; color: #b9c1cd; }
+@media (min-width: 1200px) {
+  .ia-tip { padding: 20px 22px; min-height: 150px; }
+  .ia-tip span { font-size: 14px; line-height: 1.65; }
+}
 
 /* THE PANEL — pairing the diagram with a column that explains it
    ---------------------------------------------------------------------------
@@ -1558,50 +1571,33 @@ a.footer-logo:hover{color:#fff;}
    the pointer wanders off. The one thing missing was something to read before
    the first hover, and that is four lines of seeding next to the wiring. */
 .ia-inspector { margin-top: 24px; }
-.ia-guide { margin-top: 20px; }
-.ia-guide-h {
-  font-family: 'DM Mono', ui-monospace, monospace; font-size: 10.5px;
-  letter-spacing: .13em; text-transform: uppercase; color: #6f7a8c; margin: 0 0 12px;
-}
-.ia-guide ol { margin: 0; padding: 0; list-style: none; counter-reset: iag; }
-.ia-guide li {
-  counter-increment: iag; position: relative; padding: 0 0 14px 30px;
-  font-size: 13px; line-height: 1.6; color: #8b95a6;
-}
-.ia-guide li::before {
-  content: counter(iag, decimal-leading-zero);
-  position: absolute; left: 0; top: 1px;
-  font-family: 'DM Mono', ui-monospace, monospace; font-size: 11px; color: var(--cyan);
-}
-.ia-guide li b { display: block; color: #d7dde6; font-weight: 500; margin-bottom: 2px; }
 
-@media (min-width: 1100px) {
-  .ia-stage {
-    display: grid; grid-template-columns: minmax(0, 1.34fr) minmax(300px, 1fr);
-    gap: clamp(30px, 4vw, 64px); align-items: stretch;
-  }
-  /* The column is the cap now; 780px was only ever there to stop the drawing
-     filling a 1232px band on its own. */
-  .ia-stage svg { max-width: none; margin: 0; }
-  /* Stretched to the drawing rather than pinned to the viewport. The three
-     parts of the guide describe three vertical stretches of the diagram —
-     routing at the top, the workload through the middle, the telemetry at the
-     bottom — so spreading them down the column puts each one roughly level
-     with the nodes it is talking about, and closes the gap that a panel
-     sitting at its natural height leaves under itself. */
-  .ia-inspector { margin-top: 0; display: flex; flex-direction: column; height: 100%; }
-  .ia-guide { flex: 1; display: flex; flex-direction: column; }
-  .ia-guide ol { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-  .ia-guide li { padding-bottom: 0; }
-  .ia-tip {
-    position: static; opacity: 1; transform: none; pointer-events: auto;
-    max-width: none; padding: 20px 22px;
-    /* Held open so a one-line layer and a four-line one do not shunt the
-       guide underneath it up and down as the pointer crosses the diagram. */
-    min-height: 150px;
-  }
-  .ia-tip b { font-size: 11px; margin-bottom: 9px; }
-  .ia-tip span { font-size: 14px; line-height: 1.65; }
+
+/* THE SYSTEM AND WHAT BREAKS IN IT — one paired band
+   ---------------------------------------------------------------------------
+   Below 1200px the two stack and each is exactly the section it was. Above it
+   the drawing takes the left and the right column carries the layer panel with
+   the five symptom cards under it. Two things need re-sizing for a ~420px
+   column: the symptom headline, which is set in vw and was resolving to 48px,
+   and the card summaries, which lay out as one row until there is no room. */
+.ib { background: #0a0c10; border-bottom: 1px solid rgba(255,255,255,.09);
+  padding: clamp(44px, 6vw, 80px) 0; }
+.ib-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px;
+  display: grid; gap: clamp(30px, 4vw, 56px); grid-template-columns: minmax(0, 1fr); }
+.ib .ia, .ib .tb { background: none; border-bottom: 0; padding: 0; }
+.ib .ia-inner, .ib .tb-inner { max-width: none; margin: 0; padding: 0; }
+.ib-side { display: flex; flex-direction: column; gap: clamp(28px, 3vw, 40px); }
+
+@media (min-width: 1200px) {
+  .ib-inner { grid-template-columns: minmax(0, 1.32fr) minmax(360px, 1fr);
+    align-items: start; }
+  /* the drawing is its own column now, so the 780px cap comes off */
+  .ib .ia-stage svg { max-width: none; margin: 0; }
+  /* clamp()'s vw term reads the window, not the column: 48px in a 420px box */
+  .ib .tb-head { font-size: clamp(22px, 2.1vw, 31px); }
+  .ib .tb-card summary { padding: 14px 16px; gap: 10px; }
+  .ib .tb-sym { font-size: 19px; }
+  .ib .tb-chips span { font-size: 9.5px; padding: 3px 6px; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1963,8 +1959,8 @@ a.footer-logo:hover{color:#fff;}
   <ul class="nav-links">
     <li><a href="#topics">Topics</a></li>
     <li><a href="#issues">Issues</a></li>
-    <li><a href="terminal/index.html" target="_blank" rel="noopener">Lab ↗</a></li>
-    <li><a href="#authors">Authors</a></li>
+    <li><a href="terminal/index.html">Terminal</a></li>
+    <li><a href="about/index.html">About</a></li>
     <li><a href="#subscribe" class="nav-cta">Subscribe →</a></li>
   </ul>
   <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark / light mode">
@@ -1996,6 +1992,14 @@ a.footer-logo:hover{color:#fff;}
         </a>
         <a class="cp-btn cp-btn-ghost" href="architecture/index.html">
           Explore Architecture
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+        <a class="cp-btn cp-btn-ghost" href="terminal/index.html">
+          Practice Terminal
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+        <a class="cp-btn cp-btn-ghost" href="about/index.html">
+          About + Author
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
         </a>
       </div>
@@ -2224,8 +2228,8 @@ a.footer-logo:hover{color:#fff;}
     <div class="docs-rail-label" id="docsRailLabel">On this page</div>
     <!-- a <div role="navigation">, not a <nav> — see the DOCS RAIL CSS comment -->
     <div class="docs-rail-nav" role="navigation" aria-labelledby="docsRailLabel">
-      <a href="#issues" data-rail="issues">Issues</a>
-      <a href="#topics" data-rail="topics">Topics</a>
+      <a href="issues/index.html">Issues</a>
+      <a href="categories/index.html">Topics</a>
       <a href="categories/foundation/index.html">Library</a>
       <a href="#subscribe" data-rail="subscribe">Subscribe</a>
       <a href="#authors" data-rail="authors">Authors</a>
@@ -2869,6 +2873,21 @@ a.footer-logo:hover{color:#fff;}
 
 <!-- ═══════════ FOOTER ═══════════ -->
 
+<!-- ═══════════ THE SYSTEM AND WHAT BREAKS IN IT ═══════════ -->
+<!-- The request path on the left, the five things that actually go wrong in it
+     on the right. They were two full-width sections, and the drawing is fitted
+     to 780px, so it sat in 226px of dead space while a tooltip flickered over
+     the top of it and the symptoms waited a screen further down.
+
+     The layer panel sits at the head of the right-hand column rather than
+     inside the drawing: hovering a layer says what that layer is for, and
+     directly beneath it are the failures you would be reading it to diagnose.
+     Nothing in the wiring moved — wireDiagram resolves #iaTip by id, so the
+     panel works wherever on the page it is put. The three-part guide that
+     briefly lived there is gone; these five symptoms are the better use of
+     the column, and dead markup is worse than no markup. -->
+<div class="ib">
+  <div class="ib-inner">
 <!-- ═══════════ INFRASTRUCTURE ARCHITECTURE ═══════════ -->
 <section class="ia" id="infra-diagram" aria-labelledby="ia-head">
   <div class="ia-inner">
@@ -2880,23 +2899,18 @@ a.footer-logo:hover{color:#fff;}
         <g class="ia-flow" aria-hidden="true"><circle class="ia-dot" r="3" style="offset-path:path('M380.0,52.0 C380.0,70.0 380.0,70.0 380.0,88.0'); animation-delay:0.00s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,124.0 C380.0,142.0 380.0,142.0 380.0,160.0'); animation-delay:0.42s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,196.0 C380.0,214.0 483.0,214.0 483.0,232.0'); animation-delay:0.84s"/><circle class="ia-dot" r="3" style="offset-path:path('M483.0,268.0 C483.0,286.0 380.0,286.0 380.0,304.0'); animation-delay:1.26s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,340.0 C380.0,358.0 380.0,358.0 380.0,376.0'); animation-delay:1.68s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,412.0 C380.0,430.0 380.0,430.0 380.0,448.0'); animation-delay:2.10s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,484.0 C380.0,502.0 380.0,502.0 380.0,520.0'); animation-delay:2.52s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,556.0 C380.0,574.0 380.0,574.0 380.0,592.0'); animation-delay:2.94s"/><circle class="ia-dot" r="3" style="offset-path:path('M380.0,628.0 C380.0,646.0 380.0,646.0 380.0,664.0'); animation-delay:3.36s"/></g>
         <g class="ia-nodes"><g class="ia-node" tabindex="0" role="group" data-t="Users" data-d="Where every request starts. Nothing below exists for any other reason."><rect x="280.0" y="16.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="34.0">USERS</text></g><a class="ia-node" href="categories/networking/index.html" data-t="DNS / CDN" data-d="Name resolution and edge caching: the first hop, and usually the last one anybody suspects."><rect x="280.0" y="88.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="106.0">DNS / CDN</text></a><a class="ia-node" href="categories/networking/index.html" data-t="Load balancer" data-d="Spreads traffic across healthy instances, and takes the unhealthy ones out of rotation."><rect x="280.0" y="160.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="178.0">LOAD BALANCER</text></a><a class="ia-node" href="categories/api-microservices/index.html" data-t="Service A" data-d="A stable address in front of instances that come and go."><rect x="187.0" y="232.0" width="180.0" height="36.0" rx="4"/><text x="277.0" y="250.0">SERVICE A</text></a><a class="ia-node" href="categories/api-microservices/index.html" data-t="Service B" data-d="Another one. Independently deployed, independently able to fail."><rect x="393.0" y="232.0" width="180.0" height="36.0" rx="4"/><text x="483.0" y="250.0">SERVICE B</text></a><a class="ia-node" href="categories/kubernetes/index.html" data-t="Kubernetes" data-d="Schedules the workloads and reconciles them back whenever reality drifts from the spec."><rect x="280.0" y="304.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="322.0">KUBERNETES</text></a><a class="ia-node" href="categories/kubernetes/index.html" data-t="Pods" data-d="The running unit: restarted, rescheduled and replaced, never repaired in place."><rect x="117.0" y="376.0" width="158.0" height="36.0" rx="4"/><text x="196.0" y="394.0">PODS</text></a><a class="ia-node" href="categories/storage/index.html" data-t="Storage" data-d="Volumes and storage classes — the data that has to outlive the pod using it."><rect x="301.0" y="376.0" width="158.0" height="36.0" rx="4"/><text x="380.0" y="394.0">STORAGE</text></a><a class="ia-node" href="categories/networking/index.html" data-t="Network" data-d="Pod-to-pod paths, network policy, and the DNS that lives inside the cluster."><rect x="485.0" y="376.0" width="158.0" height="36.0" rx="4"/><text x="564.0" y="394.0">NETWORK</text></a><a class="ia-node" href="categories/api-microservices/index.html" data-t="Application" data-d="Your code, finally. The part all of the above exists to keep running."><rect x="280.0" y="448.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="466.0">APPLICATION</text></a><a class="ia-node" href="categories/observability/index.html" data-t="Metrics" data-d="Numbers over time: how much, how often, how slow."><rect x="117.0" y="520.0" width="158.0" height="36.0" rx="4"/><text x="196.0" y="538.0">METRICS</text></a><a class="ia-node" href="categories/logging/index.html" data-t="Logs" data-d="What happened, in order, with the detail a metric had to throw away."><rect x="301.0" y="520.0" width="158.0" height="36.0" rx="4"/><text x="380.0" y="538.0">LOGS</text></a><a class="ia-node" href="categories/observability/index.html" data-t="Traces" data-d="One request&#x27;s path across every service it touched."><rect x="485.0" y="520.0" width="158.0" height="36.0" rx="4"/><text x="564.0" y="538.0">TRACES</text></a><a class="ia-node" href="categories/observability/index.html" data-t="Observability" data-d="Turning three signals into one answer about what is actually happening."><rect x="280.0" y="592.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="610.0">OBSERVABILITY</text></a><a class="ia-node" href="categories/sre/index.html" data-t="SRE" data-d="Error budgets, on-call, and deciding what to do about everything above this line."><rect x="280.0" y="664.0" width="200.0" height="36.0" rx="4"/><text x="380.0" y="682.0">SRE</text></a></g>
       </svg>
-      <aside class="ia-inspector" aria-label="Layer detail">
-        <div class="ia-tip" id="iaTip" role="status" aria-live="polite"><b></b><span></span></div>
-        <div class="ia-guide">
-          <p class="ia-guide-h">Read it in three parts</p>
-          <ol>
-            <li><b>Route the request</b>Users, DNS and the load balancer decide which service ever sees it.</li>
-            <li><b>Run the workload</b>Kubernetes, pods, storage and the network keep the application up.</li>
-            <li><b>Understand the result</b>Metrics, logs and traces are what the engineer on call actually reads.</li>
-          </ol>
-        </div>
-      </aside>
     </div>
   </div>
 </section>
 
 
 <!-- ═══════════ TROUBLESHOOTING ═══════════ -->
+
+    <div class="ib-side">
+      <aside class="ia-inspector" aria-label="Layer detail">
+        <div class="ia-tip" id="iaTip" role="status" aria-live="polite"><b></b><span></span></div>
+      </aside>
+
 <section class="tb" id="troubleshooting" aria-labelledby="tb-head">
   <div class="tb-inner">
     <h2 class="tb-head" id="tb-head">Production doesn't break.<br><span>Your observability tells you why.</span></h2>
@@ -2904,30 +2918,10 @@ a.footer-logo:hover{color:#fff;}
     <div class="tb-grid"><details class="tb-card" id="tb-pod-pending"><summary><span class="tb-sym">Pod pending</span><span class="tb-chips"><span>Scheduler</span><span>Nodes</span><span>Taints</span><span>Affinity</span><span>PVC</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">The scheduler has looked at every node and refused to place it. The pod is fine; the cluster has no seat for it.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>kubectl describe pod &lt;name&gt;</b><span>Read the Events at the bottom first. The scheduler says exactly why it declined, once per node.</span></li><li><b>Insufficient cpu / memory</b><span>No node has room for the <b>requests</b> — not the usage. Compare requests against each node's allocatable, not its capacity.</span></li><li><b>Untolerated taint</b><span>A node is marked for something else and this pod has no toleration for it. Common on control-plane and GPU pools.</span></li><li><b>Didn't match node affinity/selector</b><span>A nodeSelector or affinity rule matches nothing. A typo in a label value fails exactly like a full cluster.</span></li><li><b>Unbound PersistentVolumeClaim</b><span>The pod waits for a volume that will never bind — no StorageClass, no capacity, or the wrong access mode.</span></li><li><b>Nothing in Events at all</b><span>The scheduler never saw it. Check the pod is not stuck on an admission webhook or a missing priority class.</span></li></ol><div class="tb-reads"><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a><a href="categories/troubleshooting/index.html">Troubleshooting &#8594;</a><a href="Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">kubectl commands &#8594;</a></div></div></details><details class="tb-card" id="tb-crashloopbackoff"><summary><span class="tb-sym">CrashLoopBackOff</span><span class="tb-chips"><span>Logs</span><span>Events</span><span>Probes</span><span>Config</span><span>Resources</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">The container starts, exits, and Kubernetes backs off before trying again. The loop is the symptom; the first exit is the cause.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>kubectl logs &lt;pod&gt; --previous</b><span>Without <code>--previous</code> you are reading the instance that has not failed yet. The one that died holds the answer.</span></li><li><b>Read the exit code</b><span><code>1</code> the application decided to stop. <code>137</code> it was killed — usually OOM. <code>143</code> it was asked to stop and did.</span></li><li><b>kubectl describe pod → Last State</b><span>Reason: OOMKilled means the memory limit, not a leak, ended it. Raise the limit or find what grew.</span></li><li><b>Liveness probe restarting a healthy app</b><span>A slow starter fails a liveness probe that began too early. That is what <code>startupProbe</code> is for; raising initialDelaySeconds hides it.</span></li><li><b>Missing config or secret</b><span>A mount that is not there, or an env var the app requires and does not find, exits before the first log line.</span></li><li><b>It only crashes on some nodes</b><span>Then it is not the image. Look at the node: kernel, runtime version, or a mount that exists in one place.</span></li></ol><div class="tb-reads"><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a><a href="categories/troubleshooting/index.html">Troubleshooting &#8594;</a><a href="Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">kubectl commands &#8594;</a></div></div></details><details class="tb-card" id="tb-node-notready"><summary><span class="tb-sym">Node NotReady</span><span class="tb-chips"><span>Kubelet</span><span>Network</span><span>Disk</span><span>Runtime</span><span>Conditions</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">The kubelet has stopped saying it is healthy. Everything on that node is already being evicted.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>kubectl describe node &lt;name&gt;</b><span>The Conditions block names it: MemoryPressure, DiskPressure, PIDPressure, or Ready=Unknown when the kubelet went quiet.</span></li><li><b>Ready=Unknown</b><span>The node stopped reporting rather than reported a problem. That is the network or the kubelet process, not the workload.</span></li><li><b>systemctl status kubelet</b><span>Then <code>journalctl -u kubelet -n 200</code>. The kubelet says why it is unhappy in plain text.</span></li><li><b>DiskPressure</b><span><code>/var/lib/kubelet</code> or the image store is full. Image garbage collection has thresholds; a large pulled image can cross them.</span></li><li><b>Container runtime</b><span><code>crictl info</code> and <code>crictl ps</code>. A kubelet cannot be ready if the runtime under it is not.</span></li><li><b>CNI not ready</b><span>No pod networking means no Ready. Check the network plugin's own pods on that node before blaming the kubelet.</span></li></ol><div class="tb-reads"><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a><a href="categories/it-infrastructure/index.html">Infrastructure &#8594;</a><a href="Commands/LINUX-COMMANDS/linux-commands.html">Linux commands &#8594;</a></div></div></details><details class="tb-card" id="tb-high-memory"><summary><span class="tb-sym">High memory</span><span class="tb-chips"><span>Metrics</span><span>Working set</span><span>OOMKilled</span><span>Limits</span><span>GC</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">Usage is climbing. Whether that is a leak, a cache, or a limit set too low is the whole question.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>kubectl top pod — against the limit</b><span>A number on its own means nothing. What matters is the ratio to the limit, and the shape over time.</span></li><li><b>Sawtooth or ramp</b><span>Sawtooth is a garbage collector doing its job. A ramp that never comes down is a leak, or a cache with no bound.</span></li><li><b>Working set, not RSS</b><span>The kubelet evicts on working set. Page cache the container touched counts towards it, which surprises people.</span></li><li><b>OOMKilled with plenty free</b><span>The cgroup limit was reached, not the node's memory. The node being fine is not evidence.</span></li><li><b>Heap vs off-heap</b><span>A JVM or Go heap graph can look calm while the process grows — native allocations, thread stacks and mapped files sit outside it.</span></li><li><b>Requests below limits</b><span>Burstable pods are evicted before Guaranteed ones. If it dies under node pressure, the QoS class is the reason.</span></li></ol><div class="tb-reads"><a href="categories/performance-engineering/index.html">Performance engineering &#8594;</a><a href="categories/observability/index.html">Observability &#8594;</a><a href="categories/kubernetes/index.html">Kubernetes &#8594;</a></div></div></details><details class="tb-card" id="tb-connection-timeout"><summary><span class="tb-sym">Connection timeout</span><span class="tb-chips"><span>DNS</span><span>Network</span><span>Service</span><span>Endpoint</span><span>Application</span></span><span class="tb-open" aria-hidden="true"></span></summary><div class="tb-body"><p class="tb-lede">The request goes out and nothing comes back. A timeout is the one failure that looks identical at every layer.</p><div class="tb-flowlabel">Investigation</div><ol class="tb-flow"><li><b>Resolve it from inside the pod</b><span><code>nslookup &lt;svc&gt;</code> in the calling pod. Name resolution failing looks exactly like the far end being down.</span></li><li><b>kubectl get endpoints &lt;svc&gt;</b><span>A Service with no endpoints is a healthy-looking object that routes nowhere. This is the single most common cause.</span></li><li><b>Selector mismatch</b><span>Endpoints are empty because the Service selector matches no pod. Both objects look correct in isolation.</span></li><li><b>Readiness, not liveness</b><span>A pod that is running but not ready is removed from endpoints. Traffic stops without a single restart.</span></li><li><b>NetworkPolicy</b><span>A default-deny policy in the namespace drops the packet silently. Timeout, never refused.</span></li><li><b>Listening on 127.0.0.1</b><span>The app binds loopback instead of 0.0.0.0, so it works inside the container and nowhere else.</span></li></ol><div class="tb-reads"><a href="categories/networking/index.html">Networking &#8594;</a><a href="categories/service-mesh/index.html">Service mesh &#8594;</a><a href="categories/troubleshooting/index.html">Troubleshooting &#8594;</a></div></div></details></div>
   </div>
 </section>
-
-
-<!-- ═══════════ TERMINAL ═══════════ -->
-<section class="tm" id="terminal-demo" aria-labelledby="tm-head">
-  <div class="tm-inner">
-    <h2 class="tm-head" id="tm-head">One session, start to finish</h2>
-    <p class="tm-lede">A crashing pod traced to the reason it actually died, a node that stopped
-      reporting, and the command that gets the work back. Nothing here runs — it is a transcript.</p>
-
-    <div class="tm-win">
-      <div class="tm-bar">
-        <span class="tm-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="tm-title">platform-ops@production:~</span>
-      </div>
-      <div class="tm-body" id="tmBody"><div class="tm-line tm-cmd"><span class="tm-pr">$</span><span>kubectl get pods -A</span></div><div class="tm-line tm-h">NAMESPACE     NAME                            READY   STATUS             RESTARTS   AGE</div><div class="tm-line tm-o">kube-system   coredns-76f75df574-4xkqp        1/1     Running            0          14d</div><div class="tm-line tm-o">kube-system   kube-proxy-jr8wq                1/1     Running            0          14d</div><div class="tm-line tm-o">payments      api-7d9f8c6b5-2klmn             1/1     Running            0          3h</div><div class="tm-line tm-e">payments      api-7d9f8c6b5-9wxyz             0/1     CrashLoopBackOff   7          12m</div><div class="tm-line tm-cmd"><span class="tm-pr">$</span><span>kubectl describe pod api-7d9f8c6b5-9wxyz -n payments</span></div><div class="tm-line tm-o">    Last State:     Terminated</div><div class="tm-line tm-e">      Reason:       OOMKilled</div><div class="tm-line tm-o">      Exit Code:    137</div><div class="tm-line tm-o">    Limits:</div><div class="tm-line tm-o">      memory:       256Mi</div><div class="tm-line tm-o">Events:</div><div class="tm-line tm-w">  Warning  BackOff  2m (x18 over 11m)  kubelet  Back-off restarting failed container</div><div class="tm-line tm-cmd"><span class="tm-pr">$</span><span>oc get nodes</span></div><div class="tm-line tm-h">NAME        STATUS     ROLES    AGE   VERSION</div><div class="tm-line tm-o">worker-01   Ready      worker   61d   v1.30.4</div><div class="tm-line tm-e">worker-02   NotReady   worker   61d   v1.30.4</div><div class="tm-line tm-cmd"><span class="tm-pr">$</span><span>systemctl status kubelet</span></div><div class="tm-line tm-o">* kubelet.service - Kubernetes Kubelet</div><div class="tm-line tm-e">   Active: activating (auto-restart) (Result: exit-code)</div><div class="tm-line tm-cmd"><span class="tm-pr">$</span><span>journalctl -u kubelet -n 2 --no-pager</span></div><div class="tm-line tm-w">eviction_manager: attempting to reclaim ephemeral-storage</div><div class="tm-line tm-e">failed to garbage collect required amount of images: wanted to free 4.1GB</div><div class="tm-line tm-cmd"><span class="tm-pr">$</span><span>git reflog</span></div><div class="tm-line tm-o">a1b2c3d HEAD@{0}: reset --hard HEAD~3</div><div class="tm-line tm-o">9f8e7d6 HEAD@{1}: commit: raise the payments memory limit to 512Mi</div><div class="tm-line tm-c"># nothing is lost until the reflog expires</div></div>
-    </div>
-
-    <div class="tm-actions">
-      <a class="tm-btn" href="Commands/KUBERNETES-COMMANDS/kubernetes-commands.html">Explore commands &#8594;</a>
-      <a class="tm-btn ghost" href="terminal/index.html">Practice terminal &#8599;</a>
-      <a class="tm-btn ghost" href="#troubleshooting">The symptoms above</a>
     </div>
   </div>
-</section>
+</div>
+
 
 <!-- ═══════════ ROLES + JOURNEY ═══════════ -->
 <!-- Generated by tools/build_kmap.py: the stages, their live counts and
@@ -2936,71 +2930,6 @@ a.footer-logo:hover{color:#fff;}
 <!-- RJ:START -->
 <!-- RJ:END -->
 
-
-<!-- ═══════════ EVERYTHING IS CONNECTED ═══════════ -->
-<section class="ec" id="connected" aria-labelledby="ec-head">
-  <div class="ec-inner">
-    <p class="ec-kicker">Why this covers so much ground</p>
-    <h2 class="ec-head" id="ec-head">Everything is connected.</h2>
-    <p class="ec-lede">Production problems do not respect the boundaries between disciplines,
-      and the layer a failure belongs to is rarely the layer it shows up in. That is the whole
-      reason this publication runs from Linux to Kubernetes to SRE rather than picking one.</p>
-    <ul class="ec-list"><li><b>A DNS TTL</b><span>is a networking setting, until a failover takes thirty minutes to be believed.</span></li><li><b>A memory limit</b><span>is a Kubernetes field, until it is a garbage collector thrashing at 94%.</span></li><li><b>A readiness probe</b><span>is a YAML block, until it quietly removes every pod from the load balancer.</span></li><li><b>A base image</b><span>is a Dockerfile line, until it is the CVE in somebody&#x27;s audit.</span></li><li><b>A retry</b><span>is three lines of client code, until it is the reason the outage lasted an hour.</span></li><li><b>A disk filling up</b><span>is a Linux problem, until the kubelet stops reporting and the node goes NotReady.</span></li><li><b>A Service selector</b><span>is one label, until it is a healthy object routing to nothing at all.</span></li><li><b>An error budget</b><span>is a number in a document, until it is the argument that stops a release.</span></li></ul>
-    <div class="ec-actions">
-      <a class="ec-btn" href="categories/index.html">Start anywhere &#8594;</a>
-      <a class="ec-btn ghost" href="architecture/index.html">See how this site is built &#8599;</a>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ MASTHEAD ═══════════ -->
-<section class="mh" aria-labelledby="mh-mark">
-  <div class="mh-inner">
-    <h2 class="mh-mark" id="mh-mark">PLATFORM <span>OPS</span></h2>
-    <p class="mh-line">A technical newsletter on Kubernetes, OpenShift, SRE and platform engineering — written from production systems, not from documentation.</p>
-
-    <div class="mh-promises">
-      <div class="mh-promise">
-        <b>No paywall</b>
-        <span>Every page is readable without an account. There is nothing to sign up for in order to read.</span>
-      </div>
-      <div class="mh-promise">
-        <b>Corrected in place</b>
-        <span>When an issue is wrong it is fixed at its original URL, not quietly replaced or reposted.</span>
-      </div>
-      <div class="mh-promise">
-        <b>First-hand</b>
-        <span>Where an issue describes a failure it is a failure that happened; where it gives a number, the number was measured.</span>
-      </div>
-      <div class="mh-promise">
-        <b>Open build</b>
-        <span>The generator, the tests and this page are public. What you read is what the repository produces.</span>
-      </div>
-    </div>
-
-    <div class="mh-by">
-      <div class="mh-card">
-        <div class="mh-role">Written by</div>
-        <p class="mh-name">Vishal Abhinav</p>
-        <p class="mh-desc">Software Engineer (Infrastructure &amp; DevOps &amp; Platform). Building, automating, deploying and operating reliable platforms — and understanding what happens behind the tools.</p>
-        <div class="mh-links">
-          <a href="#authors">About the author</a>
-          <a href="https://www.linkedin.com/in/vishal-abhinav/" target="_blank" rel="noopener">LinkedIn ↗</a>
-          <a href="https://github.com/Vishal-Abhinav" target="_blank" rel="noopener">GitHub ↗</a>
-        </div>
-      </div>
-      <div class="mh-card">
-        <div class="mh-role">Published by</div>
-        <p class="mh-name">Srivan Technologies</p>
-        <p class="mh-desc">Infrastructure and platform engineering — clusters, the pipelines that deliver to them, and the observability that says what they are doing.</p>
-        <div class="mh-links">
-          <a href="https://srivantechnologies.com/" target="_blank" rel="noopener">srivantechnologies.com ↗</a>
-          <a href="about/index.html">About Platform Ops</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <footer>
   <div class="footer-inner">
@@ -3013,7 +2942,7 @@ a.footer-logo:hover{color:#fff;}
       <div class="footer-cols">
         <div class="footer-col">
           <div class="footer-col-title">Newsletter</div>
-          <a href="#issues">Latest Issues</a>
+          <a href="issues/index.html">Latest Issues</a>
           <a href="Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html">Newest — Issue #057</a>
           <a href="feed.xml">RSS feed</a>
           <a href="#subscribe">Subscribe</a>
@@ -3035,7 +2964,7 @@ a.footer-logo:hover{color:#fff;}
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Connect</div>
-          <a href="#authors">About the author</a>
+          <a href="about/index.html#author">About the author</a>
           <a href="https://www.linkedin.com/in/vishal-abhinav/" target="_blank" rel="noopener">LinkedIn ↗</a>
           <a href="https://srivantechnologies.com/" target="_blank" rel="noopener">Srivan Technologies ↗</a>
           <a href="#">Back to top ↑</a>

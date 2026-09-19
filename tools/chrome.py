@@ -129,7 +129,6 @@ BAR_CSS = """nav{position:sticky;top:0;z-index:50;display:flex;align-items:cente
  border:1px solid var(--line-2);border-radius:3px;padding:5px 9px;
  transition:color .2s,border-color .2s,background .2s;white-space:nowrap;}
 .nav-lab:hover{color:var(--crimson);border-color:var(--crimson);}
-.nav-lab::after{content:' \\2197';font-size:9px;}
 @media(max-width:560px){.nav-lab{padding:4px 7px;font-size:9px;}
   .nav-sub{display:none;}}
 .tt{width:32px;height:32px;border:1px solid var(--line-2);background:transparent;border-radius:50%;
@@ -218,19 +217,20 @@ def stylesheets(up=""):
     return fonts(up) + f'<link rel="stylesheet" href="{up}assets/motion.css">'
 
 
-def nav(up="", crumb="", *, toggle="", lab=True, subscribe=True):
+def nav(up="", crumb="", *, toggle="", lab=True, about=True, subscribe=True):
     """The top bar. `up` is the relative prefix back to the site root.
 
-    `lab` and `subscribe` exist only for the Lab page itself, which should not
-    link to itself. Everything else takes the defaults.
+    `lab`, `about` and `subscribe` exist so destination pages do not need to
+    link to themselves. Everything else takes the defaults.
     """
     bits = [f'  <a href="{up}index.html" class="nav-logo"><span></span>PLATFORM OPS</a>']
     if crumb:
         bits.append(f'  <div class="crumb">{crumb}</div>')
     right = [toggle]
     if lab:
-        right.append(f'<a href="{up}terminal/index.html" class="nav-lab"'
-                     f' target="_blank" rel="noopener">LAB</a>')
+        right.append(f'<a href="{up}terminal/index.html" class="nav-lab">TERMINAL</a>')
+    if about:
+        right.append(f'<a href="{up}about/index.html" class="nav-lab">ABOUT</a>')
     if subscribe:
         right.append(f'<a href="{up}index.html#subscribe" class="nav-logo nav-sub"'
                      f' style="font-size:11px;letter-spacing:1.6px;'
@@ -251,19 +251,19 @@ def footer(up=""):
       </div>
       <div class="f-cols">
         <div><div class="f-col-t">Newsletter</div>
-          <a href="{up}index.html#issues">Latest Issues</a>
+          <a href="{up}issues/index.html">Latest Issues</a>
           <a href="{up}{LATEST_PATH}">Newest — Issue #{LATEST_NUM}</a>
           <a href="{up}index.html#subscribe">Subscribe</a>
           <a href="{up}feed.xml">RSS Feed</a></div>
         <div><div class="f-col-t">Explore</div>
           <a href="{up}categories/index.html">All Categories</a>
-          <a href="{up}index.html#topics">Knowledge Map</a>
+          <a href="{up}categories/index.html">Knowledge Map</a>
           <a href="{up}categories/kubernetes-openshift-map/index.html">K8s &amp; OpenShift Topic Map</a>
           <a href="{up}terminal/index.html">Practice Terminal ↗</a>
           <a href="{up}colophon/index.html">Colophon</a></div>
         <div><div class="f-col-t">Connect</div>
           <a href="{up}about/index.html">About Platform Ops</a>
-          <a href="{up}index.html#authors">About the Author</a>
+          <a href="{up}about/index.html#author">About the Author</a>
           <a href="{STUDIO}" target="_blank" rel="noopener">Srivan Technologies ↗</a>
           <a href="#">Back to Top ↑</a></div>
       </div>

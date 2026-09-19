@@ -3,7 +3,7 @@
 ![Platform Ops](brand/banner.svg)
 
 [![Read it](https://img.shields.io/badge/read%20it-platformops.srivantechnologies.com-e53935?style=for-the-badge&labelColor=08090c)](https://platformops.srivantechnologies.com/)
-[![Issues](https://img.shields.io/badge/issues-21-00c2d4?style=for-the-badge&labelColor=08090c)](https://platformops.srivantechnologies.com/#issues)
+[![Issues](https://img.shields.io/badge/issues-21-00c2d4?style=for-the-badge&labelColor=08090c)](https://platformops.srivantechnologies.com/issues/)
 [![Topics](https://img.shields.io/badge/topics-685-f59e0b?style=for-the-badge&labelColor=08090c)](https://platformops.srivantechnologies.com/categories/)
 [![Commands](https://img.shields.io/badge/commands-362-84cc16?style=for-the-badge&labelColor=08090c)](https://platformops.srivantechnologies.com/Commands/KUBERNETES-COMMANDS/kubernetes-commands.html)
 [![RSS](https://img.shields.io/badge/rss-feed-8b5cf6?style=for-the-badge&labelColor=08090c)](https://platformops.srivantechnologies.com/feed.xml)
@@ -96,15 +96,15 @@ disagree fails the build instead of shipping.
 flowchart TB
   TAX["taxonomy.py<br/>685 topics · 45 categories<br/>each live, pipeline or planned"]
   DAT["cmd_data.py · hubs_spec.py<br/>topicmap_data.py · terminal_fs.py"]
-  HAND["content/ · 25 hand-written pages<br/>static/ · icons, OG cards, 18 fonts"]
+  HAND["content/ · 25 hand-written pages<br/>static/ · icons, OG cards, 16 fonts"]
 
-  SH["bash tools/build.sh<br/>rm -rf dist, then 31 stages in order"]
+  SH["bash tools/build.sh<br/>rm -rf dist, then 33 stages in order"]
 
   G1["structure<br/>build_hubs, build_topic_pages<br/>a hub per category,<br/>a page per item"]
   G2["navigation<br/>build_kmap, build_topicmap,<br/>build_feed, build_search<br/>maps, RSS, search index"]
   G3["contract<br/>build_seo, build_canonical,<br/>build_headers<br/>JSON-LD, canonicals, CSP"]
 
-  DIST[("dist/ · 880 pages<br/>the only deploy surface")]
+  DIST[("dist/ · 881 pages<br/>the only deploy surface")]
   VER["verify.py<br/>links · tag balance · canonicals · sitemap<br/>and whether two pages agree with each other"]
   OK["banner + README<br/>ready to deploy"]
   STOP["exit 1 · nothing ships"]
@@ -167,9 +167,9 @@ Three directories are input. One is output. Nothing else is either.
 
 | Path | What it is |
 |:--|:--|
-| `tools/` | The build: 31 ordered stages, `verify.py`, and the browser test suites. Python 3.11, standard library only. |
+| `tools/` | The build: 33 ordered stages, `verify.py`, and the browser test suites. Python 3.11, standard library only. |
 | `content/` | The 25 hand-written pages, kept pristine — they are copied into `dist/` and edited *there*, never in place. |
-| `static/` | Copied verbatim: icons, OG cards, 18 self-hosted font files, `assets/motion.css`. |
+| `static/` | Copied verbatim: icons, OG cards, 16 self-hosted font files, `assets/motion.css`. |
 | `brand/` | The generated banner. Tracked, deliberately outside `static/`, so it never reaches the site. |
 | `dist/` | **The only thing deployed.** Deleted and rebuilt from empty on every run. |
 
@@ -198,7 +198,7 @@ file once became fetchable. Now it needs a mistake in `tools/`.
 |:--|:--|:--|
 | Build | **Python 3.11**, standard library | No dependency can break a build of a site that has to still build in five years. There is no `requirements.txt` for the build itself. |
 | Output | **Static HTML**, no framework | Nothing to hydrate, nothing to server-render, nothing to keep patched. The slowest page is a file read. |
-| Styling | Hand-written CSS, **18 self-hosted font files** | Bebas Neue, Manrope, DM Mono, Instrument Serif — served from this origin, so `font-src` is `'self'` and no third party sees a reader. |
+| Styling | Hand-written CSS, **16 self-hosted font files** | Bebas Neue, Manrope, DM Mono, Instrument Serif — served from this origin, so `font-src` is `'self'` and no third party sees a reader. |
 | Tests | **Playwright** + Chromium | Overflow, duplicate headers and motion are properties of a rendered page. Reading the HTML cannot see any of them. |
 | CI | **GitHub Actions**, pinned to commit SHAs | A moved tag cannot change what runs. Dependabot watches the pins so they still get security fixes. |
 | Deploy | **Cloudflare Workers**, `wrangler@4.134.0` via `npx` | Pinned exactly, and called directly rather than through an action that quietly resolved a different version. |
@@ -216,7 +216,7 @@ flowchart TB
   DEV(["Author<br/>edits taxonomy.py or content/"])
 
   subgraph LOCAL["Local"]
-    BUILD["bash tools/build.sh<br/>31 stages · writes dist/"]
+    BUILD["bash tools/build.sh<br/>33 stages · writes dist/"]
     SUITE["verify.py · test_render.py · test_motion.py"]
   end
 
@@ -278,13 +278,13 @@ flowchart TB
   WORKER["Cloudflare Worker · platform-ops-blog<br/>serves dist/ as static assets"]
 
   subgraph RT["Runtime · every origin a reader's browser contacts"]
-    SELF["this origin<br/>HTML · CSS · JS · 18 font files"]
+    SELF["this origin<br/>HTML · CSS · JS · 16 font files"]
     GC["gc.zgo.at<br/>GoatCounter<br/>no cookies, no fingerprinting"]
     LI["www.linkedin.com<br/>2 post embeds, homepage only"]
   end
 
   subgraph OB["Outbound · the site publishes, nothing reads back"]
-    SM["sitemap.xml<br/>96 indexable URLs"]
+    SM["sitemap.xml<br/>97 indexable URLs"]
     RSS["feed.xml<br/>full archive"]
     GSC["Google Search Console"]
   end
@@ -310,7 +310,7 @@ flowchart TB
 
 Two origins in that runtime box are not this one, and both are in the CSP by
 name because the build found them there. Everything else a reader loads —
-every stylesheet, every script, all 18 font files — comes from this
+every stylesheet, every script, all 16 font files — comes from this
 origin. The same system drawn at greater depth, including the request path and
 the trust boundaries, is on the [architecture page](https://platformops.srivantechnologies.com/architecture/).
 
@@ -353,7 +353,7 @@ A `script-src` that actually constrains scripts is the open item, and it is
 open honestly: closing it means moving those inline handlers out to files
 first. It is tracked, not forgotten.
 
-**Fonts are self-hosted.** 18 files under `static/assets/fonts/`, so
+**Fonts are self-hosted.** 16 files under `static/assets/fonts/`, so
 there is no request to a third party on any page view and no `font-src`
 beyond `'self'`.
 
@@ -370,7 +370,7 @@ rather than a public issue.
 
 ## Accessibility
 
-Honoured on all 880 pages, and tested rather than asserted.
+Honoured on all 881 pages, and tested rather than asserted.
 
 The site animates: a drifting background, pulsing status dots, a ticker, a
 blinking terminal cursor, a staggered typewriter reveal, counters that count
@@ -380,7 +380,7 @@ had asked their operating system for — twelve distinct infinite animations,
 
 It now resolves in three places, because no one of them is enough:
 
-- `assets/motion.css`, on all 880 pages, collapses every CSS animation
+- `assets/motion.css`, on all 881 pages, collapses every CSS animation
   and transition to `0.01ms` with a single iteration — **not** `animation:
   none`. Several entrances start at `opacity: 0`; removing the animation
   outright would leave that content permanently invisible, which is a worse
@@ -396,7 +396,7 @@ It now resolves in three places, because no one of them is enough:
   was animating, the browser said nothing was, and the particles kept flying
   for a reader who had asked them not to. `build_seo.py` now injects an
   explicit `pauseAnimations()` call into any page carrying SMIL, and
-  `verify.py` asserts across all 880 pages that a page which can animate
+  `verify.py` asserts across all 881 pages that a page which can animate
   this way can also stop.
 
 `tools/test_motion.py` opens 7 pages twice, once under each
@@ -409,7 +409,7 @@ anything moved cannot be fooled by the technique. It also asserts that the motio
 preference — a test that only checked the reduced case would pass just as
 happily on a site whose animation had been deleted.
 
-Also measured across all 880 pages, rather than asserted: exactly one
+Also measured across all 881 pages, rather than asserted: exactly one
 `<h1>` each, a `lang` attribute on every `<html>`, a `<nav>` landmark, and no
 icon-only control left without an `aria-label`. Colour is never the only thing
 carrying a meaning — the live/pipeline/planned states that colour the coverage
@@ -438,7 +438,7 @@ receive. Please open an issue.
 
 | File | What it holds |
 |:--|:--|
-| [`/sitemap.xml`](https://platformops.srivantechnologies.com/sitemap.xml) | 96 indexable URLs. Pages carrying `noindex` are deliberately withheld — a sitemap is a request to crawl, and listing a page that then declines to be indexed just spends crawl budget. |
+| [`/sitemap.xml`](https://platformops.srivantechnologies.com/sitemap.xml) | 97 indexable URLs. Pages carrying `noindex` are deliberately withheld — a sitemap is a request to crawl, and listing a page that then declines to be indexed just spends crawl budget. |
 | [`/feed.xml`](https://platformops.srivantechnologies.com/feed.xml) | RSS, full archive. |
 | [`/robots.txt`](https://platformops.srivantechnologies.com/robots.txt) | Crawl rules and the sitemap pointer. |
 | `/_headers` | Generated per build; see Security above. |

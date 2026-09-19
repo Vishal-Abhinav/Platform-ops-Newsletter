@@ -674,9 +674,9 @@ KC = f"""<section class="kc" id="constellation" aria-labelledby="kc-head">
   </div>
 </section>"""
 
-_k0 = src.index("<!-- KC:START -->")
-_k1 = src.index("<!-- KC:END -->") + len("<!-- KC:END -->")
-src = src[:_k0] + KC + src[_k1:]
+# Not spliced here. The constellation is half of a band now, and the other
+# half is built below; they go in together so the markup between the markers
+# is always a complete pair and never a column on its own.
 
 # 7. the notice board ─────────────────────────────────────────────────────────
 #
@@ -691,7 +691,12 @@ src = src[:_k0] + KC + src[_k1:]
 # people close. What it does instead is what a real board does — a lamp that
 # breathes at 2.4s, and characters that flap into place once on arrival and
 # then hold still. It reads as live; it does not blink at anyone.
-_ISS = sorted(ISSUES, key=lambda r: -r[0])[:4]
+# Seven, not four. Beside the constellation the board is a column rather than
+# a strip, and four rows left it ending 220px short of the drawing next to
+# it — a hole in the half of the band that exists to fill one. Seven is what
+# measures level against the map at 1200px and above; stacked, it is simply
+# three more issues on a board whose job is to list them.
+_ISS = sorted(ISSUES, key=lambda r: -r[0])[:7]
 _NB_ROWS = []
 for _n, _path, _title, _desc, _dt in _ISS:
     _cat = _path.split("/")[0].replace("-", " ")
@@ -747,9 +752,35 @@ NB = f"""<section class="nb" aria-labelledby="nb-head">
   </div>
 </section>"""
 
-_n0 = src.index("<!-- NB:START -->")
-_n1 = src.index("<!-- NB:END -->") + len("<!-- NB:END -->")
-src = src[:_n0] + NB + src[_n1:]
+# 7b. the two of them as one band ─────────────────────────────────────────────
+#
+# The constellation is first in the source as well as on the left, so focus
+# order runs the way the eye does instead of starting in the right-hand column
+# and crossing back. The cost is on a phone, where the band stacks and the
+# board now sits below the map rather than above it; that is a real trade and
+# the alternative — ordering the columns visually while leaving the source
+# alone — buys the phone a better order by giving every keyboard user on the
+# desktop a worse one.
+KN = f"""<div class="kn">
+  <div class="kn-inner">
+{KC}
+{NB}
+  </div>
+</div>"""
+
+_kn0 = src.index("<!-- KN:START -->")
+_kn1 = src.index("<!-- KN:END -->") + len("<!-- KN:END -->")
+src = src[:_kn0] + KN + src[_kn1:]
+
+# Both panels must survive into the page. They are spliced as one string, so a
+# marker rename or a stray edit takes out both at once and silently — which is
+# exactly the failure the About panel had. Assert the band, not the splice.
+for _need, _what in (('class="kn-inner"', "the band wrapper"),
+                     ('class="kc"', "the constellation"),
+                     ('class="nb"', "the notice board")):
+    assert src.count(_need) == 1, (
+        f"{_what} ({_need}) appears {src.count(_need)} times in the homepage "
+        f"after the map-and-board splice; expected exactly 1")
 
 # 8. roles and the engineering journey ────────────────────────────────────────
 #
@@ -769,9 +800,19 @@ for _pname, _cats in PILLARS:
             "name": _cname, "live": _l, "total": _l + _p + _n,
             "href": f"categories/{_SPEC[_cname][0]}/index.html"}
 
+# Data Structures is a planned Foundation topic rather than a top-level
+# category. Give the journey an honest one-topic entry that lands directly on
+# the Foundation checklist instead of pretending the whole category count is
+# the status of this one topic.
+_BY_SLUG["data-structures"] = {
+    "name": "Data Structures & Algorithms", "live": 0, "total": 1,
+    "href": "categories/foundation/index.html#topics-checklist"}
+
 # (label, slug, why this step is here)
 _JOURNEY = [
+    ("Roadmap",      "roadmaps",             "Choose the role you are training for and see the route through the stack."),
     ("Foundation",   "foundation",           "How a computer, a process and a filesystem actually behave."),
+    ("Data Structures", "data-structures",   "Organise data and choose algorithms before scale makes the choice expensive."),
     ("Linux",        "linux-commands",       "The operating system everything above it assumes."),
     ("Networking",   "networking",           "Packets, routes, DNS and the failures that look like everything else."),
     ("Cloud",        "cloud",                "Somebody else's computers, with somebody else's failure modes."),
@@ -779,6 +820,7 @@ _JOURNEY = [
     ("CI / CD",      "devops",               "Build and deliver on every commit, or do it by hand forever."),
     ("Containers",   "containers",           "Package the runtime with the app so the target stops mattering."),
     ("Kubernetes",   "kubernetes",           "Schedule it, keep it running, reconcile it when it drifts."),
+    ("OpenShift",    "openshift",            "Operate Kubernetes with integrated security, routing and lifecycle controls."),
     ("Observability","observability",        "Metrics, logs and traces: what the system says about itself."),
     ("SRE",          "sre",                  "Error budgets and incidents — running it, not just shipping it."),
     ("Security",     "security",             "The layer that is someone else's job right up until it isn't."),

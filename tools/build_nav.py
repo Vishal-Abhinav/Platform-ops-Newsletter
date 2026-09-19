@@ -28,10 +28,11 @@ ASSETS.mkdir(exist_ok=True)
 data = {"pillars": [], "quick": [
     {"label": "All Categories", "href": "categories/index.html"},
     {"label": "Practice Terminal", "href": "terminal/index.html"},
+    {"label": "About Platform Ops", "href": "about/index.html"},
     {"label": "Colophon", "href": "colophon/index.html"},
     {"label": "Reference Library", "href": "index.html#library"},
-    {"label": "Knowledge Map", "href": "index.html#topics"},
-    {"label": "Latest Issues", "href": "index.html#issues"},
+    {"label": "Knowledge Map", "href": "categories/index.html"},
+    {"label": "Latest Issues", "href": "issues/index.html"},
     {"label": "Subscribe", "href": "index.html#subscribe"},
 ]}
 for pname, cats in PILLARS:

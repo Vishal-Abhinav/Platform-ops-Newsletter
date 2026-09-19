@@ -233,7 +233,6 @@ nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;pa
  border:1px solid var(--line-2);border-radius:3px;padding:5px 9px;
  transition:color .2s,border-color .2s,background .2s;white-space:nowrap;}
 .nav-lab:hover{color:var(--crimson);border-color:var(--crimson);}
-.nav-lab::after{content:' \2197';font-size:9px;}
 /* Below 560px the bar holds the logo, the toggle, LAB and SUBSCRIBE, which is
    ~30px more than fits. SUBSCRIBE goes: it is in the hero CTA and the footer
    of every page. The Lab is not anywhere else in the top bar, so it stays. */
@@ -503,6 +502,10 @@ def render(*, slug, title, tagline, eyebrow, crumbs, meta, sections, pager, up="
     # deep-dive leaves it unset and gets no tag at all, so this line is a
     # true no-op for the 15 existing pages, not a blank line left behind.
     robots_tag = f'<meta name="robots" content="{esc(robots)}">\n' if robots else ''
+    terminal_link = "" if slug == "terminal" else (
+        f'<a href="{up}terminal/index.html" class="nav-lab">TERMINAL</a>')
+    about_link = "" if slug == "about" else (
+        f'<a href="{up}about/index.html" class="nav-lab">ABOUT</a>')
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -538,8 +541,7 @@ def render(*, slug, title, tagline, eyebrow, crumbs, meta, sections, pager, up="
 <nav>
   <a href="{up}index.html" class="nav-logo"><span></span>PLATFORM OPS</a>
   <div class="crumb">{crumb}</div>
-  <div class="nav-right">{TOGGLE}<a href="{up}terminal/index.html" class="nav-lab"
-    target="_blank" rel="noopener">LAB</a><a href="{up}index.html#subscribe" class="nav-logo nav-sub"
+  <div class="nav-right">{TOGGLE}{terminal_link}{about_link}<a href="{up}index.html#subscribe" class="nav-logo nav-sub"
     style="font-size:11px;letter-spacing:1.6px;font-family:'DM Mono',monospace">SUBSCRIBE</a></div>
 </nav>
 
@@ -564,16 +566,16 @@ def render(*, slug, title, tagline, eyebrow, crumbs, meta, sections, pager, up="
       </div>
       <div class="f-cols">
         <div><div class="f-col-t">Newsletter</div>
-          <a href="{up}index.html#issues">Latest Issues</a>
+          <a href="{up}issues/index.html">Latest Issues</a>
           <a href="{up}index.html#subscribe">Subscribe</a>
           <a href="{up}feed.xml">RSS Feed</a></div>
         <div><div class="f-col-t">Explore</div>
           <a href="{up}categories/index.html">All Categories</a>
           <a href="{up}categories/foundation/index.html">Foundation Hub</a>
-          <a href="{up}index.html#topics">Knowledge Map</a></div>
+          <a href="{up}categories/index.html">Knowledge Map</a></div>
         <div><div class="f-col-t">Connect</div>
           <a href="{up}about/index.html">About Platform Ops</a>
-          <a href="{up}index.html#authors">About the Author</a>
+          <a href="{up}about/index.html#author">About the Author</a>
           <a href="https://srivantechnologies.com/" target="_blank" rel="noopener">Srivan Technologies ↗</a>
           <a href="#">Back to Top ↑</a></div>
       </div>

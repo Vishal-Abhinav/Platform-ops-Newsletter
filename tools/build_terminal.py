@@ -33,7 +33,7 @@ ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve(
 TOOLS = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
 
-from content_page import CSS, render, section, note, esc      # noqa: E402
+from content_page import CSS, render, section, note, table, esc      # noqa: E402
 from terminal_fs import FS, HOME, USER, HOST, EXERCISES       # noqa: E402
 
 OUT = ROOT / "terminal"
@@ -832,6 +832,38 @@ SECTIONS = "".join([
             "<code>&gt;&gt;</code>, chaining <code>&amp;&amp;</code>, globs <code>*</code>, "
             "<code>~</code>, quoting, Tab completion, Up/Down history</td></tr>"
             "</tbody></table></div>"),
+
+    section("Everything is connected", "Why the terminal spans so many layers",
+            "Production problems do not respect the boundaries between disciplines, "
+            "and the layer a failure belongs to is rarely the layer it shows up in. "
+            "That is why the practice box includes Linux files, logs, services, "
+            "cluster output and recovery clues instead of one isolated command list.",
+            table(["Clue", "Where it crosses a boundary"],
+                  [("A DNS TTL",
+                    "It is a networking setting, until a failover takes thirty "
+                    "minutes to be believed."),
+                   ("A memory limit",
+                    "It is a Kubernetes field, until it is a garbage collector "
+                    "thrashing at 94%."),
+                   ("A readiness probe",
+                    "It is a YAML block, until it quietly removes every pod from "
+                    "the load balancer."),
+                   ("A base image",
+                    "It is a Dockerfile line, until it is the CVE in somebody's audit."),
+                   ("A retry",
+                    "It is three lines of client code, until it is the reason the "
+                    "outage lasted an hour."),
+                   ("A disk filling up",
+                    "It is a Linux problem, until the kubelet stops reporting and "
+                    "the node goes NotReady."),
+                   ("A Service selector",
+                    "It is one label, until it is a healthy object routing to nothing."),
+                   ("An error budget",
+                    "It is a number in a document, until it is the argument that "
+                    "stops a release.")])
+            + "<p>Use the terminal as a safe place to practise that habit: read "
+              "the symptom, check the nearest evidence, then cross the boundary "
+              "only when the evidence points there.</p>"),
 ])
 
 PAGER = ('<div class="pager">'
