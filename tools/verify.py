@@ -11,7 +11,6 @@ Checks, in order:
 
 Exit status is non-zero if anything fails, so it can gate a commit.
 """
-import datetime
 import os
 import pathlib
 import posixpath
@@ -275,12 +274,11 @@ def main():
     # in the checking loop above: this stays correct if that loop is ever
     # restructured, and re-reading 878 small files costs milliseconds against
     # a 25-stage build.
-    today = datetime.date.today().isoformat()
     urls, noindexed = [], 0
     for f in pages():
         rel = str(f.relative_to(ROOT)).replace("\\", "/")
-        if re.search(r'<meta name="robots"[^>]*noindex',
-                     f.read_text(encoding="utf-8"), re.I):
+        src = f.read_text(encoding="utf-8")
+        if re.search(r'<meta name="robots"[^>]*noindex', src, re.I):
             noindexed += 1
             continue
         loc = BASE + (rel[:-len("index.html")] if rel.endswith("index.html") else rel)
@@ -290,9 +288,15 @@ def main():
             pri = "0.8" if rel == "categories/index.html" else "0.6"
         else:
             pri = "0.7"
-        urls.append((loc, pri))
-    body = "".join(f"  <url>\n    <loc>{u}</loc>\n    <lastmod>{today}</lastmod>\n"
-                   f"    <priority>{p}</priority>\n  </url>\n" for u, p in urls)
+        modified = re.search(
+            r'<meta property="article:modified_time" content="(\d{4}-\d{2}-\d{2})',
+            src, re.I)
+        urls.append((loc, pri, modified.group(1) if modified else None))
+    body = "".join(
+        f"  <url>\n    <loc>{u}</loc>\n"
+        + (f"    <lastmod>{modified}</lastmod>\n" if modified else "")
+        + f"    <priority>{p}</priority>\n  </url>\n"
+        for u, p, modified in urls)
     (ROOT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + body + "</urlset>\n",

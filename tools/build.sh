@@ -198,6 +198,9 @@ python3 tools/build_nav.py
 say "global search (index + wiring into every page)"
 python3 tools/build_search.py
 
+say "local troubleshooting assistant (free, browser-only)"
+python3 tools/build_assistant.py
+
 # README last of the aggregators: it quotes the page count, the category count
 # AND the size of the search index, so it cannot be written until search.js
 # exists. It used to run fourth, quoting the previous build's 2067 entries.

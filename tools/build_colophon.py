@@ -164,6 +164,8 @@ STAGE_NOTE = {
     "build_feed": ("the issue register", "feed.xml"),
     "build_nav": ("taxonomy", "mega-menu assets, wired into every page"),
     "build_search": ("everything on disk", "the search index, wired into every page"),
+    "build_assistant": ("the finished indexable site",
+                        "a browser-only troubleshooting corpus and assistant, wired into every page"),
     "build_seo": ("each page + register", "JSON-LD, article dates, per-issue og:image"),
     "build_canonical": ("siteconf.BASE", "rewrites every origin to the canonical one"),
     "verify": ("the built site", "sitemap.xml, and a non-zero exit if anything is wrong"),

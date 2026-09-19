@@ -98,7 +98,7 @@ flowchart TB
   DAT["cmd_data.py · hubs_spec.py<br/>topicmap_data.py · terminal_fs.py"]
   HAND["content/ · 25 hand-written pages<br/>static/ · icons, OG cards, 16 fonts"]
 
-  SH["bash tools/build.sh<br/>rm -rf dist, then 33 stages in order"]
+  SH["bash tools/build.sh<br/>rm -rf dist, then 34 stages in order"]
 
   G1["structure<br/>build_hubs, build_topic_pages<br/>a hub per category,<br/>a page per item"]
   G2["navigation<br/>build_kmap, build_topicmap,<br/>build_feed, build_search<br/>maps, RSS, search index"]
@@ -167,7 +167,7 @@ Three directories are input. One is output. Nothing else is either.
 
 | Path | What it is |
 |:--|:--|
-| `tools/` | The build: 33 ordered stages, `verify.py`, and the browser test suites. Python 3.11, standard library only. |
+| `tools/` | The build: 34 ordered stages, `verify.py`, and the browser test suites. Python 3.11, standard library only. |
 | `content/` | The 25 hand-written pages, kept pristine — they are copied into `dist/` and edited *there*, never in place. |
 | `static/` | Copied verbatim: icons, OG cards, 16 self-hosted font files, `assets/motion.css`. |
 | `brand/` | The generated banner. Tracked, deliberately outside `static/`, so it never reaches the site. |
@@ -216,7 +216,7 @@ flowchart TB
   DEV(["Author<br/>edits taxonomy.py or content/"])
 
   subgraph LOCAL["Local"]
-    BUILD["bash tools/build.sh<br/>33 stages · writes dist/"]
+    BUILD["bash tools/build.sh<br/>34 stages · writes dist/"]
     SUITE["verify.py · test_render.py · test_motion.py"]
   end
 
