@@ -120,6 +120,10 @@ nav > .nav-side.l > .nav-logo{white-space:nowrap;flex-shrink:0;}
 nav .nav-links{min-width:0;gap:22px;}
 nav .nav-links a,nav .nav-cta{white-space:nowrap;}
 nav .nav-cta{display:inline-flex;align-items:center;justify-content:center;}
+nav .po-user-item{display:flex;align-items:center;}nav .po-user-item[hidden]{display:none!important;}
+nav .po-user-chip{display:inline-flex;align-items:center;max-width:132px;min-height:32px;padding:0 10px;border:1px solid rgba(0,194,212,.38);background:rgba(0,194,212,.08);color:var(--cyan,#00c2d4);text-decoration:none;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+nav .po-user-chip:before{content:'';width:6px;height:6px;border-radius:50%;background:var(--lime,#84cc16);box-shadow:0 0 12px var(--lime,#84cc16);margin-right:8px;flex:0 0 auto;}
+nav .po-user-chip:hover{border-color:var(--cyan,#00c2d4);background:rgba(0,194,212,.14);color:var(--heading-fg,#fff);}
 /* minmax(0,380px), not auto: an `auto` middle track holds its 380px and the
    squeeze lands on the side tracks instead, which wrapped the logo onto two
    lines at 1024px. This way the box gives way and the flanks keep their size. */
@@ -188,6 +192,7 @@ nav .nav-cta{display:inline-flex;align-items:center;justify-content:center;}
 .gs-n mark{background:rgba(245,158,11,.35);color:#fff;padding:0 1px;border-radius:2px;}
 .gs-none{padding:26px 16px;text-align:center;font-family:'DM Mono',monospace;font-size:10px;
   letter-spacing:1.4px;text-transform:uppercase;color:rgba(255,255,255,.35);}
+@media(max-width:1120px){nav .po-user-item{display:none!important;}}
 @media(max-width:900px){.gs-wrap{display:none;}}
 """
 
@@ -255,6 +260,40 @@ JS = """var PO_SEARCH = __INDEX__;
       else r.appendChild(k);
     });
     nav.appendChild(l); nav.appendChild(wrap); nav.appendChild(r);
+
+    var userChip = document.createElement('a');
+    userChip.className = 'po-user-chip';
+    userChip.href = ROOT + 'user/';
+    userChip.setAttribute('aria-label', 'Open member workspace');
+    var chipHost = userChip, cta = r.querySelector('.nav-cta, .nav-sub');
+    if (cta && cta.closest && cta.closest('ul')) {
+      var ctaLi = cta.closest('li');
+      chipHost = document.createElement('li');
+      chipHost.className = 'po-user-item';
+      chipHost.hidden = true;
+      chipHost.appendChild(userChip);
+      ctaLi.parentNode.insertBefore(chipHost, ctaLi);
+    } else {
+      chipHost = document.createElement('span');
+      chipHost.className = 'po-user-item';
+      chipHost.hidden = true;
+      chipHost.appendChild(userChip);
+      if (cta && cta.parentNode === r) r.insertBefore(chipHost, cta);
+      else r.appendChild(chipHost);
+    }
+
+    fetch(ROOT + 'auth/session', { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+      .then(function (response) {
+        if (!response.ok) throw new Error('session');
+        return response.json();
+      })
+      .then(function (session) {
+        var user = session && session.user;
+        if (!user) return;
+        userChip.textContent = (user.name || user.login || user.email || 'Account').split(' ')[0];
+        chipHost.hidden = false;
+      })
+      .catch(function () {});
 
     /* Rank the links so the stylesheet can drop the ones this box and the
        Browse panel already cover, rather than letting them crowd it. */
