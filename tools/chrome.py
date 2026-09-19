@@ -131,6 +131,7 @@ BAR_CSS = """nav{position:sticky;top:0;z-index:50;display:flex;align-items:cente
 .nav-lab:hover{color:var(--crimson);border-color:var(--crimson);}
 @media(max-width:560px){.nav-lab{padding:4px 7px;font-size:9px;}
   .nav-sub{display:none;}}
+@media(max-width:420px){.nav-about{display:none;}}
 .tt{width:32px;height:32px;border:1px solid var(--line-2);background:transparent;border-radius:50%;
  cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);}
 .tt:hover{color:var(--crimson);border-color:var(--crimson);}
@@ -228,9 +229,9 @@ def nav(up="", crumb="", *, toggle="", lab=True, about=True, subscribe=True):
         bits.append(f'  <div class="crumb">{crumb}</div>')
     right = [toggle]
     if lab:
-        right.append(f'<a href="{up}terminal/index.html" class="nav-lab">TERMINAL</a>')
+        right.append(f'<a href="{up}terminal/index.html" class="nav-lab nav-terminal">TERMINAL</a>')
     if about:
-        right.append(f'<a href="{up}about/index.html" class="nav-lab">ABOUT</a>')
+        right.append(f'<a href="{up}about/index.html" class="nav-lab nav-about">ABOUT</a>')
     if subscribe:
         right.append(f'<a href="{up}index.html#subscribe" class="nav-logo nav-sub"'
                      f' style="font-size:11px;letter-spacing:1.6px;'

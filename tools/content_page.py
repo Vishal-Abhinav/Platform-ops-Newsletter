@@ -238,6 +238,7 @@ nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;pa
    of every page. The Lab is not anywhere else in the top bar, so it stays. */
 @media(max-width:560px){.nav-lab{padding:4px 7px;font-size:9px;}
   .nav-sub{display:none;}}
+@media(max-width:420px){.nav-about{display:none;}}
 .tt{width:32px;height:32px;border:1px solid var(--line-2);background:transparent;border-radius:50%;
  cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);}
 .tt:hover{color:var(--crimson);border-color:var(--crimson);}
@@ -503,9 +504,9 @@ def render(*, slug, title, tagline, eyebrow, crumbs, meta, sections, pager, up="
     # true no-op for the 15 existing pages, not a blank line left behind.
     robots_tag = f'<meta name="robots" content="{esc(robots)}">\n' if robots else ''
     terminal_link = "" if slug == "terminal" else (
-        f'<a href="{up}terminal/index.html" class="nav-lab">TERMINAL</a>')
+        f'<a href="{up}terminal/index.html" class="nav-lab nav-terminal">TERMINAL</a>')
     about_link = "" if slug == "about" else (
-        f'<a href="{up}about/index.html" class="nav-lab">ABOUT</a>')
+        f'<a href="{up}about/index.html" class="nav-lab nav-about">ABOUT</a>')
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
