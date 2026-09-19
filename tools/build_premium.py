@@ -5,7 +5,20 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
-PREMIUM = [ROOT / "categories" / "platform-engineering" / "index.html"]
+PREMIUM_SLUGS = [
+    "networking",
+    "cloud",
+    "gitops",
+    "devops",
+    "containers",
+    "kubernetes",
+    "openshift",
+    "observability",
+    "sre",
+    "security",
+    "platform-engineering",
+]
+PREMIUM = [ROOT / "categories" / slug / "index.html" for slug in PREMIUM_SLUGS]
 
 for page in PREMIUM:
     if not page.exists():
@@ -19,4 +32,3 @@ for page in PREMIUM:
     page.write_text(source, encoding="utf-8")
 
 print(f"  premium -> {len(PREMIUM)} authenticated route")
-

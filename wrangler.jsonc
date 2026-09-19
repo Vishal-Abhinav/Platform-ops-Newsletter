@@ -28,6 +28,16 @@
       "/login*",
       "/admin*",
       "/user*",
+      "/categories/networking*",
+      "/categories/cloud*",
+      "/categories/gitops*",
+      "/categories/devops*",
+      "/categories/containers*",
+      "/categories/kubernetes*",
+      "/categories/openshift*",
+      "/categories/observability*",
+      "/categories/sre*",
+      "/categories/security*",
       "/categories/platform-engineering*"
     ]
   },

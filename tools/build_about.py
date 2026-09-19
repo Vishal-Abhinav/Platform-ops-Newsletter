@@ -164,8 +164,9 @@ S_PLATFORM = section(
     "engineering — written from production systems, not from documentation.",
     table(["Promise", "What it means"],
           [("Public core",
-            "The newsletter and core reference library stay open. Approved members "
-            "also receive the premium Platform Engineering path."),
+            "The newsletter and core reference library stay open. Signed-in members "
+            "also receive the isolated operations path: Networking through "
+            "Platform Engineering."),
            ("Corrected in place",
             "When an issue is wrong it is fixed at its original URL, not "
             "quietly replaced or reposted."),

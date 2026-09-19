@@ -30,7 +30,7 @@ class FakeDatabase {
         if (query.includes("FROM users WHERE auth_provider")) {
           return db.users.find((item) => item.auth_provider === values[0] && item.provider_id === values[1]) || null;
         }
-        if (query === "SELECT id, role, status FROM users WHERE id = ?") return db.users.find((item) => item.id === values[0]) || null;
+        if (query === "SELECT id, email, role, status FROM users WHERE id = ?") return db.users.find((item) => item.id === values[0]) || null;
         if (query.startsWith("SELECT COUNT(*) AS total")) {
           return { total: db.users.filter((item) => item.role === "admin" && item.status === "approved").length };
         }
@@ -48,11 +48,11 @@ class FakeDatabase {
           const [github_id, github_login, auth_provider, provider_id, provider_login, email, name, avatar_url, role, status, created_at, updated_at, last_login_at] = values;
           db.users.push({ id: db.nextId++, github_id, github_login, auth_provider, provider_id, provider_login, email, name, avatar_url, role, status, created_at, updated_at, last_login_at });
         } else if (query.startsWith("UPDATE users SET github_id")) {
-          const [github_id, github_login, auth_provider, provider_id, provider_login, email, name, avatar_url, forceRole, forceStatus, updated_at, last_login_at, id] = values;
+          const [github_id, github_login, auth_provider, provider_id, provider_login, email, name, avatar_url, forceRole, updated_at, last_login_at, id] = values;
           const user = db.users.find((item) => item.id === id);
           Object.assign(user, { github_id, github_login, auth_provider, provider_id, provider_login, email, name, avatar_url, updated_at, last_login_at });
           if (forceRole) user.role = "admin";
-          if (forceStatus) user.status = "approved";
+          if (user.status !== "suspended") user.status = "approved";
         } else if (query === "DELETE FROM sessions WHERE token_hash = ?") {
           db.sessions = db.sessions.filter((item) => item.token_hash !== values[0]);
         } else if (query.startsWith("UPDATE users SET role")) {
@@ -154,7 +154,22 @@ async function googleLogin(code, next = "/user/") {
 }
 
 assert.equal(areaFor("/admin%2Findex.html"), "admin");
-assert.equal(areaFor("/categories/platform-engineering/index.html"), "premium");
+const premiumSlugs = [
+  "networking",
+  "cloud",
+  "gitops",
+  "devops",
+  "containers",
+  "kubernetes",
+  "openshift",
+  "observability",
+  "sre",
+  "security",
+  "platform-engineering",
+];
+for (const slug of premiumSlugs) {
+  assert.equal(areaFor(`/categories/${slug}/index.html`), "premium");
+}
 assert.equal(areaFor("/public"), null);
 assert.equal(safeNext("//evil.example"), "/user/");
 assert.equal(safeNext("/admin/"), "/admin/");
@@ -170,8 +185,13 @@ assert.equal(response.headers.get("location"), "/login/?next=%2Fadmin%2F");
 assert.equal(response.headers.get("x-robots-tag"), "noindex, nofollow");
 
 response = await call("/categories/platform-engineering/index.html");
-assert.equal(response.status, 302);
-assert.match(response.headers.get("location"), /^\/login\/?\?next=/);
+assert.equal(response.status, 200);
+assert.match(await response.text(), /Platform/);
+assert.equal(response.headers.get("x-robots-tag"), "noindex, nofollow");
+
+response = await call("/categories/kubernetes/index.html");
+assert.equal(response.status, 200);
+assert.match(await response.text(), /Kubernetes/);
 
 response = await call("/auth/providers");
 assert.deepEqual(await response.json(), { github: true, google: true });
@@ -190,16 +210,15 @@ assert.equal(response.status, 200);
 assert.equal((await response.json()).user.role, "admin");
 
 const readerLogin = await login("reader");
-assert.equal(readerLogin.response.headers.get("location"), "/login/?status=pending");
+assert.equal(readerLogin.response.headers.get("location"), "/user/");
 response = await call("/user/", { cookie: `po_session=${readerLogin.session}` });
-assert.equal(response.status, 302);
-assert.equal(response.headers.get("location"), "/login/?status=pending");
+assert.equal(response.status, 200);
 
 response = await call("/admin/api/users", { cookie: `po_session=${adminLogin.session}` });
 assert.equal(response.status, 200);
 const users = (await response.json()).users;
 const reader = users.find((item) => item.email === "reader@example.com");
-assert.equal(reader.status, "pending");
+assert.equal(reader.status, "approved");
 
 response = await call(`/admin/api/users/${reader.id}`, {
   method: "PATCH",
@@ -213,9 +232,9 @@ response = await call(`/admin/api/users/${reader.id}`, {
   method: "PATCH",
   cookie: `po_session=${adminLogin.session}`,
   origin: "https://example.com",
-  body: JSON.stringify({ role: "user", status: "approved" }),
+  body: JSON.stringify({ role: "admin", status: "approved" }),
 });
-assert.equal(response.status, 200);
+assert.equal(response.status, 403);
 
 response = await call("/user/", { cookie: `po_session=${readerLogin.session}` });
 assert.equal(response.status, 200);
@@ -223,8 +242,11 @@ assert.equal(response.status, 200);
 response = await call("/categories/platform-engineering/index.html", { cookie: `po_session=${readerLogin.session}` });
 assert.equal(response.status, 200);
 
+response = await call("/categories/kubernetes/index.html", { cookie: `po_session=${readerLogin.session}` });
+assert.equal(response.status, 200);
+
 const googleReader = await googleLogin("google-reader");
-assert.equal(googleReader.response.headers.get("location"), "/login/?status=pending");
+assert.equal(googleReader.response.headers.get("location"), "/user/");
 response = await call("/auth/session", { cookie: `po_session=${googleReader.session}` });
 assert.equal((await response.json()).user.provider, "google");
 
@@ -238,7 +260,10 @@ assert.equal(response.headers.get("location"), "/login/?status=signed-out");
 
 const wrangler = readFileSync(new URL("../wrangler.jsonc", import.meta.url), "utf8");
 assert.match(wrangler, /"binding"\s*:\s*"DB"/);
-assert.match(wrangler, /"run_worker_first"[\s\S]*"\/auth\*"[\s\S]*"\/login\*"[\s\S]*"\/admin\*"[\s\S]*"\/user\*"[\s\S]*"\/categories\/platform-engineering\*"/);
+assert.match(wrangler, /"run_worker_first"[\s\S]*"\/auth\*"[\s\S]*"\/login\*"[\s\S]*"\/admin\*"[\s\S]*"\/user\*"/);
+for (const slug of premiumSlugs) {
+  assert.ok(wrangler.includes(`"/categories/${slug}*"`));
+}
 
 const sitemap = readFileSync(new URL("../dist/sitemap.xml", import.meta.url), "utf8");
 for (const area of ["login", "admin", "user"]) {
@@ -249,7 +274,9 @@ for (const area of ["login", "admin", "user"]) {
 assert.match(readFileSync(new URL("../dist/login/index.html", import.meta.url), "utf8"), /Continue with GitHub/);
 assert.match(readFileSync(new URL("../dist/login/index.html", import.meta.url), "utf8"), /Create account/);
 assert.doesNotMatch(readFileSync(new URL("../dist/login/index.html", import.meta.url), "utf8"), /assets\/search\.js/);
-assert.doesNotMatch(sitemap, /\/categories\/platform-engineering\//);
+for (const slug of premiumSlugs) {
+  assert.doesNotMatch(sitemap, new RegExp(`/categories/${slug}/`));
+}
 assert.match(readFileSync(new URL("../dist/admin/index.html", import.meta.url), "utf8"), /data-user-list/);
 
 console.log("custom OAuth auth worker: ok");

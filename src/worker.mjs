@@ -2,6 +2,32 @@ const SESSION_COOKIE = "po_session";
 const OAUTH_STATE_COOKIE = "po_oauth_state";
 const SESSION_TTL_SECONDS = 7 * 24 * 60 * 60;
 const OAUTH_STATE_TTL_SECONDS = 10 * 60;
+const PREMIUM_CATEGORY_SLUGS = new Set([
+  "networking",
+  "cloud",
+  "gitops",
+  "devops",
+  "containers",
+  "kubernetes",
+  "openshift",
+  "observability",
+  "sre",
+  "security",
+  "platform-engineering",
+]);
+const PREMIUM_CATEGORY_META = {
+  networking: ["Networking", "Packets, routes, DNS and the failures that look like everything else.", "1 of 31 live"],
+  cloud: ["Cloud", "Somebody else's computers, with somebody else's failure modes.", "0 of 17 live"],
+  gitops: ["Git", "Version control, and then version control as the source of truth.", "3 of 8 live"],
+  devops: ["CI / CD", "Build and deliver on every commit, or do it by hand forever.", "9 of 21 live"],
+  containers: ["Containers", "Package the runtime with the app so the target stops mattering.", "0 of 12 live"],
+  kubernetes: ["Kubernetes", "Schedule it, keep it running, reconcile it when it drifts.", "35 of 35 live"],
+  openshift: ["OpenShift", "Operate Kubernetes with integrated security, routing and lifecycle controls.", "13 of 13 live"],
+  observability: ["Observability", "Metrics, logs and traces: what the system says about itself.", "11 of 22 live"],
+  sre: ["SRE", "Error budgets and incidents - running it, not just shipping it.", "4 of 25 live"],
+  security: ["Security", "The layer that is someone else's job right up until it isn't.", "0 of 31 live"],
+  "platform-engineering": ["Platform", "Turning the operational layers into something a team can use.", "0 of 12 live"],
+};
 
 const SECURITY_HEADERS = {
   "content-security-policy": "font-src 'self'; frame-src 'self'; img-src 'self' data: https://avatars.githubusercontent.com https://lh3.googleusercontent.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; form-action 'self'; upgrade-insecure-requests",
@@ -31,6 +57,12 @@ function json(body, status = 200, headers = {}) {
 
 function redirect(location, status = 302, headers = {}) {
   return secure(new Response(null, { status, headers: { location, ...headers } }));
+}
+
+function html(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;",
+  }[char]));
 }
 
 function randomToken(bytes = 32) {
@@ -83,8 +115,20 @@ function areaFor(pathname) {
   }
   if (path === "/admin" || path.startsWith("/admin/")) return "admin";
   if (path === "/user" || path.startsWith("/user/")) return "user";
-  if (path === "/categories/platform-engineering" || path.startsWith("/categories/platform-engineering/")) return "premium";
+  const match = path.match(/^\/categories\/([^/]+)(?:\/|$)/);
+  if (match && PREMIUM_CATEGORY_SLUGS.has(match[1])) return "premium";
   return null;
+}
+
+function premiumSlug(pathname) {
+  let path;
+  try {
+    path = decodeURIComponent(pathname).replace(/\\/g, "/");
+  } catch (_) {
+    return "";
+  }
+  const match = path.match(/^\/categories\/([^/]+)(?:\/|$)/);
+  return match ? match[1] : "";
 }
 
 function isApi(pathname) {
@@ -230,13 +274,13 @@ async function upsertUser(env, identity) {
       UPDATE users SET github_id = ?, github_login = ?, auth_provider = ?, provider_id = ?,
              provider_login = ?, email = ?, name = ?, avatar_url = ?,
              role = CASE WHEN ? THEN 'admin' ELSE role END,
-             status = CASE WHEN ? THEN 'approved' ELSE status END,
+             status = CASE WHEN status = 'suspended' THEN status ELSE 'approved' END,
              updated_at = ?, last_login_at = ?
        WHERE id = ?
     `).bind(
       legacyId, legacyLogin, identity.provider, identity.providerId, legacyLogin,
       identity.email, identity.name, identity.avatarUrl,
-      bootstrapAdmin ? 1 : 0, bootstrapAdmin ? 1 : 0, now, now, existing.id,
+      bootstrapAdmin ? 1 : 0, now, now, existing.id,
     ).run();
   } else {
     await env.DB.prepare(`
@@ -247,7 +291,7 @@ async function upsertUser(env, identity) {
     `).bind(
       legacyId, legacyLogin, identity.provider, identity.providerId, legacyLogin,
       identity.email, identity.name, identity.avatarUrl,
-      bootstrapAdmin ? "admin" : "user", bootstrapAdmin ? "approved" : "pending",
+      bootstrapAdmin ? "admin" : "user", "approved",
       now, now, now,
     ).run();
   }
@@ -265,6 +309,38 @@ function publicUser(user) {
     email: user.email, name: user.name,
     avatarUrl: user.avatar_url, role: user.role, status: user.status,
   };
+}
+
+function premiumPreview(url) {
+  const slug = premiumSlug(url.pathname);
+  const [title, description, metric] = PREMIUM_CATEGORY_META[slug] || ["Protected Path", "Sign in to continue reading this Platform Ops area.", "Member access"];
+  const next = encodeURIComponent(url.pathname + url.search);
+  const body = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>${html(title)} · Login required · Platform Ops</title>
+<style>
+:root{color-scheme:dark;--bg:#070b10;--panel:#101720;--line:#2a3441;--text:#f5f7fb;--muted:#a8b2c2;--cyan:#00c7d9;--red:#ff4545;--lime:#7bd916}
+*{box-sizing:border-box}body{margin:0;min-height:100svh;display:grid;place-items:center;background:radial-gradient(circle at 76% 24%,rgba(0,199,217,.2),transparent 34%),linear-gradient(135deg,#080b10,#111923);font-family:Manrope,Arial,sans-serif;color:var(--text)}
+.shell{width:min(1040px,calc(100% - 32px));display:grid;grid-template-columns:minmax(0,.92fr) minmax(320px,.58fr);border:1px solid var(--line);background:rgba(10,15,22,.84);box-shadow:0 28px 90px rgba(0,0,0,.34)}
+.story{padding:54px}.brand{font:700 13px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:58px}.brand:before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:10px}
+.eyebrow{font:700 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);margin-bottom:14px}.title{font:400 clamp(58px,8vw,104px)/.88 Impact,'Arial Narrow',sans-serif;text-transform:uppercase;margin:0 0 18px;letter-spacing:0}.copy{font-size:18px;line-height:1.65;color:var(--muted);max-width:58ch;margin:0}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}.chip{border:1px solid var(--line);padding:7px 10px;font:700 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+.panel{padding:44px;border-left:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));display:flex;flex-direction:column;justify-content:center}
+.mark{width:56px;height:56px;border:1px solid var(--line);display:grid;place-items:center;color:var(--cyan);font:700 12px ui-monospace,SFMono-Regular,Consolas,monospace;margin-bottom:22px}.panel h2{font:400 38px/.95 Impact,'Arial Narrow',sans-serif;text-transform:uppercase;margin:0 0 12px}.panel p{color:var(--muted);line-height:1.55;margin:0 0 24px}.actions{display:grid;gap:10px}.btn{display:flex;align-items:center;justify-content:space-between;text-decoration:none;border:1px solid var(--line);padding:14px 16px;color:var(--text);font:700 11px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:1.3px;text-transform:uppercase}.btn.primary{background:var(--text);border-color:var(--text);color:#081018}.btn:hover{border-color:var(--cyan)}
+@media(max-width:760px){body{place-items:start}.shell{grid-template-columns:1fr;margin:16px}.story,.panel{padding:28px}.panel{border-left:0;border-top:1px solid var(--line)}.brand{margin-bottom:36px}.copy{font-size:15px}}
+</style>
+</head>
+<body>
+<main class="shell">
+<section class="story"><div class="brand">Platform Ops</div><div class="eyebrow">Login required</div><h1 class="title">${html(title)}</h1><p class="copy">${html(description)}</p><div class="chips"><span class="chip">${html(metric)}</span><span class="chip">Isolated operations path</span><span class="chip">Approved login</span></div></section>
+<aside class="panel"><div class="mark">ID</div><h2>Continue securely</h2><p>The heading stays visible so readers know what this page covers. Sign in or create an account to open the full operational notes.</p><div class="actions"><a class="btn primary" href="/login/?next=${next}">Sign in <span>&gt;</span></a><a class="btn" href="/login/?mode=signup&next=${next}">Create account <span>&gt;</span></a><a class="btn" href="/">Public site <span>&gt;</span></a></div></aside>
+</main>
+</body>
+</html>`;
+  return secure(new Response(body, { headers: { "content-type": "text/html; charset=utf-8" } }));
 }
 
 async function beginGithub(request, env) {
@@ -299,9 +375,7 @@ async function finishGithub(request, env) {
     const user = await upsertUser(env, identity);
     if (!user || user.status === "suspended") return redirect("/login/?error=suspended");
     const session = await createSession(env, user.id);
-    const destination = user.status === "approved"
-      ? (user.role === "admin" && next === "/user/" ? "/admin/" : next)
-      : "/login/?status=pending";
+    const destination = user.role === "admin" && next === "/user/" ? "/admin/" : next;
     const response = redirect(destination, 302, {
       "set-cookie": cookie(SESSION_COOKIE, session, { maxAge: SESSION_TTL_SECONDS }),
     });
@@ -346,9 +420,7 @@ async function finishGoogle(request, env) {
     const user = await upsertUser(env, identity);
     if (!user || user.status === "suspended") return redirect("/login/?error=suspended");
     const session = await createSession(env, user.id);
-    const destination = user.status === "approved"
-      ? (user.role === "admin" && next === "/user/" ? "/admin/" : next)
-      : "/login/?status=pending";
+    const destination = user.role === "admin" && next === "/user/" ? "/admin/" : next;
     const response = redirect(destination, 302, {
       "set-cookie": cookie(SESSION_COOKIE, session, { maxAge: SESSION_TTL_SECONDS }),
     });
@@ -373,7 +445,7 @@ async function listUsers(env) {
   const result = await env.DB.prepare(`
     SELECT id, github_login, auth_provider, provider_login, email, name, avatar_url,
            role, status, created_at, last_login_at
-      FROM users ORDER BY CASE status WHEN 'pending' THEN 0 ELSE 1 END, created_at DESC
+      FROM users ORDER BY CASE status WHEN 'suspended' THEN 1 ELSE 0 END, created_at DESC
   `).all();
   return json({ users: result.results || [] });
 }
@@ -383,10 +455,13 @@ async function updateUser(request, env, actor, id) {
   let body;
   try { body = await request.json(); } catch (_) { return json({ error: "Invalid JSON" }, 400); }
   const role = body.role === "admin" ? "admin" : body.role === "user" ? "user" : null;
-  const status = ["pending", "approved", "suspended"].includes(body.status) ? body.status : null;
+  const status = ["approved", "suspended"].includes(body.status) ? body.status : null;
   if (!role || !status) return json({ error: "Invalid role or status" }, 400);
-  const target = await env.DB.prepare("SELECT id, role, status FROM users WHERE id = ?").bind(id).first();
+  const target = await env.DB.prepare("SELECT id, email, role, status FROM users WHERE id = ?").bind(id).first();
   if (!target) return json({ error: "User not found" }, 404);
+  if (role === "admin" && !emailSet(env.ADMIN_EMAILS).has(String(target.email || "").toLowerCase())) {
+    return json({ error: "Administrator role is restricted to the configured Vishal admin email" }, 403);
+  }
   if (Number(target.id) === Number(actor.id) && (role !== "admin" || status !== "approved")) {
     return json({ error: "You cannot remove your own administrator access" }, 409);
   }
@@ -422,12 +497,13 @@ async function protectedRoute(request, env, url, area) {
   const session = await sessionFromRequest(request, env);
   if (!session) {
     if (isApi(url.pathname)) return json({ error: "Authentication required" }, 401);
+    if (area === "premium") return premiumPreview(url);
     return redirect(`/login/?next=${encodeURIComponent(url.pathname + url.search)}`);
   }
   const user = session.user;
   if (user.status !== "approved") {
-    if (isApi(url.pathname)) return json({ error: "Account approval required" }, 403);
-    return redirect("/login/?status=pending");
+    if (isApi(url.pathname)) return json({ error: "Account access is suspended" }, 403);
+    return redirect("/login/?error=suspended");
   }
   if (area === "admin" && user.role !== "admin") return isApi(url.pathname)
     ? json({ error: "Administrator access required" }, 403)

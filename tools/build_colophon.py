@@ -144,9 +144,9 @@ STAGE_NOTE = {
                            "rollback, and the trust boundaries"),
     "build_auth": ("GitHub / Google OAuth + D1 route contract",
                    "branded sign-in, signup and account pages; the Worker owns "
-                   "sessions, approval state, and role checks"),
+                   "sessions, instant user signup, and Vishal-only admin checks"),
     "build_premium": ("authenticated-route policy",
-                      "noindex markers for premium Platform Engineering content"),
+                      "noindex markers for the isolated operations categories"),
     "make_banner": ("taxonomy + register + commands",
                     "brand/banner.svg — the animated masthead on the repo's "
                     "GitHub page, with the live/pipeline/planned split drawn "

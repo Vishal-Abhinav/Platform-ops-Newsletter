@@ -1,10 +1,12 @@
 # Authentication setup
 
 The newsletter and core knowledge base remain public. A custom Platform Ops
-login protects `/admin*`, `/user*`, and `/categories/platform-engineering*`.
+login protects `/admin*`, `/user*`, and the isolated operations path:
+Networking, Cloud, GitOps, DevOps, Containers, Kubernetes, OpenShift,
+Observability, SRE, Security, and Platform Engineering.
 GitHub or Google proves identity; the Worker owns the session; D1 stores account
-status and roles. Platform Ops never receives a provider password or stores an
-OAuth access token.
+status and roles. Signup opens a normal user account immediately. Platform Ops
+never receives a provider password or stores an OAuth access token.
 
 ## 1. Create the D1 database
 
@@ -62,7 +64,7 @@ OAUTH_GOOGLE_CLIENT_ID
 OAUTH_GOOGLE_CLIENT_SECRET
 ```
 
-## 4. Bootstrap the administrator
+## 4. Restrict the administrator
 
 Add one more repository Actions secret:
 
@@ -71,12 +73,12 @@ ADMIN_EMAILS
 ```
 
 Its value is a comma-separated list of verified provider email addresses that
-must become administrators. The first successful login for a listed email is
-approved automatically and receives the `admin` role.
+may become administrators. Set this to Vishal's verified GitHub/Google email.
+The first successful login for a listed email receives the `admin` role.
 
-Every other new identity enters `pending`. An administrator reviews it
-under `/admin/` and changes its status to `approved`, or to `suspended` when
-access must be revoked.
+Every other new identity becomes an approved `user` immediately after signup.
+The admin console can suspend or restore users, but it cannot promote another
+email to administrator unless that email is listed in `ADMIN_EMAILS`.
 
 The repository must also retain its existing deployment secrets:
 
@@ -102,12 +104,11 @@ authenticated areas are protected by the Worker.
 Verify in a private browser window:
 
 1. `/login/` shows the branded Platform Ops sign-in page.
-2. The configured administrator signs in with GitHub or Google and reaches `/admin/`.
-3. A new reader signs in and sees the pending-approval message.
-4. The administrator approves that reader in `/admin/`.
-5. The reader can then open `/user/` and the Platform Engineering category, but not `/admin/`.
-6. A signed-out visitor opening Platform Engineering returns to the requested page after sign-in.
-7. Signing out removes the server-side session and clears the browser cookie.
+2. A signed-out visitor opening an isolated operations category sees the category heading and a login-required panel.
+3. The configured Vishal administrator signs in with GitHub or Google and reaches `/admin/`.
+4. A new reader signs up and lands directly in `/user/`.
+5. The reader can open isolated operations categories, but not `/admin/`.
+6. Signing out removes the server-side session and clears the browser cookie.
 
 ## Security properties
 
@@ -117,5 +118,6 @@ Verify in a private browser window:
 - Browser session tokens are random; D1 stores only their SHA-256 hashes.
 - Session cookies are `HttpOnly`, `Secure`, and `SameSite=Lax`.
 - Administrator writes require a same-origin request.
-- The last approved administrator cannot remove their own access.
+- Only `ADMIN_EMAILS` accounts can receive the administrator role.
+- The last administrator cannot remove their own access.
 - Private pages use `noindex`, `no-store`, and restrictive security headers.

@@ -29,8 +29,9 @@ It assumes you already know what a Pod is. It does not assume the default
 settings are correct.
 
 **The newsletter and core reference library remain public, with no tracking beyond page
-counts and no AI-generated filler.** Approved members also receive the premium Platform
-Engineering path; the archive stays up and issues are corrected in place.
+counts and no AI-generated filler.** Signed-in members also receive the isolated
+operations path from Networking through Platform Engineering; the archive stays up
+and issues are corrected in place.
 
 > **Newest — [Issue #067: Service Mesh Operations](https://platformops.srivantechnologies.com/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html)**
 
@@ -284,7 +285,7 @@ flowchart TB
   end
 
   subgraph OB["Outbound · the site publishes, nothing reads back"]
-    SM["sitemap.xml<br/>96 indexable URLs"]
+    SM["sitemap.xml<br/>86 indexable URLs"]
     RSS["feed.xml<br/>full archive"]
     GSC["Google Search Console"]
   end
@@ -321,6 +322,8 @@ the trust boundaries, is on the [architecture page](https://platformops.srivante
 The public knowledge surface is static and runs no third-party JavaScript.
 Optional private account pages use a small Worker, GitHub OAuth, a hashed
 session cookie, and D1 role records; public reading still requires no account.
+Signup opens a normal user workspace immediately. Admin remains restricted to
+the configured Vishal email.
 
 **The policy is derived, not written.** `build_headers.py` walks the built
 pages for the origins they actually fetch from and emits `dist/_headers`. Two
@@ -439,7 +442,7 @@ receive. Please open an issue.
 
 | File | What it holds |
 |:--|:--|
-| [`/sitemap.xml`](https://platformops.srivantechnologies.com/sitemap.xml) | 96 indexable URLs. Pages carrying `noindex` are deliberately withheld — a sitemap is a request to crawl, and listing a page that then declines to be indexed just spends crawl budget. |
+| [`/sitemap.xml`](https://platformops.srivantechnologies.com/sitemap.xml) | 86 indexable URLs. Pages carrying `noindex` are deliberately withheld — a sitemap is a request to crawl, and listing a page that then declines to be indexed just spends crawl budget. |
 | [`/feed.xml`](https://platformops.srivantechnologies.com/feed.xml) | RSS, full archive. |
 | [`/robots.txt`](https://platformops.srivantechnologies.com/robots.txt) | Crawl rules and the sitemap pointer. |
 | `/_headers` | Generated per build; see Security above. |

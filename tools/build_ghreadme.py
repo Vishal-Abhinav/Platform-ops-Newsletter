@@ -170,8 +170,9 @@ It assumes you already know what a Pod is. It does not assume the default
 settings are correct.
 
 **The newsletter and core reference library remain public, with no tracking beyond page
-counts and no AI-generated filler.** Approved members also receive the premium Platform
-Engineering path; the archive stays up and issues are corrected in place.
+counts and no AI-generated filler.** Signed-in members also receive the isolated
+operations path from Networking through Platform Engineering; the archive stays up
+and issues are corrected in place.
 
 > **Newest — [Issue #{NEWEST_NUM:03d}: {NEWEST_TITLE}]({SITE}/{NEWEST_PATH})**
 
@@ -450,6 +451,8 @@ the trust boundaries, is on the [architecture page]({SITE}/architecture/).
 The public knowledge surface is static and runs no third-party JavaScript.
 Optional private account pages use a small Worker, GitHub OAuth, a hashed
 session cookie, and D1 role records; public reading still requires no account.
+Signup opens a normal user workspace immediately. Admin remains restricted to
+the configured Vishal email.
 
 **The policy is derived, not written.** `build_headers.py` walks the built
 pages for the origins they actually fetch from and emits `dist/_headers`. Two
