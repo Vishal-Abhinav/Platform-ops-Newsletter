@@ -102,9 +102,21 @@ jobs:
         env:
           AUTH_ORIGIN: https://platformops.srivantechnologies.com
         run: |
-          login_code=$(curl --silent --show-error --output /dev/null --max-time 20 --write-out '%{http_code}' "$AUTH_ORIGIN/login/")
-          if [ "$login_code" != "200" ]; then
-            echo "::error::Login page returned $login_code"
+          login_ready=0
+          for attempt in 1 2 3 4 5 6; do
+            login_code=$(curl --silent --show-error --output /dev/null --max-time 20 \
+              --header 'User-Agent: Platform-Ops-Deployment-Check' \
+              --write-out '%{http_code}' "$AUTH_ORIGIN/login/")
+            if [ "$login_code" = "200" ]; then
+              echo "login page: 200"
+              login_ready=1
+              break
+            fi
+            echo "login page not ready (attempt $attempt: $login_code)"
+            sleep 10
+          done
+          if [ "$login_ready" -ne 1 ]; then
+            echo "::error::Login page did not return 200 after deployment propagation"
             exit 1
           fi
           for area in admin user; do
