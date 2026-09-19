@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build branded login, member, and administrator account surfaces."""
+"""Build compact login, member, and administrator account surfaces."""
 import os
 import pathlib
 import sys
@@ -13,219 +13,103 @@ from content_page import CSS, render, section  # noqa: E402
 ASSETS = ROOT / "assets"
 
 AUTH_CSS = CSS + r"""
-.auth-shell{max-width:620px;margin:0 auto;border:1px solid var(--line-2);background:var(--card-bg);padding:28px;}
-.auth-mark{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--line-2);margin-bottom:22px;
- font-family:'DM Mono',monospace;font-size:12px;color:var(--heading-fg);background:var(--panel-bg);}
-.auth-shell h3{font-family:'Bebas Neue',sans-serif;font-size:32px;font-weight:400;line-height:1;margin:0 0 10px;}
-.auth-shell p{margin:0;color:var(--muted);font-size:14px;line-height:1.65;}
-.auth-button{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:24px;padding:13px 16px;
- border:1px solid var(--heading-fg);background:var(--heading-fg);color:var(--page-bg);text-decoration:none;
- font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;}
-.auth-button:hover{background:var(--cyan);border-color:var(--cyan);}
-.auth-note{display:flex;gap:9px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line-1);
- font-family:'DM Mono',monospace;font-size:9px;line-height:1.6;letter-spacing:.7px;color:var(--muted);}
-.auth-note::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--lime);margin-top:4px;flex:0 0 auto;}
-.auth-message{display:none;margin:0 0 18px;padding:12px 14px;border-left:2px solid var(--amber);background:var(--panel-bg);
- font-size:13px;line-height:1.55;color:var(--heading-fg);}
-.auth-message.show{display:block}.auth-message.error{border-color:var(--crimson)}
-.account-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(260px,.9fr);gap:14px;}
-.account-card{border:1px solid var(--line-2);background:var(--card-bg);padding:22px;min-width:0;}
-.account-kicker{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-.account-value{font-size:17px;color:var(--heading-fg);overflow-wrap:anywhere;margin:0;}
-.account-role{display:inline-flex;margin-top:14px;border:1px solid var(--line-2);padding:5px 9px;
- font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--cyan);}
-.account-state{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);margin-top:14px;}
-.account-state::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--amber);flex:0 0 auto;}
-.account-state.ready::before{background:var(--lime)}.account-state.error::before{background:var(--crimson)}
-.account-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;background:var(--line-1);border:1px solid var(--line-1);}
-.account-action{background:var(--card-bg);padding:18px;text-decoration:none;min-height:118px;display:flex;
- flex-direction:column;justify-content:space-between;transition:background .18s;}
-.account-action:hover{background:var(--panel-bg)}
-.account-action b{font-family:'Bebas Neue',sans-serif;font-size:22px;font-weight:400;letter-spacing:.4px;}
-.account-action span{font-size:12.5px;color:var(--muted);line-height:1.5;}
-.account-action i{font-style:normal;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--crimson);margin-top:12px;}
-.account-signout{display:inline-block;margin-top:18px;padding:0;border:0;background:none;cursor:pointer;
- font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);}
-.account-signout:hover{color:var(--crimson)}
-.user-table-wrap{overflow-x:auto;border:1px solid var(--line-2);background:var(--card-bg);}
-.user-table{width:100%;border-collapse:collapse;min-width:760px;font-size:12px;}
-.user-table th,.user-table td{padding:13px 12px;border-bottom:1px solid var(--line-1);text-align:left;vertical-align:middle;}
-.user-table th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);}
-.user-table strong{display:block;color:var(--heading-fg);font-weight:600}.user-table small{color:var(--muted)}
-.user-table select{border:1px solid var(--line-2);background:var(--page-bg);color:var(--heading-fg);padding:7px 8px;font-size:12px;}
-.user-save{border:1px solid var(--line-2);background:transparent;color:var(--cyan);padding:7px 10px;cursor:pointer;
- font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;}
-.user-save:hover{border-color:var(--cyan)}.user-save:disabled{opacity:.45;cursor:wait}
-.user-empty{padding:24px;color:var(--muted)}
-@media(max-width:700px){.account-grid,.account-actions{grid-template-columns:1fr}.auth-shell{padding:22px}}
+.auth-app{height:100svh;min-height:620px;overflow:hidden;display:grid;grid-template-rows:64px minmax(0,1fr);background:var(--page-bg);}
+.auth-app>nav{position:relative!important;top:auto!important;grid-row:1;padding:0 30px!important;min-height:64px;background:var(--nav-bg);border-bottom:1px solid var(--line-2);}
+.auth-app .crumb{display:none!important;}
+.auth-app>.hero,.auth-app>section,.auth-app>footer{display:none!important;}
+.auth-main{grid-row:2;min-height:0;width:min(1480px,100%);margin:0 auto;padding:18px 24px;display:grid;gap:14px;overflow:hidden;}
+.auth-main>section{min-width:0;min-height:0;padding:0;border:0;background:transparent;}
+.auth-main>section>.wrap{height:100%;max-width:none;padding:0;display:flex;flex-direction:column;min-height:0;}
+.auth-main .sec-tag{margin:0 0 7px;font-size:8px;letter-spacing:2px;}.auth-main h2{font-size:clamp(25px,2.2vw,38px);margin:0 0 6px;line-height:1;}
+.auth-main .lede{font-size:12.5px;line-height:1.5;margin:0 0 12px;max-width:66ch;color:var(--muted);}
+.auth-top-actions{display:flex;align-items:center;gap:8px;white-space:nowrap;}.auth-top-link,.account-signout{border:1px solid var(--line-2);background:transparent;color:var(--muted);padding:8px 11px;text-decoration:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;}
+.auth-top-link:hover,.account-signout:hover{border-color:var(--cyan);color:var(--cyan);}
+.auth-login .auth-main{width:min(1220px,100%);grid-template-columns:1fr;place-items:center;padding:24px;}.auth-login .auth-main>section{width:100%;height:auto;}
+.auth-login .auth-main>section>.wrap>.sec-tag,.auth-login .auth-main>section>.wrap>h2,.auth-login .auth-main>section>.wrap>.lede{display:none;}
+.login-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(380px,.95fr);min-height:510px;border:1px solid var(--line-2);background:var(--card-bg);box-shadow:0 28px 80px rgba(0,0,0,.16);}
+.login-story{padding:44px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;background:linear-gradient(135deg,var(--panel-bg),var(--card-bg));border-right:1px solid var(--line-2);}
+.login-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2.2px;text-transform:uppercase;color:var(--crimson);}.login-story h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,5vw,78px);font-weight:400;line-height:.92;margin:16px 0 18px;color:var(--heading-fg);}
+.login-story h1 span{display:block;color:var(--cyan);}.login-story p{font-size:14px;line-height:1.7;color:var(--muted);max-width:55ch;margin:0;}
+.access-viz{display:grid;grid-template-columns:126px 1fr;gap:22px;align-items:center;margin-top:28px;}.access-ring{--value:72;width:118px;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--cyan) calc(var(--value)*1%),var(--lime) 0 86%,var(--line-1) 0);position:relative;}
+.access-ring:after{content:'';position:absolute;inset:11px;border-radius:50%;background:var(--card-bg);}.access-ring strong{position:relative;z-index:1;font:400 27px/1 'Bebas Neue',sans-serif;color:var(--heading-fg);}.access-ring small{position:absolute;z-index:1;margin-top:34px;font:8px 'DM Mono',monospace;letter-spacing:1px;color:var(--muted);}
+.signal-bars{display:grid;gap:10px;}.signal-row{display:grid;grid-template-columns:86px 1fr 28px;gap:9px;align-items:center;font:8px 'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}.signal-row i{height:4px;background:var(--line-1);position:relative;overflow:hidden;}.signal-row i:after{content:'';display:block;height:100%;width:var(--w);background:var(--bar,var(--cyan));animation:auth-grow .8s ease-out both;transform-origin:left;}@keyframes auth-grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.login-panel{padding:38px;display:flex;flex-direction:column;justify-content:center;min-width:0;}.auth-mark{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line-2);font-family:'DM Mono',monospace;font-size:10px;color:var(--heading-fg);background:var(--panel-bg);}
+.login-panel h3{font-family:'Bebas Neue',sans-serif;font-size:35px;font-weight:400;line-height:1;margin:20px 0 9px;}.login-panel>p{margin:0;color:var(--muted);font-size:13px;line-height:1.6;}.auth-providers{display:grid;gap:9px;margin-top:24px;}
+.auth-mode{display:grid;grid-template-columns:1fr 1fr;margin-top:20px;border:1px solid var(--line-2);}.auth-mode a{padding:9px;text-align:center;text-decoration:none;font:8.5px 'DM Mono',monospace;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);}.auth-mode a.is-active{background:var(--panel-bg);color:var(--heading-fg);box-shadow:inset 0 -2px 0 var(--cyan);}
+.auth-button{display:grid;grid-template-columns:28px 1fr 18px;align-items:center;gap:10px;width:100%;padding:12px 14px;border:1px solid var(--line-2);background:transparent;color:var(--heading-fg);text-decoration:none;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1.1px;text-transform:uppercase;}
+.auth-button:hover{border-color:var(--cyan);background:var(--panel-bg);}.auth-button.primary{background:var(--heading-fg);color:var(--page-bg);border-color:var(--heading-fg);}.auth-button.primary:hover{background:var(--cyan);border-color:var(--cyan);}.auth-button[hidden]{display:none;}.auth-provider-mark{display:grid;place-items:center;width:26px;height:26px;border:1px solid currentColor;font-size:10px;}.auth-arrow{text-align:right;font-size:14px;}
+.auth-message{display:none;margin:18px 0 0;padding:10px 12px;border-left:2px solid var(--amber);background:var(--panel-bg);font-size:12px;line-height:1.5;color:var(--heading-fg);}.auth-message.show{display:block}.auth-message.error{border-color:var(--crimson)}
+.auth-note{display:flex;gap:9px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line-1);font:8.5px/1.6 'DM Mono',monospace;letter-spacing:.6px;color:var(--muted);}.auth-note:before{content:'';width:7px;height:7px;border-radius:50%;background:var(--lime);margin-top:3px;flex:0 0 auto;}
+.auth-user .auth-main{grid-template-columns:minmax(320px,.78fr) minmax(0,1.22fr);}.auth-admin .auth-main{grid-template-columns:minmax(320px,.72fr) minmax(0,1.28fr);grid-template-rows:auto minmax(0,1fr);}.auth-admin .auth-main>section:nth-child(2){grid-column:2;grid-row:1/3;}.auth-admin .auth-main>section:nth-child(3){grid-column:1;grid-row:2;}
+.account-grid{display:grid;grid-template-columns:1fr;gap:10px;min-height:0;}.account-card,.account-actions,.user-table-wrap,.admin-overview{border:1px solid var(--line-2);background:var(--card-bg);}.account-card{padding:18px;min-width:0;}.identity-head{display:flex;align-items:center;gap:13px;}.account-avatar{width:46px;height:46px;object-fit:cover;border:1px solid var(--line-2);background:var(--panel-bg);}.account-kicker{font:8px 'DM Mono',monospace;letter-spacing:1.7px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}.account-value{font-size:15px;color:var(--heading-fg);overflow-wrap:anywhere;margin:0;}.account-subvalue{font-size:11px;color:var(--muted);overflow-wrap:anywhere;margin:2px 0 0;}
+.account-role{display:inline-flex;margin-top:12px;border:1px solid var(--line-2);padding:4px 8px;font:8px 'DM Mono',monospace;letter-spacing:1.3px;text-transform:uppercase;color:var(--cyan);}.account-state{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-top:11px;}.account-state:before{content:'';width:7px;height:7px;border-radius:50%;background:var(--amber);flex:0 0 auto;}.account-state.ready:before{background:var(--lime)}.account-state.error:before{background:var(--crimson)}
+.session-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-1);margin-top:13px;}.session-stat{background:var(--panel-bg);padding:10px;}.session-stat b{display:block;font:20px 'Bebas Neue',sans-serif;color:var(--heading-fg);}.session-stat span{font:7px 'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.account-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line-1);min-height:0;flex:1;}.account-action{background:var(--card-bg);padding:15px;text-decoration:none;min-height:92px;display:flex;flex-direction:column;justify-content:space-between;transition:background .18s;}.account-action:hover{background:var(--panel-bg)}.account-action b{font-family:'Bebas Neue',sans-serif;font-size:20px;font-weight:400;letter-spacing:.4px;}.account-action span{font-size:11px;color:var(--muted);line-height:1.45;}.account-action i{font-style:normal;font:8px 'DM Mono',monospace;letter-spacing:1.1px;text-transform:uppercase;color:var(--crimson);margin-top:8px;}
+.member-viz{display:grid;grid-template-columns:105px 1fr;gap:18px;align-items:center;margin-top:10px;}.member-ring{--value:38;width:98px;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--lime) calc(var(--value)*1%),var(--line-1) 0);position:relative;}.member-ring:after{content:'';position:absolute;inset:9px;border-radius:50%;background:var(--card-bg);}.member-ring b{position:relative;z-index:1;font:24px 'Bebas Neue',sans-serif;color:var(--heading-fg);}.member-bars{display:grid;gap:9px}.member-bar{display:grid;gap:4px}.member-bar label{display:flex;justify-content:space-between;font:8px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}.member-bar i{height:5px;background:var(--line-1)}.member-bar i:after{content:'';display:block;height:100%;width:var(--w);background:var(--bar,var(--cyan));}
+.admin-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line-1);margin-bottom:10px;}.admin-metric{background:var(--card-bg);padding:12px;}.admin-metric b{display:block;font:25px 'Bebas Neue',sans-serif;color:var(--heading-fg);}.admin-metric span{font:7.5px 'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}.user-table-wrap{overflow:auto;min-height:0;flex:1;scrollbar-width:thin;}.user-table{width:100%;border-collapse:collapse;min-width:690px;font-size:11px;}.user-table th,.user-table td{padding:10px;border-bottom:1px solid var(--line-1);text-align:left;vertical-align:middle;}.user-table th{position:sticky;top:0;z-index:1;background:var(--panel-bg);font:8px 'DM Mono',monospace;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);}.user-table strong{display:block;color:var(--heading-fg);font-weight:600}.user-table small{color:var(--muted)}.user-table select{border:1px solid var(--line-2);background:var(--page-bg);color:var(--heading-fg);padding:6px;font-size:11px;}.user-save{border:1px solid var(--line-2);background:transparent;color:var(--cyan);padding:6px 9px;cursor:pointer;font:8px 'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;}.user-save:hover{border-color:var(--cyan)}.user-save:disabled{opacity:.45;cursor:wait}.user-empty{padding:20px;color:var(--muted)}
+@media(max-width:1050px){.auth-user .auth-main,.auth-admin .auth-main{grid-template-columns:1fr 1fr;}.auth-admin .auth-main>section:nth-child(2){grid-column:1/3;grid-row:2}.auth-admin .auth-main>section:nth-child(3){display:none;}.auth-admin .auth-main{grid-template-rows:auto minmax(0,1fr)}.login-story{padding:32px}.login-panel{padding:30px}}
+@media(max-width:760px), (max-height:700px){.auth-app{height:auto;min-height:100svh;overflow:auto;display:block;}.auth-app>nav{position:sticky!important;top:0!important;height:58px;min-height:58px;padding:0 16px!important;}.auth-main,.auth-login .auth-main,.auth-user .auth-main,.auth-admin .auth-main{display:block;width:100%;padding:12px;overflow:visible;}.auth-main>section{margin-bottom:12px}.auth-admin .auth-main>section:nth-child(3){display:block}.login-layout{grid-template-columns:1fr;min-height:0;}.login-story{padding:26px;border-right:0;border-bottom:1px solid var(--line-2)}.login-story h1{font-size:48px}.access-viz{display:none}.login-panel{padding:26px}.account-actions{grid-template-columns:1fr}.admin-overview{grid-template-columns:repeat(2,1fr)}.auth-top-link{display:none}}
+@media(prefers-reduced-motion:reduce){.signal-row i:after{animation:none}}
 """
 
 LOGIN_SCRIPT = r"""<script>
-(function(){
-  var params=new URLSearchParams(location.search);
-  var message=document.querySelector('[data-auth-message]');
-  var messages={
-    pending:'Your identity is verified. An administrator must approve the account before private pages open.',
-    'signed-out':'You have been signed out safely.'
-  };
-  var errors={
-    configuration:'Sign-in is being configured. Please return shortly.',
-    state:'The sign-in request expired. Start again from this page.',
-    github:'GitHub could not verify this account. Confirm that your GitHub email is verified, then try again.',
-    suspended:'This account is not currently permitted to sign in.',
-    session:'Your session expired. Sign in again to continue.'
-  };
-  var text=errors[params.get('error')] || messages[params.get('status')];
-  if(text){message.textContent=text;message.classList.add('show');if(params.get('error'))message.classList.add('error');}
-  var next=params.get('next');
-  if(next && next.charAt(0)==='/' && next.indexOf('//')!==0){
-    document.querySelector('[data-github-login]').href='/auth/github?next='+encodeURIComponent(next);
-  }
-})();
+(function(){var params=new URLSearchParams(location.search),message=document.querySelector('[data-auth-message]'),mode=params.get('mode')==='signup'?'signup':'signin';
+var messages={pending:'Your identity is verified. An administrator must approve the account before private pages open.','signed-out':'You have been signed out safely.'};
+var errors={configuration:'Sign-in is being configured. Please return shortly.',state:'The sign-in request expired. Start again from this page.',github:'GitHub could not verify this account. Confirm that its email is verified, then try again.',google:'Google could not verify this account. Confirm that its email is verified, then try again.','google-configuration':'Google sign-in is not configured yet.',suspended:'This account is not currently permitted to sign in.',session:'Your session expired. Sign in again to continue.'};
+var text=errors[params.get('error')]||messages[params.get('status')];if(text){message.textContent=text;message.classList.add('show');if(params.get('error'))message.classList.add('error');}
+var next=params.get('next');
+document.querySelectorAll('[data-auth-mode]').forEach(function(a){var target=a.dataset.authMode,active=target===mode,q=[];if(next&&next.charAt(0)==='/'&&next.indexOf('//')!==0)q.push('next='+encodeURIComponent(next));if(target==='signup')q.push('mode=signup');a.href=q.length?'?'+q.join('&'):'?mode=signin';a.classList.toggle('is-active',active);a.setAttribute('aria-current',active?'page':'false');});
+var title=document.querySelector('[data-auth-title]'),copy=document.querySelector('[data-auth-copy]');if(mode==='signup'){title.textContent='Create your account';copy.textContent='Choose a verified identity. Your account is created immediately and opens after administrator approval.';document.querySelectorAll('[data-provider-label]').forEach(function(label){label.textContent='Sign up with '+label.dataset.providerLabel;});}
+document.querySelectorAll('[data-provider]').forEach(function(a){var query=[];if(next&&next.charAt(0)==='/'&&next.indexOf('//')!==0)query.push('next='+encodeURIComponent(next));if(mode==='signup')query.push('mode=signup');a.href='/auth/'+a.dataset.provider+(query.length?'?'+query.join('&'):'');});
+fetch('/auth/providers',{headers:{Accept:'application/json'}}).then(function(r){return r.json();}).then(function(data){var google=document.querySelector('[data-provider="google"]');if(google&&data.google)google.hidden=false;}).catch(function(){});})();
 </script>"""
 
 SESSION_SCRIPT = r"""<script>
-(function(){
-  var root=document.querySelector('[data-account]');
-  if(!root)return;
-  fetch('/auth/session',{headers:{Accept:'application/json'},credentials:'same-origin'})
-    .then(function(response){if(!response.ok)throw new Error('session');return response.json();})
-    .then(function(session){
-      var user=session.user;
-      root.querySelector('[data-account-name]').textContent=user.name || user.githubLogin;
-      root.querySelector('[data-account-email]').textContent=user.email;
-      root.querySelector('[data-account-role]').textContent=user.role;
-      var state=root.querySelector('[data-account-state]');
-      state.textContent='Verified with GitHub';state.className='account-state ready';
-    }).catch(function(){location.assign('/login/?error=session');});
-})();
+(function(){var root=document.querySelector('[data-account]');if(!root)return;fetch('/auth/session',{headers:{Accept:'application/json'},credentials:'same-origin'}).then(function(response){if(!response.ok)throw new Error('session');return response.json();}).then(function(session){var user=session.user;root.querySelector('[data-account-name]').textContent=user.name||user.login;root.querySelector('[data-account-email]').textContent=user.email;root.querySelector('[data-account-role]').textContent=user.role;var avatar=root.querySelector('[data-account-avatar]');if(user.avatarUrl){avatar.src=user.avatarUrl;avatar.hidden=false;}var state=root.querySelector('[data-account-state]');state.textContent='Verified with '+(user.provider==='google'?'Google':'GitHub');state.className='account-state ready';}).catch(function(){location.assign('/login/?error=session');});})();
 </script>"""
 
 ADMIN_SCRIPT = r"""<script>
-(function(){
-  var body=document.querySelector('[data-user-list]');
-  if(!body)return;
-  function option(value,current){var o=document.createElement('option');o.value=value;o.textContent=value;o.selected=value===current;return o;}
-  function load(){
-    fetch('/admin/api/users',{headers:{Accept:'application/json'},credentials:'same-origin'})
-      .then(function(r){if(!r.ok)throw new Error('load');return r.json();})
-      .then(function(data){
-        body.textContent='';
-        if(!data.users.length){var row=body.insertRow();var cell=row.insertCell();cell.colSpan=5;cell.className='user-empty';cell.textContent='No accounts yet.';return;}
-        data.users.forEach(function(user){
-          var row=body.insertRow();
-          var identity=row.insertCell();var name=document.createElement('strong');name.textContent=user.name || user.github_login;
-          var detail=document.createElement('small');detail.textContent='@'+user.github_login+' / '+user.email;identity.append(name,detail);
-          var role=row.insertCell();var roleSelect=document.createElement('select');['user','admin'].forEach(function(v){roleSelect.append(option(v,user.role));});role.append(roleSelect);
-          var status=row.insertCell();var statusSelect=document.createElement('select');['pending','approved','suspended'].forEach(function(v){statusSelect.append(option(v,user.status));});status.append(statusSelect);
-          var seen=row.insertCell();seen.textContent=user.last_login_at ? new Date(user.last_login_at).toLocaleDateString() : 'Never';
-          var action=row.insertCell();var save=document.createElement('button');save.type='button';save.className='user-save';save.textContent='Save';action.append(save);
-          save.addEventListener('click',function(){
-            save.disabled=true;save.textContent='Saving';
-            fetch('/admin/api/users/'+user.id,{method:'PATCH',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:roleSelect.value,status:statusSelect.value})})
-              .then(function(r){return r.json().then(function(data){if(!r.ok)throw new Error(data.error || 'Update failed');});})
-              .then(load).catch(function(error){alert(error.message);save.disabled=false;save.textContent='Save';});
-          });
-        });
-      }).catch(function(){body.textContent='';var row=body.insertRow();var cell=row.insertCell();cell.colSpan=5;cell.className='user-empty';cell.textContent='Account list could not be loaded.';});
-  }
-  load();
-})();
+(function(){var body=document.querySelector('[data-user-list]');if(!body)return;function option(value,current){var o=document.createElement('option');o.value=value;o.textContent=value;o.selected=value===current;return o;}function metric(name,value){var el=document.querySelector('[data-admin-'+name+']');if(el)el.textContent=value;}
+function load(){fetch('/admin/api/users',{headers:{Accept:'application/json'},credentials:'same-origin'}).then(function(r){if(!r.ok)throw new Error('load');return r.json();}).then(function(data){var users=data.users||[],approved=users.filter(function(u){return u.status==='approved';}).length;metric('total',users.length);metric('approved',approved);metric('pending',users.filter(function(u){return u.status==='pending';}).length);metric('admins',users.filter(function(u){return u.role==='admin'&&u.status==='approved';}).length);body.textContent='';if(!users.length){var empty=body.insertRow().insertCell();empty.colSpan=5;empty.className='user-empty';empty.textContent='No accounts yet.';return;}users.forEach(function(user){var row=body.insertRow(),identity=row.insertCell(),name=document.createElement('strong');name.textContent=user.name||user.provider_login||user.github_login;var detail=document.createElement('small');detail.textContent=(user.auth_provider||'github')+' / '+user.email;identity.append(name,detail);var role=row.insertCell(),roleSelect=document.createElement('select');['user','admin'].forEach(function(v){roleSelect.append(option(v,user.role));});role.append(roleSelect);var status=row.insertCell(),statusSelect=document.createElement('select');['pending','approved','suspended'].forEach(function(v){statusSelect.append(option(v,user.status));});status.append(statusSelect);var seen=row.insertCell();seen.textContent=user.last_login_at?new Date(user.last_login_at).toLocaleDateString():'Never';var action=row.insertCell(),save=document.createElement('button');save.type='button';save.className='user-save';save.textContent='Save';action.append(save);save.addEventListener('click',function(){save.disabled=true;save.textContent='Saving';fetch('/admin/api/users/'+user.id,{method:'PATCH',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:roleSelect.value,status:statusSelect.value})}).then(function(r){return r.json().then(function(result){if(!r.ok)throw new Error(result.error||'Update failed');});}).then(load).catch(function(error){alert(error.message);save.disabled=false;save.textContent='Save';});});});}).catch(function(){body.textContent='';var cell=body.insertRow().insertCell();cell.colSpan=5;cell.className='user-empty';cell.textContent='Account list could not be loaded.';});}load();})();
 </script>"""
 
+def top_actions(area):
+    return ('<div class="auth-top-actions"><a class="auth-top-link" href="../index.html">Public site</a>'
+            + (f'<a class="auth-top-link" href="../{area}/">{area.title()}</a>' if area else '') + '</div>')
 
 def identity_panel(area):
-    return (
-        f'<div class="account-grid" data-account="{area}">'
-        '<div class="account-card"><div class="account-kicker">Signed in as</div>'
-        '<p class="account-value" data-account-name>Checking session...</p>'
-        '<p class="account-value" data-account-email></p>'
-        '<span class="account-role" data-account-role>verifying</span>'
-        '<div class="account-state" data-account-state>Validating secure session</div></div>'
-        '<div class="account-card"><div class="account-kicker">Session security</div>'
-        '<p>GitHub verifies your identity. Platform Ops stores only the account profile, role, and a hashed session token.</p>'
-        '<form method="post" action="/auth/logout"><button class="account-signout" type="submit">Sign out</button></form>'
-        '</div></div>')
-
+    return (f'<div class="account-grid" data-account="{area}"><div class="account-card"><div class="identity-head">'
+            '<img class="account-avatar" data-account-avatar hidden alt=""><div><div class="account-kicker">Signed in as</div>'
+            '<p class="account-value" data-account-name>Checking session...</p><p class="account-subvalue" data-account-email></p></div></div>'
+            '<span class="account-role" data-account-role>verifying</span><div class="account-state" data-account-state>Validating secure session</div>'
+            '<div class="session-grid"><div class="session-stat"><b>7D</b><span>Session TTL</span></div><div class="session-stat"><b>SHA</b><span>Token hash</span></div><div class="session-stat"><b>TLS</b><span>Transport</span></div></div>'
+            '<form method="post" action="/auth/logout"><button class="account-signout" type="submit">Sign out</button></form></div></div>')
 
 def action(href, title, text, label, external=False):
     attrs = ' target="_blank" rel="noopener noreferrer"' if external else ''
-    return (f'<a class="account-action" href="{href}"{attrs}><b>{title}</b>'
-            f'<span>{text}</span><i>{label}</i></a>')
+    return f'<a class="account-action" href="{href}"{attrs}><b>{title}</b><span>{text}</span><i>{label}</i></a>'
 
+def app_page(area, title, tagline, lede, actions, extra_sections="", scripts=""):
+    content = (section("Identity", "Your secure session", lede, identity_panel(area)) + extra_sections
+               + section("Workspace", "Choose a destination", "Tools and knowledge available to this account.", '<div class="account-actions">' + ''.join(actions) + '</div>'))
+    page = render(slug=area, title=title, tagline=tagline, eyebrow="Private workspace", crumbs=[("Home", "../index.html"), (title, None)], meta=["OAuth identity", "Role checked", "No search indexing"], sections='<main class="auth-main">' + content + '</main>', pager="", up="../", css="../assets/auth.css", canon=f"{area}/", robots="noindex,nofollow")
+    page = page.replace('<div class="nav-right">', '<div class="nav-right">' + top_actions("admin" if area == "user" else "user"), 1)
+    page = page.replace("<body>", f'<body class="auth-app auth-{area}">', 1).replace("</body>", SESSION_SCRIPT + scripts + "\n</body>")
+    out = ROOT / area; out.mkdir(parents=True, exist_ok=True); (out / "index.html").write_text(page, encoding="utf-8")
 
-def build_page(area, title, tagline, lede, actions, extra_sections="", scripts=""):
-    page = render(
-        slug=area,
-        title=title,
-        tagline=tagline,
-        eyebrow="Private workspace",
-        crumbs=[("Home", "../index.html"), (title, None)],
-        meta=["GitHub identity", "Role checked", "No search indexing"],
-        sections=section("Identity", "Your secure session", lede, identity_panel(area))
-        + extra_sections
-        + section("Workspace", "Choose a destination", "Only destinations appropriate to this account are shown here.",
-                  '<div class="account-actions">' + ''.join(actions) + '</div>'),
-        pager="",
-        up="../",
-        css="../assets/auth.css",
-        canon=f"{area}/",
-        robots="noindex,nofollow",
-    )
-    page = page.replace("</body>", SESSION_SCRIPT + scripts + "\n</body>")
-    out = ROOT / area
-    out.mkdir(parents=True, exist_ok=True)
-    (out / "index.html").write_text(page, encoding="utf-8")
+ASSETS.mkdir(parents=True, exist_ok=True); (ASSETS / "auth.css").write_text(AUTH_CSS, encoding="utf-8")
 
+login_body = r"""<div class="login-layout"><div class="login-story"><div><div class="login-eyebrow">Platform Ops member access</div><h1>Operate deeper.<span>Keep context.</span></h1><p>Approved members unlock premium Platform Engineering paths, a persistent workspace, and the private tools that will power saved troubleshooting and AI sessions.</p></div><div class="access-viz" aria-label="Member workspace coverage"><div class="access-ring" style="--value:72"><strong>72%</strong><small>READY</small></div><div class="signal-bars"><div class="signal-row"><span>Knowledge</span><i style="--w:94%"></i><b>94</b></div><div class="signal-row"><span>Platform</span><i style="--w:78%;--bar:var(--lime)"></i><b>78</b></div><div class="signal-row"><span>Private tools</span><i style="--w:52%;--bar:var(--amber)"></i><b>52</b></div></div></div></div><div class="login-panel"><div class="auth-mark" aria-hidden="true">ID</div><div class="auth-mode" aria-label="Account action"><a href="?mode=signin" data-auth-mode="signin">Sign in</a><a href="?mode=signup" data-auth-mode="signup">Create account</a></div><h3 data-auth-title>Continue securely</h3><p data-auth-copy>Use a verified identity. Platform Ops never receives or stores your provider password.</p><div class="auth-message" role="status" data-auth-message></div><div class="auth-providers"><a class="auth-button primary" href="/auth/github" data-provider="github"><span class="auth-provider-mark">GH</span><span data-provider-label="GitHub">Continue with GitHub</span><span class="auth-arrow">&gt;</span></a><a class="auth-button" href="/auth/google" data-provider="google" hidden><span class="auth-provider-mark">G</span><span data-provider-label="Google">Continue with Google</span><span class="auth-arrow">&gt;</span></a></div><div class="auth-note">New identities remain pending until an administrator approves access.</div></div></div>"""
 
-ASSETS.mkdir(parents=True, exist_ok=True)
-(ASSETS / "auth.css").write_text(AUTH_CSS, encoding="utf-8")
+login = render(slug="login", title="Member Sign In", tagline="Secure access to premium Platform Ops knowledge.", eyebrow="Platform Ops account", crumbs=[("Home", "../index.html"), ("Sign in", None)], meta=["OAuth", "Admin approval", "No password stored"], sections='<main class="auth-main">' + section("Sign in", "Access your workspace", "", login_body) + '</main>', pager="", up="../", css="../assets/auth.css", canon="login/", robots="noindex,nofollow")
+login = login.replace('<div class="nav-right">', '<div class="nav-right">' + top_actions(""), 1).replace("<body>", '<body class="auth-app auth-login">', 1)
+(ROOT / "login").mkdir(parents=True, exist_ok=True); (ROOT / "login" / "index.html").write_text(login.replace("</body>", LOGIN_SCRIPT + "\n</body>"), encoding="utf-8")
 
-login_body = (
-    '<div class="auth-shell"><div class="auth-mark" aria-hidden="true">GH</div>'
-    '<div class="auth-message" role="status" data-auth-message></div>'
-    '<h3>Continue securely</h3><p>Use a verified GitHub account. Platform Ops never receives or stores your GitHub password.</p>'
-    '<a class="auth-button" href="/auth/github" data-github-login>Continue with GitHub</a>'
-    '<div class="auth-note">New accounts enter a pending state. An administrator approves access before private tools become available.</div></div>')
-login = render(
-    slug="login", title="Member Sign In",
-    tagline="One identity, a short-lived session, and no password database.",
-    eyebrow="Platform Ops account",
-    crumbs=[("Home", "../index.html"), ("Sign in", None)],
-    meta=["GitHub OAuth", "Admin approval", "No password stored"],
-    sections=section("Sign in", "Access your workspace", "Public knowledge remains open. Sign-in is only for private account tools.", login_body),
-    pager="", up="../", css="../assets/auth.css", canon="login/", robots="noindex,nofollow",
-)
-(ROOT / "login").mkdir(parents=True, exist_ok=True)
-(ROOT / "login" / "index.html").write_text(login.replace("</body>", LOGIN_SCRIPT + "\n</body>"), encoding="utf-8")
+user_table = ('<div class="admin-overview"><div class="admin-metric"><b data-admin-total>0</b><span>Total accounts</span></div><div class="admin-metric"><b data-admin-approved>0</b><span>Approved</span></div><div class="admin-metric"><b data-admin-pending>0</b><span>Pending</span></div><div class="admin-metric"><b data-admin-admins>0</b><span>Administrators</span></div></div><div class="user-table-wrap"><table class="user-table"><thead><tr><th>Account</th><th>Role</th><th>Status</th><th>Last sign-in</th><th>Action</th></tr></thead><tbody data-user-list><tr><td colspan="5" class="user-empty">Loading accounts...</td></tr></tbody></table></div>')
 
-user_table = (
-    '<div class="user-table-wrap"><table class="user-table"><thead><tr>'
-    '<th>Account</th><th>Role</th><th>Status</th><th>Last sign-in</th><th>Action</th>'
-    '</tr></thead><tbody data-user-list><tr><td colspan="5" class="user-empty">Loading accounts...</td></tr></tbody></table></div>')
+app_page("admin", "Admin Console", "Account approval and deployment control in one operational view.", "Available only to approved administrator accounts.", [action("https://dash.cloudflare.com/", "Cloudflare", "Worker, D1, security events and runtime settings.", "Open dashboard", True), action("https://github.com/Vishal-Abhinav/Platform-ops-Newsletter/actions", "Deployments", "Build, browser checks and production rollout status.", "Open Actions", True), action("https://search.google.com/search-console", "Search Console", "Indexing, sitemap discovery and search performance.", "Open console", True), action("../colophon/index.html", "Build System", "Generated architecture and build-stage inventory.", "View colophon")], extra_sections=section("Access control", "Members and roles", "Approve, suspend, or promote identities without leaving the site.", user_table), scripts=ADMIN_SCRIPT)
 
-build_page(
-    "admin", "Admin Console", "Manage access without leaving the Platform Ops site.",
-    "This page is available only to approved administrator accounts.",
-    [
-        action("https://dash.cloudflare.com/", "Cloudflare", "Review Worker deployments, D1 usage, logs, and runtime settings.", "Open dashboard", True),
-        action("https://github.com/Vishal-Abhinav/Platform-ops-Newsletter/actions", "Deployments", "Inspect build, browser tests, and production deployment.", "Open GitHub Actions", True),
-        action("https://search.google.com/search-console", "Search Console", "Review indexing, sitemap discovery, and search performance.", "Open Search Console", True),
-        action("../colophon/index.html", "Build System", "Read the generated architecture and build-stage inventory.", "View colophon"),
-    ],
-    extra_sections=section("Access", "Approve and manage accounts", "New GitHub identities remain pending until an administrator approves them.", user_table),
-    scripts=ADMIN_SCRIPT,
-)
-
-build_page(
-    "user", "Member Workspace", "A signed-in starting point for approved Platform Ops readers.",
-    "This page is available to approved readers and administrators.",
-    [
-        action("../issues/index.html", "Latest Issues", "Continue with the newest deep dives and production field notes.", "Browse issues"),
-        action("../categories/index.html", "Knowledge Map", "Move through the complete topic and category map.", "Explore topics"),
-        action("../terminal/index.html", "Practice Terminal", "Work through command exercises in the browser-based lab.", "Open terminal"),
-        action("../index.html", "Ops Assistant", "Return to the public site and open the troubleshooting assistant.", "Open assistant"),
-    ],
-)
+member_viz = ('<div class="account-card"><div class="account-kicker">Learning signal</div><div class="member-viz"><div class="member-ring" style="--value:38"><b>38%</b></div><div class="member-bars"><div class="member-bar"><label><span>Platform Engineering</span><b>64%</b></label><i style="--w:64%;--bar:var(--lime)"></i></div><div class="member-bar"><label><span>Kubernetes</span><b>48%</b></label><i style="--w:48%"></i></div><div class="member-bar"><label><span>Reliability</span><b>31%</b></label><i style="--w:31%;--bar:var(--amber)"></i></div></div></div></div>')
+app_page("user", "Member Workspace", "Premium knowledge and member tools without losing the public reading experience.", "Available to approved readers and administrators.", [action("../categories/platform-engineering/index.html", "Premium Platform", "The gated Platform Engineering path and member-only material.", "Open premium path"), action("../issues/index.html", "Latest Issues", "Continue with the newest production field notes.", "Browse issues"), action("../terminal/index.html", "Practice Terminal", "Run command exercises in the browser lab.", "Open terminal"), action("../index.html", "Ops Assistant", "Return to troubleshooting and the public knowledge system.", "Open assistant")], extra_sections=section("Progress", "Your engineering path", "A compact view of the areas this workspace will remember.", member_viz))
 
 print("  auth -> login/index.html, admin/index.html, user/index.html, assets/auth.css")

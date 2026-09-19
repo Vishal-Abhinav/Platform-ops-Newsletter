@@ -28,9 +28,9 @@ you.
 It assumes you already know what a Pod is. It does not assume the default
 settings are correct.
 
-**No paywall, no required sign-in, no tracking beyond page counts, no AI-generated
-filler.** Every knowledge page is readable without an account, the archive stays up, and
-issues are corrected in place rather than silently replaced.
+**The newsletter and core reference library remain public, with no tracking beyond page
+counts and no AI-generated filler.** Approved members also receive the premium Platform
+Engineering path; the archive stays up and issues are corrected in place.
 
 > **Newest — [Issue #067: Service Mesh Operations](https://platformops.srivantechnologies.com/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html)**
 
@@ -98,7 +98,7 @@ flowchart TB
   DAT["cmd_data.py · hubs_spec.py<br/>topicmap_data.py · terminal_fs.py"]
   HAND["content/ · 25 hand-written pages<br/>static/ · icons, OG cards, 16 fonts"]
 
-  SH["bash tools/build.sh<br/>rm -rf dist, then 35 stages in order"]
+  SH["bash tools/build.sh<br/>rm -rf dist, then 36 stages in order"]
 
   G1["structure<br/>build_hubs, build_topic_pages<br/>a hub per category,<br/>a page per item"]
   G2["navigation<br/>build_kmap, build_topicmap,<br/>build_feed, build_search<br/>maps, RSS, search index"]
@@ -167,7 +167,7 @@ Three directories are input. One is output. Nothing else is either.
 
 | Path | What it is |
 |:--|:--|
-| `tools/` | The build: 35 ordered stages, `verify.py`, and the browser test suites. Python 3.11, standard library only. |
+| `tools/` | The build: 36 ordered stages, `verify.py`, and the browser test suites. Python 3.11, standard library only. |
 | `content/` | The 25 hand-written pages, kept pristine — they are copied into `dist/` and edited *there*, never in place. |
 | `static/` | Copied verbatim: icons, OG cards, 16 self-hosted font files, `assets/motion.css`. |
 | `brand/` | The generated banner. Tracked, deliberately outside `static/`, so it never reaches the site. |
@@ -216,7 +216,7 @@ flowchart TB
   DEV(["Author<br/>edits taxonomy.py or content/"])
 
   subgraph LOCAL["Local"]
-    BUILD["bash tools/build.sh<br/>35 stages · writes dist/"]
+    BUILD["bash tools/build.sh<br/>36 stages · writes dist/"]
     SUITE["verify.py · test_render.py · test_motion.py"]
   end
 
@@ -284,7 +284,7 @@ flowchart TB
   end
 
   subgraph OB["Outbound · the site publishes, nothing reads back"]
-    SM["sitemap.xml<br/>97 indexable URLs"]
+    SM["sitemap.xml<br/>96 indexable URLs"]
     RSS["feed.xml<br/>full archive"]
     GSC["Google Search Console"]
   end
@@ -439,7 +439,7 @@ receive. Please open an issue.
 
 | File | What it holds |
 |:--|:--|
-| [`/sitemap.xml`](https://platformops.srivantechnologies.com/sitemap.xml) | 97 indexable URLs. Pages carrying `noindex` are deliberately withheld — a sitemap is a request to crawl, and listing a page that then declines to be indexed just spends crawl budget. |
+| [`/sitemap.xml`](https://platformops.srivantechnologies.com/sitemap.xml) | 96 indexable URLs. Pages carrying `noindex` are deliberately withheld — a sitemap is a request to crawl, and listing a page that then declines to be indexed just spends crawl budget. |
 | [`/feed.xml`](https://platformops.srivantechnologies.com/feed.xml) | RSS, full archive. |
 | [`/robots.txt`](https://platformops.srivantechnologies.com/robots.txt) | Crawl rules and the sitemap pointer. |
 | `/_headers` | Generated per build; see Security above. |

@@ -111,18 +111,21 @@ CSS = """/* Global search — centred in the nav on every page. */
      [data-p=2] Categories — the Browse panel next to the logo IS this
      [data-p=1] Topics / Issues / Authors — in-page anchors, also in the footer
      [data-p=0] Subscribe — the CTA, never hidden */
-nav{display:grid!important;grid-template-columns:1fr minmax(0,380px) 1fr;
-  align-items:center;}
+nav{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(220px,340px) minmax(0,1fr);
+  align-items:center;column-gap:18px;padding-inline:clamp(18px,2.4vw,42px)!important;}
 nav > .nav-side{display:flex;align-items:center;min-width:0;}
 nav > .nav-side.l{justify-content:flex-start;gap:4px;}
-nav > .nav-side.r{justify-content:flex-end;gap:20px;}
-nav > .nav-side.l > .nav-logo{white-space:nowrap;}
+nav > .nav-side.r{justify-content:flex-end;gap:14px;}
+nav > .nav-side.l > .nav-logo{white-space:nowrap;flex-shrink:0;}
+nav .nav-links{min-width:0;gap:22px;}
+nav .nav-links a,nav .nav-cta{white-space:nowrap;}
+nav .nav-cta{display:inline-flex;align-items:center;justify-content:center;}
 /* minmax(0,380px), not auto: an `auto` middle track holds its 380px and the
    squeeze lands on the side tracks instead, which wrapped the logo onto two
    lines at 1024px. This way the box gives way and the flanks keep their size. */
 .gs-wrap{position:relative;width:100%;min-width:0;}
-@media (max-width:1540px){nav .nav-links li[data-p="2"]{display:none;}
-  nav .nav-links{gap:26px;}}
+@media (max-width:1800px){nav .nav-links li[data-p="2"]{display:none;}
+  nav .nav-links{gap:18px;}}
 @media (max-width:1270px){nav .nav-links li[data-p="1"]{display:none;}}
 /* Below 900 the box and the links are both gone and the side tracks are wildly
    uneven, so equal 1fr tracks only push the logo around. Back to a plain row.
@@ -260,7 +263,7 @@ JS = """var PO_SEARCH = __INDEX__;
       if (!a) return;
       li.setAttribute('data-p',
         a.classList.contains('nav-cta') ? '0'
-          : /categories\/index\.html$/.test(a.getAttribute('href') || '') ? '2'
+          : /categories[/]index[.]html$/.test(a.getAttribute('href') || '') ? '2'
           : '1');
     });
 
@@ -368,6 +371,8 @@ for f in sorted(ROOT.rglob("*.html")):
     if ".git" in f.parts or "tools" in f.parts or skip_page(f.name):
         continue
     rel = str(f.relative_to(ROOT)).replace("\\", "/")
+    if rel == "login/index.html":
+        continue
     s = f.read_text(encoding="utf-8")
     if "assets/search.js" in s:
         already += 1

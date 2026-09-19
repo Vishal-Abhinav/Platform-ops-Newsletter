@@ -27,7 +27,8 @@
       "/auth*",
       "/login*",
       "/admin*",
-      "/user*"
+      "/user*",
+      "/categories/platform-engineering*"
     ]
   },
   "d1_databases": [

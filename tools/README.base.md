@@ -894,7 +894,8 @@ and a half-applied edit can never accumulate.
 | 18 | `build_colophon.py` | everything above + the rendered SVGs | `colophon/index.html` — how the site is built, on the site |
 | 19 | `build_about.py` | taxonomy + register + commands | `about/index.html` — what this newsletter is and what it covers, on the domain rather than in a repo. Derives its numbers from the taxonomy, not from the generated README, so it runs here and the whole-site passes below pick it up like any other page |
 | 20 | `build_architecture.py` | taxonomy + register + corpus + `build.sh` | `architecture/index.html` — the system end to end in seven diagrams |
-| 21 | `build_auth.py` | GitHub OAuth + D1 route contract | branded `/login/` plus noindex `/admin/` and `/user/` pages; the Worker owns sessions, approval state, and role checks |
+| 21 | `build_auth.py` | GitHub / Google OAuth + D1 route contract | branded sign-in, signup, `/admin/`, and `/user/` pages; the Worker owns sessions, approval state, and role checks |
+| 22 | `build_premium.py` | authenticated-route policy | marks premium Platform Engineering content noindex before sitemap generation |
 | 21 | `build_terminal.py` | `terminal_fs.py` | `terminal/index.html` — a Unix shell simulated over an in-memory filesystem |
 | 21 | `build_feed.py` | the register | `feed.xml` |
 | 22 | `build_nav.py` | taxonomy | mega-menu assets, wired into every page |

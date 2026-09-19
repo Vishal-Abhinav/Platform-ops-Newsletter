@@ -142,9 +142,11 @@ STAGE_NOTE = {
                            "seven diagrams: data flow, the build opened up, the "
                            "pull-request path, the request path, deploy and "
                            "rollback, and the trust boundaries"),
-    "build_auth": ("GitHub OAuth + D1 route contract",
-                   "branded login and noindex account pages; the Worker owns "
+    "build_auth": ("GitHub / Google OAuth + D1 route contract",
+                   "branded sign-in, signup and account pages; the Worker owns "
                    "sessions, approval state, and role checks"),
+    "build_premium": ("authenticated-route policy",
+                      "noindex markers for premium Platform Engineering content"),
     "make_banner": ("taxonomy + register + commands",
                     "brand/banner.svg — the animated masthead on the repo's "
                     "GitHub page, with the live/pipeline/planned split drawn "

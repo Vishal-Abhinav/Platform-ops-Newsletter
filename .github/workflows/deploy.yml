@@ -55,6 +55,8 @@ jobs:
           D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
           OAUTH_GITHUB_CLIENT_ID: ${{ secrets.OAUTH_GITHUB_CLIENT_ID }}
           OAUTH_GITHUB_CLIENT_SECRET: ${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}
+          OAUTH_GOOGLE_CLIENT_ID: ${{ secrets.OAUTH_GOOGLE_CLIENT_ID }}
+          OAUTH_GOOGLE_CLIENT_SECRET: ${{ secrets.OAUTH_GOOGLE_CLIENT_SECRET }}
           ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
         run: |
           missing=0
@@ -77,8 +79,13 @@ jobs:
           jq -n \
             --arg client_id "$OAUTH_GITHUB_CLIENT_ID" \
             --arg client_secret "$OAUTH_GITHUB_CLIENT_SECRET" \
+            --arg google_client_id "$OAUTH_GOOGLE_CLIENT_ID" \
+            --arg google_client_secret "$OAUTH_GOOGLE_CLIENT_SECRET" \
             --arg admins "$ADMIN_EMAILS" \
-            '{OAUTH_GITHUB_CLIENT_ID:$client_id,OAUTH_GITHUB_CLIENT_SECRET:$client_secret,ADMIN_EMAILS:$admins}' \
+            '{OAUTH_GITHUB_CLIENT_ID:$client_id,OAUTH_GITHUB_CLIENT_SECRET:$client_secret,ADMIN_EMAILS:$admins}
+             + (if $google_client_id != "" and $google_client_secret != "" then
+                  {OAUTH_GOOGLE_CLIENT_ID:$google_client_id,OAUTH_GOOGLE_CLIENT_SECRET:$google_client_secret}
+                else {} end)' \
             | npx --yes wrangler@4.134.0 secret bulk
 
       - name: Configure production D1 binding

@@ -163,9 +163,9 @@ S_PLATFORM = section(
     "A technical newsletter on Kubernetes, OpenShift, SRE and platform "
     "engineering — written from production systems, not from documentation.",
     table(["Promise", "What it means"],
-          [("No paywall",
-            "Every page is readable without an account. There is nothing to "
-            "sign up for in order to read."),
+          [("Public core",
+            "The newsletter and core reference library stay open. Approved members "
+            "also receive the premium Platform Engineering path."),
            ("Corrected in place",
             "When an issue is wrong it is fixed at its original URL, not "
             "quietly replaced or reposted."),

@@ -296,6 +296,8 @@ for f in sorted(ROOT.rglob("*.html")):
     if ".git" in f.parts or "tools" in f.parts or skip_page(f.name):
         continue
     rel = str(f.relative_to(ROOT)).replace("\\", "/")
+    if rel == "login/index.html":
+        continue
     s = f.read_text(encoding="utf-8")
     if "megamenu.js" in s:
         already += 1

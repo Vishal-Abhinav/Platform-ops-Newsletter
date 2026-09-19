@@ -195,6 +195,7 @@ python3 tools/build_architecture.py
 # shared navigation and security headers stay consistent with the public site.
 say "custom login + protected account pages"
 python3 tools/build_auth.py
+python3 tools/build_premium.py
 
 #   (README moved below build_search — it quotes the search index size)
 

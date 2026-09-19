@@ -169,9 +169,9 @@ you.
 It assumes you already know what a Pod is. It does not assume the default
 settings are correct.
 
-**No paywall, no required sign-in, no tracking beyond page counts, no AI-generated
-filler.** Every knowledge page is readable without an account, the archive stays up, and
-issues are corrected in place rather than silently replaced.
+**The newsletter and core reference library remain public, with no tracking beyond page
+counts and no AI-generated filler.** Approved members also receive the premium Platform
+Engineering path; the archive stays up and issues are corrected in place.
 
 > **Newest — [Issue #{NEWEST_NUM:03d}: {NEWEST_TITLE}]({SITE}/{NEWEST_PATH})**
 
