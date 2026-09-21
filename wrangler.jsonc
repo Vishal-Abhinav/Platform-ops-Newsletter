@@ -52,8 +52,9 @@
     {
       "binding": "DB",
       "database_name": "platform-ops-auth",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "2138dd8a-d142-4879-aa23-04f28addbc78",
       "migrations_dir": "migrations"
     }
   ]
 }
+
