@@ -24,7 +24,7 @@ src = src[:ticker_start] + src[ticker_end:]
 start = src.index('<div class="knowledge-row">')
 end = src.index('<!-- ═══════════ AUTHORS ═══════════ -->')
 
-portals = """<section class="home-portals" aria-labelledby="explore-heading">
+portals = """<section class="home-portals" id="topics" aria-labelledby="explore-heading">
   <div class="home-portals-inner reveal">
     <div class="home-portals-head">
       <h2 id="explore-heading">Explore Platform Ops</h2>
@@ -47,6 +47,28 @@ portals = """<section class="home-portals" aria-labelledby="explore-heading">
 
 """
 src = src[:start] + portals + src[end:]
+
+hash_js = """
+// Robust deep-link handling for homepage aliases that are shared externally.
+// The final homepage now links to dedicated pages, but /#topics and /#issues
+// remain stable entry points for older links and search-result sitelinks.
+(function(){
+  function jumpToHash(){
+    var id = (location.hash || '').replace(/^#/, '');
+    if (!id) return;
+    var target = document.getElementById(id);
+    if (!target) return;
+    var nav = document.querySelector('nav');
+    var offset = (nav ? nav.getBoundingClientRect().height : 0) + 22;
+    var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  }
+  window.addEventListener('hashchange', jumpToHash);
+  window.addEventListener('load', function(){ setTimeout(jumpToHash, 80); });
+})();
+
+"""
+src = src.replace("/* ── Keep the Latest Issues scroll panel flush", hash_js + "/* ── Keep the Latest Issues scroll panel flush", 1)
 
 authors = src.index('<!-- ═══════════ AUTHORS ═══════════ -->')
 subscribe = src.index('<!-- ═══════════ SUBSCRIBE ═══════════ -->', authors)

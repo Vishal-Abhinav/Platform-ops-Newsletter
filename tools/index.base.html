@@ -98,6 +98,12 @@ html:not([data-theme="dark"]) .theme-toggle .icon-moon { display: none; }
 /* ─── RESET ─── */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior: smooth; }
+/* External links such as /#topics and /#issues land under the fixed top nav
+   unless the target reserves space for the chrome. */
+#topics,
+#issues {
+  scroll-margin-top: 96px;
+}
 
 body {
   background: var(--page-bg);
@@ -3099,6 +3105,24 @@ function toggleTopic(card){
 document.querySelectorAll('.tc-badge-link').forEach(link=>{
   link.addEventListener('click', e=>e.stopPropagation());
 });
+
+// Robust deep-link handling for anchors that are shared from outside the page.
+// Native hash jumps can fire before fonts/layout settle; this repeats the jump
+// after load and accounts for the fixed nav.
+(function(){
+  function jumpToHash(){
+    var id = (location.hash || '').replace(/^#/, '');
+    if (!id) return;
+    var target = document.getElementById(id);
+    if (!target) return;
+    var nav = document.querySelector('nav');
+    var offset = (nav ? nav.getBoundingClientRect().height : 0) + 22;
+    var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  }
+  window.addEventListener('hashchange', jumpToHash);
+  window.addEventListener('load', function(){ setTimeout(jumpToHash, 80); });
+})();
 
 /* ── Keep the Latest Issues scroll panel flush with the Topics column height ── */
 function syncIssuesScrollHeight(){

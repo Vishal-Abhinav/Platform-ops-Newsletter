@@ -720,7 +720,7 @@ _FLAP = "".join(
 
 _STAMP = _ISS[0][4].strftime("%d %b %Y").upper()
 
-NB = f"""<section class="nb" aria-labelledby="nb-head">
+NB = f"""<section class="nb" id="issues" aria-labelledby="nb-head">
   <div class="nb-inner">
     <div class="nb-frame">
       <div class="nb-top">

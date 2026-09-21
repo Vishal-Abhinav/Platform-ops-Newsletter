@@ -233,10 +233,10 @@ for page in sorted(ROOT.rglob("*.html")):
         continue
     rel = page.relative_to(ROOT).as_posix()
     src = page.read_text(encoding="utf-8")
-    # Thin backlog placeholders and private account pages are intentionally
-    # outside the published knowledge surface. Do not add a public assistant
-    # launcher there (on account pages it also competes with the session UI).
-    if re.search(r'<meta name="robots"[^>]*noindex', src, re.I):
+    # The assistant launcher should be available on every real knowledge page,
+    # including noindex placeholders and protected topic pages. Keep it off the
+    # auth/account control surfaces, where it competes with login/session UI.
+    if rel.startswith(("login/", "admin/", "user/")):
         continue
     if "assets/assistant.js" in src:
         already += 1
