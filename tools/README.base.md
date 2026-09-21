@@ -960,7 +960,7 @@ There is no client-side framework and nothing to hydrate. Every interactive part
 | Global search | One JSON array inlined in `assets/search.js`, filtered in memory — no request, no index server |
 | Mega-menu | One markup block injected into every page by `build_nav.py`, with the depth-correct links baked in |
 | Command tables | Group filter + substring match over rows already in the document |
-| Topic requests | Queued in `sessionStorage`, posted to Kit as a custom field on signup |
+| Topic requests | Queued in `sessionStorage`, posted to the Cloudflare Worker and stored in D1 on signup |
 | Analytics | GoatCounter, loaded only if a site code is set — empty by default, so nothing is sent |
 
 The only external requests a page makes are Google Fonts and, if enabled, GoatCounter.
@@ -1022,7 +1022,7 @@ The homepage is a single hand-written HTML file with no framework behind it:
 | ♾️ **Animated DevOps loop** | SVG infinity loop with the eight lifecycle stages and a light pulse racing the path |
 | 🗺️ **Knowledge map** | All 521 topics, grouped into 33 categories under 10 pillars — search by name, filter by status, open a pillar to see what's shipped and what's queued |
 | 🖥️ **Coverage terminal** | Terminal-style `tree` view of the ten pillars with live-vs-total counts, and a `ls published/` listing that links straight into every issue |
-| 🔔 **Topic requests** | Clicking a pipeline or planned topic queues it; the signup then tells Kit which topics that reader is waiting for |
+| 🔔 **Topic requests** | Clicking a pipeline or planned topic queues it; the signup stores those requested topics with the subscriber in Cloudflare D1 |
 | 📡 **RSS** | `feed.xml` carries all 11 issues, and every page advertises it in its `<head>` |
 | 📌 **Pinned archive** | On desktop Latest Issues is pinned beside the map and scrolls inside itself, so the issues stay one glance away however far down the map you are |
 | 🔍 **Searchable glossary** | 190 terms across 15 categories, with standalone deep-dive pages for the terms that need one |
@@ -1039,13 +1039,9 @@ The homepage is a single hand-written HTML file with no framework behind it:
 
 456 of the 521 topics have no page yet, so a reader who finds one has nowhere to go.
 Clicking a pipeline or planned topic queues it instead. The queue rides along with
-the signup as a Kit custom field, which turns the backlog into a ranked list of what
-people are actually waiting for.
-
-**One-time Kit setup:** create a custom field named `topic_request`
-(Grow → Subscribers → the gear icon → Custom fields). Without it Kit silently drops
-the value — signups still work, you just don't see the topics. Sort your subscriber
-list by that column to see which topics come up most.
+the signup as `topic_request`, and the Cloudflare Worker stores it beside the
+subscriber in D1. Export or query `newsletter_subscribers` to see which topics
+come up most.
 
 ---
 

@@ -130,19 +130,6 @@ for name in ("LICENSE", "NOTICE"):
         f.write_text(out, encoding="utf-8")
         touched.append(name)
 
-# The Kit email template is not a published page — it is pasted into Kit — but
-# its links go out in actual emails, so it follows the canonical origin too.
-kit = ROOT / "newsletter" / "kit-template.html"
-if kit.exists():
-    t = kit.read_text(encoding="utf-8")
-    out = t
-    for origin in KNOWN:
-        if origin != BASE:
-            out = out.replace(origin, BASE)
-    if out != t:
-        kit.write_text(out, encoding="utf-8")
-        touched.append("newsletter/kit-template.html (re-paste this into Kit)")
-
 print(f"canonical origin -> {BASE}")
 print(f"  {len(touched)} page(s) rewritten"
       + (f", first: {touched[0]}" if touched else " (already canonical)"))

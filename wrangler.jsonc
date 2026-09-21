@@ -25,6 +25,7 @@
     "binding": "ASSETS",
     "run_worker_first": [
       "/auth*",
+      "/api*",
       "/login*",
       "/admin*",
       "/user*",

@@ -116,7 +116,7 @@ N_CMDS = sum(len(g[3]) for spec in CMD_SPECS for g in spec["groups"])
 N_CMD_PAGES = len(CMD_SPECS)
 
 pages = sorted(p for p in ROOT.rglob("*.html")
-               if "tools" not in p.parts and p.name != "kit-template.html")
+               if "tools" not in p.parts)
 N_PAGES = len(pages)
 by_dir = {}
 for p in pages:

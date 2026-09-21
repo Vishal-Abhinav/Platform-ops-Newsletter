@@ -2854,7 +2854,7 @@ a.footer-logo:hover{color:#fff;}
     <div class="section-tag" style="justify-content:center">Free Forever</div>
     <h2 class="section-title">JOIN 250+<br>ENGINEERS</h2>
     <p class="section-lead">One deep-dive every month. No fluff, no spam — just battle-tested knowledge from the Platform Engineering trenches.</p>
-    <form class="sub-form" id="subscribeForm" method="post" action="" target="subscribeSink">
+    <form class="sub-form" id="subscribeForm" method="post" action="/api/subscribe">
       <label class="sr-only" for="subEmail">Email address</label>
       <input class="sub-input" id="subEmail" type="email" name="email"
              placeholder="your@email.com" required autocomplete="email" />
@@ -2864,7 +2864,6 @@ a.footer-logo:hover{color:#fff;}
     </form>
     <div class="sub-status" id="subStatus" role="status" aria-live="polite"></div>
     <div class="sub-note">No spam · Unsubscribe anytime · Published monthly</div>
-    <iframe name="subscribeSink" id="subscribeSink" class="sr-only" title="Subscription response" aria-hidden="true"></iframe>
   </div>
 </div>
 
@@ -3030,38 +3029,15 @@ window.addEventListener('scroll', () => {
 /* ══════════════════════════════════════════════════════════════════════
    NEWSLETTER SIGNUP
    ──────────────────────────────────────────────────────────────────────
-   This site is static (GitHub Pages), so there is no backend to receive
-   the form. Instead it posts straight to a newsletter provider's PUBLIC
-   embed endpoint. Set ONE value below and signup goes live.
-
-   ⚠  NEVER paste a secret API key here. This file is public — anyone can
-      read it. Only ever use the provider's public form / embed URL.
-
-   Paste the provider's form URL into ENDPOINT:
-
-     Buttondown  https://buttondown.com/api/emails/embed-subscribe/USERNAME
-     Kit         https://app.kit.com/forms/FORM_ID/subscriptions
-     MailerLite  the POST url shown in an embedded (HTML) form
-     Listmonk    https://YOUR-HOST/subscription/form   (self-hosted, open source)
-
-   Providers disagree on what the email field is called — Kit uses
-   "email_address", Buttondown and Listmonk use "email". To make a wrong
-   guess impossible, the form posts the address under BOTH names; the
-   provider reads the one it wants and ignores the other. If yours expects
-   something else again (MailerLite uses "fields[email]"), copy the exact
-   name out of the embed snippet they gave you and put it in FIELD.
+   This posts to the Cloudflare Worker that already fronts the site. The
+   address lands in D1, so the subscriber list stays inside the same
+   Cloudflare setup as authentication and protected pages.
    ══════════════════════════════════════════════════════════════════════ */
-const NEWSLETTER = {
-  ENDPOINT: 'https://app.kit.com/forms/9900411/subscriptions',   // Kit form #9900411
-  FIELD:    'email_address',   // ← Kit's name; posted alongside "email" either way
-};
-
 (function(){
   const form   = document.getElementById('subscribeForm');
   const input  = document.getElementById('subEmail');
   const btn    = form && form.querySelector('.sub-btn');
   const status = document.getElementById('subStatus');
-  const sink   = document.getElementById('subscribeSink');
   if (!form || !input || !status) return;
 
   function say(msg, kind){
@@ -3069,63 +3045,47 @@ const NEWSLETTER = {
     status.className = 'sub-status show ' + (kind || '');
   }
 
-  // Point the form at the provider and use their field name.
-  if (NEWSLETTER.ENDPOINT) {
-    form.setAttribute('action', NEWSLETTER.ENDPOINT);
-    input.setAttribute('name', NEWSLETTER.FIELD);
-  }
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-  form.addEventListener('submit', (e) => {
-    // Not configured yet — say so honestly instead of pretending it worked.
-    if (!NEWSLETTER.ENDPOINT) {
-      e.preventDefault();
-      say('Signup isn’t connected yet — please check back shortly.', 'err');
-      return;
-    }
     // Honeypot: a filled hidden field means a bot. Drop it silently.
-    if (form.hp_website && form.hp_website.value) { e.preventDefault(); return; }
+    if (form.hp_website && form.hp_website.value) return;
 
     if (!input.checkValidity()) {
-      e.preventDefault();
       say('That doesn’t look like a valid email address.', 'err');
       input.focus();
       return;
     }
 
-    // Post the address under every common field name, so a provider that
-    // wants "email_address" and one that wants "email" both find it. Only
-    // the names not already used by the visible input get added.
-    ['email', 'email_address'].forEach((name) => {
-      if (name === input.getAttribute('name')) return;
-      let alt = form.querySelector('input[data-alias="' + name + '"]');
-      if (!alt) {
-        alt = document.createElement('input');
-        alt.type = 'hidden';
-        alt.name = name;
-        alt.setAttribute('data-alias', name);
-        form.appendChild(alt);
-      }
-      alt.value = input.value;
-    });
-
-    // Let the form post natively into the hidden iframe (no CORS problems,
-    // and it still works if fetch is blocked). We can't read a cross-origin
-    // response, so we confirm the post completed and point at the inbox.
     btn.disabled = true;
     btn.textContent = 'Subscribing…';
-    say('Sending…', '');
+    say('Saving your spot…', '');
 
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
+    try {
+      const response = await fetch(form.action || '/api/subscribe', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: input.value,
+          hp_website: form.hp_website ? form.hp_website.value : '',
+          topic_request: document.getElementById('subTopicField') ? document.getElementById('subTopicField').value : '',
+          source: 'homepage'
+        })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'Subscription could not be saved right now.');
+      say(result.message || 'You are subscribed. Welcome to Platform Ops.', 'ok');
+      form.reset();
+    } catch (error) {
+      say(error.message || 'Subscription could not be saved right now.', 'err');
+    } finally {
       btn.disabled = false;
       btn.textContent = 'Subscribe →';
-      say('Almost there — check your inbox to confirm your subscription.', 'ok');
-      form.reset();
-    };
-    if (sink) sink.addEventListener('load', finish, { once: true });
-    setTimeout(finish, 4000);   // fallback if the iframe load never fires
+    }
   });
 })();
 

@@ -51,7 +51,7 @@ N_CATS = sum(len(c) for _, c in PILLARS)
 N_ISSUES = len(ISSUES)
 N_CMDS = sum(len(g[3]) for spec in CMD_SPECS for g in spec["groups"])
 N_PAGES = len([q for q in ROOT.rglob("*.html")
-               if "tools" not in q.parts and q.name != "kit-template.html"])
+               if "tools" not in q.parts])
 
 # Stage count read off build.sh rather than typed, for the same reason as
 # everywhere else: the list moves, and a number that describes it must move too.

@@ -6,7 +6,9 @@ class FakeDatabase {
   constructor() {
     this.users = [];
     this.sessions = [];
+    this.newsletter = [];
     this.nextId = 1;
+    this.nextSubscriberId = 1;
   }
 
   prepare(sql) {
@@ -34,10 +36,17 @@ class FakeDatabase {
         if (query.startsWith("SELECT COUNT(*) AS total")) {
           return { total: db.users.filter((item) => item.role === "admin" && item.status === "approved").length };
         }
+        if (query.includes("FROM newsletter_subscribers") && query.includes("WHERE email")) {
+          const [email] = values;
+          return db.newsletter.find((item) => item.email.toLowerCase() === email.toLowerCase()) || null;
+        }
         return null;
       },
       async all() {
         if (query.includes("FROM users ORDER BY")) return { results: [...db.users] };
+        if (query.includes("FROM newsletter_subscribers") && query.includes("ORDER BY created_at DESC")) {
+          return { results: [...db.newsletter].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))) };
+        }
         return { results: [] };
       },
       async run() {
@@ -61,6 +70,23 @@ class FakeDatabase {
           Object.assign(user, { role, status, updated_at });
         } else if (query === "DELETE FROM sessions WHERE user_id = ?") {
           db.sessions = db.sessions.filter((item) => item.user_id !== values[0]);
+        } else if (query.startsWith("INSERT INTO newsletter_subscribers")) {
+          const [email, source, requested_topics, unsubscribe_token, created_at, updated_at] = values;
+          db.newsletter.push({
+            id: db.nextSubscriberId++,
+            email,
+            status: "subscribed",
+            source,
+            requested_topics,
+            unsubscribe_token,
+            created_at,
+            updated_at,
+            unsubscribed_at: null,
+          });
+        } else if (query.startsWith("UPDATE newsletter_subscribers")) {
+          const [source, requested_topics, updated_at, id] = values;
+          const subscriber = db.newsletter.find((item) => item.id === id);
+          Object.assign(subscriber, { status: "subscribed", source, requested_topics, updated_at, unsubscribed_at: null });
         }
         return { success: true };
       },
@@ -206,6 +232,33 @@ let response = await call("/public/index.html");
 assert.equal(response.status, 200);
 assert.equal(await response.text(), "asset:/public/index.html");
 
+response = await call("/api/subscribe", {
+  method: "POST",
+  origin: "https://evil.example",
+  body: JSON.stringify({ email: "reader@example.com" }),
+});
+assert.equal(response.status, 403);
+
+response = await call("/api/subscribe", {
+  method: "POST",
+  origin: "https://example.com",
+  body: JSON.stringify({ email: " Reader@Example.COM ", source: "homepage", topic_request: "OpenShift, SRE" }),
+});
+assert.equal(response.status, 200);
+assert.equal((await response.json()).subscribed, true);
+assert.equal(db.newsletter.length, 1);
+assert.equal(db.newsletter[0].email, "reader@example.com");
+assert.equal(db.newsletter[0].requested_topics, "OpenShift, SRE");
+
+response = await call("/api/subscribe", {
+  method: "POST",
+  origin: "https://example.com",
+  body: JSON.stringify({ email: "reader@example.com", source: "footer" }),
+});
+assert.equal(response.status, 200);
+assert.equal(db.newsletter.length, 1);
+assert.equal(db.newsletter[0].source, "footer");
+
 response = await call("/admin/");
 assert.equal(response.status, 302);
 assert.equal(response.headers.get("location"), "/login/?next=%2Fadmin%2F");
@@ -255,6 +308,10 @@ const users = (await response.json()).users;
 const reader = users.find((item) => item.email === "reader@example.com");
 assert.equal(reader.status, "approved");
 
+response = await call("/admin/api/subscribers", { cookie: `po_session=${adminLogin.session}` });
+assert.equal(response.status, 200);
+assert.equal((await response.json()).subscribers[0].email, "reader@example.com");
+
 response = await call(`/admin/api/users/${reader.id}`, {
   method: "PATCH",
   cookie: `po_session=${adminLogin.session}`,
@@ -301,7 +358,7 @@ assert.equal(response.headers.get("location"), "/login/?status=signed-out");
 
 const wrangler = readFileSync(new URL("../wrangler.jsonc", import.meta.url), "utf8");
 assert.match(wrangler, /"binding"\s*:\s*"DB"/);
-assert.match(wrangler, /"run_worker_first"[\s\S]*"\/auth\*"[\s\S]*"\/login\*"[\s\S]*"\/admin\*"[\s\S]*"\/user\*"/);
+assert.match(wrangler, /"run_worker_first"[\s\S]*"\/auth\*"[\s\S]*"\/api\*"[\s\S]*"\/login\*"[\s\S]*"\/admin\*"[\s\S]*"\/user\*"/);
 for (const slug of premiumSlugs) {
   assert.ok(wrangler.includes(`"/categories/${slug}*"`));
 }

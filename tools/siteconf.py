@@ -139,7 +139,7 @@ for _tok in GOOGLE_SITE_VERIFICATIONS:
 # file needs no code change.
 import re as _re                                       # noqa: E402
 
-SKIP_NAMES = {"kit-template.html"}
+SKIP_NAMES = set()
 _GOOGLE_VERIFY = _re.compile(r"google[0-9a-f]{8,}\.html\Z")
 
 

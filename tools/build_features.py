@@ -2,7 +2,7 @@
 """Second build stage for index.html:
 
   1. topic requests  — clicking a pipeline/planned topic queues it, and the
-                       subscribe form posts the queue to Kit as a custom field
+                       subscribe form posts the queue to the Cloudflare Worker
   2. analytics       — GoatCounter loader (inert until the code is filled in)
                        plus events for search, filters, requests and signups
   3. RSS             — discovery link in the head, links in the page
@@ -128,7 +128,7 @@ src = src.replace('<!-- ═══════════ SUBSCRIBE ════
                   '</button>\n\n'
                   '<!-- ═══════════ SUBSCRIBE ═══════════ -->', 1)
 
-# ── 5. subscribe form: queued-topic chips, the Kit field, an RSS alternative ──
+# ── 5. subscribe form: queued-topic chips, Worker field, RSS alternative ──
 src = src.replace(
     '    <form class="sub-form" id="subscribeForm"',
     '    <div class="sub-requests" id="subRequests">\n'
@@ -139,9 +139,7 @@ src = src.replace(
 
 src = src.replace(
     '      <button class="sub-btn" type="submit">Subscribe →</button>',
-    '      <!-- Kit custom field. Create a field named topic_request in Kit\n'
-    '           (Grow → Subscribers → the gear → Custom fields) or Kit drops it. -->\n'
-    '      <input type="hidden" name="fields[topic_request]" id="subTopicField" value="">\n'
+    '      <input type="hidden" name="topic_request" id="subTopicField" value="">\n'
     '      <button class="sub-btn" type="submit">Subscribe →</button>', 1)
 
 src = src.replace(
@@ -167,7 +165,7 @@ function poTrack(path, title){
 
 /* ── Topic requests ──────────────────────────────────────────────────────
    A pipeline or planned topic is a dead end otherwise: there's nothing to
-   click through to. Queuing it turns that into a signup and, in Kit, into a
+   click through to. Queuing it turns that into a signup and, in D1, into a
    ranked list of what people actually want written next. Kept in
    sessionStorage so a reload mid-browse doesn't lose the queue. ---------- */
 (function(){
@@ -272,6 +270,6 @@ src = src.replace("""      say('Almost there — check your inbox to confirm you
 
 SRC.write_text(src, encoding='utf-8')
 print(f"index.html -> {len(src)} bytes")
-for probe in ('PO_GC', 'reqPill', 'fields[topic_request]', 'poTrack', 'feed.xml',
+for probe in ('PO_GC', 'reqPill', 'topic_request', 'poTrack', 'feed.xml',
               'sub-req-chips', 'km-hint', 'RSS Feed'):
     print(f"  {probe:24} x{src.count(probe)}")

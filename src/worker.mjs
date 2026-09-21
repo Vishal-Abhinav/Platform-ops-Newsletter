@@ -467,6 +467,62 @@ function sameOrigin(request) {
   return request.headers.get("origin") === new URL(request.url).origin;
 }
 
+function normalizedEmail(value) {
+  const email = String(value || "").trim().toLowerCase();
+  if (email.length < 6 || email.length > 254) return "";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "";
+  return email;
+}
+
+async function subscribe(request, env) {
+  if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, { allow: "POST" });
+  if (!env.DB) return json({ error: "Newsletter storage is not configured" }, 503);
+  if (!sameOrigin(request)) return json({ error: "Invalid request origin" }, 403);
+
+  let body = {};
+  try {
+    const type = request.headers.get("content-type") || "";
+    if (type.includes("application/json")) {
+      body = await request.json();
+    } else {
+      const form = await request.formData();
+      body = Object.fromEntries(form.entries());
+    }
+  } catch (_) {
+    return json({ error: "Invalid subscription request" }, 400);
+  }
+
+  if (body.hp_website) return json({ subscribed: true, message: "You are subscribed." });
+
+  const email = normalizedEmail(body.email);
+  if (!email) return json({ error: "Enter a valid email address" }, 400);
+
+  const source = String(body.source || "homepage").slice(0, 64).replace(/[^\w:.-]/g, "-") || "homepage";
+  const requestedTopics = String(body.topic_request || "").trim().slice(0, 500);
+  const now = new Date().toISOString();
+  const existing = await env.DB.prepare(`
+    SELECT id, unsubscribe_token FROM newsletter_subscribers
+     WHERE email = ? COLLATE NOCASE
+  `).bind(email).first();
+
+  if (existing) {
+    await env.DB.prepare(`
+      UPDATE newsletter_subscribers
+         SET status = 'subscribed', source = ?, requested_topics = ?,
+             updated_at = ?, unsubscribed_at = NULL
+       WHERE id = ?
+    `).bind(source, requestedTopics, now, existing.id).run();
+  } else {
+    await env.DB.prepare(`
+      INSERT INTO newsletter_subscribers
+        (email, status, source, requested_topics, unsubscribe_token, created_at, updated_at)
+      VALUES (?, 'subscribed', ?, ?, ?, ?, ?)
+    `).bind(email, source, requestedTopics, randomToken(24), now, now).run();
+  }
+
+  return json({ subscribed: true, message: "You are subscribed. Welcome to Platform Ops." });
+}
+
 async function listUsers(env) {
   const result = await env.DB.prepare(`
     SELECT id, github_login, auth_provider, provider_login, email, name, avatar_url,
@@ -474,6 +530,15 @@ async function listUsers(env) {
       FROM users ORDER BY CASE status WHEN 'suspended' THEN 1 ELSE 0 END, created_at DESC
   `).all();
   return json({ users: result.results || [] });
+}
+
+async function listSubscribers(env) {
+  const result = await env.DB.prepare(`
+    SELECT id, email, status, source, requested_topics, created_at, updated_at, unsubscribed_at
+      FROM newsletter_subscribers
+     ORDER BY created_at DESC
+  `).all();
+  return json({ subscribers: result.results || [] });
 }
 
 async function updateUser(request, env, actor, id) {
@@ -536,6 +601,7 @@ async function protectedRoute(request, env, url, area) {
     : redirect("/user/?error=forbidden");
   if ((area === "admin" || area === "user") && url.pathname === `/${area}/api/session`) return json({ authenticated: true, user: publicUser(user) });
   if (area === "admin" && url.pathname === "/admin/api/users" && request.method === "GET") return listUsers(env);
+  if (area === "admin" && url.pathname === "/admin/api/subscribers" && request.method === "GET") return listSubscribers(env);
   const match = area === "admin" && url.pathname.match(/^\/admin\/api\/users\/(\d+)$/);
   if (match && request.method === "PATCH") return updateUser(request, env, user, Number(match[1]));
   if ((area === "admin" || area === "user") && url.pathname.startsWith(`/${area}/api/`)) return json({ error: "Not found" }, 404);
@@ -546,6 +612,7 @@ async function protectedRoute(request, env, url, area) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/api/subscribe") return subscribe(request, env);
     if (url.pathname.startsWith("/auth/")) return handleAuth(request, env, url);
     const area = areaFor(url.pathname);
     if (area) return protectedRoute(request, env, url, area);

@@ -50,7 +50,7 @@ N_PILL = len(PILLARS)
 N_ISSUES = len(ISSUES)
 N_CMDS = sum(len(g[3]) for spec in CMD_SPECS for g in spec["groups"])
 N_PAGES = len([q for q in ROOT.rglob("*.html")
-               if "tools" not in q.parts and q.name != "kit-template.html"])
+               if "tools" not in q.parts])
 
 
 # ── the diagram, checked against the source it was rendered from ────────────
