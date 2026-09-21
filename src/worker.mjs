@@ -749,20 +749,29 @@ async function sendLatestIssue(request, env) {
   const content = issueEmail(issue);
   let sent = 0;
   let failed = 0;
+  const errors = [];
   for (const subscriber of subscribers) {
     const delivery = await sendEmail(env, { to: subscriber.email, ...content });
-    if (delivery.sent) sent += 1; else failed += 1;
+    if (delivery.sent) {
+      sent += 1;
+    } else {
+      failed += 1;
+      errors.push({ email: subscriber.email, error: delivery.error || delivery.reason || "Email send failed" });
+    }
     await recordDelivery(env, campaign.id, subscriber, delivery);
   }
   const summary = await refreshCampaign(env, campaign.id);
-  return json({
+  const payload = {
     issue,
     sent,
     failed,
     attempted: subscribers.length,
     remaining: Math.max(0, summary.subscribers - summary.sent),
     campaign: summary,
-  });
+    errors,
+  };
+  if (!sent && failed) return json({ ...payload, error: errors[0]?.error || "No newsletter email could be sent" }, 502);
+  return json(payload);
 }
 
 async function updateUser(request, env, actor, id) {
