@@ -525,30 +525,64 @@ async function sendEmail(env, { to, subject, htmlBody, textBody }) {
 
 function confirmationEmail(email, origin) {
   const subject = "You are subscribed to Platform Ops";
+  const issuesUrl = `${origin}/login/?next=%2Fissues%2F`;
+  const signatureHtml = `<p style="font-size:13px;line-height:1.65;color:#b7c0ce;margin:30px 0 0;border-top:1px solid #263241;padding-top:18px">Vishal Abhinav<br>Platform Engineer<br>Srivan Technologies</p>`;
+  const signatureText = "Vishal Abhinav\nPlatform Engineer\nSrivan Technologies";
   const htmlBody = `<!doctype html><html><body style="margin:0;background:#080b10;color:#f5f7fb;font-family:Arial,sans-serif">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#080b10;padding:28px"><tr><td align="center">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#111820;border:1px solid #2a3441">
-<tr><td style="padding:28px"><div style="font:12px monospace;letter-spacing:2px;text-transform:uppercase;color:#00c7d9">Platform Ops</div>
-<h1 style="font-size:32px;line-height:1.05;margin:14px 0 12px;color:#fff">Subscription confirmed</h1>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#080b10;padding:32px 18px"><tr><td align="center">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:760px;background:#111820;border:1px solid #2a3441">
+<tr><td style="padding:34px"><div style="font:12px monospace;letter-spacing:2px;text-transform:uppercase;color:#00c7d9">Platform Ops newsletter</div>
+<h1 style="font-size:36px;line-height:1.05;margin:14px 0 12px;color:#fff">Subscription confirmed</h1>
 <p style="font-size:15px;line-height:1.65;color:#b7c0ce">You are on the Platform Ops newsletter list as <strong style="color:#fff">${html(email)}</strong>. New production deep-dives will arrive when a new issue is published.</p>
-<p style="margin:24px 0 0"><a href="${html(origin)}/issues/" style="display:inline-block;background:#f5f7fb;color:#081018;text-decoration:none;padding:12px 16px;font:12px monospace;letter-spacing:1px;text-transform:uppercase">Browse latest issues</a></p>
+<p style="margin:24px 0 0"><a href="${html(issuesUrl)}" style="display:inline-block;background:#f5f7fb;color:#081018;text-decoration:none;padding:12px 16px;font:12px monospace;letter-spacing:1px;text-transform:uppercase">Sign in to browse issues</a></p>
+${signatureHtml}
 </td></tr></table></td></tr></table></body></html>`;
-  const textBody = `You are subscribed to Platform Ops as ${email}.\n\nBrowse latest issues: ${origin}/issues/\n`;
+  const textBody = `You are subscribed to Platform Ops as ${email}.\n\nSign in to browse latest issues: ${issuesUrl}\n\n${signatureText}\n`;
   return { subject, htmlBody, textBody };
+}
+
+function issueLoginUrl(issue) {
+  const url = new URL(issue.url);
+  return `${url.origin}/login/?next=${encodeURIComponent(url.pathname + url.search)}`;
+}
+
+function issueDateLabel(issue) {
+  if (!issue.published_at) return "Latest published issue";
+  try {
+    return new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(new Date(issue.published_at));
+  } catch (_) {
+    return "Latest published issue";
+  }
 }
 
 function issueEmail(issue) {
   const subject = `Platform Ops #${String(issue.number).padStart(3, "0")} - ${issue.title}`;
+  const readUrl = issueLoginUrl(issue);
+  const issueNumber = String(issue.number).padStart(3, "0");
+  const dateLabel = issueDateLabel(issue);
+  const signatureHtml = `<p style="font-size:13px;line-height:1.65;color:#b7c0ce;margin:30px 0 0;border-top:1px solid #263241;padding-top:18px">Vishal Abhinav<br>Platform Engineer<br>Srivan Technologies</p>`;
+  const signatureText = "Vishal Abhinav\nPlatform Engineer\nSrivan Technologies";
   const htmlBody = `<!doctype html><html><body style="margin:0;background:#080b10;color:#f5f7fb;font-family:Arial,sans-serif">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#080b10;padding:28px"><tr><td align="center">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px;background:#111820;border:1px solid #2a3441">
-<tr><td style="padding:30px"><div style="font:12px monospace;letter-spacing:2px;text-transform:uppercase;color:#ff4545">New Platform Ops issue</div>
-<h1 style="font-size:34px;line-height:1.05;margin:14px 0 12px;color:#fff">#${String(issue.number).padStart(3, "0")} - ${html(issue.title)}</h1>
-<p style="font-size:15px;line-height:1.65;color:#b7c0ce">${html(issue.blurb || "")}</p>
-<p style="margin:26px 0 0"><a href="${html(issue.url)}" style="display:inline-block;background:#f5f7fb;color:#081018;text-decoration:none;padding:12px 16px;font:12px monospace;letter-spacing:1px;text-transform:uppercase">Read the issue</a></p>
-<p style="font-size:12px;line-height:1.6;color:#7f8895;margin-top:26px">You are receiving this because you subscribed to Platform Ops.</p>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#080b10;padding:32px 18px"><tr><td align="center">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:840px;background:#111820;border:1px solid #2a3441">
+<tr><td style="padding:34px 38px 24px;border-bottom:1px solid #263241"><div style="font:12px monospace;letter-spacing:2px;text-transform:uppercase;color:#ff4545">New Platform Ops issue</div>
+<h1 style="font-size:38px;line-height:1.05;margin:14px 0 12px;color:#fff">#${issueNumber} - ${html(issue.title)}</h1>
+<p style="font-size:16px;line-height:1.65;color:#d7dde7;margin:0">${html(issue.blurb || "")}</p></td></tr>
+<tr><td style="padding:0 38px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse">
+<tr><td width="33.33%" style="padding:16px 14px 15px 0;border-bottom:1px solid #263241"><div style="font:10px monospace;letter-spacing:1.4px;text-transform:uppercase;color:#7f8895">Issue</div><div style="font-size:22px;font-weight:700;color:#fff;margin-top:4px">#${issueNumber}</div></td>
+<td width="33.33%" style="padding:16px 14px 15px;border-bottom:1px solid #263241;border-left:1px solid #263241"><div style="font:10px monospace;letter-spacing:1.4px;text-transform:uppercase;color:#7f8895">Published</div><div style="font-size:15px;font-weight:700;color:#fff;margin-top:7px">${html(dateLabel)}</div></td>
+<td width="33.33%" style="padding:16px 0 15px 14px;border-bottom:1px solid #263241;border-left:1px solid #263241"><div style="font:10px monospace;letter-spacing:1.4px;text-transform:uppercase;color:#7f8895">Access</div><div style="font-size:15px;font-weight:700;color:#fff;margin-top:7px">Login required</div></td></tr>
+</table></td></tr>
+<tr><td style="padding:26px 38px 34px">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#0b1118;border:1px solid #263241"><tr><td style="padding:18px 20px">
+<div style="font:11px monospace;letter-spacing:1.6px;text-transform:uppercase;color:#00c7d9;margin-bottom:9px">Issue report</div>
+<p style="font-size:14px;line-height:1.7;color:#b7c0ce;margin:0">This month focuses on the operational path behind the newest Platform Ops deep-dive. Use the secure link below; after sign-in, the site opens the issue directly.</p>
+</td></tr></table>
+<p style="margin:26px 0 0"><a href="${html(readUrl)}" style="display:inline-block;background:#f5f7fb;color:#081018;text-decoration:none;padding:13px 18px;font:12px monospace;letter-spacing:1px;text-transform:uppercase">Sign in to read the issue</a></p>
+<p style="font-size:12px;line-height:1.6;color:#7f8895;margin-top:24px">You are receiving this because you subscribed to Platform Ops.</p>
+${signatureHtml}
 </td></tr></table></td></tr></table></body></html>`;
-  const textBody = `Platform Ops #${String(issue.number).padStart(3, "0")} - ${issue.title}\n\n${issue.blurb || ""}\n\nRead the issue: ${issue.url}\n`;
+  const textBody = `Platform Ops #${issueNumber} - ${issue.title}\n\n${issue.blurb || ""}\n\nIssue report\nPublished: ${dateLabel}\nAccess: Login required\n\nSign in to read the issue: ${readUrl}\n\n${signatureText}\n`;
   return { subject, htmlBody, textBody };
 }
 

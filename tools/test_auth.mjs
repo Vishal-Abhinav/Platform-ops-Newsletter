@@ -145,6 +145,8 @@ const googleIdentities = {
   "google-reader": { sub: "g-303", name: "Google Reader", email: "google@example.com", email_verified: true, picture: "https://lh3.googleusercontent.com/a/test" },
 };
 
+const sentEmails = [];
+
 globalThis.fetch = async (input, init = {}) => {
   const url = String(input);
   if (url === "https://github.com/login/oauth/access_token") {
@@ -167,6 +169,7 @@ globalThis.fetch = async (input, init = {}) => {
     return Response.json(googleIdentities[token]);
   }
   if (url === "https://api.resend.com/emails") {
+    sentEmails.push(JSON.parse(init.body));
     return Response.json({ id: "email-test-id" });
   }
   throw new Error(`Unexpected fetch: ${url}`);
@@ -311,6 +314,8 @@ assert.equal((await response.json()).subscribed, true);
 assert.equal(db.newsletter.length, 1);
 assert.equal(db.newsletter[0].email, "reader@example.com");
 assert.equal(db.newsletter[0].requested_topics, "OpenShift, SRE");
+assert.match(sentEmails[0].html, /Vishal Abhinav<br>Platform Engineer<br>Srivan Technologies/);
+assert.match(sentEmails[0].text, /Sign in to browse latest issues: https:\/\/example\.com\/login\/\?next=%2Fissues%2F/);
 
 response = await call("/api/subscribe", {
   method: "POST",
@@ -354,6 +359,14 @@ assert.ok(adminLogin.session);
 response = await call("/admin/", { cookie: `po_session=${adminLogin.session}` });
 assert.equal(response.status, 200);
 assert.equal(await response.text(), "asset:/admin/");
+
+response = await call("/categories/platform-engineering/index.html", { cookie: `po_session=${adminLogin.session}` });
+assert.equal(response.status, 200);
+assert.equal(await response.text(), "asset:/categories/platform-engineering/index.html");
+
+response = await call("/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html", { cookie: `po_session=${adminLogin.session}` });
+assert.equal(response.status, 200);
+assert.equal(await response.text(), "asset:/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html");
 
 response = await call("/auth/session", { cookie: `po_session=${adminLogin.session}` });
 assert.equal(response.status, 200);
@@ -400,6 +413,9 @@ newsletter = await response.json();
 assert.equal(newsletter.sent, 1);
 assert.equal(newsletter.remaining, 0);
 assert.equal(db.deliveries.length, 1);
+assert.match(sentEmails[1].html, /Sign in to read the issue/);
+assert.match(sentEmails[1].html, /https:\/\/example\.com\/login\/\?next=%2FKubernetes%2FSERVICE-MESH-OPERATIONS%2Fservice-mesh-operations\.html/);
+assert.match(sentEmails[1].text, /Vishal Abhinav\nPlatform Engineer\nSrivan Technologies/);
 
 response = await call("/admin/api/newsletter/send-latest", {
   method: "POST",
