@@ -12,6 +12,7 @@ ROOT = _pl.Path(os.environ.get("PO_ROOT") or _pl.Path(__file__).resolve().parent
 TOOLS = _pl.Path(__file__).resolve().parent
 
 import html
+import json
 import pathlib
 from email.utils import format_datetime
 from datetime import datetime, timezone
@@ -188,6 +189,22 @@ if __name__ == "__main__":
     # import from silently regenerating feed.xml out of turn.
     out = ROOT / 'feed.xml'
     out.write_text(feed, encoding='utf-8')
+
+    latest_num, latest_path, latest_title, latest_blurb, latest_when = ISSUES[0]
+    latest = {
+        "number": latest_num,
+        "path": latest_path,
+        "title": latest_title,
+        "blurb": latest_blurb,
+        "url": BASE + latest_path,
+        "published_at": latest_when.isoformat(),
+    }
+    assets = ROOT / "assets"
+    assets.mkdir(parents=True, exist_ok=True)
+    (assets / "latest-issue.json").write_text(
+        json.dumps(latest, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
     # well-formedness is not optional for a feed — readers reject the whole file
     import xml.etree.ElementTree as ET  # noqa: E402

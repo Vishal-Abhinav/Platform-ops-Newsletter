@@ -7,8 +7,12 @@ class FakeDatabase {
     this.users = [];
     this.sessions = [];
     this.newsletter = [];
+    this.campaigns = [];
+    this.deliveries = [];
     this.nextId = 1;
     this.nextSubscriberId = 1;
+    this.nextCampaignId = 1;
+    this.nextDeliveryId = 1;
   }
 
   prepare(sql) {
@@ -34,11 +38,27 @@ class FakeDatabase {
         }
         if (query === "SELECT id, email, role, status FROM users WHERE id = ?") return db.users.find((item) => item.id === values[0]) || null;
         if (query.startsWith("SELECT COUNT(*) AS total")) {
+          if (query.includes("FROM newsletter_subscribers")) {
+            return { total: db.newsletter.filter((item) => item.status === "subscribed").length };
+          }
+          if (query.includes("FROM newsletter_deliveries")) {
+            return { total: db.deliveries.filter((item) => item.campaign_id === values[0] && item.status === "sent").length };
+          }
           return { total: db.users.filter((item) => item.role === "admin" && item.status === "approved").length };
         }
         if (query.includes("FROM newsletter_subscribers") && query.includes("WHERE email")) {
           const [email] = values;
           return db.newsletter.find((item) => item.email.toLowerCase() === email.toLowerCase()) || null;
+        }
+        if (query === "SELECT * FROM newsletter_campaigns WHERE issue_path = ?") {
+          return db.campaigns.find((item) => item.issue_path === values[0]) || null;
+        }
+        if (query.includes("SUM(CASE WHEN status = 'sent'")) {
+          const rows = db.deliveries.filter((item) => item.campaign_id === values[0]);
+          return {
+            sent: rows.filter((item) => item.status === "sent").length,
+            failed: rows.filter((item) => item.status === "failed").length,
+          };
         }
         return null;
       },
@@ -46,6 +66,11 @@ class FakeDatabase {
         if (query.includes("FROM users ORDER BY")) return { results: [...db.users] };
         if (query.includes("FROM newsletter_subscribers") && query.includes("ORDER BY created_at DESC")) {
           return { results: [...db.newsletter].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))) };
+        }
+        if (query.includes("FROM newsletter_subscribers s") && query.includes("NOT EXISTS")) {
+          const [campaignId, limit] = values;
+          const sent = new Set(db.deliveries.filter((item) => item.campaign_id === campaignId && item.status === "sent").map((item) => item.subscriber_id));
+          return { results: db.newsletter.filter((item) => item.status === "subscribed" && !sent.has(item.id)).slice(0, limit).map((item) => ({ id: item.id, email: item.email })) };
         }
         return { results: [] };
       },
@@ -87,6 +112,23 @@ class FakeDatabase {
           const [source, requested_topics, updated_at, id] = values;
           const subscriber = db.newsletter.find((item) => item.id === id);
           Object.assign(subscriber, { status: "subscribed", source, requested_topics, updated_at, unsubscribed_at: null });
+        } else if (query.startsWith("INSERT INTO newsletter_campaigns")) {
+          const [issue_number, issue_path, issue_title, issue_url, issue_blurb, created_at, updated_at] = values;
+          db.campaigns.push({ id: db.nextCampaignId++, issue_number, issue_path, issue_title, issue_url, issue_blurb, status: "draft", subscriber_count: 0, sent_count: 0, failed_count: 0, created_at, updated_at, sent_at: null, last_error: null });
+        } else if (query === "UPDATE newsletter_campaigns SET status = 'sending', updated_at = ? WHERE id = ?") {
+          const [updated_at, id] = values;
+          const campaign = db.campaigns.find((item) => item.id === id);
+          Object.assign(campaign, { status: "sending", updated_at });
+        } else if (query.startsWith("INSERT INTO newsletter_deliveries")) {
+          const [campaign_id, subscriber_id, email, status, provider_message_id, error, created_at, updated_at] = values;
+          const existing = db.deliveries.find((item) => item.campaign_id === campaign_id && item.subscriber_id === subscriber_id);
+          if (existing) Object.assign(existing, { email, status, provider_message_id, error, updated_at });
+          else db.deliveries.push({ id: db.nextDeliveryId++, campaign_id, subscriber_id, email, status, provider_message_id, error, created_at, updated_at });
+        } else if (query.startsWith("UPDATE newsletter_campaigns SET status")) {
+          const [status, subscriber_count, sent_count, failed_count, updated_at, markSent, sent_at, id] = values;
+          const campaign = db.campaigns.find((item) => item.id === id);
+          Object.assign(campaign, { status, subscriber_count, sent_count, failed_count, updated_at });
+          if (markSent) campaign.sent_at = campaign.sent_at || sent_at;
         }
         return { success: true };
       },
@@ -124,6 +166,9 @@ globalThis.fetch = async (input, init = {}) => {
     const token = String(init.headers.authorization).replace("Bearer ", "");
     return Response.json(googleIdentities[token]);
   }
+  if (url === "https://api.resend.com/emails") {
+    return Response.json({ id: "email-test-id" });
+  }
   throw new Error(`Unexpected fetch: ${url}`);
 };
 
@@ -135,7 +180,24 @@ const env = {
   OAUTH_GOOGLE_CLIENT_ID: "google-client-id",
   OAUTH_GOOGLE_CLIENT_SECRET: "google-client-secret",
   ADMIN_EMAILS: "admin@example.com",
-  ASSETS: { fetch: async (request) => new Response(`asset:${new URL(request.url).pathname}`) },
+  RESEND_API_KEY: "resend-key",
+  NEWSLETTER_BATCH_LIMIT: "2",
+  ASSETS: {
+    fetch: async (request) => {
+      const path = new URL(request.url).pathname;
+      if (path === "/assets/latest-issue.json") {
+        return Response.json({
+          number: 67,
+          path: "Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html",
+          title: "Service Mesh Operations",
+          blurb: "mTLS identity, policy defaults, retries, and trace headers.",
+          url: "https://example.com/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html",
+          published_at: "2026-09-15T15:00:00+00:00",
+        });
+      }
+      return new Response(`asset:${path}`);
+    },
+  },
 };
 
 async function call(path, { method = "GET", cookie = "", body, origin } = {}) {
@@ -311,6 +373,43 @@ assert.equal(reader.status, "approved");
 response = await call("/admin/api/subscribers", { cookie: `po_session=${adminLogin.session}` });
 assert.equal(response.status, 200);
 assert.equal((await response.json()).subscribers[0].email, "reader@example.com");
+
+response = await call("/admin/api/newsletter/latest", { cookie: `po_session=${adminLogin.session}` });
+assert.equal(response.status, 200);
+let newsletter = await response.json();
+assert.equal(newsletter.emailConfigured, true);
+assert.equal(newsletter.subscribers, 1);
+assert.equal(newsletter.issue.number, 67);
+
+response = await call("/admin/api/newsletter/send-latest", {
+  method: "POST",
+  cookie: `po_session=${adminLogin.session}`,
+  origin: "https://evil.example",
+  body: "{}",
+});
+assert.equal(response.status, 403);
+
+response = await call("/admin/api/newsletter/send-latest", {
+  method: "POST",
+  cookie: `po_session=${adminLogin.session}`,
+  origin: "https://example.com",
+  body: "{}",
+});
+assert.equal(response.status, 200);
+newsletter = await response.json();
+assert.equal(newsletter.sent, 1);
+assert.equal(newsletter.remaining, 0);
+assert.equal(db.deliveries.length, 1);
+
+response = await call("/admin/api/newsletter/send-latest", {
+  method: "POST",
+  cookie: `po_session=${adminLogin.session}`,
+  origin: "https://example.com",
+  body: "{}",
+});
+assert.equal(response.status, 200);
+assert.equal((await response.json()).sent, 0);
+assert.equal(db.deliveries.length, 1);
 
 response = await call(`/admin/api/users/${reader.id}`, {
   method: "PATCH",

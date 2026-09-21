@@ -58,9 +58,10 @@ jobs:
           OAUTH_GOOGLE_CLIENT_ID: ${{ secrets.OAUTH_GOOGLE_CLIENT_ID }}
           OAUTH_GOOGLE_CLIENT_SECRET: ${{ secrets.OAUTH_GOOGLE_CLIENT_SECRET }}
           ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: |
           missing=0
-          for name in D1_DATABASE_ID OAUTH_GITHUB_CLIENT_ID OAUTH_GITHUB_CLIENT_SECRET ADMIN_EMAILS; do
+          for name in D1_DATABASE_ID OAUTH_GITHUB_CLIENT_ID OAUTH_GITHUB_CLIENT_SECRET ADMIN_EMAILS RESEND_API_KEY; do
             if [ -z "${!name:-}" ]; then
               echo "::error::Required repository secret $name is missing"
               missing=1
@@ -74,7 +75,12 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           OAUTH_GITHUB_CLIENT_ID: ${{ secrets.OAUTH_GITHUB_CLIENT_ID }}
           OAUTH_GITHUB_CLIENT_SECRET: ${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}
+          OAUTH_GOOGLE_CLIENT_ID: ${{ secrets.OAUTH_GOOGLE_CLIENT_ID }}
+          OAUTH_GOOGLE_CLIENT_SECRET: ${{ secrets.OAUTH_GOOGLE_CLIENT_SECRET }}
           ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NEWSLETTER_FROM: ${{ secrets.NEWSLETTER_FROM }}
+          NEWSLETTER_BATCH_LIMIT: ${{ secrets.NEWSLETTER_BATCH_LIMIT }}
         run: |
           jq -n \
             --arg client_id "$OAUTH_GITHUB_CLIENT_ID" \
@@ -82,10 +88,15 @@ jobs:
             --arg google_client_id "$OAUTH_GOOGLE_CLIENT_ID" \
             --arg google_client_secret "$OAUTH_GOOGLE_CLIENT_SECRET" \
             --arg admins "$ADMIN_EMAILS" \
-            '{OAUTH_GITHUB_CLIENT_ID:$client_id,OAUTH_GITHUB_CLIENT_SECRET:$client_secret,ADMIN_EMAILS:$admins}
+            --arg resend "$RESEND_API_KEY" \
+            --arg newsletter_from "$NEWSLETTER_FROM" \
+            --arg newsletter_batch "$NEWSLETTER_BATCH_LIMIT" \
+            '{OAUTH_GITHUB_CLIENT_ID:$client_id,OAUTH_GITHUB_CLIENT_SECRET:$client_secret,ADMIN_EMAILS:$admins,RESEND_API_KEY:$resend}
              + (if $google_client_id != "" and $google_client_secret != "" then
                   {OAUTH_GOOGLE_CLIENT_ID:$google_client_id,OAUTH_GOOGLE_CLIENT_SECRET:$google_client_secret}
-                else {} end)' \
+                else {} end)
+             + (if $newsletter_from != "" then {NEWSLETTER_FROM:$newsletter_from} else {} end)
+             + (if $newsletter_batch != "" then {NEWSLETTER_BATCH_LIMIT:$newsletter_batch} else {} end)' \
             | npx --yes wrangler@4.134.0 secret bulk
 
       - name: Configure production D1 binding

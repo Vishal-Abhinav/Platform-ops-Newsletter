@@ -53,6 +53,9 @@ const PREMIUM_CATEGORY_META = {
   "platform-engineering": ["Platform", "Turning the operational layers into something a team can use.", "0 of 12 live"],
 };
 
+const DEFAULT_NEWSLETTER_FROM = "Platform Ops <platformops.newsletter@srivantechnologies.com>";
+const DEFAULT_NEWSLETTER_BATCH_LIMIT = 90;
+
 const SECURITY_HEADERS = {
   "content-security-policy": "font-src 'self'; frame-src 'self'; img-src 'self' data: https://avatars.githubusercontent.com https://lh3.googleusercontent.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; form-action 'self'; upgrade-insecure-requests",
   "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
@@ -116,6 +119,23 @@ function cookie(name, value, { maxAge = 0 } = {}) {
 
 function emailSet(value) {
   return new Set(String(value || "").split(",").map((email) => email.trim().toLowerCase()).filter(Boolean));
+}
+
+function siteOrigin(env) {
+  return String(env.SITE_ORIGIN || "https://platformops.srivantechnologies.com").replace(/\/+$/, "");
+}
+
+function emailConfigured(env) {
+  return Boolean(env.RESEND_API_KEY);
+}
+
+function newsletterFrom(env) {
+  return String(env.NEWSLETTER_FROM || DEFAULT_NEWSLETTER_FROM).trim() || DEFAULT_NEWSLETTER_FROM;
+}
+
+function newsletterBatchLimit(env) {
+  const value = Number(env.NEWSLETTER_BATCH_LIMIT || DEFAULT_NEWSLETTER_BATCH_LIMIT);
+  return Math.max(1, Math.min(100, Number.isFinite(value) ? Math.floor(value) : DEFAULT_NEWSLETTER_BATCH_LIMIT));
 }
 
 function safeNext(value, fallback = "/user/") {
@@ -474,6 +494,70 @@ function normalizedEmail(value) {
   return email;
 }
 
+async function sendEmail(env, { to, subject, htmlBody, textBody }) {
+  if (!emailConfigured(env)) return { sent: false, skipped: true, reason: "not_configured" };
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        from: newsletterFrom(env),
+        to: [to],
+        subject,
+        html: htmlBody,
+        text: textBody,
+      }),
+    });
+    let result = {};
+    try { result = await response.json(); } catch (_) { /* keep empty */ }
+    if (!response.ok) {
+      const error = result.message || result.error || `Resend returned ${response.status}`;
+      return { sent: false, error };
+    }
+    return { sent: true, id: result.id || "" };
+  } catch (error) {
+    return { sent: false, error: error.message || "Email provider request failed" };
+  }
+}
+
+function confirmationEmail(email, origin) {
+  const subject = "You are subscribed to Platform Ops";
+  const htmlBody = `<!doctype html><html><body style="margin:0;background:#080b10;color:#f5f7fb;font-family:Arial,sans-serif">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#080b10;padding:28px"><tr><td align="center">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#111820;border:1px solid #2a3441">
+<tr><td style="padding:28px"><div style="font:12px monospace;letter-spacing:2px;text-transform:uppercase;color:#00c7d9">Platform Ops</div>
+<h1 style="font-size:32px;line-height:1.05;margin:14px 0 12px;color:#fff">Subscription confirmed</h1>
+<p style="font-size:15px;line-height:1.65;color:#b7c0ce">You are on the Platform Ops newsletter list as <strong style="color:#fff">${html(email)}</strong>. New production deep-dives will arrive when a new issue is published.</p>
+<p style="margin:24px 0 0"><a href="${html(origin)}/issues/" style="display:inline-block;background:#f5f7fb;color:#081018;text-decoration:none;padding:12px 16px;font:12px monospace;letter-spacing:1px;text-transform:uppercase">Browse latest issues</a></p>
+</td></tr></table></td></tr></table></body></html>`;
+  const textBody = `You are subscribed to Platform Ops as ${email}.\n\nBrowse latest issues: ${origin}/issues/\n`;
+  return { subject, htmlBody, textBody };
+}
+
+function issueEmail(issue) {
+  const subject = `Platform Ops #${String(issue.number).padStart(3, "0")} - ${issue.title}`;
+  const htmlBody = `<!doctype html><html><body style="margin:0;background:#080b10;color:#f5f7fb;font-family:Arial,sans-serif">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#080b10;padding:28px"><tr><td align="center">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px;background:#111820;border:1px solid #2a3441">
+<tr><td style="padding:30px"><div style="font:12px monospace;letter-spacing:2px;text-transform:uppercase;color:#ff4545">New Platform Ops issue</div>
+<h1 style="font-size:34px;line-height:1.05;margin:14px 0 12px;color:#fff">#${String(issue.number).padStart(3, "0")} - ${html(issue.title)}</h1>
+<p style="font-size:15px;line-height:1.65;color:#b7c0ce">${html(issue.blurb || "")}</p>
+<p style="margin:26px 0 0"><a href="${html(issue.url)}" style="display:inline-block;background:#f5f7fb;color:#081018;text-decoration:none;padding:12px 16px;font:12px monospace;letter-spacing:1px;text-transform:uppercase">Read the issue</a></p>
+<p style="font-size:12px;line-height:1.6;color:#7f8895;margin-top:26px">You are receiving this because you subscribed to Platform Ops.</p>
+</td></tr></table></td></tr></table></body></html>`;
+  const textBody = `Platform Ops #${String(issue.number).padStart(3, "0")} - ${issue.title}\n\n${issue.blurb || ""}\n\nRead the issue: ${issue.url}\n`;
+  return { subject, htmlBody, textBody };
+}
+
+async function latestIssue(env) {
+  const response = await env.ASSETS.fetch(new Request("https://assets.local/assets/latest-issue.json"));
+  if (!response.ok) throw new Error("latest issue manifest missing");
+  return response.json();
+}
+
 async function subscribe(request, env) {
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, { allow: "POST" });
   if (!env.DB) return json({ error: "Newsletter storage is not configured" }, 503);
@@ -501,9 +585,10 @@ async function subscribe(request, env) {
   const requestedTopics = String(body.topic_request || "").trim().slice(0, 500);
   const now = new Date().toISOString();
   const existing = await env.DB.prepare(`
-    SELECT id, unsubscribe_token FROM newsletter_subscribers
+    SELECT id, status, unsubscribe_token FROM newsletter_subscribers
      WHERE email = ? COLLATE NOCASE
   `).bind(email).first();
+  const shouldConfirm = !existing || existing.status !== "subscribed";
 
   if (existing) {
     await env.DB.prepare(`
@@ -520,7 +605,17 @@ async function subscribe(request, env) {
     `).bind(email, source, requestedTopics, randomToken(24), now, now).run();
   }
 
-  return json({ subscribed: true, message: "You are subscribed. Welcome to Platform Ops." });
+  let confirmation = { sent: false, skipped: true };
+  if (shouldConfirm) {
+    const emailContent = confirmationEmail(email, new URL(request.url).origin || siteOrigin(env));
+    confirmation = await sendEmail(env, { to: email, ...emailContent });
+  }
+
+  return json({
+    subscribed: true,
+    confirmationSent: Boolean(confirmation.sent),
+    message: "You are subscribed. Welcome to Platform Ops.",
+  });
 }
 
 async function listUsers(env) {
@@ -539,6 +634,135 @@ async function listSubscribers(env) {
      ORDER BY created_at DESC
   `).all();
   return json({ subscribers: result.results || [] });
+}
+
+async function subscriberCount(env) {
+  const row = await env.DB.prepare("SELECT COUNT(*) AS total FROM newsletter_subscribers WHERE status = 'subscribed'").first();
+  return Number(row?.total || 0);
+}
+
+async function campaignForIssue(env, issue) {
+  return env.DB.prepare("SELECT * FROM newsletter_campaigns WHERE issue_path = ?").bind(issue.path).first();
+}
+
+async function ensureCampaign(env, issue) {
+  const existing = await campaignForIssue(env, issue);
+  if (existing) return existing;
+  const now = new Date().toISOString();
+  await env.DB.prepare(`
+    INSERT INTO newsletter_campaigns
+      (issue_number, issue_path, issue_title, issue_url, issue_blurb, status, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, 'draft', ?, ?)
+  `).bind(issue.number, issue.path, issue.title, issue.url, issue.blurb || "", now, now).run();
+  return campaignForIssue(env, issue);
+}
+
+async function campaignSummary(env) {
+  const issue = await latestIssue(env);
+  const campaign = await campaignForIssue(env, issue);
+  const subscribers = await subscriberCount(env);
+  const delivered = campaign ? await env.DB.prepare(`
+    SELECT COUNT(*) AS total FROM newsletter_deliveries
+     WHERE campaign_id = ? AND status = 'sent'
+  `).bind(campaign.id).first() : { total: 0 };
+  return json({
+    emailConfigured: emailConfigured(env),
+    from: newsletterFrom(env),
+    batchLimit: newsletterBatchLimit(env),
+    issue,
+    subscribers,
+    campaign: campaign || null,
+    delivered: Number(delivered?.total || 0),
+    remaining: Math.max(0, subscribers - Number(delivered?.total || 0)),
+  });
+}
+
+async function pendingSubscribers(env, campaignId, limit) {
+  const result = await env.DB.prepare(`
+    SELECT s.id, s.email
+      FROM newsletter_subscribers s
+     WHERE s.status = 'subscribed'
+       AND NOT EXISTS (
+         SELECT 1 FROM newsletter_deliveries d
+          WHERE d.campaign_id = ? AND d.subscriber_id = s.id AND d.status = 'sent'
+       )
+     ORDER BY s.created_at ASC
+     LIMIT ?
+  `).bind(campaignId, limit).all();
+  return result.results || [];
+}
+
+async function recordDelivery(env, campaignId, subscriber, delivery) {
+  const now = new Date().toISOString();
+  const status = delivery.sent ? "sent" : "failed";
+  const error = delivery.sent ? "" : String(delivery.error || delivery.reason || "Email send failed").slice(0, 500);
+  await env.DB.prepare(`
+    INSERT INTO newsletter_deliveries
+      (campaign_id, subscriber_id, email, status, provider_message_id, error, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(campaign_id, subscriber_id) DO UPDATE SET
+      status = excluded.status,
+      provider_message_id = excluded.provider_message_id,
+      error = excluded.error,
+      updated_at = excluded.updated_at
+  `).bind(campaignId, subscriber.id, subscriber.email, status, delivery.id || "", error, now, now).run();
+}
+
+async function refreshCampaign(env, campaignId) {
+  const counts = await env.DB.prepare(`
+    SELECT
+      SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) AS sent,
+      SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failed
+      FROM newsletter_deliveries
+     WHERE campaign_id = ?
+  `).bind(campaignId).first();
+  const subscribers = await subscriberCount(env);
+  const sent = Number(counts?.sent || 0);
+  const failed = Number(counts?.failed || 0);
+  const now = new Date().toISOString();
+  const status = sent >= subscribers && failed === 0 ? "sent" : sent > 0 ? "partial" : failed > 0 ? "failed" : "draft";
+  await env.DB.prepare(`
+    UPDATE newsletter_campaigns
+       SET status = ?, subscriber_count = ?, sent_count = ?, failed_count = ?,
+           updated_at = ?, sent_at = CASE WHEN ? THEN COALESCE(sent_at, ?) ELSE sent_at END
+     WHERE id = ?
+  `).bind(status, subscribers, sent, failed, now, status === "sent" ? 1 : 0, now, campaignId).run();
+  return { subscribers, sent, failed, status };
+}
+
+async function sendLatestIssue(request, env) {
+  if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, { allow: "POST" });
+  if (!sameOrigin(request)) return json({ error: "Invalid request origin" }, 403);
+  if (!emailConfigured(env)) return json({ error: "RESEND_API_KEY is not configured" }, 503);
+  const issue = await latestIssue(env);
+  const campaign = await ensureCampaign(env, issue);
+  const limit = newsletterBatchLimit(env);
+  const subscribers = await pendingSubscribers(env, campaign.id, limit);
+  if (!subscribers.length) {
+    const summary = await refreshCampaign(env, campaign.id);
+    return json({ sent: 0, failed: 0, remaining: 0, issue, campaign: summary });
+  }
+
+  await env.DB.prepare("UPDATE newsletter_campaigns SET status = 'sending', updated_at = ? WHERE id = ?")
+    .bind(new Date().toISOString(), campaign.id).run();
+
+  const content = issueEmail(issue);
+  let sent = 0;
+  let failed = 0;
+  for (const subscriber of subscribers) {
+    const delivery = await sendEmail(env, { to: subscriber.email, ...content });
+    if (delivery.sent) sent += 1; else failed += 1;
+    await recordDelivery(env, campaign.id, subscriber, delivery);
+  }
+  const summary = await refreshCampaign(env, campaign.id);
+  return json({
+    issue,
+    sent,
+    failed,
+    attempted: subscribers.length,
+    remaining: Math.max(0, summary.subscribers - summary.sent),
+    campaign: summary,
+  });
 }
 
 async function updateUser(request, env, actor, id) {
@@ -602,6 +826,8 @@ async function protectedRoute(request, env, url, area) {
   if ((area === "admin" || area === "user") && url.pathname === `/${area}/api/session`) return json({ authenticated: true, user: publicUser(user) });
   if (area === "admin" && url.pathname === "/admin/api/users" && request.method === "GET") return listUsers(env);
   if (area === "admin" && url.pathname === "/admin/api/subscribers" && request.method === "GET") return listSubscribers(env);
+  if (area === "admin" && url.pathname === "/admin/api/newsletter/latest" && request.method === "GET") return campaignSummary(env);
+  if (area === "admin" && url.pathname === "/admin/api/newsletter/send-latest") return sendLatestIssue(request, env);
   const match = area === "admin" && url.pathname.match(/^\/admin\/api\/users\/(\d+)$/);
   if (match && request.method === "PATCH") return updateUser(request, env, user, Number(match[1]));
   if ((area === "admin" || area === "user") && url.pathname.startsWith(`/${area}/api/`)) return json({ error: "Not found" }, 404);
