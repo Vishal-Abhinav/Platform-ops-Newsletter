@@ -167,8 +167,35 @@ const premiumSlugs = [
   "security",
   "platform-engineering",
 ];
+const premiumIssuePaths = [
+  "/issues/index.html",
+  "/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html",
+  "/Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html",
+  "/Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html",
+  "/Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html",
+  "/Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html",
+  "/Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html",
+  "/Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html",
+  "/OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html",
+  "/OpenShift/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html",
+  "/OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html",
+  "/Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html",
+  "/Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html",
+  "/Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html",
+  "/Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html",
+  "/SRE/INCIDENT-MANAGEMENT/incident-management.html",
+  "/DevOps/CICD/cicd-pipelines.html",
+  "/DevOps/K8/OBSERVABILITY/k8-observability.html",
+  "/DevOps/K8/STORAGE/k8-storage.html",
+  "/DevOps/K8/ERROR/K8-error.html",
+  "/DevOps/K8/ARCHITECTURE/k8-architecture.html",
+  "/DevOps/K8/Networking/k8-networking.html",
+];
 for (const slug of premiumSlugs) {
   assert.equal(areaFor(`/categories/${slug}/index.html`), "premium");
+}
+for (const path of premiumIssuePaths) {
+  assert.equal(areaFor(path), "premium");
 }
 assert.equal(areaFor("/public"), null);
 assert.equal(safeNext("//evil.example"), "/user/");
@@ -192,6 +219,14 @@ assert.equal(response.headers.get("x-robots-tag"), "noindex, nofollow");
 response = await call("/categories/kubernetes/index.html");
 assert.equal(response.status, 200);
 assert.match(await response.text(), /Kubernetes/);
+
+response = await call("/issues/index.html");
+assert.equal(response.status, 200);
+assert.match(await response.text(), /Latest Issues/);
+
+response = await call("/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html");
+assert.equal(response.status, 200);
+assert.match(await response.text(), /Latest Issues|Protected Path/);
 
 response = await call("/auth/providers");
 assert.deepEqual(await response.json(), { github: true, google: true });
@@ -245,6 +280,12 @@ assert.equal(response.status, 200);
 response = await call("/categories/kubernetes/index.html", { cookie: `po_session=${readerLogin.session}` });
 assert.equal(response.status, 200);
 
+response = await call("/issues/index.html", { cookie: `po_session=${readerLogin.session}` });
+assert.equal(response.status, 200);
+
+response = await call("/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html", { cookie: `po_session=${readerLogin.session}` });
+assert.equal(response.status, 200);
+
 const googleReader = await googleLogin("google-reader");
 assert.equal(googleReader.response.headers.get("location"), "/user/");
 response = await call("/auth/session", { cookie: `po_session=${googleReader.session}` });
@@ -264,6 +305,9 @@ assert.match(wrangler, /"run_worker_first"[\s\S]*"\/auth\*"[\s\S]*"\/login\*"[\s
 for (const slug of premiumSlugs) {
   assert.ok(wrangler.includes(`"/categories/${slug}*"`));
 }
+for (const prefix of ["/issues*", "/Kubernetes*", "/OpenShift*", "/Infrastructure*", "/SRE*", "/DevOps*"]) {
+  assert.ok(wrangler.includes(`"${prefix}"`));
+}
 
 const sitemap = readFileSync(new URL("../dist/sitemap.xml", import.meta.url), "utf8");
 for (const area of ["login", "admin", "user"]) {
@@ -276,6 +320,10 @@ assert.match(readFileSync(new URL("../dist/login/index.html", import.meta.url), 
 assert.doesNotMatch(readFileSync(new URL("../dist/login/index.html", import.meta.url), "utf8"), /assets\/search\.js/);
 for (const slug of premiumSlugs) {
   assert.doesNotMatch(sitemap, new RegExp(`/categories/${slug}/`));
+}
+assert.doesNotMatch(sitemap, /\/issues\//);
+for (const path of premiumIssuePaths.filter((item) => item !== "/issues/index.html")) {
+  assert.doesNotMatch(sitemap, new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 }
 assert.match(readFileSync(new URL("../dist/admin/index.html", import.meta.url), "utf8"), /data-user-list/);
 

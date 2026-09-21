@@ -3,8 +3,14 @@
 import os
 import pathlib
 import re
+import sys
 
 ROOT = pathlib.Path(os.environ.get("PO_ROOT") or pathlib.Path(__file__).resolve().parent.parent)
+TOOLS = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(TOOLS))
+
+from build_feed import ISSUES  # noqa: E402
+
 PREMIUM_SLUGS = [
     "networking",
     "cloud",
@@ -19,6 +25,8 @@ PREMIUM_SLUGS = [
     "platform-engineering",
 ]
 PREMIUM = [ROOT / "categories" / slug / "index.html" for slug in PREMIUM_SLUGS]
+PREMIUM += [ROOT / "issues" / "index.html"]
+PREMIUM += [ROOT / path for _num, path, *_ in ISSUES]
 
 for page in PREMIUM:
     if not page.exists():

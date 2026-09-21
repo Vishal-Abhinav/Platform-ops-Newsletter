@@ -15,7 +15,31 @@ const PREMIUM_CATEGORY_SLUGS = new Set([
   "security",
   "platform-engineering",
 ]);
+const PREMIUM_ISSUE_PATHS = new Set([
+  "/Kubernetes/SERVICE-MESH-OPERATIONS/service-mesh-operations.html",
+  "/Kubernetes/SERVICE-MESH-FUNDAMENTALS/service-mesh-fundamentals.html",
+  "/Kubernetes/KUBERNETES-CLUSTER-OPERATIONS/kubernetes-cluster-operations.html",
+  "/Kubernetes/KUBERNETES-AUTOSCALING/kubernetes-autoscaling.html",
+  "/Kubernetes/KUBERNETES-SCHEDULING/kubernetes-scheduling.html",
+  "/Kubernetes/KUBERNETES-CONFIG-AND-ACCESS/kubernetes-config-and-access.html",
+  "/Kubernetes/KUBERNETES-WORKLOADS/kubernetes-workloads.html",
+  "/OpenShift/OPENSHIFT-OPERATIONS/openshift-operations.html",
+  "/OpenShift/OPENSHIFT-NETWORKING-STORAGE/openshift-networking-storage.html",
+  "/OpenShift/OPENSHIFT-ARCHITECTURE/openshift-architecture.html",
+  "/Infrastructure/OS/LINUX/GLOSSARY/linux-unix-glossary.html",
+  "/Infrastructure/OS/LINUX/TROUBLESHOOTING/linux-troubleshooting.html",
+  "/Infrastructure/OS/LINUX/ADVANCED/linux-advanced.html",
+  "/Infrastructure/OS/LINUX/FUNDAMENTALS/linux-fundamentals.html",
+  "/SRE/INCIDENT-MANAGEMENT/incident-management.html",
+  "/DevOps/CICD/cicd-pipelines.html",
+  "/DevOps/K8/OBSERVABILITY/k8-observability.html",
+  "/DevOps/K8/STORAGE/k8-storage.html",
+  "/DevOps/K8/ERROR/K8-error.html",
+  "/DevOps/K8/ARCHITECTURE/k8-architecture.html",
+  "/DevOps/K8/Networking/k8-networking.html",
+]);
 const PREMIUM_CATEGORY_META = {
+  issues: ["Latest Issues", "The published Platform Ops archive is available after sign-in, including the newest issue and prior production deep-dives.", "21 issues"],
   networking: ["Networking", "Packets, routes, DNS and the failures that look like everything else.", "1 of 31 live"],
   cloud: ["Cloud", "Somebody else's computers, with somebody else's failure modes.", "0 of 17 live"],
   gitops: ["Git", "Version control, and then version control as the source of truth.", "3 of 8 live"],
@@ -115,6 +139,7 @@ function areaFor(pathname) {
   }
   if (path === "/admin" || path.startsWith("/admin/")) return "admin";
   if (path === "/user" || path.startsWith("/user/")) return "user";
+  if (path === "/issues" || path.startsWith("/issues/") || PREMIUM_ISSUE_PATHS.has(path)) return "premium";
   const match = path.match(/^\/categories\/([^/]+)(?:\/|$)/);
   if (match && PREMIUM_CATEGORY_SLUGS.has(match[1])) return "premium";
   return null;
@@ -127,6 +152,7 @@ function premiumSlug(pathname) {
   } catch (_) {
     return "";
   }
+  if (path === "/issues" || path.startsWith("/issues/") || PREMIUM_ISSUE_PATHS.has(path)) return "issues";
   const match = path.match(/^\/categories\/([^/]+)(?:\/|$)/);
   return match ? match[1] : "";
 }

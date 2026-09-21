@@ -282,6 +282,43 @@ PRIVATE_CSS = {
 """,
 }
 PCSS_OPEN, PCSS_CLOSE = "/* page:begin */", "/* page:end */"
+P0_TIGHTEN = {
+    "DevOps/CICD/cicd-pipelines.html",
+    "DevOps/K8/index.html",
+    "DevOps/K8/ARCHITECTURE/k8-architecture.html",
+    "DevOps/K8/ERROR/K8-error.html",
+    "DevOps/K8/OBSERVABILITY/k8-observability.html",
+    "DevOps/K8/STORAGE/k8-storage.html",
+    "DevOps/K8/Networking/k8-networking.html",
+    "SRE/INCIDENT-MANAGEMENT/incident-management.html",
+}
+P0_TIGHT_CSS = """
+/* P0 spacing pass: legacy issue pages used a 100px editorial rhythm that left
+   large blank bands after the shared nav was added. Keep the designs, tighten
+   the vertical rhythm. */
+.hero,.page-hero{min-height:clamp(500px,62vh,660px)!important;}
+.hero-left{padding:clamp(48px,5vw,64px) 48px clamp(46px,5vw,62px) 64px!important;}
+.hero-right{padding:42px 48px!important;}
+.hero-sub,.hero-desc{margin-bottom:22px!important;}
+.level-pills{margin-bottom:26px!important;}
+.hero-meta-row{padding-top:20px!important;}
+.arch-inner,.inside-inner,.timeline-inner,.content-section,.articles-section,.path-section,.cheat-inner{padding:72px 64px!important;}
+.dg-wrap{padding-top:56px!important;padding-bottom:16px!important;}
+.section-tag{margin-bottom:14px!important;}
+.section-title{margin-bottom:8px!important;}
+.section-lead{margin-bottom:34px!important;}
+.arch-diagram{margin-bottom:32px!important;}
+.postmortem-band{margin-bottom:34px!important;padding:28px 32px!important;}
+.author-strip{padding:44px 64px!important;}
+@media(max-width:900px){
+  .hero,.page-hero{min-height:auto!important;}
+  .hero-left,.hero-right{padding:38px 28px!important;}
+  .arch-inner,.inside-inner,.timeline-inner,.content-section,.articles-section,.path-section,.cheat-inner{padding:52px 28px!important;}
+  .dg-wrap{padding:42px 28px 14px!important;}
+  .section-lead{margin-bottom:26px!important;}
+  .author-strip{padding:40px 28px!important;}
+}
+"""
 
 
 def private_palette(rel, src):
@@ -409,7 +446,8 @@ def patch(rel, src):
     # No leading newline: strip_marked takes the block and its trailing
     # newline, so a leading one would survive and the page would gain a blank
     # line per build — exactly the leak build_seo.py had.
-    block = f"{CSS_OPEN}\n{chrome.CSS}\n{CSS_CLOSE}\n"
+    extra_css = P0_TIGHT_CSS if rel in P0_TIGHTEN else ""
+    block = f"{CSS_OPEN}\n{chrome.CSS}{extra_css}\n{CSS_CLOSE}\n"
     i = src.rfind("</style>")
     if i == -1:
         raise SystemExit(f"{rel}: no <style> block to append the chrome CSS to")

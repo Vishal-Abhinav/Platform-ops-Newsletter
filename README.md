@@ -285,7 +285,7 @@ flowchart TB
   end
 
   subgraph OB["Outbound · the site publishes, nothing reads back"]
-    SM["sitemap.xml<br/>86 indexable URLs"]
+    SM["sitemap.xml<br/>64 indexable URLs"]
     RSS["feed.xml<br/>full archive"]
     GSC["Google Search Console"]
   end
@@ -442,7 +442,7 @@ receive. Please open an issue.
 
 | File | What it holds |
 |:--|:--|
-| [`/sitemap.xml`](https://platformops.srivantechnologies.com/sitemap.xml) | 86 indexable URLs. Pages carrying `noindex` are deliberately withheld — a sitemap is a request to crawl, and listing a page that then declines to be indexed just spends crawl budget. |
+| [`/sitemap.xml`](https://platformops.srivantechnologies.com/sitemap.xml) | 64 indexable URLs. Pages carrying `noindex` are deliberately withheld — a sitemap is a request to crawl, and listing a page that then declines to be indexed just spends crawl budget. |
 | [`/feed.xml`](https://platformops.srivantechnologies.com/feed.xml) | RSS, full archive. |
 | [`/robots.txt`](https://platformops.srivantechnologies.com/robots.txt) | Crawl rules and the sitemap pointer. |
 | `/_headers` | Generated per build; see Security above. |

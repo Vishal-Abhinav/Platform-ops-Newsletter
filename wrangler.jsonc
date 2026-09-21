@@ -28,6 +28,7 @@
       "/login*",
       "/admin*",
       "/user*",
+      "/issues*",
       "/categories/networking*",
       "/categories/cloud*",
       "/categories/gitops*",
@@ -38,7 +39,12 @@
       "/categories/observability*",
       "/categories/sre*",
       "/categories/security*",
-      "/categories/platform-engineering*"
+      "/categories/platform-engineering*",
+      "/Kubernetes*",
+      "/OpenShift*",
+      "/Infrastructure*",
+      "/SRE*",
+      "/DevOps*"
     ]
   },
   "d1_databases": [
